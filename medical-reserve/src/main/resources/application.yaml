@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  # MySQL数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/medical_reserve?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: password
+  
+  # JPA配置
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 10000
+
+# MyBatis配置
+mybatis:
+  mapper-locations: classpath:mappers/*xml
+  type-aliases-package: com.forth.medicalreserve.mybatis.entity
