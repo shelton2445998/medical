@@ -1,22 +1,12 @@
 package com.forth.medicalreserve.controller;
 
-import com.forth.medicalreserve.common.Result;
-import com.forth.medicalreserve.dto.UpdatePasswordDTO;
-import com.forth.medicalreserve.dto.UserDTO;
-import com.forth.medicalreserve.entity.User;
-import com.forth.medicalreserve.exception.BusinessException;
-import com.forth.medicalreserve.security.JwtUserDetails;
+import com.forth.medicalreserve.entity.Users;
 import com.forth.medicalreserve.service.UserService;
+import com.forth.medicalreserve.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 /**
  * 用户控制器
@@ -28,134 +18,87 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    /**
-     * 获取当前登录用户信息
-     */
-    @ApiOperation("获取当前登录用户信息")
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('USER')")
-    public Result<User> getCurrentUser(@AuthenticationPrincipal JwtUserDetails userDetails) {
-        User user = userService.getById(userDetails.getId());
-        // 清除敏感信息
-        user.setPassword(null);
-        return Result.success(user);
-    }
-
-    /**
-     * 修改当前用户密码
-     */
-    @ApiOperation("修改当前用户密码")
-    @PostMapping("/updatePassword")
-    @PreAuthorize("hasRole('USER')")
-    public Result<Void> updatePassword(
-            @AuthenticationPrincipal JwtUserDetails userDetails,
-            @Valid @RequestBody UpdatePasswordDTO updatePasswordDTO) {
-        
-        // 验证新密码和确认密码是否一致
-        if (!updatePasswordDTO.getNewPassword().equals(updatePasswordDTO.getConfirmPassword())) {
-            throw new BusinessException("新密码和确认密码不一致");
+    
+    @ApiOperation("用户注册")
+    @PostMapping("/register")
+    public Result<Users> register(@RequestBody Users user) {
+        try {
+            Users registeredUser = userService.register(user);
+            return Result.success(registeredUser);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
         }
-        
-        userService.updatePassword(
-                userDetails.getId(),
-                updatePasswordDTO.getOldPassword(),
-                updatePasswordDTO.getNewPassword()
-        );
-        return Result.success();
     }
-
-    /**
-     * 修改当前用户信息
-     */
-    @ApiOperation("修改当前用户信息")
-    @PutMapping("/me")
-    @PreAuthorize("hasRole('USER')")
-    public Result<Void> updateCurrentUser(
-            @AuthenticationPrincipal JwtUserDetails userDetails,
-            @Valid @RequestBody UserDTO userDTO) {
-        
-        userService.update(userDetails.getId(), userDTO);
-        return Result.success();
+    
+    @ApiOperation("用户登录")
+    @PostMapping("/login")
+    public Result<Users> login(@RequestParam String userName, @RequestParam String password) {
+        try {
+            Users user = userService.login(userName, password);
+            return Result.success(user);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
-
-    /**
-     * 分页查询用户列表（管理员权限）
-     */
-    @ApiOperation("分页查询用户列表")
-    @GetMapping("/page")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<Page<User>> page(
-            @ApiParam(value = "页码", required = true) @RequestParam(defaultValue = "1") Integer pageNum,
-            @ApiParam(value = "每页大小", required = true) @RequestParam(defaultValue = "10") Integer pageSize,
-            @ApiParam(value = "关键词") @RequestParam(required = false) String keyword) {
-        
-        Page<User> page = userService.page(pageNum, pageSize, keyword);
-        // 清除敏感信息
-        page.getContent().forEach(user -> user.setPassword(null));
-        return Result.success(page);
+    
+    @ApiOperation("手机号登录")
+    @PostMapping("/loginByMobile")
+    public Result<Users> loginByMobile(@RequestParam String mobile, @RequestParam String code) {
+        try {
+            Users user = userService.loginByMobile(mobile, code);
+            return Result.success(user);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
-
-    /**
-     * 获取用户详情（管理员权限）
-     */
-    @ApiOperation("获取用户详情")
+    
+    @ApiOperation("获取用户信息")
     @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<User> getUser(@PathVariable Integer userId) {
-        User user = userService.getById(userId);
-        // 清除敏感信息
-        user.setPassword(null);
-        return Result.success(user);
+    public Result<Users> getUserInfo(@PathVariable Integer userId) {
+        try {
+            Users user = userService.findById(userId);
+            return Result.success(user);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
-
-    /**
-     * 创建用户（管理员权限）
-     */
-    @ApiOperation("创建用户")
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<Integer> createUser(@Valid @RequestBody UserDTO userDTO) {
-        Integer userId = userService.create(userDTO);
-        return Result.success(userId);
+    
+    @ApiOperation("更新用户信息")
+    @PutMapping
+    public Result<Users> updateUser(@RequestBody Users user) {
+        try {
+            Users updatedUser = userService.updateUser(user);
+            return Result.success(updatedUser);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
-
-    /**
-     * 更新用户（管理员权限）
-     */
-    @ApiOperation("更新用户")
-    @PutMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<Void> updateUser(
+    
+    @ApiOperation("修改密码")
+    @PutMapping("/{userId}/password")
+    public Result<Boolean> changePassword(
             @PathVariable Integer userId,
-            @Valid @RequestBody UserDTO userDTO) {
-        
-        userService.update(userId, userDTO);
-        return Result.success();
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        try {
+            boolean result = userService.changePassword(userId, oldPassword, newPassword);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
-
-    /**
-     * 删除用户（管理员权限）
-     */
-    @ApiOperation("删除用户")
-    @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<Void> deleteUser(@PathVariable Integer userId) {
-        userService.delete(userId);
-        return Result.success();
-    }
-
-    /**
-     * 禁用/启用用户（管理员权限）
-     */
-    @ApiOperation("禁用/启用用户")
-    @PutMapping("/{userId}/status/{status}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public Result<Void> updateUserStatus(
-            @PathVariable Integer userId,
-            @PathVariable Integer status) {
-        
-        userService.updateStatus(userId, status);
-        return Result.success();
+    
+    @ApiOperation("重置密码")
+    @PostMapping("/resetPassword")
+    public Result<Boolean> resetPassword(
+            @RequestParam String mobile,
+            @RequestParam String code,
+            @RequestParam String newPassword) {
+        try {
+            boolean result = userService.resetPassword(mobile, code, newPassword);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
     }
 } 

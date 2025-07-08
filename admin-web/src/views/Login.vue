@@ -27,6 +27,12 @@ export default {
           </el-button>
         </el-form-item>
       </el-form>
+
+      <!-- 演示模式提示 -->
+      <div class="demo-tip">
+        <p>演示模式：输入任意账号密码可登录系统</p>
+        <p>默认账号: admin 密码: admin123</p>
+      </div>
     </el-card>
   </div>
 </template>
@@ -35,6 +41,7 @@ export default {
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { login } from '../api/index'
 
 const router = useRouter()
 const loading = ref(false)
@@ -51,53 +58,35 @@ const loginRules = {
     { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少为6个字符', trigger: 'blur' }
+    { required: true, message: '请输入密码', trigger: 'blur' }
   ]
 }
 
 // 登录逻辑
-const handleLogin = () => {
-  loading.value = true
-  
-  // 这里模拟API登录请求
-  setTimeout(() => {
-    // 假设登录成功
-    if (loginForm.username === 'admin' && loginForm.password === 'admin123') {
-      // 存储token
-      localStorage.setItem('admin-token', 'admin-token-example')
-      // 显示成功消息
-      ElMessage.success('登录成功')
-      // 跳转到首页
-      router.push('/')
-    } else {
-      // 登录失败
-      ElMessage.error('用户名或密码错误')
-    }
+const handleLogin = async () => {
+  try {
+    loading.value = true
+    
+    // 演示模式下，任何账号密码都可以登录
+    const res = await login({
+      username: loginForm.username || 'admin',
+      password: loginForm.password || 'admin123'
+    })
+    
+    // 存储token
+    localStorage.setItem('admin-token', res.data.token || 'admin-token-example')
+    
+    // 显示成功消息
+    ElMessage.success('登录成功')
+    
+    // 跳转到首页
+    router.push('/')
+  } catch (error) {
+    console.error('登录失败:', error)
+    ElMessage.error('登录失败，请重试')
+  } finally {
     loading.value = false
-  }, 1000)
-  
-  // 实际项目中应该使用axios调用后端API
-  /*
-  axios.post('/admin/login', {
-    username: loginForm.username,
-    password: loginForm.password
-  }).then(response => {
-    const { data } = response
-    if (data.code === 200) {
-      localStorage.setItem('admin-token', data.token)
-      ElMessage.success('登录成功')
-      router.push('/')
-    } else {
-      ElMessage.error(data.message || '登录失败')
-    }
-  }).catch(error => {
-    console.error('登录请求错误:', error)
-    ElMessage.error('网络错误，请稍后再试')
-  }).finally(() => {
-    loading.value = false
-  })
-  */
+  }
 }
 </script>
 
@@ -137,5 +126,19 @@ const handleLogin = () => {
 
 .login-button {
   width: 100%;
+}
+
+.demo-tip {
+  margin-top: 20px;
+  text-align: center;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  color: #666;
+  font-size: 13px;
+}
+
+.demo-tip p {
+  margin: 5px 0;
 }
 </style> 

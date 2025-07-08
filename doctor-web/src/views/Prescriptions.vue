@@ -297,11 +297,17 @@ export default {
       })
         .then(() => {
           // 这里应该调用API删除处方
+          // 在演示模式下直接从列表中移除
+          const index = prescriptionList.value.findIndex(item => item.id === row.id)
+          if (index !== -1) {
+            prescriptionList.value.splice(index, 1)
+            total.value -= 1
+          }
+          
           ElMessage({
             type: 'success',
-            message: '删除成功!'
+            message: '删除成功(演示模式)!'
           })
-          fetchPrescriptions()
         })
         .catch(() => {
           // 取消删除
@@ -329,12 +335,38 @@ export default {
       prescriptionFormRef.value.validate((valid) => {
         if (valid) {
           // 这里应该调用API保存处方
+          
+          // 在演示模式下添加处方到列表
+          if (!isEdit.value) {
+            const now = new Date()
+            const newPrescription = {
+              id: (prescriptionList.value.length + 1).toString(),
+              prescriptionId: 'RX' + now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + (prescriptionList.value.length + 1).toString().padStart(3, '0'),
+              patientId: prescriptionForm.patientId,
+              patientName: patientOptions.value.find(p => p.value === prescriptionForm.patientId)?.label.split(' ')[0] || '患者',
+              diagnosis: prescriptionForm.diagnosis,
+              medicationList: [...prescriptionForm.medicationList],
+              createTime: now.toLocaleString(),
+              status: '处理中',
+              instructions: prescriptionForm.instructions
+            }
+            prescriptionList.value.unshift(newPrescription)
+            total.value += 1
+          } else {
+            // 更新已有处方
+            const index = prescriptionList.value.findIndex(item => item.id === prescriptionForm.id)
+            if (index !== -1) {
+              prescriptionList.value[index].diagnosis = prescriptionForm.diagnosis
+              prescriptionList.value[index].medicationList = [...prescriptionForm.medicationList]
+              prescriptionList.value[index].instructions = prescriptionForm.instructions
+            }
+          }
+          
           ElMessage({
             type: 'success',
-            message: isEdit.value ? '更新成功!' : '添加成功!'
+            message: isEdit.value ? '更新成功(演示模式)!' : '添加成功(演示模式)!'
           })
           formVisible.value = false
-          fetchPrescriptions()
         }
       })
     }

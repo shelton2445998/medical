@@ -12,6 +12,9 @@ spring:
     url: jdbc:mysql://39.104.57.236:3306/medical_reserve?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&useSSL=false
     username: root
     password: hyx123456789.
+    schema: classpath:schema.sql
+    data: classpath:data.sql
+    initialization-mode: always
   
   # JPA配置
   jpa:
@@ -33,6 +36,12 @@ spring:
     password: hyx123456789.
     database: 0
     timeout: 10000
+    lettuce:
+      pool:
+        max-active: 20
+        max-wait: -1
+        max-idle: 5
+        min-idle: 0
     
   # 解决Swagger与SpringBoot 2.6+版本不兼容问题
   mvc:

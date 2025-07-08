@@ -1,76 +1,80 @@
 package com.forth.medicalreserve.service;
 
-import com.forth.medicalreserve.dto.UserDTO;
-import com.forth.medicalreserve.entity.User;
-import org.springframework.data.domain.Page;
+import com.forth.medicalreserve.entity.Users;
+
+import java.util.List;
 
 /**
  * 用户服务接口
  */
 public interface UserService {
-
+    
+    /**
+     * 用户注册
+     * @param user 用户信息
+     * @return 注册成功的用户
+     */
+    Users register(Users user);
+    
+    /**
+     * 用户登录
+     * @param userName 用户名
+     * @param password 密码
+     * @return 登录成功的用户
+     */
+    Users login(String userName, String password);
+    
+    /**
+     * 手机号验证码登录
+     * @param mobile 手机号
+     * @param code 验证码
+     * @return 登录成功的用户
+     */
+    Users loginByMobile(String mobile, String code);
+    
     /**
      * 根据ID查询用户
      * @param userId 用户ID
      * @return 用户信息
      */
-    User getById(Integer userId);
-
+    Users findById(Integer userId);
+    
     /**
-     * 根据用户名查询用户
-     * @param userName 用户名
-     * @return 用户信息
+     * 更新用户信息
+     * @param user 用户信息
+     * @return 更新后的用户
      */
-    User getByUserName(String userName);
-
-    /**
-     * 根据手机号查询用户
-     * @param mobile 手机号
-     * @return 用户信息
-     */
-    User getByMobile(String mobile);
-
-    /**
-     * 分页查询用户列表
-     * @param pageNum 页码
-     * @param pageSize 每页大小
-     * @param keyword 关键词
-     * @return 用户分页列表
-     */
-    Page<User> page(int pageNum, int pageSize, String keyword);
-
-    /**
-     * 创建用户
-     * @param userDTO 用户DTO
-     * @return 创建后的用户ID
-     */
-    Integer create(UserDTO userDTO);
-
-    /**
-     * 更新用户
-     * @param userId 用户ID
-     * @param userDTO 用户DTO
-     */
-    void update(Integer userId, UserDTO userDTO);
-
-    /**
-     * 删除用户
-     * @param userId 用户ID
-     */
-    void delete(Integer userId);
-
-    /**
-     * 禁用/启用用户
-     * @param userId 用户ID
-     * @param status 状态：0-禁用，1-启用
-     */
-    void updateStatus(Integer userId, Integer status);
-
+    Users updateUser(Users user);
+    
     /**
      * 修改密码
      * @param userId 用户ID
      * @param oldPassword 旧密码
      * @param newPassword 新密码
+     * @return 是否修改成功
      */
-    void updatePassword(Integer userId, String oldPassword, String newPassword);
+    boolean changePassword(Integer userId, String oldPassword, String newPassword);
+    
+    /**
+     * 重置密码
+     * @param mobile 手机号
+     * @param code 验证码
+     * @param newPassword 新密码
+     * @return 是否重置成功
+     */
+    boolean resetPassword(String mobile, String code, String newPassword);
+    
+    /**
+     * 查询所有用户
+     * @return 用户列表
+     */
+    List<Users> findAll();
+    
+    /**
+     * 禁用/启用用户
+     * @param userId 用户ID
+     * @param status 状态
+     * @return 是否操作成功
+     */
+    boolean updateStatus(Integer userId, Integer status);
 } 
