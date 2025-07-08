@@ -10,7 +10,7 @@ export default {
       <!-- 侧边栏 -->
       <el-aside width="220px" class="sidebar">
         <div class="logo">
-          <img src="../assets/logo.png" alt="Logo" height="40" />
+          <img src="../assets/newlogo.png" alt="Logo" height="40" />
           <h2>医疗预约系统</h2>
         </div>
         <!-- 侧边菜单 -->

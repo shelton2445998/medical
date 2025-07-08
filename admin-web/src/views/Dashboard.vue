@@ -8,7 +8,7 @@ export default {
   <div class="dashboard-container">
     <el-row :gutter="20">
       <!-- 统计卡片 -->
-      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+      <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="6">
         <el-card class="stat-card blue-card">
           <div class="stat-icon">
             <el-icon><Calendar /></el-icon>
@@ -20,8 +20,8 @@ export default {
           </div>
         </el-card>
       </el-col>
-      
-      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+
+      <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="6">
         <el-card class="stat-card green-card">
           <div class="stat-icon">
             <el-icon><User /></el-icon>
@@ -33,9 +33,9 @@ export default {
           </div>
         </el-card>
       </el-col>
-      
-      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="stat-card orange-card">
+
+      <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="6" >
+        <el-card class="stat-card orange-card" >
           <div class="stat-icon">
             <el-icon><Box /></el-icon>
           </div>
@@ -46,19 +46,8 @@ export default {
           </div>
         </el-card>
       </el-col>
-      
-      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="stat-card purple-card">
-          <div class="stat-icon">
-            <el-icon><Money /></el-icon>
-          </div>
-          <div class="stat-info">
-            <p class="stat-title">今日收入</p>
-            <h2 class="stat-value">¥{{ formatNumber(dashboardData.todayIncome) }}</h2>
-            <p class="stat-desc">总收入 ¥{{ formatNumber(dashboardData.totalIncome) }}</p>
-          </div>
-        </el-card>
-      </el-col>
+
+
     </el-row>
 
     <el-row :gutter="20" class="chart-row">
@@ -68,7 +57,7 @@ export default {
           <template #header>
             <div class="card-header">
               <span>预约趋势</span>
-              <el-radio-group v-model="dateRange" size="small">
+              <el-radio-group v-model="dateRange" size="small" @change="updateAppointmentChart">
                 <el-radio-button label="week">本周</el-radio-button>
                 <el-radio-button label="month">本月</el-radio-button>
                 <el-radio-button label="year">全年</el-radio-button>
@@ -85,7 +74,14 @@ export default {
               </div>
               <div class="chart-bars">
                 <div v-for="(value, index) in dashboardData.appointmentChart.yData" :key="index" class="chart-bar-container">
-                  <div class="chart-bar" :style="{ height: value * 2 + 'px' }">{{ value }}</div>
+                  <div
+                      class="chart-bar"
+                      :style="{
+                  height: (value / dashboardData.appointmentChart.maxValue * 220) + 'px'
+                }"
+                  >
+                    {{ value }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -198,6 +194,33 @@ const dashboardData = reactive({
   hospitalRank: []
 })
 
+// 监听日期范围变化
+// 监听日期范围变化
+const updateAppointmentChart = () => {
+  if (dateRange.value === 'week') {
+    // 本周数据
+    dashboardData.appointmentChart = {
+      xData: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      yData: [15, 22, 18, 25, 30, 42, 38],
+      maxValue: 42  // 添加最大值属性
+    }
+  } else if (dateRange.value === 'month') {
+    // 本月数据（简化显示为4周）
+    dashboardData.appointmentChart = {
+      xData: ['第一周', '第二周', '第三周', '第四周'],
+      yData: [120, 145, 180, 160],
+      maxValue: 180  // 添加最大值属性
+    }
+  } else if (dateRange.value === 'year') {
+    // 全年数据
+    dashboardData.appointmentChart = {
+      xData: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      yData: [420, 380, 450, 520, 600, 680, 720, 700, 650, 580, 510, 480],
+      maxValue: 720  // 添加最大值属性
+    }
+  }
+}
+
 // 计算最大值用于比例显示
 const maxPackageRank = computed(() => {
   if (dashboardData.packageRank.length === 0) return 100
@@ -253,6 +276,8 @@ const fetchDashboardData = async () => {
 // 页面加载时获取数据
 onMounted(() => {
   fetchDashboardData()
+  // 设置初始图表数据
+  updateAppointmentChart()
 })
 </script>
 
@@ -464,4 +489,4 @@ onMounted(() => {
 .demo-mode-tip {
   margin-top: 20px;
 }
-</style> 
+</style>
