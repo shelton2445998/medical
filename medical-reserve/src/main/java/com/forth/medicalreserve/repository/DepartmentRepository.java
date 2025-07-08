@@ -12,25 +12,33 @@ import java.util.Optional;
  */
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
-
+    
     /**
-     * 根据科室名称查找科室
+     * 根据医院ID查询科室列表
+     * @param hospitalId 医院ID
+     * @return 科室列表
+     */
+    List<Department> findByHospitalId(Integer hospitalId);
+    
+    /**
+     * 根据科室名称查询
      * @param departmentName 科室名称
      * @return 科室
      */
     Optional<Department> findByDepartmentName(String departmentName);
-
+    
     /**
-     * 根据状态查找科室列表
+     * 根据医院ID和科室名称查询
+     * @param hospitalId 医院ID
+     * @param departmentName 科室名称
+     * @return 科室
+     */
+    Optional<Department> findByHospitalIdAndDepartmentName(Integer hospitalId, String departmentName);
+    
+    /**
+     * 根据状态查询科室列表
      * @param status 状态
      * @return 科室列表
      */
     List<Department> findByStatus(Integer status);
-
-    /**
-     * 根据科室名称模糊查询
-     * @param departmentName 科室名称
-     * @return 科室列表
-     */
-    List<Department> findByDepartmentNameContaining(String departmentName);
 } 
