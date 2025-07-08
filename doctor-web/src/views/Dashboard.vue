@@ -4,22 +4,24 @@
     
     <!-- 统计卡片 -->
     <el-row :gutter="20" class="mb-20">
+<el-col :span="6">
+  <el-card shadow="hover" class="stat-card">
+    <!-- 图标直接作为背景层 -->
+    <el-icon class="stat-full-icon waiting-icon"><clock /></el-icon>
+    
+    <!-- 文字内容绝对定位在图标上方 -->
+    <div class="stat-content">
+      <div class="stat-value">{{ statistics.waitingPatients }}</div>
+      <div class="stat-label">今日待诊人数</div>
+    </div>
+  </el-card>
+</el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-icon waiting-icon">
-            <el-icon><clock /></el-icon>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ statistics.waitingPatients }}</div>
-            <div class="stat-label">今日待诊人数</div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
-          <div class="stat-icon completed-icon">
+         <!-- <div class="stat-icon completed-icon">
             <el-icon><circle-check /></el-icon>
-          </div>
+          </div> -->
+		   <el-icon class="stat-full-icon completed-icon"><circle-check /></el-icon>
           <div class="stat-content">
             <div class="stat-value">{{ statistics.completedPatients }}</div>
             <div class="stat-label">今日已诊人数</div>
@@ -28,9 +30,10 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-icon appointment-icon">
+         <!-- <div class="stat-icon appointment-icon">
             <el-icon><calendar /></el-icon>
-          </div>
+          </div> -->
+		  <el-icon class="stat-full-icon appointment-icon"><calendar /></el-icon>
           <div class="stat-content">
             <div class="stat-value">{{ statistics.totalAppointments }}</div>
             <div class="stat-label">今日总预约数</div>
@@ -39,9 +42,10 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-icon prescription-icon">
+          <!-- <div class="stat-icon prescription-icon">
             <el-icon><tickets /></el-icon>
-          </div>
+          </div> -->
+		  <el-icon class="stat-full-icon prescription-icon"><tickets /></el-icon>
           <div class="stat-content">
             <div class="stat-value">{{ statistics.totalPrescriptions }}</div>
             <div class="stat-label">今日处方数</div>
@@ -267,73 +271,102 @@ export default {
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 20px;
-}
-
 .stat-card {
-  height: 100px;
-  display: flex;
-  align-items: center;
+  position: relative; /* 作为绝对定位的参考 */
+  height: 100%;
+  padding: 0; /* 移除内边距，让图标填满 */
+  overflow: hidden; /* 防止内容溢出 */
+  border-radius: 12px;
 }
 
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+.stat-full-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* 宽度占满卡片 */
+  height: 100%; /* 高度占满卡片 */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-}
-
-.stat-icon :deep(svg) {
-  font-size: 28px;
-  color: #fff;
+  opacity: 0.4 ; /* 降低图标透明度，避免遮挡文字 */
+  font-size: 120px; /* 增大图标尺寸 */
+  color: currentColor; /* 继承卡片的文本颜色 */
 }
 
 .waiting-icon {
-  background-color: #409EFF;
+  background-color: #0b40ff;
+  color: white; /* 图标颜色 */
 }
 
-.completed-icon {
-  background-color: #67C23A;
-}
-
-.appointment-icon {
-  background-color: #E6A23C;
-}
-
-.prescription-icon {
-  background-color: #F56C6C;
-}
-
-.stat-content {
-  flex: 1;
+/* 文字内容的样式 */
+.stat-overlay {
+  position: relative; /* 相对于卡片定位 */
+  z-index: 1;      /* 确保文字显示在图标上方 */
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 36px;
   font-weight: bold;
-  color: #303133;
+  color: white; /* 数字颜色 */
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8); /* 标签颜色（半透明） */
+}
+
+/* 不同卡片的图标容器背景色 */
+.waiting-icon {
+  background-color: #409EFF;
+}
+.completed-icon {
+  background-color: #67C23A;
+}
+.appointment-icon {
+  background-color: #e6d6c2;
+}
+.prescription-icon {
+  background-color: #ffd4fb;
+}
+
+/* 图标样式：让图标占满容器 */
+.stat-icon .el-icon {
+  font-size: 36px; 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  color: #fff; 
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative; /* 相对于卡片定位 */
+  z-index: 1;      /* 确保文字显示在图标上方 */
+  padding: 20px;
+  
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #909399;
-  margin-top: 5px;
-}
+  color: #000000;
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.empty-data {
-  text-align: center;
-  padding: 20px 0;
-  color: #909399;
-  font-size: 14px;
 }
 </style> 

@@ -3,7 +3,7 @@
     <el-container class="main-container">
       <el-aside width="200px" class="aside">
         <div class="logo">
-          <img src="../assets/images/logo.png" alt="Logo" />
+          <img src="../assets/images/new_logo.png" alt="Logo" />
           <span>医生工作站</span>
         </div>
         <el-menu 

@@ -44,10 +44,13 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
+			  <!-- 外层加 div 控制布局 -->
+			  <div class="btn-group-right">
             <el-button type="primary" size="small" @click="handleView(scope.row)">查看</el-button>
             <el-button type="warning" size="small" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
+              </div>
+		  </template>
         </el-table-column>
       </el-table>
 
@@ -402,6 +405,15 @@ export default {
 </script>
 
 <style scoped>
+	.btn-group-right {
+	  /* Flex 布局，按钮靠右 */
+	  display: flex; 
+	  justify-content: flex-end; 
+	}
+	/* 按钮间距（可选，避免挤在一起） */
+	.el-button {
+	  margin-left: 8px; 
+	}
 .prescriptions-container {
   padding: 20px;
   background-color: #f5f7fa;
