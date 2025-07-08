@@ -1,22 +1,15 @@
 package com.forth.medicalreserve.service.impl;
 
-import com.forth.medicalreserve.dto.UserDTO;
-import com.forth.medicalreserve.entity.User;
-import com.forth.medicalreserve.exception.BusinessException;
-import com.forth.medicalreserve.repository.UserRepository;
+import com.forth.medicalreserve.entity.Users;
+import com.forth.medicalreserve.repository.UsersRepository;
 import com.forth.medicalreserve.service.UserService;
-import com.forth.medicalreserve.util.MD5Util;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,147 +19,145 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Override
-    public User getById(Integer userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
-    }
-
-    @Override
-    public User getByUserName(String userName) {
-        return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
-    }
-
-    @Override
-    public User getByMobile(String mobile) {
-        return userRepository.findByMobile(mobile)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
-    }
-
-    @Override
-    public Page<User> page(int pageNum, int pageSize, String keyword) {
-        // 构建查询条件
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING) // 模糊查询
-                .withIgnoreCase(true); // 忽略大小写
-
-        User user = new User();
-        if (StringUtils.hasText(keyword)) {
-            user.setUserName(keyword);
-            // 也可以设置其他字段进行查询
-        }
-
-        Example<User> example = Example.of(user, matcher);
-        return userRepository.findAll(example, PageRequest.of(pageNum - 1, pageSize));
-    }
-
+    private UsersRepository usersRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @Override
     @Transactional
-    public Integer create(UserDTO userDTO) {
-        // 检查用户名是否已存在
-        if (userRepository.existsByUserName(userDTO.getUserName())) {
-            throw new BusinessException("用户名已存在");
+    public Users register(Users user) {
+        // 校验用户名是否存在
+        if (usersRepository.existsByUserName(user.getUserName())) {
+            throw new RuntimeException("用户名已存在");
         }
-
-        // 检查手机号是否已存在
-        if (userRepository.existsByMobile(userDTO.getMobile())) {
-            throw new BusinessException("手机号已被使用");
+        
+        // 校验手机号是否存在
+        if (usersRepository.existsByMobile(user.getMobile())) {
+            throw new RuntimeException("手机号已存在");
         }
-
-        User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
-
-        // 设置密码（MD5加密）
-        user.setPassword(MD5Util.encrypt(userDTO.getPassword()));
-
-        // 设置状态和时间
+        
+        // 密码加密
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // 设置状态为启用
         user.setStatus(1);
-        user.setCreateTime(new Date());
+        // 设置创建时间和更新时间
+        Date now = new Date();
+        user.setCreateTime(now);
+        user.setUpdateTime(now);
+        
+        return usersRepository.save(user);
+    }
+
+    @Override
+    public Users login(String userName, String password) {
+        Optional<Users> userOpt = usersRepository.findByUserName(userName);
+        if (!userOpt.isPresent()) {
+            throw new RuntimeException("用户名不存在");
+        }
+        
+        Users user = userOpt.get();
+        // 校验密码
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("密码错误");
+        }
+        
+        // 校验用户状态
+        if (user.getStatus() != 1) {
+            throw new RuntimeException("用户已被禁用");
+        }
+        
+        return user;
+    }
+
+    @Override
+    public Users loginByMobile(String mobile, String code) {
+        // TODO 校验验证码
+        
+        Optional<Users> userOpt = usersRepository.findByMobile(mobile);
+        if (!userOpt.isPresent()) {
+            throw new RuntimeException("手机号未注册");
+        }
+        
+        Users user = userOpt.get();
+        // 校验用户状态
+        if (user.getStatus() != 1) {
+            throw new RuntimeException("用户已被禁用");
+        }
+        
+        return user;
+    }
+
+    @Override
+    public Users findById(Integer userId) {
+        return usersRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+    }
+
+    @Override
+    @Transactional
+    public Users updateUser(Users user) {
+        Users existingUser = findById(user.getUserId());
+        
+        // 更新基本信息
+        existingUser.setRealName(user.getRealName());
+        existingUser.setGender(user.getGender());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setAddress(user.getAddress());
+        existingUser.setUpdateTime(new Date());
+        
+        return usersRepository.save(existingUser);
+    }
+
+    @Override
+    @Transactional
+    public boolean changePassword(Integer userId, String oldPassword, String newPassword) {
+        Users user = findById(userId);
+        
+        // 校验旧密码
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("旧密码错误");
+        }
+        
+        // 更新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(new Date());
-
-        // 保存用户并返回用户ID
-        User savedUser = userRepository.save(user);
-        return savedUser.getUserId();
+        usersRepository.save(user);
+        
+        return true;
     }
 
     @Override
     @Transactional
-    public void update(Integer userId, UserDTO userDTO) {
-        // 获取用户信息
-        User user = getById(userId);
-
-        // 如果修改了用户名，检查是否已存在
-        if (!user.getUserName().equals(userDTO.getUserName()) 
-                && userRepository.existsByUserName(userDTO.getUserName())) {
-            throw new BusinessException("用户名已存在");
+    public boolean resetPassword(String mobile, String code, String newPassword) {
+        // TODO 校验验证码
+        
+        Optional<Users> userOpt = usersRepository.findByMobile(mobile);
+        if (!userOpt.isPresent()) {
+            throw new RuntimeException("手机号未注册");
         }
-
-        // 如果修改了手机号，检查是否已存在
-        if (!user.getMobile().equals(userDTO.getMobile()) 
-                && userRepository.existsByMobile(userDTO.getMobile())) {
-            throw new BusinessException("手机号已被使用");
-        }
-
-        // 复制属性（不包括密码、状态等字段）
-        BeanUtils.copyProperties(userDTO, user, "password", "status", "createTime", "updateTime");
-
-        // 如果设置了新密码，则更新密码
-        if (StringUtils.hasText(userDTO.getPassword())) {
-            user.setPassword(MD5Util.encrypt(userDTO.getPassword()));
-        }
-
-        // 更新时间
+        
+        Users user = userOpt.get();
+        // 更新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(new Date());
+        usersRepository.save(user);
+        
+        return true;
+    }
 
-        // 保存用户
-        userRepository.save(user);
+    @Override
+    public List<Users> findAll() {
+        return usersRepository.findAll();
     }
 
     @Override
     @Transactional
-    public void delete(Integer userId) {
-        // 检查用户是否存在
-        if (!userRepository.existsById(userId)) {
-            throw new BusinessException("用户不存在");
-        }
-
-        // 删除用户
-        userRepository.deleteById(userId);
-    }
-
-    @Override
-    @Transactional
-    public void updateStatus(Integer userId, Integer status) {
-        // 获取用户信息
-        User user = getById(userId);
-
-        // 更新状态
+    public boolean updateStatus(Integer userId, Integer status) {
+        Users user = findById(userId);
         user.setStatus(status);
         user.setUpdateTime(new Date());
-
-        // 保存用户
-        userRepository.save(user);
-    }
-
-    @Override
-    @Transactional
-    public void updatePassword(Integer userId, String oldPassword, String newPassword) {
-        // 获取用户信息
-        User user = getById(userId);
-
-        // 验证旧密码
-        if (!MD5Util.verify(oldPassword, user.getPassword())) {
-            throw new BusinessException("旧密码错误");
-        }
-
-        // 更新密码
-        user.setPassword(MD5Util.encrypt(newPassword));
-        user.setUpdateTime(new Date());
-
-        // 保存用户
-        userRepository.save(user);
+        usersRepository.save(user);
+        return true;
     }
 } 

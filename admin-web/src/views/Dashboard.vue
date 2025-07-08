@@ -8,15 +8,54 @@ export default {
   <div class="dashboard-container">
     <el-row :gutter="20">
       <!-- 统计卡片 -->
-      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6" v-for="(card, index) in statCards" :key="index">
-        <el-card class="stat-card" :class="card.class">
+      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+        <el-card class="stat-card blue-card">
           <div class="stat-icon">
-            <component :is="card.icon"></component>
+            <el-icon><Calendar /></el-icon>
           </div>
           <div class="stat-info">
-            <p class="stat-title">{{ card.title }}</p>
-            <h2 class="stat-value">{{ card.value }}</h2>
-            <p class="stat-desc">{{ card.desc }}</p>
+            <p class="stat-title">今日预约</p>
+            <h2 class="stat-value">{{ dashboardData.todayAppointments }}</h2>
+            <p class="stat-desc">总预约量 {{ dashboardData.totalAppointments }}</p>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+        <el-card class="stat-card green-card">
+          <div class="stat-icon">
+            <el-icon><User /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-title">用户总数</p>
+            <h2 class="stat-value">{{ dashboardData.userCount }}</h2>
+            <p class="stat-desc">医生数量 {{ dashboardData.doctorCount }}</p>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+        <el-card class="stat-card orange-card">
+          <div class="stat-icon">
+            <el-icon><Box /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-title">体检套餐</p>
+            <h2 class="stat-value">{{ dashboardData.packageCount }}</h2>
+            <p class="stat-desc">合作医院 {{ dashboardData.hospitalCount }}</p>
+          </div>
+        </el-card>
+      </el-col>
+      
+      <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
+        <el-card class="stat-card purple-card">
+          <div class="stat-icon">
+            <el-icon><Money /></el-icon>
+          </div>
+          <div class="stat-info">
+            <p class="stat-title">今日收入</p>
+            <h2 class="stat-value">¥{{ formatNumber(dashboardData.todayIncome) }}</h2>
+            <p class="stat-desc">总收入 ¥{{ formatNumber(dashboardData.totalIncome) }}</p>
           </div>
         </el-card>
       </el-col>
@@ -37,8 +76,19 @@ export default {
             </div>
           </template>
           <div class="chart-container">
-            <!-- 此处可集成ECharts等图表库 -->
-            <div class="placeholder-chart">预约趋势图表</div>
+            <!-- 此处展示模拟数据图表 -->
+            <div class="chart-data-display">
+              <div class="chart-legend">
+                <div v-for="(day, index) in dashboardData.appointmentChart.xData" :key="index" class="chart-day">
+                  {{ day }}
+                </div>
+              </div>
+              <div class="chart-bars">
+                <div v-for="(value, index) in dashboardData.appointmentChart.yData" :key="index" class="chart-bar-container">
+                  <div class="chart-bar" :style="{ height: value * 2 + 'px' }">{{ value }}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -52,35 +102,40 @@ export default {
             </div>
           </template>
           <div class="chart-container">
-            <!-- 此处可集成ECharts等图表库 -->
-            <div class="placeholder-chart">套餐分布图表</div>
+            <div class="rank-list">
+              <div v-for="(item, index) in dashboardData.packageRank" :key="index" class="rank-item">
+                <span class="rank-name">{{ item.name }}</span>
+                <div class="rank-bar-container">
+                  <div class="rank-bar" :style="{ width: (item.value / maxPackageRank * 100) + '%' }"></div>
+                </div>
+                <span class="rank-value">{{ item.value }}人</span>
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
     <el-row :gutter="20">
-      <!-- 最新预约 -->
+      <!-- 医院排名 -->
       <el-col :xs="24" :sm="24" :md="12">
         <el-card class="data-card">
           <template #header>
             <div class="card-header">
-              <span>最新预约</span>
-              <el-button type="text">查看更多</el-button>
+              <span>医院预约排名</span>
+              <el-button type="text" @click="toHospitals">查看全部</el-button>
             </div>
           </template>
-          <el-table :data="latestAppointments" stripe style="width: 100%" size="small">
-            <el-table-column prop="userName" label="用户" width="100" />
-            <el-table-column prop="packageName" label="套餐" />
-            <el-table-column prop="appointmentTime" label="预约时间" width="180" />
-            <el-table-column prop="status" label="状态">
-              <template #default="scope">
-                <el-tag :type="getStatusType(scope.row.status)">
-                  {{ scope.row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
+          <div class="rank-list">
+            <div v-for="(item, index) in dashboardData.hospitalRank" :key="index" class="rank-item">
+              <span class="rank-index">{{ index + 1 }}</span>
+              <span class="rank-name">{{ item.name }}</span>
+              <div class="rank-bar-container">
+                <div class="rank-bar" :style="{ width: (item.value / maxHospitalRank * 100) + '%' }"></div>
+              </div>
+              <span class="rank-value">{{ item.value }}人</span>
+            </div>
+          </div>
         </el-card>
       </el-col>
 
@@ -104,80 +159,55 @@ export default {
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 演示模式提示 -->
+    <div class="demo-mode-tip">
+      <el-alert
+        title="演示模式：当前显示的是静态演示数据"
+        type="info"
+        description="本系统目前处于演示模式，所有数据均为静态模拟数据，仅用于展示界面效果。"
+        show-icon
+        :closable="false"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { Calendar, User, Box, Money } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { getDashboardData } from '../api/index'
 
-// 日期范围
+const router = useRouter()
 const dateRange = ref('week')
+const dashboardData = reactive({
+  todayAppointments: 0,
+  totalAppointments: 0,
+  userCount: 0,
+  packageCount: 0,
+  hospitalCount: 0,
+  doctorCount: 0,
+  todayIncome: 0,
+  totalIncome: 0,
+  appointmentChart: {
+    xData: [],
+    yData: []
+  },
+  packageRank: [],
+  hospitalRank: []
+})
 
-// 统计卡片数据
-const statCards = reactive([
-  {
-    title: '今日预约',
-    value: '128',
-    desc: '同比增长 24%',
-    class: 'blue-card',
-    icon: 'el-icon-date'
-  },
-  {
-    title: '用户总数',
-    value: '8,846',
-    desc: '本月新增 235',
-    class: 'green-card',
-    icon: 'el-icon-user'
-  },
-  {
-    title: '体检完成',
-    value: '93',
-    desc: '完成率 72.6%',
-    class: 'orange-card',
-    icon: 'el-icon-finished'
-  },
-  {
-    title: '月营收',
-    value: '¥89,325',
-    desc: '同比增长 12%',
-    class: 'purple-card',
-    icon: 'el-icon-money'
-  }
-])
+// 计算最大值用于比例显示
+const maxPackageRank = computed(() => {
+  if (dashboardData.packageRank.length === 0) return 100
+  return Math.max(...dashboardData.packageRank.map(item => item.value))
+})
 
-// 最新预约数据
-const latestAppointments = reactive([
-  {
-    userName: '张三',
-    packageName: '全面体检套餐',
-    appointmentTime: '2023-07-15 09:00',
-    status: '待体检'
-  },
-  {
-    userName: '李四',
-    packageName: '入职体检套餐',
-    appointmentTime: '2023-07-15 10:30',
-    status: '已完成'
-  },
-  {
-    userName: '王五',
-    packageName: '高级体检套餐',
-    appointmentTime: '2023-07-16 08:00',
-    status: '已取消'
-  },
-  {
-    userName: '赵六',
-    packageName: '女性体检套餐',
-    appointmentTime: '2023-07-16 14:30',
-    status: '待支付'
-  },
-  {
-    userName: '钱七',
-    packageName: '心脑血管检查',
-    appointmentTime: '2023-07-17 09:30',
-    status: '待体检'
-  }
-])
+const maxHospitalRank = computed(() => {
+  if (dashboardData.hospitalRank.length === 0) return 100
+  return Math.max(...dashboardData.hospitalRank.map(item => item.value))
+})
 
 // 系统通知数据
 const systemNotices = reactive([
@@ -198,62 +228,52 @@ const systemNotices = reactive([
   }
 ])
 
-// 获取状态对应的Tag类型
-const getStatusType = (status) => {
-  const statusMap = {
-    '待支付': 'info',
-    '待体检': 'warning',
-    '已完成': 'success',
-    '已取消': 'danger'
-  }
-  return statusMap[status] || 'info'
+// 格式化数字（添加千位分隔符）
+const formatNumber = (num) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-// 组件挂载时加载数据
+// 跳转到医院管理页面
+const toHospitals = () => {
+  router.push('/hospitals')
+}
+
+// 获取仪表盘数据
+const fetchDashboardData = async () => {
+  try {
+    const res = await getDashboardData()
+    if (res.data) {
+      Object.assign(dashboardData, res.data)
+    }
+  } catch (error) {
+    console.error('获取仪表盘数据失败:', error)
+  }
+}
+
+// 页面加载时获取数据
 onMounted(() => {
-  // 这里可以调用API获取实时数据
-  console.log('仪表盘组件已挂载，可以请求实时数据')
+  fetchDashboardData()
 })
 </script>
 
 <style scoped>
 .dashboard-container {
-  padding: 10px;
+  padding: 20px;
 }
 
 .stat-card {
-  height: 120px;
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  color: white;
   border-radius: 8px;
 }
 
-.blue-card {
-  background: linear-gradient(90deg, #1890ff, #36cbcb);
-}
-
-.green-card {
-  background: linear-gradient(90deg, #52c41a, #7cb305);
-}
-
-.orange-card {
-  background: linear-gradient(90deg, #fa8c16, #ffd666);
-}
-
-.purple-card {
-  background: linear-gradient(90deg, #722ed1, #b37feb);
-}
-
 .stat-icon {
+  font-size: 48px;
+  color: #fff;
+  margin-right: 20px;
   width: 60px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 32px;
-  margin: 0 10px;
+  text-align: center;
 }
 
 .stat-info {
@@ -262,18 +282,37 @@ onMounted(() => {
 
 .stat-title {
   font-size: 14px;
+  color: #fff;
   margin: 0;
 }
 
 .stat-value {
-  font-size: 24px;
-  margin: 5px 0;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  margin: 8px 0;
 }
 
 .stat-desc {
   font-size: 12px;
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
+}
+
+.blue-card {
+  background: linear-gradient(135deg, #1e88e5, #42a5f5);
+}
+
+.green-card {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+}
+
+.orange-card {
+  background: linear-gradient(135deg, #fb8c00, #ffa726);
+}
+
+.purple-card {
+  background: linear-gradient(135deg, #8e24aa, #ab47bc);
 }
 
 .chart-row {
@@ -282,6 +321,7 @@ onMounted(() => {
 
 .chart-card, .data-card {
   margin-bottom: 20px;
+  height: 350px;
 }
 
 .card-header {
@@ -291,36 +331,137 @@ onMounted(() => {
 }
 
 .chart-container {
-  height: 300px;
+  height: 280px;
   display: flex;
-  justify-content: center;
   align-items: center;
-}
-
-.placeholder-chart {
-  width: 100%;
-  height: 100%;
-  display: flex;
   justify-content: center;
-  align-items: center;
-  background-color: #f5f7fa;
-  color: #909399;
-  font-size: 16px;
-  border-radius: 4px;
-}
-
-.notice-content {
-  margin-bottom: 10px;
 }
 
 .notice-content h4 {
-  margin: 0 0 5px 0;
-  font-size: 14px;
+  margin: 0 0 8px;
+  font-weight: bold;
 }
 
 .notice-content p {
   margin: 0;
-  color: #606266;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 图表样式 */
+.chart-data-display {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.chart-day {
   font-size: 12px;
+  color: #666;
+  text-align: center;
+  width: 14%;
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-between;
+  height: 220px;
+  align-items: flex-end;
+}
+
+.chart-bar-container {
+  width: 14%;
+  text-align: center;
+}
+
+.chart-bar {
+  background: linear-gradient(180deg, #409eff, #a0cfff);
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5px;
+  font-size: 12px;
+  color: #fff;
+  transition: height 0.5s;
+  min-height: 20px;
+}
+
+/* 排名样式 */
+.rank-list {
+  width: 100%;
+  padding: 10px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.rank-index {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 12px;
+}
+
+.rank-item:nth-child(1) .rank-index {
+  background-color: #f44336;
+  color: white;
+}
+
+.rank-item:nth-child(2) .rank-index {
+  background-color: #ff9800;
+  color: white;
+}
+
+.rank-item:nth-child(3) .rank-index {
+  background-color: #ffc107;
+  color: white;
+}
+
+.rank-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 10px;
+}
+
+.rank-bar-container {
+  width: 40%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.rank-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #409eff, #a0cfff);
+  transition: width 0.5s;
+}
+
+.rank-value {
+  width: 60px;
+  text-align: right;
+  font-size: 14px;
+  color: #666;
+}
+
+.demo-mode-tip {
+  margin-top: 20px;
 }
 </style> 

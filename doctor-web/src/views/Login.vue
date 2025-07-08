@@ -3,6 +3,7 @@
     <div class="login-box">
       <div class="title">医生工作站</div>
       <div class="subtitle">医疗预约管理系统</div>
+      <div class="demo-tip">演示模式：API不可用时，可使用任意用户名密码登录</div>
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
         <el-form-item prop="username">
           <el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="请输入用户名"></el-input>
@@ -65,7 +66,21 @@ export default {
             }
           } catch (error) {
             console.error('登录出错：', error)
-            ElMessage.error('登录失败，请稍后再试')
+            // API失效时使用静态演示数据登录
+            const mockDoctorInfo = {
+              doctorId: 'D2023001',
+              name: loginForm.username || '演示医生',
+              department: 'internal',
+              departmentName: '内科',
+              title: '主治医师',
+              phone: '13800138000'
+            }
+            // 生成模拟token
+            const mockToken = 'mock_token_' + Math.random().toString(36).substring(2)
+            localStorage.setItem('doctorToken', mockToken)
+            localStorage.setItem('doctorInfo', JSON.stringify(mockDoctorInfo))
+            ElMessage.success('登录成功(演示模式)')
+            router.push('/home/dashboard')
           } finally {
             loading.value = false
           }
@@ -116,7 +131,17 @@ export default {
   font-size: 18px;
   color: #606266;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
+}
+
+.demo-tip {
+  font-size: 14px;
+  color: #909399;
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 6px;
+  background-color: #f0f9eb;
+  border-radius: 4px;
 }
 
 .login-form {

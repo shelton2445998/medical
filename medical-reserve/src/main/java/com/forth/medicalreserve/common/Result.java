@@ -1,13 +1,14 @@
 package com.forth.medicalreserve.common;
 
-import com.forth.medicalreserve.constant.CommonConstant;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 统一返回结果类
+ * 统一API返回结果
  * @param <T> 数据类型
  */
+@Data
 public class Result<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,105 +19,89 @@ public class Result<T> implements Serializable {
     private Integer code;
 
     /**
-     * 返回信息
+     * 消息
      */
     private String message;
 
     /**
-     * 返回数据
+     * 数据
      */
     private T data;
 
-    public Result() {
-    }
-
-    public Result(Integer code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public Result(Integer code, String message, T data) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-    }
+    private Result() {}
 
     /**
      * 成功返回结果
-     */
-    public static <T> Result<T> success() {
-        return new Result<>(CommonConstant.SUCCESS_CODE, "操作成功");
-    }
-
-    /**
-     * 成功返回结果
-     * @param data 返回的数据
+     * @param data 数据
+     * @param <T> 数据类型
+     * @return 结果
      */
     public static <T> Result<T> success(T data) {
-        return new Result<>(CommonConstant.SUCCESS_CODE, "操作成功", data);
+        Result<T> result = new Result<>();
+        result.setCode(200);
+        result.setMessage("操作成功");
+        result.setData(data);
+        return result;
     }
 
     /**
      * 成功返回结果
-     * @param message 返回的信息
-     * @param data 返回的数据
+     * @param <T> 数据类型
+     * @return 结果
      */
-    public static <T> Result<T> success(String message, T data) {
-        return new Result<>(CommonConstant.SUCCESS_CODE, message, data);
-    }
-
-    /**
-     * 失败返回结果
-     */
-    public static <T> Result<T> error() {
-        return new Result<>(CommonConstant.ERROR_CODE, "操作失败");
-    }
-
-    /**
-     * 失败返回结果
-     * @param message 返回的信息
-     */
-    public static <T> Result<T> error(String message) {
-        return new Result<>(CommonConstant.ERROR_CODE, message);
+    public static <T> Result<T> success() {
+        return success(null);
     }
 
     /**
      * 失败返回结果
      * @param code 状态码
-     * @param message 返回的信息
+     * @param message 消息
+     * @param <T> 数据类型
+     * @return 结果
      */
     public static <T> Result<T> error(Integer code, String message) {
-        return new Result<>(code, message);
+        Result<T> result = new Result<>();
+        result.setCode(code);
+        result.setMessage(message);
+        return result;
     }
 
     /**
-     * 未授权返回结果
+     * 失败返回结果
+     * @param message 消息
+     * @param <T> 数据类型
+     * @return 结果
      */
-    public static <T> Result<T> unauthorized(String message) {
-        return new Result<>(CommonConstant.UNAUTHORIZED_CODE, message);
+    public static <T> Result<T> error(String message) {
+        return error(500, message);
     }
 
-    public Integer getCode() {
-        return code;
+    /**
+     * 参数验证失败返回结果
+     * @param message 消息
+     * @param <T> 数据类型
+     * @return 结果
+     */
+    public static <T> Result<T> validateFailed(String message) {
+        return error(400, message);
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
+    /**
+     * 未登录返回结果
+     * @param <T> 数据类型
+     * @return 结果
+     */
+    public static <T> Result<T> unauthorized() {
+        return error(401, "未登录或登录已过期");
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
+    /**
+     * 无权限返回结果
+     * @param <T> 数据类型
+     * @return 结果
+     */
+    public static <T> Result<T> forbidden() {
+        return error(403, "没有相关权限");
     }
 } 
