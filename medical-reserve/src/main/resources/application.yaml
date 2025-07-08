@@ -2,10 +2,14 @@ server:
   port: 8080
 
 spring:
+  # 应用名称
+  application:
+    name: 医疗预约系统
+    
   # MySQL数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://39.104.57.236:3306/medical_reserve?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://39.104.57.236:3306/medical_reserve?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&useSSL=false
     username: root
     password: hyx123456789.
   
@@ -17,7 +21,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-  
+        format_sql: true
+        # 禁用外键约束
+        globally_quoted_identifiers: true
+        temp.use_jdbc_metadata_defaults: false
+        
   # Redis配置
   redis:
     host: 39.104.57.236
@@ -25,8 +33,26 @@ spring:
     password: hyx123456789.
     database: 0
     timeout: 10000
+    
+  # 解决Swagger与SpringBoot 2.6+版本不兼容问题
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 # MyBatis配置
 mybatis:
   mapper-locations: classpath:mappers/*xml
-  type-aliases-package: com.forth.medicalreserve.mybatis.entity
+  type-aliases-package: com.forth.medicalreserve.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+# 日志配置
+logging:
+  level:
+    root: info
+    com.forth.medicalreserve: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace
+  file:
+    name: logs/medical-reserve.log

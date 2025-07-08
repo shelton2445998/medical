@@ -1,0 +1,102 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "沈阳云医院",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		}, 
+		{
+			"path": "pages/register/register",
+			"style": {
+				"navigationBarTitleText": "注册"
+			}
+		}, 
+		{
+			"path": "pages/appointment/appointment",
+			"style": {
+				"navigationBarTitleText": "体检预约"
+			}
+		},
+		{
+			"path": "pages/hospital/hospital",
+			"style": {
+				"navigationBarTitleText": "选择体检医院"
+			}
+		},
+		{
+			"path": "pages/package/package",
+			"style": {
+				"navigationBarTitleText": "选择体检套餐"
+			}
+		},
+		{
+			"path": "pages/report/report",
+			"style": {
+				"navigationBarTitleText": "体检报告"
+			}
+		},
+		{
+			"path": "pages/report-detail/report-detail",
+			"style": {
+				"navigationBarTitleText": "报告详情"
+			}
+		},
+		{
+			"path": "pages/user/user",
+			"style": {
+				"navigationBarTitleText": "个人中心"
+			}
+		},
+		{
+			"path": "pages/my-appointment/my-appointment",
+			"style": {
+				"navigationBarTitleText": "我的预约"
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#7a7e83",
+		"selectedColor": "#1296db",
+		"backgroundColor": "#ffffff",
+		"list": [{
+			"pagePath": "pages/index/index",
+			"text": "首页",
+			"iconPath": "static/img/home.png",
+			"selectedIconPath": "static/img/homeHL.png"
+		}, {
+			"pagePath": "pages/appointment/appointment",
+			"text": "体检预约",
+			"iconPath": "static/img/home.png",
+			"selectedIconPath": "static/img/homeHL.png"
+		}, {
+			"pagePath": "pages/report/report",
+			"text": "体检报告",
+			"iconPath": "static/img/home.png",
+			"selectedIconPath": "static/img/homeHL.png"
+		}, {
+			"pagePath": "pages/user/user",
+			"text": "我的",
+			"iconPath": "static/img/user.png",
+			"selectedIconPath": "static/img/userHL.png"
+		}]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarBackgroundColor": "#1296db",
+		"backgroundColor": "#f8f8f8"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+		}
+	}
+}

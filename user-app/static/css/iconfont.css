@@ -1,0 +1,396 @@
+@font-face {
+  font-family: "iconfont";
+  src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-home:before {
+  content: "\e60f";
+}
+
+.icon-appointment:before {
+  content: "\e639";
+}
+
+.icon-report:before {
+  content: "\e60b";
+}
+
+.icon-user:before {
+  content: "\e614";
+}
+
+.icon-phone:before {
+  content: "\e639";
+}
+
+.icon-lock:before {
+  content: "\e60f";
+}
+
+.icon-code:before {
+  content: "\e60f";
+}
+
+.icon-idcard:before {
+  content: "\e60f";
+}
+
+.icon-gender:before {
+  content: "\e60f";
+}
+
+.icon-weixin:before {
+  content: "\e60f";
+}
+
+.icon-qq:before {
+  content: "\e60f";
+}
+
+.icon-weibo:before {
+  content: "\e60f";
+}
+
+.icon-health:before {
+  content: "\e60f";
+}
+
+.icon-analysis:before {
+  content: "\e60f";
+}
+
+.icon-setting:before {
+  content: "\e60f";
+}
+
+.icon-about:before {
+  content: "\e60f";
+}
+
+.icon-help:before {
+  content: "\e60f";
+}
+
+.icon-favorite:before {
+  content: "\e60f";
+}
+
+.icon-family:before {
+  content: "\e60f";
+}
+
+.icon-location:before {
+  content: "\e60f";
+}
+
+.icon-time:before {
+  content: "\e60f";
+}
+
+.icon-call:before {
+  content: "\e60f";
+}
+
+.icon-map:before {
+  content: "\e60f";
+}
+
+.icon-arrow-right:before {
+  content: "\e65e";
+}
+
+.icon-back:before {
+  content: "\e65e";
+}
+
+.icon-search:before {
+  content: "\e65c";
+}
+
+.icon-consult:before {
+  content: "\e60f";
+}
+
+.icon-register:before {
+  content: "\e60f";
+}
+
+.icon-ecg:before {
+  content: "\e60f";
+}
+
+.icon-clinic:before {
+  content: "\e60f";
+}
+
+.icon-group:before {
+  content: "\e60f";
+}
+
+/* 右箭头图标 */
+.icon-right:before {
+  content: "\e65f";
+}
+
+/* 左箭头图标 */
+.icon-left:before {
+  content: "\e660";
+}
+
+/* 向上箭头 */
+.icon-up:before {
+  content: "\e661";
+}
+
+/* 向下箭头 */
+.icon-down:before {
+  content: "\e662";
+}
+
+/* 位置图标 */
+.icon-location:before {
+  content: "\e60e";
+}
+
+/* 电话图标 */
+.icon-phone:before {
+  content: "\e64c";
+}
+
+/* 邮件图标 */
+.icon-email:before {
+  content: "\e64d";
+}
+
+/* 用户图标 */
+.icon-user:before {
+  content: "\e64e";
+}
+
+/* 密码图标 */
+.icon-password:before {
+  content: "\e64f";
+}
+
+/* 时钟图标 */
+.icon-time:before {
+  content: "\e650";
+}
+
+/* 日历图标 */
+.icon-calendar:before {
+  content: "\e651";
+}
+
+/* 收藏图标 */
+.icon-star:before {
+  content: "\e652";
+}
+
+/* 收藏(已选)图标 */
+.icon-star-fill:before {
+  content: "\e653";
+}
+
+/* 点赞图标 */
+.icon-like:before {
+  content: "\e654";
+}
+
+/* 点赞(已选)图标 */
+.icon-like-fill:before {
+  content: "\e655";
+}
+
+/* 评论图标 */
+.icon-comment:before {
+  content: "\e656";
+}
+
+/* 分享图标 */
+.icon-share:before {
+  content: "\e657";
+}
+
+/* 设置图标 */
+.icon-settings:before {
+  content: "\e658";
+}
+
+/* 删除图标 */
+.icon-delete:before {
+  content: "\e659";
+}
+
+/* 编辑图标 */
+.icon-edit:before {
+  content: "\e65a";
+}
+
+/* 添加图标 */
+.icon-add:before {
+  content: "\e65b";
+}
+
+/* 关闭图标 */
+.icon-close:before {
+  content: "\e65d";
+}
+
+/* 成功图标 */
+.icon-success:before {
+  content: "\e65e";
+}
+
+/* 警告图标 */
+.icon-warning:before {
+  content: "\e663";
+}
+
+/* 错误图标 */
+.icon-error:before {
+  content: "\e664";
+}
+
+/* 信息图标 */
+.icon-info:before {
+  content: "\e665";
+}
+
+/* 帮助图标 */
+.icon-help:before {
+  content: "\e666";
+}
+
+/* 首页图标 */
+.icon-home:before {
+  content: "\e667";
+}
+
+/* 订单图标 */
+.icon-order:before {
+  content: "\e668";
+}
+
+/* 消息图标 */
+.icon-message:before {
+  content: "\e669";
+}
+
+/* 我的图标 */
+.icon-mine:before {
+  content: "\e66a";
+}
+
+/* 购物车图标 */
+.icon-cart:before {
+  content: "\e66b";
+}
+
+/* 分类图标 */
+.icon-category:before {
+  content: "\e66c";
+}
+
+/* 刷新图标 */
+.icon-refresh:before {
+  content: "\e66d";
+}
+
+/* 下载图标 */
+.icon-download:before {
+  content: "\e66e";
+}
+
+/* 上传图标 */
+.icon-upload:before {
+  content: "\e66f";
+}
+
+/* 照相机图标 */
+.icon-camera:before {
+  content: "\e670";
+}
+
+/* 图片图标 */
+.icon-image:before {
+  content: "\e671";
+}
+
+/* 视频图标 */
+.icon-video:before {
+  content: "\e672";
+}
+
+/* 音频图标 */
+.icon-audio:before {
+  content: "\e673";
+}
+
+/* 文件图标 */
+.icon-file:before {
+  content: "\e674";
+}
+
+/* 文档图标 */
+.icon-document:before {
+  content: "\e675";
+}
+
+/* 扫码图标 */
+.icon-scan:before {
+  content: "\e676";
+}
+
+/* 支付图标 */
+.icon-pay:before {
+  content: "\e677";
+}
+
+/* 钱包图标 */
+.icon-wallet:before {
+  content: "\e678";
+}
+
+/* 优惠券图标 */
+.icon-coupon:before {
+  content: "\e679";
+}
+
+/* 礼物图标 */
+.icon-gift:before {
+  content: "\e67a";
+}
+
+/* 标签图标 */
+.icon-tag:before {
+  content: "\e67b";
+}
+
+/* 筛选图标 */
+.icon-filter:before {
+  content: "\e67c";
+}
+
+/* 排序图标 */
+.icon-sort:before {
+  content: "\e67d";
+}
+
+/* 列表视图图标 */
+.icon-list:before {
+  content: "\e67e";
+}
+
+/* 网格视图图标 */
+.icon-grid:before {
+  content: "\e67f";
+} 

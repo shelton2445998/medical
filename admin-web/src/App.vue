@@ -1,23 +1,6 @@
 <template>
-  <div class="common-layout">
-    <el-container>
-      <el-header>
-        <h1>医疗预约系统 - 管理员端</h1>
-      </el-header>
-      <el-main>
-        <el-card class="welcome-card">
-          <template #header>
-            <div class="card-header">
-              <span>欢迎使用管理员后台</span>
-            </div>
-          </template>
-          <div class="card-content">
-            <p>这是基于Vue 3和Element Plus开发的管理员后台</p>
-            <el-button type="success">进入系统</el-button>
-          </div>
-        </el-card>
-      </el-main>
-    </el-container>
+  <div id="app">
+    <router-view />
   </div>
 </template>
 
@@ -25,28 +8,39 @@
 // 使用Vue 3的组合式API
 </script>
 
-<style scoped>
-.el-header {
-  background-color: #67C23A;
-  color: white;
-  text-align: center;
-  line-height: 60px;
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5;
 }
 
-.welcome-card {
-  max-width: 600px;
-  margin: 0 auto;
-  margin-top: 40px;
+#app {
+  height: 100%;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* 重置一些全局样式 */
+.el-card {
+  border-radius: 4px;
 }
 
-.card-content {
-  text-align: center;
-  padding: 20px;
+.el-card__header {
+  padding: 15px 20px;
+  font-weight: 600;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+  .el-dialog {
+    width: 95% !important;
+  }
+  
+  .el-form-item {
+    margin-bottom: 18px;
+  }
 }
 </style>
