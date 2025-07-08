@@ -74,6 +74,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
+			  
             <el-button type="primary" size="small" @click="viewRecord(scope.row)">
               查看
             </el-button>
@@ -84,6 +85,7 @@
               <el-button type="info" size="small">
                 更多<i class="el-icon-arrow-down el-icon--right"></i>
               </el-button>
+			
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="printRecord(scope.row)">
@@ -817,6 +819,15 @@ export default {
 </script>
 
 <style scoped>
+.btn-group-right {
+  /* Flex 布局，按钮靠右 */
+  display: flex; 
+  justify-content: flex-end; 
+}
+/* 按钮间距（可选，避免挤在一起） */
+.el-button {
+  margin-left: 8px; 
+}
 .medical-records-container {
   padding: 20px;
 }
