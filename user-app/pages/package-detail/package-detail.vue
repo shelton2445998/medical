@@ -211,7 +211,7 @@
 							avatar: '/static/images/avatar1.jpg',
 							time: '2023-07-08',
 							rating: 5,
-							content: '套餐内容很全面，医生态度很好，检查很仔细，报告出来也很快，值得推荐！'
+							content: '套餐内容很全面，医态很态度很好，检查很仔细，报告出来也很快，值得推荐！'
 						},
 						{
 							id: 2,
@@ -249,34 +249,29 @@
 			}
 		},
 		onLoad(options) {
-			// 获取套餐ID
-			const packageId = options.id;
-			// 根据ID获取套餐详情
-			this.getPackageDetail(packageId);
+			if (options && options.id) {
+				this.loadPackageDetail(options.id);
+			} else {
+				uni.showToast({
+					title: '缺少套餐ID参数',
+					icon: 'none'
+				});
+				uni.navigateBack();
+			}
 		},
 		methods: {
-			// 获取套餐详情
-			getPackageDetail(id) {
-				// 这里可以替换为实际的API调用
-				console.log('获取套餐详情，ID：', id);
-			},
-			// 在线咨询
-			consult() {
-				uni.navigateTo({
-					url: '/pages/consult/consult'
-				});
-			},
-			// 立即预约
-			makeAppointment() {
-				uni.navigateTo({
-					url: `/pages/appointment-form/appointment-form?packageId=${this.packageInfo.id}&hospitalId=${this.packageInfo.hospitalId}`
-				});
-			},
-			// 页面跳转
-			navigateTo(url) {
-				uni.navigateTo({
-					url: url
-				});
+			async loadPackageDetail(id) {
+				try {
+					const res = await uni.request({
+						url: `/api/packages/${id}`
+					});
+					this.packageInfo = res.data;
+				} catch (error) {
+					uni.showToast({
+						title: '加载套餐详情失败',
+						icon: 'none'
+					});
+				}
 			}
 		}
 	}
@@ -656,4 +651,4 @@
 		}
 	}
 }
-</style> 
+</style>

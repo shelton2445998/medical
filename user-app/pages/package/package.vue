@@ -23,15 +23,17 @@
 		
 		<!-- 套餐列表 -->
 		<view class="package-list">
-			<view class="package-item" v-for="(item, index) in filteredPackages" :key="index" @click="selectPackage(item)">
+			<view class="package-item" v-for="(item, index) in filteredPackages" :key="index">
 				<view class="package-header">
 					<text class="package-name">{{item.name}}</text>
 					<text class="package-tag">{{getTypeName(item.type)}}</text>
+					<text class="package-recommend" v-if="item.recommend">推荐</text>
 				</view>
 				<view class="package-price">
 					<text class="price-label">套餐价格：</text>
 					<text class="price-value">¥{{item.discountPrice}}</text>
 					<text class="price-original">¥{{item.price}}</text>
+					<text class="price-discount">{{Math.round(item.discountPrice/item.price*10)}}折</text>
 				</view>
 				<view class="package-desc">
 					<text>{{item.description}}</text>
@@ -167,7 +169,17 @@
 			// 查看套餐详情
 			showPackageDetail(pkg) {
 				uni.navigateTo({
-					url: `/pages/package-detail/package-detail?id=${pkg.id}`
+					url: `/pages/package-detail/package-detail?id=${pkg.id}`,
+					success: () => {
+						console.log('成功跳转到套餐详情页');
+					},
+					fail: (err) => {
+						console.error('跳转失败:', err);
+						uni.showToast({
+							title: '跳转失败，请稍后重试',
+							icon: 'none'
+						});
+					}
 				});
 			},
 			// 返回上一页
@@ -259,7 +271,11 @@
 		margin-bottom: 20rpx;
 		padding: 30rpx;
 		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-		
+		transition: all 0.3s;
+		&:active {
+			transform: scale(0.98);
+			opacity: 0.9;
+		}
 		.package-header {
 			display: flex;
 			align-items: center;
@@ -365,4 +381,4 @@
 		}
 	}
 }
-</style> 
+</style>

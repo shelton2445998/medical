@@ -50,6 +50,14 @@
 			}
 		},
 		{
+			"path": "pages/package-detail/package-detail",
+			"style": {
+				"navigationBarTitleText": "套餐详情",
+				"navigationBarBackgroundColor": "#1296db",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "个人中心"
