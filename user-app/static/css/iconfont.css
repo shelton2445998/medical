@@ -25,10 +25,12 @@
 
 .icon-user:before {
   content: "\e614";
+  margin-left: -23px;
 }
 
 .icon-phone:before {
   content: "\e639";
+  margin-left: -24px;
 }
 
 .icon-lock:before {
@@ -36,15 +38,15 @@
 }
 
 .icon-code:before {
-  content: "\e60f";
+
 }
 
 .icon-idcard:before {
-  content: "\e60f";
+
 }
 
 .icon-gender:before {
-  content: "\e60f";
+  
 }
 
 .icon-weixin:before {
@@ -108,7 +110,7 @@
 }
 
 .icon-back:before {
-  content: "\e65e";
+
 }
 
 .icon-search:before {

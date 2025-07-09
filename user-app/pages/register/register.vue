@@ -54,13 +54,13 @@
 			
 			<!-- 密码 -->
 			<view class="form-item">
-				<text class="iconfont icon-lock">&#xe60f;</text>
+				<text class="iconfont icon-lock"></text>
 				<input type="password" v-model="registerForm.password" placeholder="请设置登录密码" password />
 			</view>
 			
 			<!-- 确认密码 -->
 			<view class="form-item">
-				<text class="iconfont icon-lock">&#xe60f;</text>
+				<text class="iconfont icon-lock"></text>
 				<input type="password" v-model="registerForm.confirmPassword" placeholder="请确认登录密码" password />
 			</view>
 			

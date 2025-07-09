@@ -18,7 +18,7 @@
 			
 			<!-- 密码 -->
 			<view class="form-item">
-				<text class="iconfont icon-lock">&#xe60f;</text>
+				<text class="iconfont icon-lock"></text>
 				<input type="password" v-model="password" placeholder="请输入密码" password />
 				<text class="forget-pwd" @click="navigateTo('/pages/pwd/pwd')">忘记密码?</text>
 			</view>
@@ -35,13 +35,13 @@
 				</view>
 				<view class="oauth-box">
 					<view class="oauth-item" @click="oauthLogin('weixin')">
-						<text class="iconfont icon-weixin">&#xe60f;</text>
+						<text class="iconfont icon-weixin"></text>
 					</view>
 					<view class="oauth-item" @click="oauthLogin('qq')">
-						<text class="iconfont icon-qq">&#xe60f;</text>
+						<text class="iconfont icon-qq"></text>
 					</view>
 					<view class="oauth-item" @click="oauthLogin('weibo')">
-						<text class="iconfont icon-weibo">&#xe60f;</text>
+						<text class="iconfont icon-weibo"></text>
 					</view>
 				</view>
 			</view>
