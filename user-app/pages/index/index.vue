@@ -29,7 +29,7 @@
 				<text class="section-title">推荐医院</text>
 				<view class="more" @click="navigateTo('/pages/hospital/hospital')">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 			<view class="hospital-list">
@@ -41,7 +41,7 @@
 							<text class="tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">{{tag}}</text>
 						</view>
 						<view class="hospital-address">
-							<text class="iconfont icon-location">&#xe60e;</text>
+							<text class="iconfont icon-location"></text>
 							<text class="address-text">{{item.address}}</text>
 						</view>
 					</view>
@@ -55,7 +55,7 @@
 				<text class="section-title">热门套餐</text>
 				<view class="more" @click="navigateTo('/pages/package/package')">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 			<view class="package-list">
@@ -79,7 +79,7 @@
 				<text class="section-title">健康资讯</text>
 				<view class="more" @click="navigateTo('/pages/news/news')">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 			<view class="news-list">

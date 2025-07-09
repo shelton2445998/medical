@@ -29,7 +29,7 @@
 				<text class="section-title">推荐医院</text>
 				<view class="more" @click="navigateTo('/pages/hospital/hospital')">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 			<view class="hospital-list">
@@ -55,7 +55,7 @@
 				<text class="section-title">热门套餐</text>
 				<view class="more" @click="navigateTo('/pages/package/package')">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 			<view class="package-list">
@@ -87,7 +87,7 @@
 					<text class="process-name">选择医院</text>
 				</view>
 				<view class="process-arrow">
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 				<view class="process-item">
 					<view class="process-icon">
@@ -97,7 +97,7 @@
 					<text class="process-name">选择套餐</text>
 				</view>
 				<view class="process-arrow">
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 				<view class="process-item">
 					<view class="process-icon">
@@ -107,7 +107,7 @@
 					<text class="process-name">填写信息</text>
 				</view>
 				<view class="process-arrow">
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 				<view class="process-item">
 					<view class="process-icon">
