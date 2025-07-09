@@ -49,6 +49,12 @@
 			}
 		},
 		{
+			"path": "pages/news-detail/news-detail",
+			"style": {
+				"navigationBarTitleText": "资讯详情"
+			}
+		},
+		{
 			"path": "pages/report/report",
 			"style": {
 				"navigationBarTitleText": "体检报告"

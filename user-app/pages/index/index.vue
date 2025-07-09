@@ -7,14 +7,14 @@
 				<input type="text" placeholder="搜索医院、体检套餐" />
 			</view>
 		</view>
-		
+
 		<!-- 轮播图 -->
 		<swiper class="banner-swiper" circular indicator-dots autoplay interval="3000" duration="500" indicator-active-color="#1296db">
 			<swiper-item v-for="(item, index) in bannerList" :key="index">
 				<image :src="item.image" mode="aspectFill" class="banner-image" @click="navigateTo(item.url)"></image>
 			</swiper-item>
 		</swiper>
-		
+
 		<!-- 快捷服务 -->
 		<view class="quick-service">
 			<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
@@ -22,7 +22,7 @@
 				<text class="service-name">{{item.name}}</text>
 			</view>
 		</view>
-		
+
 		<!-- 推荐医院 -->
 		<view class="section">
 			<view class="section-header">
@@ -48,7 +48,7 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 热门套餐 -->
 		<view class="section">
 			<view class="section-header">
@@ -72,7 +72,7 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 健康资讯 -->
 		<view class="section">
 			<view class="section-header">
@@ -102,8 +102,7 @@
 	export default {
 		data() {
 			return {
-				bannerList: [
-					{
+				bannerList: [{
 						image: '/static/images/banner1.jpg',
 						url: '/pages/package/package'
 					},
@@ -116,8 +115,7 @@
 						url: '/pages/appointment/appointment'
 					}
 				],
-				serviceList: [
-					{
+				serviceList: [{
 						name: '体检预约',
 						icon: '/static/images/icon-appointment.png',
 						url: '/pages/appointment/appointment'
@@ -138,8 +136,7 @@
 						url: '/pages/consult/consult'
 					}
 				],
-				hospitalList: [
-					{
+				hospitalList: [{
 						id: 1,
 						name: '沈阳市云医院-和平分院',
 						image: '/static/images/hospital1.jpg',
@@ -154,8 +151,7 @@
 						address: '沈阳市沈河区北站路33号'
 					}
 				],
-				packageList: [
-					{
+				packageList: [{
 						id: 1,
 						name: '标准体检套餐',
 						image: '/static/images/package1.jpg',
@@ -172,33 +168,38 @@
 						originalPrice: '899'
 					}
 				],
-				newsList: [
-					{
+				newsList: [{
 						id: 1,
 						title: '每天一个苹果，医生远离我？水果的健康真相',
 						image: '/static/images/news1.jpg',
 						source: '健康时报',
-						time: '2023-07-08'
+						time: '2023-07-08',
+						type: 3,
+						url: 'https://www.thepaper.cn/newsDetail_forward_16646201'
 					},
 					{
 						id: 2,
 						title: '夏季养生指南：这些食物帮你清热解暑',
 						image: '/static/images/news2.jpg',
 						source: '生活健康',
-						time: '2023-07-06'
+						time: '2023-07-06',
+						type: 1,
+						url: "https://www.sohu.com/a/904293109_121679638"
 					},
 					{
 						id: 3,
 						title: '中年人体检必查的5项指标，你都了解吗？',
 						image: '/static/images/news3.jpg',
 						source: '医学科普',
-						time: '2023-07-05'
+						time: '2023-07-05',
+						type: 2,
+						url: 'https://www.163.com/dy/article/I6JGCGOQ0552CRD4.html'
 					}
 				]
 			}
 		},
 		onLoad() {
-			
+
 		},
 		methods: {
 			navigateTo(url) {
@@ -217,309 +218,325 @@
 				});
 			},
 			viewNews(news) {
-				uni.navigateTo({
-					url: `/pages/news-detail/news-detail?id=${news.id}`
-				});
+				console.log("111111111111111111111")
+				if (news.url) {
+					console.log("加载出")
+					uni.showLoading({
+						title: '加载中...'
+					});
+			
+					uni.navigateTo({
+						url: `/pages/news-web-view/news-web-view?url=${encodeURIComponent(news.url)}`,
+						complete: () => {
+							uni.hideLoading();
+						}
+					});
+				} else {
+					console.log("未加载出")
+					uni.navigateTo({
+						url: `/pages/news-detail/news-detail?id=${news.id}`
+					});
+				}
 			}
 		}
 	}
 </script>
 
 <style lang="scss">
-.content {
-	padding-bottom: 30rpx;
-}
-
-.search-container {
-	padding: 20rpx 30rpx;
-	background-color: #1296db;
-	
-	.search-box {
-		display: flex;
-		align-items: center;
-		height: 70rpx;
-		background-color: #ffffff;
-		border-radius: 35rpx;
-		padding: 0 30rpx;
-		
-		.iconfont {
-			font-size: 36rpx;
-			color: #999999;
-			margin-right: 10rpx;
-		}
-		
-		input {
-			flex: 1;
-			height: 70rpx;
-			font-size: 28rpx;
-		}
+	.content {
+		padding-bottom: 30rpx;
 	}
-}
 
-.banner-swiper {
-	width: 100%;
-	height: 300rpx;
-	
-	.banner-image {
-		width: 100%;
-		height: 100%;
-		border-radius: 0 0 20rpx 20rpx;
-	}
-}
+	.search-container {
+		padding: 20rpx 30rpx;
+		background-color: #1296db;
 
-.quick-service {
-	display: flex;
-	padding: 30rpx 20rpx;
-	background-color: #ffffff;
-	margin-bottom: 20rpx;
-	
-	.service-item {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		
-		.service-icon {
-			width: 100rpx;
-			height: 100rpx;
-			margin-bottom: 15rpx;
-		}
-		
-		.service-name {
-			font-size: 26rpx;
-			color: #333333;
-		}
-	}
-}
-
-.section {
-	margin-bottom: 20rpx;
-	background-color: #ffffff;
-	padding: 20rpx 30rpx;
-	
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-		
-		.section-title {
-			font-size: 32rpx;
-			font-weight: bold;
-			color: #333333;
-			position: relative;
-			padding-left: 20rpx;
-			
-			&::before {
-				content: '';
-				position: absolute;
-				left: 0;
-				top: 50%;
-				transform: translateY(-50%);
-				width: 6rpx;
-				height: 30rpx;
-				background-color: #1296db;
-				border-radius: 3rpx;
-			}
-		}
-		
-		.more {
+		.search-box {
 			display: flex;
 			align-items: center;
-			font-size: 26rpx;
-			color: #999999;
-			
+			height: 70rpx;
+			background-color: #ffffff;
+			border-radius: 35rpx;
+			padding: 0 30rpx;
+
 			.iconfont {
-				font-size: 24rpx;
-				margin-left: 5rpx;
+				font-size: 36rpx;
+				color: #999999;
+				margin-right: 10rpx;
+			}
+
+			input {
+				flex: 1;
+				height: 70rpx;
+				font-size: 28rpx;
 			}
 		}
 	}
-}
 
-.hospital-list {
-	.hospital-item {
+	.banner-swiper {
+		width: 100%;
+		height: 300rpx;
+
+		.banner-image {
+			width: 100%;
+			height: 100%;
+			border-radius: 0 0 20rpx 20rpx;
+		}
+	}
+
+	.quick-service {
 		display: flex;
-		margin-bottom: 30rpx;
-		
-		&:last-child {
-			margin-bottom: 0;
-		}
-		
-		.hospital-image {
-			width: 180rpx;
-			height: 140rpx;
-			border-radius: 10rpx;
-			margin-right: 20rpx;
-		}
-		
-		.hospital-info {
+		padding: 30rpx 20rpx;
+		background-color: #ffffff;
+		margin-bottom: 20rpx;
+
+		.service-item {
 			flex: 1;
 			display: flex;
 			flex-direction: column;
+			align-items: center;
+
+			.service-icon {
+				width: 100rpx;
+				height: 100rpx;
+				margin-bottom: 15rpx;
+			}
+
+			.service-name {
+				font-size: 26rpx;
+				color: #333333;
+			}
+		}
+	}
+
+	.section {
+		margin-bottom: 20rpx;
+		background-color: #ffffff;
+		padding: 20rpx 30rpx;
+
+		.section-header {
+			display: flex;
 			justify-content: space-between;
-			
-			.hospital-name {
-				font-size: 30rpx;
+			align-items: center;
+			margin-bottom: 20rpx;
+
+			.section-title {
+				font-size: 32rpx;
 				font-weight: bold;
 				color: #333333;
-				margin-bottom: 10rpx;
-			}
-			
-			.hospital-tags {
-				display: flex;
-				flex-wrap: wrap;
-				margin-bottom: 10rpx;
-				
-				.tag {
-					font-size: 22rpx;
-					color: #1296db;
-					background-color: rgba(18, 150, 219, 0.1);
-					padding: 4rpx 12rpx;
-					border-radius: 6rpx;
-					margin-right: 10rpx;
-					margin-bottom: 10rpx;
+				position: relative;
+				padding-left: 20rpx;
+
+				&::before {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 6rpx;
+					height: 30rpx;
+					background-color: #1296db;
+					border-radius: 3rpx;
 				}
 			}
-			
-			.hospital-address {
+
+			.more {
 				display: flex;
 				align-items: center;
-				font-size: 24rpx;
+				font-size: 26rpx;
 				color: #999999;
-				
+
 				.iconfont {
 					font-size: 24rpx;
-					margin-right: 6rpx;
+					margin-left: 5rpx;
 				}
-				
-				.address-text {
+			}
+		}
+	}
+
+	.hospital-list {
+		.hospital-item {
+			display: flex;
+			margin-bottom: 30rpx;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			.hospital-image {
+				width: 180rpx;
+				height: 140rpx;
+				border-radius: 10rpx;
+				margin-right: 20rpx;
+			}
+
+			.hospital-info {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+
+				.hospital-name {
+					font-size: 30rpx;
+					font-weight: bold;
+					color: #333333;
+					margin-bottom: 10rpx;
+				}
+
+				.hospital-tags {
+					display: flex;
+					flex-wrap: wrap;
+					margin-bottom: 10rpx;
+
+					.tag {
+						font-size: 22rpx;
+						color: #1296db;
+						background-color: rgba(18, 150, 219, 0.1);
+						padding: 4rpx 12rpx;
+						border-radius: 6rpx;
+						margin-right: 10rpx;
+						margin-bottom: 10rpx;
+					}
+				}
+
+				.hospital-address {
+					display: flex;
+					align-items: center;
+					font-size: 24rpx;
+					color: #999999;
+
+					.iconfont {
+						font-size: 24rpx;
+						margin-right: 6rpx;
+					}
+
+					.address-text {
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+				}
+			}
+		}
+	}
+
+	.package-list {
+		display: flex;
+		flex-wrap: nowrap;
+		overflow-x: scroll;
+		margin: 0 -30rpx;
+		padding: 0 30rpx;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		.package-item {
+			flex: 0 0 300rpx;
+			margin-right: 20rpx;
+			border-radius: 10rpx;
+			overflow: hidden;
+			box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+
+			&:last-child {
+				margin-right: 0;
+			}
+
+			.package-image {
+				width: 100%;
+				height: 180rpx;
+			}
+
+			.package-info {
+				padding: 15rpx;
+
+				.package-name {
+					font-size: 28rpx;
+					font-weight: bold;
+					color: #333333;
+					margin-bottom: 10rpx;
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
 				}
-			}
-		}
-	}
-}
 
-.package-list {
-	display: flex;
-	flex-wrap: nowrap;
-	overflow-x: scroll;
-	margin: 0 -30rpx;
-	padding: 0 30rpx;
-	
-	&::-webkit-scrollbar {
-		display: none;
-	}
-	
-	.package-item {
-		flex: 0 0 300rpx;
-		margin-right: 20rpx;
-		border-radius: 10rpx;
-		overflow: hidden;
-		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-		
-		&:last-child {
-			margin-right: 0;
-		}
-		
-		.package-image {
-			width: 100%;
-			height: 180rpx;
-		}
-		
-		.package-info {
-			padding: 15rpx;
-			
-			.package-name {
-				font-size: 28rpx;
-				font-weight: bold;
-				color: #333333;
-				margin-bottom: 10rpx;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			
-			.package-desc {
-				font-size: 24rpx;
-				color: #666666;
-				margin-bottom: 10rpx;
-				height: 68rpx;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
-				-webkit-line-clamp: 2;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			
-			.package-price-box {
-				display: flex;
-				align-items: baseline;
-				
-				.package-price {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #ff5a5f;
-					margin-right: 10rpx;
+				.package-desc {
+					font-size: 24rpx;
+					color: #666666;
+					margin-bottom: 10rpx;
+					height: 68rpx;
+					display: -webkit-box;
+					-webkit-box-orient: vertical;
+					-webkit-line-clamp: 2;
+					overflow: hidden;
+					text-overflow: ellipsis;
 				}
-				
-				.package-original-price {
+
+				.package-price-box {
+					display: flex;
+					align-items: baseline;
+
+					.package-price {
+						font-size: 32rpx;
+						font-weight: bold;
+						color: #ff5a5f;
+						margin-right: 10rpx;
+					}
+
+					.package-original-price {
+						font-size: 24rpx;
+						color: #999999;
+						text-decoration: line-through;
+					}
+				}
+			}
+		}
+	}
+
+	.news-list {
+		.news-item {
+			display: flex;
+			margin-bottom: 30rpx;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			.news-image {
+				width: 200rpx;
+				height: 140rpx;
+				border-radius: 10rpx;
+				margin-right: 20rpx;
+			}
+
+			.news-info {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+
+				.news-title {
+					font-size: 28rpx;
+					color: #333333;
+					line-height: 1.5;
+					display: -webkit-box;
+					-webkit-box-orient: vertical;
+					-webkit-line-clamp: 2;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+
+				.news-meta {
+					display: flex;
+					justify-content: space-between;
 					font-size: 24rpx;
 					color: #999999;
-					text-decoration: line-through;
-				}
-			}
-		}
-	}
-}
 
-.news-list {
-	.news-item {
-		display: flex;
-		margin-bottom: 30rpx;
-		
-		&:last-child {
-			margin-bottom: 0;
-		}
-		
-		.news-image {
-			width: 200rpx;
-			height: 140rpx;
-			border-radius: 10rpx;
-			margin-right: 20rpx;
-		}
-		
-		.news-info {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			
-			.news-title {
-				font-size: 28rpx;
-				color: #333333;
-				line-height: 1.5;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
-				-webkit-line-clamp: 2;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			
-			.news-meta {
-				display: flex;
-				justify-content: space-between;
-				font-size: 24rpx;
-				color: #999999;
-				
-				.news-source {
-					color: #1296db;
+					.news-source {
+						color: #1296db;
+					}
 				}
 			}
 		}
 	}
-}
-</style> 
+</style>
