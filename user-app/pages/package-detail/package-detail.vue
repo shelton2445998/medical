@@ -363,6 +363,43 @@
 						reviews: [
 							{ id: 1, name: '公务员', avatar: '/static/images/avatar1.jpg', time: '2023-01-10', rating: 4, content: '公务员套餐很标准，检查细致。' }
 						]
+					},
+					8: {
+						id: 8,
+						name: '高级体检套餐',
+						price: 699,
+						originalPrice: 899,
+						tags: ['高级', '心脑血管', '肿瘤筛查'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '适合45岁以上人群，包含心脑血管、肿瘤筛查等全面检查，帮助早期发现慢性病和肿瘤风险。',
+						suitablePeople: '适合45岁以上关注慢性病、肿瘤风险的人群，建议每年体检一次。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '心脏检查', name: '心脏彩超', desc: '心脏结构及功能' },
+							{ category: '心脑血管', name: '脑血流图', desc: '脑部血流情况检测' },
+							{ category: '专项检查', name: '肿瘤标志物', desc: '多种肿瘤早筛' },
+							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' },
+							{ category: '影像检查', name: '腹部B超', desc: '腹部脏器筛查' }
+						],
+						notices: [
+							'体检前请清淡饮食，避免油腻、辛辣食物',
+							'体检当天请空腹，禁食8-12小时',
+							'如有慢性病请携带相关病历资料',
+							'体检报告一般在3-5个工作日出具，可在APP查看'
+						],
+						reviews: [
+							{ id: 1, name: '孙女士', avatar: '/static/images/avatar2.jpg', time: '2023-07-10', rating: 5, content: '检查项目很全面，医生很专业，推荐给中老年朋友。' },
+							{ id: 2, name: '李先生', avatar: '/static/images/avatar1.jpg', time: '2023-07-09', rating: 4, content: '体检体验不错，报告解读很细致。' }
+						]
 					}
 				}
 			}
@@ -417,6 +454,20 @@
 						icon: 'none'
 					});
 				}
+			},
+			// 演示预约成功
+			makeAppointment() {
+				uni.showToast({
+					title: '预约成功！',
+					icon: 'success',
+					duration: 2000
+				});
+			},
+			// 跳转到专家咨询界面
+			consult() {
+				uni.navigateTo({
+					url: '/pages/consult/consult'
+				});
 			}
 		}
 	}
