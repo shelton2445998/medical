@@ -146,6 +146,7 @@
 						'/static/images/hospital-env3.jpg'
 					]
 				},
+				
 				packageList: [
 					{
 						id: 1,

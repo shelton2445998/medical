@@ -79,6 +79,28 @@
 						image: '/static/images/hospital2.jpg',
 						latitude: 41.812977,
 						longitude: 123.445235
+					},
+					{
+						id: 3,
+						name: '内蒙古自治区人民医院',
+						tag: '三甲',
+						address: '内蒙古呼和浩特市昭乌达路20号',
+						time: '上午8:00-12:00 ，下午14:30-17:30',
+						phone: '0471-3283999',
+						image: '/static/images/hospital3.jpg',
+						latitude: 41.812977,
+						longitude: 123.445235
+					},
+					{
+						id: 4,
+						name: '内蒙古医科大学附属医院',
+						tag: '三甲',
+						address: '呼和浩特市回民区通道北路1号',
+						time: '上午8:00-12:00 ，下午14:30-17:30',
+						phone: '0471-3451120',
+						image: '/static/images/hospital4.jpg',
+						latitude: 41.812977,
+						longitude: 123.445235
 					}
 				],
 				filteredHospitals: []
