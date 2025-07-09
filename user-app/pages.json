@@ -79,6 +79,12 @@
 			"style": {
 				"navigationBarTitleText": "我的预约"
 			}
+		},
+		{
+			"path": "pages/consult/consult",
+			"style": {
+				"navigationBarTitleText": "专家咨询"
+			}
 		}
 	],
 	"tabBar": {
