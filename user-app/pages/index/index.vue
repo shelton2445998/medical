@@ -184,7 +184,7 @@
 						source: '生活健康',
 						time: '2023-07-06',
 						type: 1,
-						url: "https://www.sohu.com/a/904293109_121679638"
+						url: "https://foodmate.net/foodsafe/health/170514.html"
 					},
 					{
 						id: 3,
