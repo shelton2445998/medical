@@ -207,7 +207,7 @@ export default {
     // 加载状态
     const loading = ref(false)
     
-    // 分页参数
+    // 分页参数（修正为文档中的pageNum和pageSize）
     const currentPage = ref(1)
     const pageSize = ref(10)
     const total = ref(0)
@@ -307,16 +307,17 @@ export default {
       fetchPatientsList()
     })
     
-    // 获取患者列表
+    // 获取患者列表（修正接口URL和分页参数）
     const fetchPatientsList = async () => {
       loading.value = true
       try {
         const params = {
-          page: currentPage.value,
-          limit: pageSize.value,
+          pageNum: currentPage.value,  // 修正为文档中的pageNum
+          pageSize: pageSize.value,    // 修正为文档中的pageSize
           ...searchForm
         }
-        const { data: res } = await axios.get('/doctor/patients/list', { params })
+        // 修正接口URL，添加api前缀
+        const { data: res } = await axios.get('/api/admin/user/list', { params })
         if (res.code === 200) {
           patientsList.value = res.data.list
           total.value = res.data.total
@@ -353,36 +354,9 @@ export default {
           phone: '13800138002',
           idCard: '110103199012157895',
           address: '北京市朝阳区建国路89号'
-        },
-        {
-          patientId: 'P20230003',
-          name: '王五',
-          gender: 'male',
-          age: 28,
-          phone: '13800138003',
-          idCard: '130603199510284563',
-          address: '河北省保定市莲池区朝阳南大街123号'
-        },
-        {
-          patientId: 'P20230004',
-          name: '赵六',
-          gender: 'female',
-          age: 52,
-          phone: '13800138004',
-          idCard: '410102197101022846',
-          address: '河南省郑州市金水区农业路18号'
-        },
-        {
-          patientId: 'P20230005',
-          name: '钱七',
-          gender: 'female',
-          age: 35,
-          phone: '13800138005',
-          idCard: '320505198906153216',
-          address: '江苏省苏州市虎丘区狮山路88号'
         }
       ]
-      total.value = 5
+      total.value = 2
     }
     
     // 搜索
@@ -433,30 +407,35 @@ export default {
       dialogVisible.value = true
     }
     
-    // 提交患者表单
+    // 提交患者表单（修正接口URL和请求方法）
     const submitPatientForm = () => {
       if (!patientFormRef.value) return
       
       patientFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            const url = isEdit.value ? '/doctor/patients/update' : '/doctor/patients/add'
-            const { data: res } = await axios.post(url, patientForm)
-            if (res.code === 200) {
+            let res
+            if (isEdit.value) {
+              // 编辑患者：使用PUT方法，对应管理后台用户更新接口
+              res = await axios.put('/api/admin/user/update', patientForm)
+            } else {
+              // 新增患者：使用POST方法，对应管理后台用户添加接口
+              res = await axios.post('/api/admin/user/add', patientForm)
+            }
+            
+            if (res.data.code === 200) {
               ElMessage.success(isEdit.value ? '患者信息更新成功' : '患者添加成功')
               dialogVisible.value = false
               fetchPatientsList()
             } else {
-              ElMessage.error(res.message || (isEdit.value ? '更新失败' : '添加失败'))
+              ElMessage.error(res.data.message || (isEdit.value ? '更新失败' : '添加失败'))
             }
           } catch (error) {
             console.error(isEdit.value ? '更新患者信息失败:' : '添加患者失败:', error)
             // 使用模拟数据处理
             if (!isEdit.value) {
-              // 如果是添加患者，生成ID
               patientForm.patientId = 'P' + Date.now().toString().substring(6)
               if (!patientForm.age && patientForm.birthday) {
-                // 从生日计算年龄
                 const birthYear = new Date(patientForm.birthday).getFullYear()
                 const currentYear = new Date().getFullYear()
                 patientForm.age = currentYear - birthYear
@@ -481,7 +460,7 @@ export default {
       })
     }
     
-    // 创建预约
+    // 创建预约（修正接口URL）
     const createAppointment = (row) => {
       appointmentForm.patientId = row.patientId
       appointmentForm.patientName = row.name
@@ -495,14 +474,15 @@ export default {
       appointmentDialogVisible.value = true
     }
     
-    // 提交预约
+    // 提交预约（修正接口URL）
     const submitAppointment = () => {
       if (!appointmentFormRef.value) return
       
       appointmentFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            const { data: res } = await axios.post('/doctor/appointments/create', appointmentForm)
+            // 修正为用户端创建预约接口
+            const { data: res } = await axios.post('/api/appointment/create', appointmentForm)
             if (res.code === 200) {
               ElMessage.success('预约创建成功')
               appointmentDialogVisible.value = false
@@ -573,4 +553,4 @@ export default {
   display: flex;
   justify-content: flex-end;
 }
-</style> 
+</style>

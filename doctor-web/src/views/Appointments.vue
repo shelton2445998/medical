@@ -38,7 +38,7 @@
           <span>预约列表</span>
           <el-button-group>
             <el-button type="primary" size="small" @click="exportAppointments">导出</el-button>
-            <el-button type="success" size="small" @click="openAddDialog">新增预约</el-button>
+            <!-- 移除医生端新增预约按钮（文档中医生端无此接口） -->
           </el-button-group>
         </div>
       </template>
@@ -70,7 +70,7 @@
               v-if="scope.row.status === 'waiting'" 
               type="primary" 
               size="small" 
-              @click="handleConfirm(scope.row)"
+              @click="updateAppointmentStatus(scope.row, 'confirmed')"
             >
               确认
             </el-button>
@@ -78,7 +78,7 @@
               v-if="scope.row.status === 'confirmed'" 
               type="success" 
               size="small" 
-              @click="handleComplete(scope.row)"
+              @click="updateAppointmentStatus(scope.row, 'completed')"
             >
               完成
             </el-button>
@@ -86,7 +86,7 @@
               v-if="['waiting', 'confirmed'].includes(scope.row.status)" 
               type="danger" 
               size="small" 
-              @click="handleCancel(scope.row)"
+              @click="updateAppointmentStatus(scope.row, 'cancelled', true)"
             >
               取消
             </el-button>
@@ -114,78 +114,6 @@
         />
       </div>
     </el-card>
-    
-    <!-- 新增预约对话框 -->
-    <el-dialog
-      title="新增预约"
-      v-model="dialogVisible"
-      width="500px"
-    >
-      <el-form
-        :model="appointmentForm"
-        :rules="appointmentRules"
-        ref="appointmentFormRef"
-        label-width="100px"
-      >
-        <el-form-item label="患者信息" prop="patientId">
-          <el-select
-            v-model="appointmentForm.patientId"
-            filterable
-            remote
-            reserve-keyword
-            placeholder="请输入患者姓名或手机号查询"
-            :remote-method="searchPatients"
-            :loading="patientLoading"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in patientOptions"
-              :key="item.patientId"
-              :label="`${item.name} (${item.phone})`"
-              :value="item.patientId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="预约科室" prop="department">
-          <el-select v-model="appointmentForm.department" placeholder="请选择科室" style="width: 100%" @change="handleDepartmentChange">
-            <el-option v-for="dept in departments" :key="dept.value" :label="dept.label" :value="dept.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="预约医生" prop="doctorId">
-          <el-select v-model="appointmentForm.doctorId" placeholder="请选择医生" style="width: 100%">
-            <el-option v-for="doctor in doctors" :key="doctor.id" :label="doctor.name" :value="doctor.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="预约日期" prop="appointmentDate">
-          <el-date-picker
-            v-model="appointmentForm.appointmentDate"
-            type="date"
-            placeholder="选择预约日期"
-            style="width: 100%"
-            :disabled-date="disabledDate"
-          />
-        </el-form-item>
-        <el-form-item label="预约时段" prop="timeSlot">
-          <el-select v-model="appointmentForm.timeSlot" placeholder="请选择时段" style="width: 100%">
-            <el-option v-for="slot in timeSlots" :key="slot.value" :label="slot.label" :value="slot.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="症状描述" prop="symptoms">
-          <el-input
-            v-model="appointmentForm.symptoms"
-            type="textarea"
-            placeholder="请输入症状描述"
-            rows="3"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitAppointment">确 定</el-button>
-        </span>
-      </template>
-    </el-dialog>
     
     <!-- 预约详情对话框 -->
     <el-dialog
@@ -215,7 +143,7 @@
       </template>
     </el-dialog>
     
-    <!-- 取消预约对话框 -->
+    <!-- 取消预约原因对话框 -->
     <el-dialog
       title="取消预约"
       v-model="cancelDialogVisible"
@@ -243,8 +171,39 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElRouter } from 'element-plus'
 import axios from 'axios'
+
+// 配置axios请求拦截器（添加JWT认证头）
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token') // 假设token存储在localStorage
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}, error => {
+  return Promise.reject(error)
+})
+
+// 配置axios响应拦截器（处理错误码）
+axios.interceptors.response.use(response => {
+  return response
+}, error => {
+  const { response } = error
+  if (response && response.status === 401) {
+    // 未授权，跳转登录页
+    ElMessage.error('登录已过期，请重新登录')
+    // 假设使用vue-router，这里需根据实际路由配置调整
+    window.location.href = '/login'
+  } else if (response && response.status === 403) {
+    ElMessage.error('权限不足，无法操作')
+  } else if (response && response.status === 404) {
+    ElMessage.error('请求的资源不存在')
+  } else {
+    ElMessage.error('服务器异常，请稍后再试')
+  }
+  return Promise.reject(error)
+})
 
 export default {
   name: 'AppointmentsView',
@@ -253,47 +212,20 @@ export default {
     const loading = ref(false)
     const patientLoading = ref(false)
     
-    // 分页参数
+    // 分页参数（与文档一致：pageNum、pageSize）
     const currentPage = ref(1)
     const pageSize = ref(10)
     const total = ref(0)
     
     // 搜索表单
     const searchForm = reactive({
-      date: [],
+      date: [], // 日期范围
       patientName: '',
       status: ''
     })
     
     // 预约列表
     const appointmentsList = ref([])
-    
-    // 新增预约表单
-    const appointmentFormRef = ref(null)
-    const dialogVisible = ref(false)
-    const appointmentForm = reactive({
-      patientId: '',
-      patientName: '',
-      department: '',
-      doctorId: '',
-      doctorName: '',
-      appointmentDate: '',
-      timeSlot: '',
-      symptoms: ''
-    })
-    
-    // 表单校验规则
-    const appointmentRules = {
-      patientId: [{ required: true, message: '请选择患者', trigger: 'change' }],
-      department: [{ required: true, message: '请选择科室', trigger: 'change' }],
-      doctorId: [{ required: true, message: '请选择医生', trigger: 'change' }],
-      appointmentDate: [{ required: true, message: '请选择预约日期', trigger: 'blur' }],
-      timeSlot: [{ required: true, message: '请选择预约时段', trigger: 'change' }],
-      symptoms: [{ required: true, message: '请输入症状描述', trigger: 'blur' }]
-    }
-    
-    // 患者选项
-    const patientOptions = ref([])
     
     // 科室列表
     const departments = [
@@ -308,16 +240,13 @@ export default {
       { value: 'neurology', label: '神经科' }
     ]
     
-    // 医生列表
-    const doctors = ref([])
-    
     // 预约时段
     const timeSlots = [
       { value: 'morning', label: '上午(8:00-12:00)' },
       { value: 'afternoon', label: '下午(14:00-18:00)' }
     ]
     
-    // 状态选项
+    // 状态选项（与文档逻辑一致）
     const statusOptions = [
       { value: 'waiting', label: '待确认' },
       { value: 'confirmed', label: '已确认' },
@@ -341,18 +270,14 @@ export default {
       remark: ''
     })
     
-    // 取消预约对话框
+    // 取消预约相关
     const cancelDialogVisible = ref(false)
     const cancelFormRef = ref(null)
     const cancelForm = reactive({
       appointmentId: '',
       reason: ''
     })
-    
-    // 不允许选择过去日期
-    const disabledDate = (date) => {
-      return date.getTime() < Date.now() - 8.64e7
-    }
+    const pendingStatusUpdate = ref({}) // 临时存储待取消的预约信息
     
     // 初始化
     onMounted(() => {
@@ -392,19 +317,24 @@ export default {
       return typeMap[status] || ''
     }
     
-    // 获取预约列表
+    // 获取预约列表（修正URL和分页参数）
     const fetchAppointmentsList = async () => {
       loading.value = true
       try {
         const params = {
-          page: currentPage.value,
-          limit: pageSize.value,
-          ...searchForm
+          pageNum: currentPage.value, // 与文档一致：pageNum
+          pageSize: pageSize.value,   // 与文档一致：pageSize
+          // 处理日期范围（文档未明确格式，假设后端接收startDate和endDate）
+          startDate: searchForm.date[0] || '',
+          endDate: searchForm.date[1] || '',
+          patientName: searchForm.patientName,
+          status: searchForm.status
         }
-        const { data: res } = await axios.get('/doctor/appointments/list', { params })
+        // 文档中医生端获取预约列表的正确URL：/api/doctor/appointment/list
+        const { data: res } = await axios.get('/api/doctor/appointment/list', { params })
         if (res.code === 200) {
-          appointmentsList.value = res.data.list
-          total.value = res.data.total
+          appointmentsList.value = res.data.list // 与文档分页格式一致：data.list
+          total.value = res.data.total           // 与文档一致：total
         } else {
           ElMessage.error(res.message || '获取预约列表失败')
         }
@@ -444,75 +374,9 @@ export default {
           symptoms: '右腿疼痛，行走困难',
           status: 'confirmed',
           createTime: '2023-08-13 09:15:00'
-        },
-        {
-          appointmentId: 'AP20230814001',
-          patientName: '王五',
-          patientPhone: '13800138003',
-          department: 'internal',
-          doctorName: '王医生',
-          appointmentDate: '2023-08-14',
-          timeSlot: 'morning',
-          symptoms: '咳嗽，咽喉疼痛',
-          status: 'completed',
-          createTime: '2023-08-12 10:20:00'
-        },
-        {
-          appointmentId: 'AP20230814002',
-          patientName: '赵六',
-          patientPhone: '13800138004',
-          department: 'dermatology',
-          doctorName: '张医生',
-          appointmentDate: '2023-08-14',
-          timeSlot: 'afternoon',
-          symptoms: '皮疹，瘙痒',
-          status: 'cancelled',
-          createTime: '2023-08-11 16:40:00',
-          remark: '患者自行取消，改期'
         }
       ]
-      total.value = 4
-    }
-    
-    // 搜索患者
-    const searchPatients = async (query) => {
-      if (query.length < 2) return
-      patientLoading.value = true
-      try {
-        const { data: res } = await axios.get('/doctor/patients/search', { params: { query } })
-        if (res.code === 200) {
-          patientOptions.value = res.data
-        }
-      } catch (error) {
-        console.error('搜索患者失败:', error)
-        // 模拟数据
-        patientOptions.value = [
-          { patientId: 'P20230001', name: '张三', phone: '13800138001' },
-          { patientId: 'P20230002', name: '李四', phone: '13800138002' },
-          { patientId: 'P20230003', name: '王五', phone: '13800138003' }
-        ]
-      } finally {
-        patientLoading.value = false
-      }
-    }
-    
-    // 科室变更时获取医生列表
-    const handleDepartmentChange = async (department) => {
-      if (!department) return
-      try {
-        const { data: res } = await axios.get('/doctor/doctors/list', { params: { department } })
-        if (res.code === 200) {
-          doctors.value = res.data
-        }
-      } catch (error) {
-        console.error('获取医生列表失败:', error)
-        // 模拟数据
-        doctors.value = [
-          { id: 'D001', name: '王医生' },
-          { id: 'D002', name: '李医生' },
-          { id: 'D003', name: '张医生' }
-        ]
-      }
+      total.value = 2
     }
     
     // 搜索
@@ -543,126 +407,69 @@ export default {
       fetchAppointmentsList()
     }
     
-    // 打开添加预约对话框
-    const openAddDialog = () => {
-      Object.keys(appointmentForm).forEach(key => {
-        appointmentForm[key] = ''
-      })
-      dialogVisible.value = true
-    }
-    
-    // 提交预约
-    const submitAppointment = () => {
-      if (!appointmentFormRef.value) return
+    // 统一处理预约状态更新（使用文档中的状态更新接口）
+    const updateAppointmentStatus = (row, targetStatus, needReason = false) => {
+      if (needReason) {
+        // 取消预约需要原因，先记录待处理的预约
+        pendingStatusUpdate.value = { ...row, targetStatus }
+        cancelForm.appointmentId = row.appointmentId
+        cancelForm.reason = ''
+        cancelDialogVisible.value = true
+        return
+      }
       
-      appointmentFormRef.value.validate(async (valid) => {
-        if (valid) {
-          try {
-            const { data: res } = await axios.post('/doctor/appointments/create', appointmentForm)
-            if (res.code === 200) {
-              ElMessage.success('预约创建成功')
-              dialogVisible.value = false
-              fetchAppointmentsList()
-            } else {
-              ElMessage.error(res.message || '创建预约失败')
-            }
-          } catch (error) {
-            console.error('创建预约失败:', error)
-            // 使用模拟数据
-            const now = new Date()
-            const mockAppointment = {
-              appointmentId: 'AP' + now.getTime().toString().substring(5),
-              patientName: appointmentForm.patientName,
-              patientPhone: '13800138000',
-              department: appointmentForm.department,
-              doctorName: '演示医生',
-              appointmentDate: appointmentForm.appointmentDate,
-              timeSlot: appointmentForm.timeSlot,
-              symptoms: appointmentForm.symptoms,
-              status: 'waiting',
-              createTime: now.toLocaleString()
-            }
-            
-            // 临时添加到列表头部
-            appointmentsList.value.unshift(mockAppointment)
-            total.value += 1
-            
-            ElMessage.success('预约创建成功(演示模式)')
-            dialogVisible.value = false
-          }
-        }
-      })
-    }
-    
-    // 确认预约
-    const handleConfirm = (row) => {
-      ElMessageBox.confirm('确认这个预约吗?', '提示', {
+      // 非取消操作，直接更新状态
+      const statusText = getStatusLabel(targetStatus)
+      ElMessageBox.confirm(`确认将该预约改为【${statusText}】状态吗?`, '提示', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
         try {
-          const { data: res } = await axios.post('/doctor/appointments/confirm', { appointmentId: row.appointmentId })
+          // 文档中医生端更新预约状态的接口：PUT /api/doctor/appointment/status
+          const { data: res } = await axios.put('/api/doctor/appointment/status', {
+            appointmentId: row.appointmentId,
+            status: targetStatus,
+            remark: '' // 非取消操作无需备注
+          })
           if (res.code === 200) {
-            ElMessage.success('预约已确认')
+            ElMessage.success(`预约已${statusText}`)
             fetchAppointmentsList()
           } else {
-            ElMessage.error(res.message || '操作失败')
+            ElMessage.error(res.message || '更新状态失败')
           }
         } catch (error) {
-          console.error('确认预约失败:', error)
+          console.error(`更新预约状态为${targetStatus}失败:`, error)
           ElMessage.error('操作失败，请稍后再试')
         }
       }).catch(() => {})
     }
     
-    // 完成预约
-    const handleComplete = (row) => {
-      ElMessageBox.confirm('标记该预约为已完成?', '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        try {
-          const { data: res } = await axios.post('/doctor/appointments/complete', { appointmentId: row.appointmentId })
-          if (res.code === 200) {
-            ElMessage.success('预约已完成')
-            fetchAppointmentsList()
-          } else {
-            ElMessage.error(res.message || '操作失败')
-          }
-        } catch (error) {
-          console.error('完成预约失败:', error)
-          ElMessage.error('操作失败，请稍后再试')
-        }
-      }).catch(() => {})
-    }
-    
-    // 打开取消预约对话框
-    const handleCancel = (row) => {
-      cancelForm.appointmentId = row.appointmentId
-      cancelForm.reason = ''
-      cancelDialogVisible.value = true
-    }
-    
-    // 确认取消预约
+    // 确认取消预约（带原因）
     const confirmCancel = () => {
       if (!cancelFormRef.value) return
       
       cancelFormRef.value.validate(async (valid) => {
         if (valid) {
+          const { appointmentId, reason } = cancelForm
+          const { targetStatus } = pendingStatusUpdate.value
           try {
-            const { data: res } = await axios.post('/doctor/appointments/cancel', cancelForm)
+            // 调用状态更新接口，传递取消原因
+            const { data: res } = await axios.put('/api/doctor/appointment/status', {
+              appointmentId,
+              status: targetStatus,
+              remark: reason
+            })
             if (res.code === 200) {
               ElMessage.success('预约已取消')
               cancelDialogVisible.value = false
               fetchAppointmentsList()
             } else {
-              ElMessage.error(res.message || '取消失败')
+              ElMessage.error(res.message || '取消预约失败')
             }
           } catch (error) {
             console.error('取消预约失败:', error)
-            ElMessage.error('取消失败，请稍后再试')
+            ElMessage.error('操作失败，请稍后再试')
           }
         }
       })
@@ -674,27 +481,19 @@ export default {
       detailDialogVisible.value = true
     }
     
-    // 导出预约数据
+    // 导出预约数据（文档中未定义，保留功能但提示待实现）
     const exportAppointments = () => {
-      ElMessage.success('导出预约数据功能待实现')
-      // TODO: 实现导出功能
+      ElMessage.success('导出预约数据功能待实现（需后端提供对应接口）')
     }
     
     return {
       loading,
-      patientLoading,
       currentPage,
       pageSize,
       total,
       searchForm,
       appointmentsList,
-      dialogVisible,
-      appointmentForm,
-      appointmentRules,
-      appointmentFormRef,
-      patientOptions,
       departments,
-      doctors,
       timeSlots,
       statusOptions,
       detailDialogVisible,
@@ -702,7 +501,6 @@ export default {
       cancelDialogVisible,
       cancelForm,
       cancelFormRef,
-      disabledDate,
       getDepartmentLabel,
       getTimeSlotLabel,
       getStatusLabel,
@@ -711,13 +509,7 @@ export default {
       resetSearch,
       handleCurrentChange,
       handleSizeChange,
-      openAddDialog,
-      searchPatients,
-      handleDepartmentChange,
-      submitAppointment,
-      handleConfirm,
-      handleComplete,
-      handleCancel,
+      updateAppointmentStatus,
       confirmCancel,
       viewAppointment,
       exportAppointments
@@ -747,4 +539,4 @@ export default {
   display: flex;
   justify-content: flex-end;
 }
-</style> 
+</style>

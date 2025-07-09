@@ -6,12 +6,8 @@
     <el-row :gutter="20" class="mb-20">
 <el-col :span="6">
   <el-card shadow="hover" class="stat-card">
-    <!-- 图标直接作为背景层 -->
     <el-icon class="stat-full-icon waiting-icon"><clock /></el-icon>
-    
-    <!-- 文字内容绝对定位在图标上方 -->
     <div class="stat-content">
-      
       <div class="stat-label">今日待诊人数</div>
 	  <div class="stat-value">{{ statistics.waitingPatients }}</div>
     </div>
@@ -19,12 +15,8 @@
 </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-         <!-- <div class="stat-icon completed-icon">
-            <el-icon><circle-check /></el-icon>
-          </div> -->
 		   <el-icon class="stat-full-icon completed-icon"><circle-check /></el-icon>
           <div class="stat-content">
-            
             <div class="stat-label">今日已诊人数</div>
 			<div class="stat-value">{{ statistics.completedPatients }}</div>
           </div>
@@ -32,12 +24,8 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-         <!-- <div class="stat-icon appointment-icon">
-            <el-icon><calendar /></el-icon>
-          </div> -->
 		  <el-icon class="stat-full-icon appointment-icon"><calendar /></el-icon>
           <div class="stat-content">
-            
             <div class="stat-label">今日总预约数</div>
 			<div class="stat-value">{{ statistics.totalAppointments }}</div>
           </div>
@@ -45,12 +33,8 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <!-- <div class="stat-icon prescription-icon">
-            <el-icon><tickets /></el-icon>
-          </div> -->
-		  <el-icon class="stat-full-icon prescription-icon"><tickets /></el-icon>
+          <el-icon class="stat-full-icon prescription-icon"><tickets /></el-icon>
           <div class="stat-content">
-            
             <div class="stat-label">今日处方数</div>
 			<div class="stat-value">{{ statistics.totalPrescriptions }}</div>
           </div>
@@ -116,6 +100,44 @@ import { ElMessage } from 'element-plus'
 import { Clock, CircleCheck, Calendar, Tickets } from '@element-plus/icons-vue'
 import axios from 'axios'
 
+// 添加JWT认证请求拦截器
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}, error => {
+  return Promise.reject(error)
+})
+
+// 添加响应拦截器处理错误码
+axios.interceptors.response.use(response => {
+  return response
+}, error => {
+  const { response } = error
+  if (response) {
+    switch(response.status) {
+      case 401:
+        ElMessage.error('未授权，请登录')
+        window.location.href = '/login'
+        break
+      case 403:
+        ElMessage.error('权限不足，禁止访问')
+        break
+      case 404:
+        ElMessage.error('请求的资源不存在')
+        break
+      case 500:
+        ElMessage.error('服务器内部错误')
+        break
+    }
+  } else {
+    ElMessage.error('网络异常')
+  }
+  return Promise.reject(error)
+})
+
 export default {
   name: 'DashboardView',
   components: {
@@ -168,20 +190,26 @@ export default {
       fetchDashboardData()
     })
     
-    // 获取工作台数据
+    // 获取工作台数据（仅修改接口相关部分）
     const fetchDashboardData = async () => {
       loading.value = true
       try {
-        // 获取统计数据
-        const { data: statsRes } = await axios.get('/doctor/dashboard/statistics')
+        // 1. 获取统计数据（使用医生端接口路径规范）
+        const { data: statsRes } = await axios.get('/api/doctor/dashboard')
         if (statsRes.code === 200) {
           Object.assign(statistics, statsRes.data)
         }
         
-        // 获取待诊患者列表
-        const { data: patientsRes } = await axios.get('/doctor/dashboard/waiting-patients')
+        // 2. 获取待诊患者列表（复用医生端预约列表接口，筛选状态为待确认的预约）
+        const { data: patientsRes } = await axios.get('/api/doctor/appointment/list', {
+          params: {
+            status: 'waiting',
+            pageNum: 1,
+            pageSize: 100
+          }
+        })
         if (patientsRes.code === 200) {
-          waitingPatients.value = patientsRes.data
+          waitingPatients.value = patientsRes.data.list
         }
       } catch (error) {
         console.error('获取工作台数据失败:', error)
@@ -193,7 +221,7 @@ export default {
       }
     }
     
-    // 模拟数据（当API不可用时使用）
+    // 模拟数据
     const mockData = () => {
       statistics.waitingPatients = 5
       statistics.completedPatients = 12
@@ -252,7 +280,6 @@ export default {
     // 开始诊断
     const startDiagnosis = (patient) => {
       ElMessage.success(`开始为患者 ${patient.patientName} 进行诊断`)
-      // 跳转到诊断页面或打开诊断对话框
       router.push({
         path: '/home/medical-records',
         query: {
@@ -276,10 +303,10 @@ export default {
 
 <style scoped>
 .stat-card {
-  position: relative; /* 作为绝对定位的参考 */
+  position: relative; 
   height: 100%;
-  padding: 0; /* 移除内边距，让图标填满 */
-  overflow: hidden; /* 防止内容溢出 */
+  padding: 0; 
+  overflow: hidden; 
   border-radius: 12px;
 }
 
@@ -287,16 +314,16 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%; /* 宽度占满卡片 */
-  height: 100%; /* 高度占满卡片 */
+  width: 100%; 
+  height: 100%; 
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.4 ; /* 降低图标透明度，避免遮挡文字 */
-  font-size: 120px; /* 增大图标尺寸 */
-  color: currentColor; /* 继承卡片的文本颜色 */
+  opacity: 0.4 ; 
+  font-size: 120px; 
+  color: currentColor; 
 }
-/* 图标颜色 */
+
 .waiting-icon {
   
   color: black; 
@@ -310,61 +337,13 @@ export default {
 .prescription-icon{
 	color: black;
 }
-/* 文字内容的样式 */
-.stat-overlay {
-  position: relative; /* 相对于卡片定位 */
-  z-index: 1;      /* 确保文字显示在图标上方 */
-  padding: 20px;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 36px;
-  font-weight: bold;
-  color: white; /* 数字颜色 */
-  margin-bottom: 8px;
-}
-
-.stat-label {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8); /* 标签颜色（半透明） */
-}
-
-/* 不同卡片的图标容器背景色 */
-.waiting-icon {
-  background-color: #409EFF;
-}
-.completed-icon {
-  background-color: #67C23A;
-}
-.appointment-icon {
-  background-color: #e6d6c2;
-}
-.prescription-icon {
-  background-color: #ffd4fb;
-}
-
-/* 图标样式：让图标占满容器 */
-.stat-icon .el-icon {
-  font-size: 36px; 
-  width: 100%; 
-  height: 100%; 
-  object-fit: contain; 
-  color: #fff; 
-}
 
 .stat-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative; /* 相对于卡片定位 */
-  z-index: 1;      /* 确保文字显示在图标上方 */
+  position: relative; 
+  z-index: 1;      
   padding: 20px;
   
 }
@@ -381,4 +360,17 @@ export default {
   color: #000000;
 
 }
-</style> 
+
+.waiting-icon {
+  background-color: #409EFF;
+}
+.completed-icon {
+  background-color: #67C23A;
+}
+.appointment-icon {
+  background-color: #e6d6c2;
+}
+.prescription-icon {
+  background-color: #ffd4fb;
+}
+</style>

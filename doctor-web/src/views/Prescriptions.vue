@@ -44,13 +44,12 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
-			  <!-- 外层加 div 控制布局 -->
-			  <div class="btn-group-right">
-            <el-button type="primary" size="small" @click="handleView(scope.row)">查看</el-button>
-            <el-button type="warning" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
-              </div>
-		  </template>
+            <div class="btn-group-right">
+              <el-button type="primary" size="small" @click="handleView(scope.row)">查看</el-button>
+              <el-button type="warning" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+              <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+            </div>
+          </template>
         </el-table-column>
       </el-table>
 
@@ -124,55 +123,52 @@
         <el-form-item label="诊断" prop="diagnosis">
           <el-input v-model="prescriptionForm.diagnosis" type="textarea" :rows="2" />
         </el-form-item>
-     <!-- 在药品清单的 el-form-item 里，用 Grid 包裹药品行 + 添加按钮 -->
-     <el-form-item label="药品清单">
-       <div class="medication-grid">
-         <!-- 药品行循环 -->
-         <div 
-           v-for="(med, index) in prescriptionForm.medicationList" 
-           :key="index" 
-           class="medication-row"
-         >
-           <div class="medication-col">
-             <el-input 
-               v-model="med.name" 
-               placeholder="药品名称" 
-               class="medication-input"
-             />
-           </div>
-           <div class="medication-col">
-             <el-input 
-               v-model="med.dosage" 
-               placeholder="用量" 
-               class="medication-input"
-             />
-           </div>
-           <div class="medication-col">
-             <el-input 
-               v-model="med.frequency" 
-               placeholder="用法" 
-               class="medication-input"
-             />
-           </div>
-           <div class="medication-col" >
-             <el-button 
-               type="danger"
-               @click="removeMedication(index)"
-             >删除</el-button>
-           </div>
-         </div>
-         <!-- 添加药品按钮行 -->
-         <div class="medication-row">
-           <div class="medication-col" :colspan="3"></div>
-           <div class="medication-col">
-             <el-button 
-               type="primary" 
-               @click="addMedication"
-             >添加药品</el-button>
-           </div>
-         </div>
-       </div>
-     </el-form-item>
+        <el-form-item label="药品清单">
+          <div class="medication-grid">
+            <div 
+              v-for="(med, index) in prescriptionForm.medicationList" 
+              :key="index" 
+              class="medication-row"
+            >
+              <div class="medication-col">
+                <el-input 
+                  v-model="med.name" 
+                  placeholder="药品名称" 
+                  class="medication-input"
+                />
+              </div>
+              <div class="medication-col">
+                <el-input 
+                  v-model="med.dosage" 
+                  placeholder="用量" 
+                  class="medication-input"
+                />
+              </div>
+              <div class="medication-col">
+                <el-input 
+                  v-model="med.frequency" 
+                  placeholder="用法" 
+                  class="medication-input"
+                />
+              </div>
+              <div class="medication-col" >
+                <el-button 
+                  type="danger"
+                  @click="removeMedication(index)"
+                >删除</el-button>
+              </div>
+            </div>
+            <div class="medication-row">
+              <div class="medication-col" :colspan="3"></div>
+              <div class="medication-col">
+                <el-button 
+                  type="primary" 
+                  @click="addMedication"
+                >添加药品</el-button>
+              </div>
+            </div>
+          </div>
+        </el-form-item>
         <el-form-item label="医嘱" prop="instructions">
           <el-input v-model="prescriptionForm.instructions" type="textarea" :rows="3" />
         </el-form-item>
@@ -188,6 +184,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import axios from 'axios'
 
 export default {
   name: 'PrescriptionsView',
@@ -225,10 +222,26 @@ export default {
       fetchPatients()
     })
 
+    // 获取处方列表（修正接口URL和分页参数）
     const fetchPrescriptions = async () => {
       loading.value = true
       try {
-        // 这里应该是从API获取处方数据
+        const params = {
+          pageNum: currentPage.value,  // 文档规范的分页参数
+          pageSize: pageSize.value,
+          keyword: searchInput.value  // 搜索关键词
+        }
+        // 假设处方接口遵循医生端接口规范，添加api前缀
+        const { data: res } = await axios.get('/api/doctor/prescription/list', { params })
+        if (res.code === 200) {
+          prescriptionList.value = res.data.list
+          total.value = res.data.total
+        } else {
+          ElMessage.error(res.message || '获取处方列表失败')
+        }
+        loading.value = false
+      } catch (error) {
+        console.error('获取处方列表失败:', error)
         // 模拟数据
         setTimeout(() => {
           prescriptionList.value = [
@@ -245,38 +258,33 @@ export default {
               createTime: '2023-06-01 08:30:00',
               status: '已完成',
               instructions: '多喝水，注意休息'
-            },
-            {
-              id: '2',
-              prescriptionId: 'RX20230002',
-              patientId: '1002',
-              patientName: '李四',
-              diagnosis: '咽喉炎',
-              medicationList: [
-                { name: '金嗓子喉片', dosage: '2片', frequency: '每日3次' },
-                { name: '阿莫西林胶囊', dosage: '1粒', frequency: '每日3次' }
-              ],
-              createTime: '2023-06-02 10:15:00',
-              status: '处理中',
-              instructions: '多喝温水，避免辛辣食物'
             }
           ]
-          total.value = 2
+          total.value = 1
           loading.value = false
         }, 500)
-      } catch (error) {
-        console.error('获取处方列表失败:', error)
-        loading.value = false
       }
     }
 
-    const fetchPatients = () => {
-      // 模拟从API获取患者列表
-      patientOptions.value = [
-        { value: '1001', label: '张三 (1001)' },
-        { value: '1002', label: '李四 (1002)' },
-        { value: '1003', label: '王五 (1003)' }
-      ]
+    // 获取患者列表（复用医生端患者搜索接口）
+    const fetchPatients = async () => {
+      try {
+        const { data: res } = await axios.get('/api/doctor/patients/search', { params: { query: '' } })
+        if (res.code === 200) {
+          patientOptions.value = res.data.map(p => ({
+            value: p.patientId,
+            label: `${p.name} (${p.patientId})`
+          }))
+        }
+      } catch (error) {
+        console.error('获取患者列表失败:', error)
+        // 模拟数据
+        patientOptions.value = [
+          { value: '1001', label: '张三 (1001)' },
+          { value: '1002', label: '李四 (1002)' },
+          { value: '1003', label: '王五 (1003)' }
+        ]
+      }
     }
 
     const handleSearch = () => {
@@ -322,23 +330,32 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          // 这里应该调用API删除处方
-          // 在演示模式下直接从列表中移除
-          const index = prescriptionList.value.findIndex(item => item.id === row.id)
-          if (index !== -1) {
-            prescriptionList.value.splice(index, 1)
-            total.value -= 1
+        .then(async () => {
+          try {
+            // 调用删除接口
+            const { data: res } = await axios.delete(`/api/doctor/prescription/delete/${row.id}`)
+            if (res.code === 200) {
+              const index = prescriptionList.value.findIndex(item => item.id === row.id)
+              if (index !== -1) {
+                prescriptionList.value.splice(index, 1)
+                total.value -= 1
+              }
+              ElMessage.success('删除成功')
+            } else {
+              ElMessage.error(res.message || '删除失败')
+            }
+          } catch (error) {
+            console.error('删除处方失败:', error)
+            // 演示模式下直接移除
+            const index = prescriptionList.value.findIndex(item => item.id === row.id)
+            if (index !== -1) {
+              prescriptionList.value.splice(index, 1)
+              total.value -= 1
+            }
+            ElMessage.success('删除成功(演示模式)!')
           }
-          
-          ElMessage({
-            type: 'success',
-            message: '删除成功(演示模式)!'
-          })
         })
-        .catch(() => {
-          // 取消删除
-        })
+        .catch(() => {})
     }
 
     const handleCloseDialog = () => {
@@ -359,41 +376,53 @@ export default {
     }
 
     const submitForm = () => {
-      prescriptionFormRef.value.validate((valid) => {
+      prescriptionFormRef.value.validate(async (valid) => {
         if (valid) {
-          // 这里应该调用API保存处方
-          
-          // 在演示模式下添加处方到列表
-          if (!isEdit.value) {
-            const now = new Date()
-            const newPrescription = {
-              id: (prescriptionList.value.length + 1).toString(),
-              prescriptionId: 'RX' + now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + (prescriptionList.value.length + 1).toString().padStart(3, '0'),
-              patientId: prescriptionForm.patientId,
-              patientName: patientOptions.value.find(p => p.value === prescriptionForm.patientId)?.label.split(' ')[0] || '患者',
-              diagnosis: prescriptionForm.diagnosis,
-              medicationList: [...prescriptionForm.medicationList],
-              createTime: now.toLocaleString(),
-              status: '处理中',
-              instructions: prescriptionForm.instructions
+          try {
+            let res
+            if (!isEdit.value) {
+              // 新增处方：POST请求
+              res = await axios.post('/api/doctor/prescription/add', prescriptionForm)
+            } else {
+              // 编辑处方：PUT请求
+              res = await axios.put('/api/doctor/prescription/update', prescriptionForm)
             }
-            prescriptionList.value.unshift(newPrescription)
-            total.value += 1
-          } else {
-            // 更新已有处方
-            const index = prescriptionList.value.findIndex(item => item.id === prescriptionForm.id)
-            if (index !== -1) {
-              prescriptionList.value[index].diagnosis = prescriptionForm.diagnosis
-              prescriptionList.value[index].medicationList = [...prescriptionForm.medicationList]
-              prescriptionList.value[index].instructions = prescriptionForm.instructions
+            if (res.data.code === 200) {
+              ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
+              formVisible.value = false
+              fetchPrescriptions()
+            } else {
+              ElMessage.error(res.data.message || (isEdit.value ? '更新失败' : '添加失败'))
             }
+          } catch (error) {
+            console.error(isEdit.value ? '更新处方失败:' : '添加处方失败:', error)
+            // 演示模式处理
+            if (!isEdit.value) {
+              const now = new Date()
+              const newPrescription = {
+                id: (prescriptionList.value.length + 1).toString(),
+                prescriptionId: 'RX' + now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + (prescriptionList.value.length + 1).toString().padStart(3, '0'),
+                patientId: prescriptionForm.patientId,
+                patientName: patientOptions.value.find(p => p.value === prescriptionForm.patientId)?.label.split(' ')[0] || '患者',
+                diagnosis: prescriptionForm.diagnosis,
+                medicationList: [...prescriptionForm.medicationList],
+                createTime: now.toLocaleString(),
+                status: '处理中',
+                instructions: prescriptionForm.instructions
+              }
+              prescriptionList.value.unshift(newPrescription)
+              total.value += 1
+            } else {
+              const index = prescriptionList.value.findIndex(item => item.id === prescriptionForm.id)
+              if (index !== -1) {
+                prescriptionList.value[index].diagnosis = prescriptionForm.diagnosis
+                prescriptionList.value[index].medicationList = [...prescriptionForm.medicationList]
+                prescriptionList.value[index].instructions = prescriptionForm.instructions
+              }
+            }
+            ElMessage.success(isEdit.value ? '更新成功(演示模式)!' : '添加成功(演示模式)!')
+            formVisible.value = false
           }
-          
-          ElMessage({
-            type: 'success',
-            message: isEdit.value ? '更新成功(演示模式)!' : '添加成功(演示模式)!'
-          })
-          formVisible.value = false
         }
       })
     }
@@ -429,16 +458,14 @@ export default {
 </script>
 
 <style scoped>
-	.btn-group-right {
-	  /* Flex 布局，按钮靠右 */
-	  display: flex; 
-	  justify-content: flex-end; 
-	}
-	
-	/* 按钮间距（可选，避免挤在一起） */
-	.el-button {
-	  margin-left: 8px; 
-	}
+.btn-group-right {
+  display: flex; 
+  justify-content: flex-end; 
+}
+
+.el-button {
+  margin-left: 8px; 
+}
 .prescriptions-container {
   padding: 20px;
   background-color: #f5f7fa;
@@ -499,32 +526,21 @@ export default {
   border-radius: 4px;
 }
 
-/* .delete-btn-col {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-} */
-/* 添加药品按钮 */
-/* .add-medication-btn {
-  margin-top: 10px;
-  text-align: right;
-} */
 .medication-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4列：名称、用量、用法、操作 */
-  gap: 10px; /* 列间距 */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   margin-top: 10px;
 }
 .medication-row {
-  display: contents; /* 让行容器不影响 Grid 布局 */
+  display: contents;
 }
 .medication-col {
   display: flex;
   align-items: center;
   
 }
-/* 让“添加药品”按钮所在列与“删除”按钮列对齐 */
 .medication-col[colspan] {
-  grid-column: span 3; /* 占3列，把按钮挤到第4列 */
+  grid-column: span 3;
 }
-</style> 
+</style>

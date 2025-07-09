@@ -55,7 +55,8 @@ export default {
         if (valid) {
           try {
             loading.value = true
-            const { data: res } = await axios.post('/doctor/login', loginForm)
+            // 修正医生登录接口URL，符合文档中医生端认证接口规范
+            const { data: res } = await axios.post('/api/doctor/login', loginForm)
             if (res.code === 200) {
               localStorage.setItem('doctorToken', res.data.token)
               localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
@@ -151,4 +152,4 @@ export default {
 .login-button {
   width: 100%;
 }
-</style> 
+</style>

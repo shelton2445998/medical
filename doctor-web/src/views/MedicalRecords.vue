@@ -317,7 +317,7 @@ export default {
     const loading = ref(false)
     const patientLoading = ref(false)
     
-    // 分页参数
+    // 分页参数（修正为文档中的pageNum和pageSize）
     const currentPage = ref(1)
     const pageSize = ref(10)
     const total = ref(0)
@@ -440,19 +440,20 @@ export default {
       return type ? type.label : value
     }
     
-    // 获取病历列表
+    // 获取病历列表（修正接口URL和分页参数）
     const fetchRecordsList = async () => {
       loading.value = true
       try {
         const params = {
-          page: currentPage.value,
-          limit: pageSize.value,
+          pageNum: currentPage.value,  // 修正为文档中的pageNum
+          pageSize: pageSize.value,    // 修正为文档中的pageSize
           patientKeyword: searchForm.patientKeyword,
           startDate: searchForm.dateRange ? searchForm.dateRange[0] : '',
           endDate: searchForm.dateRange ? searchForm.dateRange[1] : '',
           recordType: searchForm.recordType
         }
-        const { data: res } = await axios.get('/doctor/medical-records/list', { params })
+        // 修正接口URL，添加api前缀
+        const { data: res } = await axios.get('/api/doctor/report/list', { params })
         if (res.code === 200) {
           recordsList.value = res.data.list
           total.value = res.data.total
@@ -524,12 +525,13 @@ export default {
       total.value = 4
     }
     
-    // 搜索患者
+    // 搜索患者（修正接口URL）
     const searchPatients = async (query) => {
       if (query.length < 2) return
       patientLoading.value = true
       try {
-        const { data: res } = await axios.get('/doctor/patients/search', { params: { query } })
+        // 修正接口URL，添加api前缀
+        const { data: res } = await axios.get('/api/doctor/patients/search', { params: { query } })
         if (res.code === 200) {
           patientOptions.value = res.data
         }
@@ -546,10 +548,11 @@ export default {
       }
     }
     
-    // 获取患者信息
+    // 获取患者信息（修正接口URL）
     const getPatientInfo = async (patientId) => {
       try {
-        const { data: res } = await axios.get(`/doctor/patients/info/${patientId}`)
+        // 修正接口URL，添加api前缀
+        const { data: res } = await axios.get(`/api/doctor/patients/info/${patientId}`)
         if (res.code === 200) {
           const patient = res.data
           patientInfo.patientId = patient.patientId
@@ -676,10 +679,11 @@ export default {
       dialogTitle.value = '编辑病历'
     }
     
-    // 获取病历详情
+    // 获取病历详情（修正接口URL）
     const getRecordDetail = async (recordId) => {
       try {
-        const { data: res } = await axios.get(`/doctor/medical-records/detail/${recordId}`)
+        // 修正接口URL，添加api前缀
+        const { data: res } = await axios.get(`/api/doctor/report/detail/${recordId}`)
         if (res.code === 200) {
           const record = res.data
           // 填充表单
@@ -727,24 +731,28 @@ export default {
       dialogVisible.value = true
     }
     
-    // 提交病历表单
+    // 提交病历表单（修正接口URL和请求方法）
     const submitRecord = () => {
       if (!recordFormRef.value) return
       
       recordFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            const url = editMode.value ? 
-              `/doctor/medical-records/update/${recordForm.recordId}` : 
-              '/doctor/medical-records/create'
+            let res
+            if (editMode.value) {
+              // 编辑病历：使用PUT方法，修正接口URL
+              res = await axios.put(`/api/doctor/report/update`, recordForm)
+            } else {
+              // 新建病历：使用POST方法，修正接口URL
+              res = await axios.post('/api/doctor/appointment/result', recordForm)
+            }
             
-            const { data: res } = await axios.post(url, recordForm)
-            if (res.code === 200) {
+            if (res.data.code === 200) {
               ElMessage.success(editMode.value ? '病历更新成功' : '病历创建成功')
               dialogVisible.value = false
               fetchRecordsList()
             } else {
-              ElMessage.error(res.message || (editMode.value ? '更新失败' : '创建失败'))
+              ElMessage.error(res.data.message || (editMode.value ? '更新失败' : '创建失败'))
             }
           } catch (error) {
             console.error(editMode.value ? '更新病历失败:' : '创建病历失败:', error)
@@ -852,4 +860,4 @@ export default {
 .el-divider {
   margin: 15px 0;
 }
-</style> 
+</style>

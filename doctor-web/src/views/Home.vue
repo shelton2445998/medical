@@ -104,6 +104,44 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown } from '@element-plus/icons-vue'
 import axios from 'axios'
 
+// 添加JWT认证请求拦截器
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('doctorToken')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}, error => {
+  return Promise.reject(error)
+})
+
+// 添加响应拦截器处理错误码
+axios.interceptors.response.use(response => {
+  return response
+}, error => {
+  const { response } = error
+  if (response) {
+    switch (response.status) {
+      case 401:
+        ElMessage.error('未授权，请登录')
+        localStorage.removeItem('doctorToken')
+        localStorage.removeItem('doctorInfo')
+        router.push('/')
+        break
+      case 403:
+        ElMessage.error('权限不足，禁止访问')
+        break
+      case 404:
+        ElMessage.error('请求的资源不存在')
+        break
+      case 500:
+        ElMessage.error('服务器内部错误')
+        break
+    }
+  }
+  return Promise.reject(error)
+})
+
 export default {
   name: 'HomeView',
   components: {
@@ -182,10 +220,10 @@ export default {
       }
     })
 
-    // 获取医生信息
+    // 获取医生信息（修正接口URL）
     const getDoctorInfo = async () => {
       try {
-        const { data: res } = await axios.get('/doctor/info')
+        const { data: res } = await axios.get('/api/doctor/info')
         if (res.code === 200) {
           Object.assign(doctorInfo, res.data)
           localStorage.setItem('doctorInfo', JSON.stringify(res.data))
@@ -210,14 +248,14 @@ export default {
       changePasswordDialogVisible.value = true
     }
 
-    // 提交修改密码
+    // 提交修改密码（修正接口URL和请求方法）
     const submitChangePassword = () => {
       if (!passwordFormRef.value) return
       
       passwordFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            const { data: res } = await axios.post('/doctor/change-password', {
+            const { data: res } = await axios.put('/api/doctor/password', {
               oldPassword: passwordForm.oldPassword,
               newPassword: passwordForm.newPassword
             })
@@ -239,17 +277,21 @@ export default {
       })
     }
 
-    // 退出登录
+    // 退出登录（修正接口URL）
     const handleLogout = () => {
       ElMessageBox.confirm('确认退出登录吗？', '提示', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        localStorage.removeItem('doctorToken')
-        localStorage.removeItem('doctorInfo')
-        router.push('/')
-        ElMessage.success('已退出登录')
+      }).then(async () => {
+        try {
+          await axios.post('/api/doctor/logout')
+        } finally {
+          localStorage.removeItem('doctorToken')
+          localStorage.removeItem('doctorInfo')
+          router.push('/')
+          ElMessage.success('已退出登录')
+        }
       }).catch(() => {})
     }
 
@@ -335,4 +377,4 @@ export default {
 :deep(.el-menu) {
   border-right: none;
 }
-</style> 
+</style>
