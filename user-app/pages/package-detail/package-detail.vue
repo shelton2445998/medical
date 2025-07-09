@@ -334,34 +334,38 @@
 					},
 					7: {
 						id: 7,
-						name: '公务员专项体检套餐',
-						price: 680,
-						originalPrice: 800,
-						tags: ['公务员', '专项', '标准'],
+						name: '儿童体检套餐',
+						price: 480,
+						originalPrice: 600,
+						tags: ['儿童', '生长发育', '健康筛查'],
 						hospitalId: 1,
 						hospitalName: '沈阳市云医院-和平分院',
 						hospitalAddress: '沈阳市和平区南京南街61号',
 						hospitalImage: '/static/images/hospital1.jpg',
-						description: '针对公务员体检标准，包含传染病筛查、基础健康检查等。',
-						suitablePeople: '适合公务员及相关岗位体检。',
+						description: '适合3-14岁儿童，包含生长发育、视力、听力、常规血尿等检查，关注儿童健康成长。',
+						suitablePeople: '适合3-14岁儿童，关注成长发育及常见健康问题。',
 						items: [
-							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '一般检查', name: '生长发育评估', desc: '身高、体重、体格发育测量' },
 							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
 							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
 							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
-							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
 							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
-							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' },
+							{ category: '微量元素', name: '微量元素检测', desc: '钙、铁、锌等微量元素筛查' },
+							{ category: '尿液检查', name: '尿常规', desc: '尿液常规指标检测' },
+							{ category: '视力', name: '视力检查', desc: '远视力、近视力筛查' },
+							{ category: '听力', name: '听力筛查', desc: '儿童听力健康筛查' },
 							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
-							{ category: '传染病筛查', name: '乙肝五项', desc: '乙肝病毒相关抗原抗体检测' }
+							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' }
 						],
 						notices: [
-							'体检当天请空腹',
-							'请携带身份证件',
-							'如有特殊要求请提前说明'
+							'体检前一天请清淡饮食，避免油腻、辛辣食物',
+							'体检当天请空腹，禁食8-12小时',
+							'请携带儿童身份证或户口本',
+							'体检报告一般在3-5个工作日出具，可在APP查看'
 						],
 						reviews: [
-							{ id: 1, name: '公务员', avatar: '/static/images/avatar1.jpg', time: '2023-01-10', rating: 4, content: '公务员套餐很标准，检查细致。' }
+							{ id: 1, name: '小明家长', avatar: '/static/images/avatar1.jpg', time: '2023-07-10', rating: 5, content: '儿童体检很细致，医生很有耐心，孩子也不怕。' },
+							{ id: 2, name: '小红妈妈', avatar: '/static/images/avatar2.jpg', time: '2023-07-09', rating: 5, content: '检查项目很全面，报告解读很细致。' }
 						]
 					},
 					8: {

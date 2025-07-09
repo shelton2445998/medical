@@ -118,7 +118,7 @@
 				serviceList: [{
 						name: '体检预约',
 						icon: '/static/images/icon-appointment.png',
-						url: '/pages/appointment/appointment'
+						url: '/pages/appointment/appointment-select'
 					},
 					{
 						name: '体检报告',
@@ -203,9 +203,16 @@
 		},
 		methods: {
 			navigateTo(url) {
-				uni.navigateTo({
-					url: url
-				});
+				if (url === '/pages/appointment/appointment') {
+					let id = this.packageList && this.packageList.length > 0 ? this.packageList[0].id : '';
+					if (id) {
+						uni.navigateTo({ url: `/pages/appointment/appointment?packageId=${id}` });
+					} else {
+						uni.navigateTo({ url });
+					}
+				} else {
+					uni.navigateTo({ url });
+				}
 			},
 			selectHospital(hospital) {
 				uni.navigateTo({

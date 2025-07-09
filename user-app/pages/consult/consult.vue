@@ -56,10 +56,11 @@ export default {
       uni.showToast({
         title: `已进入与${expert.name}的咨询（演示）`,
         icon: 'success',
-        duration: 2000
+        duration: 1000
       });
-      // 这里可跳转到实际聊天页面
-      // uni.navigateTo({ url: `/pages/chat/chat?expertId=${expert.id}` });
+      setTimeout(() => {
+        uni.navigateTo({ url: `/pages/chat/chat?expertId=${expert.id}` });
+      }, 1000);
     }
   }
 }
