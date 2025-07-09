@@ -156,8 +156,7 @@
            </div>
            <div class="medication-col" >
              <el-button 
-               type="danger" 
-               icon="el-icon-delete" 
+               type="danger"
                @click="removeMedication(index)"
              >删除</el-button>
            </div>
