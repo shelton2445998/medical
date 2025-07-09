@@ -11,8 +11,9 @@
     
     <!-- 文字内容绝对定位在图标上方 -->
     <div class="stat-content">
-      <div class="stat-value">{{ statistics.waitingPatients }}</div>
+      
       <div class="stat-label">今日待诊人数</div>
+	  <div class="stat-value">{{ statistics.waitingPatients }}</div>
     </div>
   </el-card>
 </el-col>
@@ -23,8 +24,9 @@
           </div> -->
 		   <el-icon class="stat-full-icon completed-icon"><circle-check /></el-icon>
           <div class="stat-content">
-            <div class="stat-value">{{ statistics.completedPatients }}</div>
+            
             <div class="stat-label">今日已诊人数</div>
+			<div class="stat-value">{{ statistics.completedPatients }}</div>
           </div>
         </el-card>
       </el-col>
@@ -35,8 +37,9 @@
           </div> -->
 		  <el-icon class="stat-full-icon appointment-icon"><calendar /></el-icon>
           <div class="stat-content">
-            <div class="stat-value">{{ statistics.totalAppointments }}</div>
+            
             <div class="stat-label">今日总预约数</div>
+			<div class="stat-value">{{ statistics.totalAppointments }}</div>
           </div>
         </el-card>
       </el-col>
@@ -47,8 +50,9 @@
           </div> -->
 		  <el-icon class="stat-full-icon prescription-icon"><tickets /></el-icon>
           <div class="stat-content">
-            <div class="stat-value">{{ statistics.totalPrescriptions }}</div>
+            
             <div class="stat-label">今日处方数</div>
+			<div class="stat-value">{{ statistics.totalPrescriptions }}</div>
           </div>
         </el-card>
       </el-col>
@@ -292,12 +296,20 @@ export default {
   font-size: 120px; /* 增大图标尺寸 */
   color: currentColor; /* 继承卡片的文本颜色 */
 }
-
+/* 图标颜色 */
 .waiting-icon {
-  background-color: #0b40ff;
-  color: white; /* 图标颜色 */
+  
+  color: black; 
 }
-
+.completed-icon{
+	 color: black;
+}
+.appointment-icon{
+	color: black;
+}
+.prescription-icon{
+	color: black;
+}
 /* 文字内容的样式 */
 .stat-overlay {
   position: relative; /* 相对于卡片定位 */

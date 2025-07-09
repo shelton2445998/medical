@@ -124,31 +124,56 @@
         <el-form-item label="诊断" prop="diagnosis">
           <el-input v-model="prescriptionForm.diagnosis" type="textarea" :rows="2" />
         </el-form-item>
-        <el-form-item label="药品清单">
-          <div v-for="(med, index) in prescriptionForm.medicationList" :key="index" class="medication-form-item">
-            <el-row :gutter="10">
-              <el-col :span="8">
-                <el-form-item :prop="'medicationList.' + index + '.name'" :rules="{ required: true, message: '药品名称不能为空', trigger: 'blur' }">
-                  <el-input v-model="med.name" placeholder="药品名称" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="6">
-                <el-form-item :prop="'medicationList.' + index + '.dosage'" :rules="{ required: true, message: '用量不能为空', trigger: 'blur' }">
-                  <el-input v-model="med.dosage" placeholder="用量" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="8">
-                <el-form-item :prop="'medicationList.' + index + '.frequency'" :rules="{ required: true, message: '用法不能为空', trigger: 'blur' }">
-                  <el-input v-model="med.frequency" placeholder="用法" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="2">
-                <el-button type="danger" icon="el-icon-delete" circle @click="removeMedication(index)" />
-              </el-col>
-            </el-row>
-          </div>
-          <el-button type="primary" @click="addMedication">添加药品</el-button>
-        </el-form-item>
+     <!-- 在药品清单的 el-form-item 里，用 Grid 包裹药品行 + 添加按钮 -->
+     <el-form-item label="药品清单">
+       <div class="medication-grid">
+         <!-- 药品行循环 -->
+         <div 
+           v-for="(med, index) in prescriptionForm.medicationList" 
+           :key="index" 
+           class="medication-row"
+         >
+           <div class="medication-col">
+             <el-input 
+               v-model="med.name" 
+               placeholder="药品名称" 
+               class="medication-input"
+             />
+           </div>
+           <div class="medication-col">
+             <el-input 
+               v-model="med.dosage" 
+               placeholder="用量" 
+               class="medication-input"
+             />
+           </div>
+           <div class="medication-col">
+             <el-input 
+               v-model="med.frequency" 
+               placeholder="用法" 
+               class="medication-input"
+             />
+           </div>
+           <div class="medication-col" >
+             <el-button 
+               type="danger" 
+               icon="el-icon-delete" 
+               @click="removeMedication(index)"
+             >删除</el-button>
+           </div>
+         </div>
+         <!-- 添加药品按钮行 -->
+         <div class="medication-row">
+           <div class="medication-col" :colspan="3"></div>
+           <div class="medication-col">
+             <el-button 
+               type="primary" 
+               @click="addMedication"
+             >添加药品</el-button>
+           </div>
+         </div>
+       </div>
+     </el-form-item>
         <el-form-item label="医嘱" prop="instructions">
           <el-input v-model="prescriptionForm.instructions" type="textarea" :rows="3" />
         </el-form-item>
@@ -410,6 +435,7 @@ export default {
 	  display: flex; 
 	  justify-content: flex-end; 
 	}
+	
 	/* 按钮间距（可选，避免挤在一起） */
 	.el-button {
 	  margin-left: 8px; 
@@ -474,7 +500,32 @@ export default {
   border-radius: 4px;
 }
 
-.medication-form-item {
-  margin-bottom: 10px;
+/* .delete-btn-col {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+} */
+/* 添加药品按钮 */
+/* .add-medication-btn {
+  margin-top: 10px;
+  text-align: right;
+} */
+.medication-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4列：名称、用量、用法、操作 */
+  gap: 10px; /* 列间距 */
+  margin-top: 10px;
+}
+.medication-row {
+  display: contents; /* 让行容器不影响 Grid 布局 */
+}
+.medication-col {
+  display: flex;
+  align-items: center;
+  
+}
+/* 让“添加药品”按钮所在列与“删除”按钮列对齐 */
+.medication-col[colspan] {
+  grid-column: span 3; /* 占3列，把按钮挤到第4列 */
 }
 </style> 
