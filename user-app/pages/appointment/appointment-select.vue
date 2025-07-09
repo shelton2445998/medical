@@ -26,7 +26,7 @@ export default {
       uni.reLaunch({ url: '/pages/index/index' });
     },
     goToNormal() {
-      uni.navigateTo({ url: '/pages/appointment/appointment' });
+      uni.navigateTo({ url: '/pages/appointment/normal-appointment' });
     },
     goToPackage() {
       uni.navigateTo({ url: '/pages/package/package' });

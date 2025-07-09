@@ -31,6 +31,12 @@
 			}
 		},
 		{
+			"path": "pages/appointment/normal-appointment",
+			"style": {
+				"navigationBarTitleText": "普通项目预约"
+			}
+		},
+		{
 			"path": "pages/hospital/hospital",
 			"style": {
 				"navigationBarTitleText": "选择体检医院"
