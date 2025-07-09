@@ -38,6 +38,12 @@
 			}
 		},
 		{
+		      "path": "pages/news/news",
+		      "style": {
+		        "navigationBarTitleText": "健康资讯"
+		      }
+		},
+		{
 			"path": "pages/report/report",
 			"style": {
 				"navigationBarTitleText": "体检报告"
