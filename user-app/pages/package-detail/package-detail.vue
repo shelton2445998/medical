@@ -128,100 +128,242 @@
 	export default {
 		data() {
 			return {
-				packageInfo: {
-					id: 1,
-					name: '标准体检套餐',
-					price: '299',
-					originalPrice: '399',
-					tags: ['热门', '体检', '全面'],
-					hospitalId: 1,
-					hospitalName: '沈阳市云医院-和平分院',
-					hospitalAddress: '沈阳市和平区南京南街61号',
-					hospitalImage: '/static/images/hospital1.jpg',
-					description: '本套餐是针对25-45岁人群设计的基础体检套餐，包含血常规、尿常规、肝功能、肾功能、血脂、血糖等基础检查项目，能够全面了解身体健康状况，及早发现潜在健康风险。',
-					suitablePeople: '适合25-45岁人群，特别是长期伏案工作、生活压力大、作息不规律的上班族，建议每年体检一次。',
-					items: [
-						{
-							category: '一般检查',
-							name: '身高体重',
-							desc: '测量身高、体重，计算体重指数(BMI)'
-						},
-						{
-							category: '一般检查',
-							name: '血压',
-							desc: '测量收缩压和舒张压'
-						},
-						{
-							category: '一般检查',
-							name: '视力',
-							desc: '检查远视力和近视力'
-						},
-						{
-							category: '血液检查',
-							name: '血常规',
-							desc: '检查红细胞、白细胞、血小板等指标'
-						},
-						{
-							category: '血液检查',
-							name: '肝功能',
-							desc: '检查ALT、AST、总蛋白等肝功能指标'
-						},
-						{
-							category: '血液检查',
-							name: '肾功能',
-							desc: '检查尿素氮、肌酐等肾功能指标'
-						},
-						{
-							category: '血液检查',
-							name: '血脂',
-							desc: '检查总胆固醇、甘油三酯等血脂指标'
-						},
-						{
-							category: '血液检查',
-							name: '血糖',
-							desc: '检查空腹血糖'
-						},
-						{
-							category: '尿液检查',
-							name: '尿常规',
-							desc: '检查尿液颜色、比重、pH值等指标'
-						},
-						{
-							category: '影像检查',
-							name: '胸部X光',
-							desc: '检查肺部、心脏等胸腔器官'
-						},
-						{
-							category: '影像检查',
-							name: 'B超',
-							desc: '肝、胆、脾、胰、肾B超检查'
-						}
-					],
-					notices: [
-						'体检前一天请清淡饮食，避免辛辣、油腻食物',
-						'体检当天请空腹，禁食8-12小时',
-						'体检前一天晚上请保证充足睡眠',
-						'体检当天请携带身份证等有效证件',
-						'体检报告一般在3-5个工作日出具，可在APP查看'
-					],
-					reviews: [
-						{
-							id: 1,
-							name: '张先生',
-							avatar: '/static/images/avatar1.jpg',
-							time: '2023-07-08',
-							rating: 5,
-							content: '套餐内容很全面，医态很态度很好，检查很仔细，报告出来也很快，值得推荐！'
-						},
-						{
-							id: 2,
-							name: '李女士',
-							avatar: '/static/images/avatar2.jpg',
-							time: '2023-07-06',
-							rating: 4,
-							content: '体检很顺利，医护人员很专业，就是人比较多，需要排队等待。'
-						}
-					]
+				packageInfo: {},
+				demoPackages: {
+					1: {
+						id: 1,
+						name: '标准体检套餐',
+						price: 299,
+						originalPrice: 399,
+						tags: ['热门', '体检', '全面'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '本套餐是针对25-45岁人群设计的基础体检套餐，包含血常规、尿常规、肝功能、肾功能、血脂、血糖等基础检查项目，能够全面了解身体健康状况，及早发现潜在健康风险。',
+						suitablePeople: '适合25-45岁人群，特别是长期伏案工作、生活压力大、作息不规律的上班族，建议每年体检一次。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算体重指数(BMI)' },
+							{ category: '一般检查', name: '血压', desc: '测量收缩压和舒张压' },
+							{ category: '一般检查', name: '视力', desc: '检查远视力和近视力' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等指标' },
+							{ category: '血液检查', name: '肝功能', desc: '检查ALT、AST、总蛋白等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '检查尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '检查总胆固醇、甘油三酯等血脂指标' },
+							{ category: '血液检查', name: '血糖', desc: '检查空腹血糖' },
+							{ category: '尿液检查', name: '尿常规', desc: '检查尿液颜色、比重、pH值等指标' },
+							{ category: '影像检查', name: '胸部X光', desc: '检查肺部、心脏等胸腔器官' },
+							{ category: '影像检查', name: 'B超', desc: '肝、胆、脾、胰、肾B超检查' }
+						],
+						notices: [
+							'体检前一天请清淡饮食，避免辛辣、油腻食物',
+							'体检当天请空腹，禁食8-12小时',
+							'体检前一天晚上请保证充足睡眠',
+							'体检当天请携带身份证等有效证件',
+							'体检报告一般在3-5个工作日出具，可在APP查看'
+						],
+						reviews: [
+							{ id: 1, name: '张先生', avatar: '/static/images/avatar1.jpg', time: '2023-07-08', rating: 5, content: '套餐内容很全面，医态很态度很好，检查很仔细，报告出来也很快，值得推荐！' },
+							{ id: 2, name: '李女士', avatar: '/static/images/avatar2.jpg', time: '2023-07-06', rating: 4, content: '体检很顺利，医护人员很专业，就是人比较多，需要排队等待。' }
+						]
+					},
+					2: {
+						id: 2,
+						name: '男性专项体检套餐',
+						price: 980,
+						originalPrice: 1200,
+						tags: ['男性', '专项', '健康'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '针对男性健康，增加前列腺、肿瘤筛查等专项检查，适合30岁以上男性。',
+						suitablePeople: '适合30岁以上男性，关注前列腺、肿瘤筛查等专项健康问题。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '专项检查', name: '前列腺B超', desc: '前列腺结构及病变筛查' },
+							{ category: '专项检查', name: '肿瘤标志物', desc: '男性常见肿瘤筛查' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' }
+						],
+						notices: [
+							'体检前避免剧烈运动',
+							'体检当天请空腹',
+							'如有慢性病请携带相关病历资料'
+						],
+						reviews: [
+							{ id: 1, name: '王先生', avatar: '/static/images/avatar1.jpg', time: '2023-06-10', rating: 5, content: '男性专项很细致，医生讲解到位。' }
+						]
+					},
+					3: {
+						id: 3,
+						name: '女性专项体检套餐',
+						price: 1080,
+						originalPrice: 1300,
+						tags: ['女性', '专项', '健康'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '针对女性健康，增加乳腺、妇科、HPV等专项检查，适合30岁以上女性。',
+						suitablePeople: '适合30岁以上女性，关注乳腺、妇科健康。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '专项检查', name: '乳腺彩超', desc: '乳腺结构及病变筛查' },
+							{ category: '专项检查', name: '妇科检查', desc: '妇科常规体检' },
+							{ category: '专项检查', name: 'HPV检测', desc: '宫颈癌筛查' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '影像检查', name: 'B超', desc: '盆腔、腹部等' }
+						],
+						notices: [
+							'体检前避免性生活',
+							'体检当天请空腹',
+							'如有特殊生理期请提前告知'
+						],
+						reviews: [
+							{ id: 1, name: '赵女士', avatar: '/static/images/avatar2.jpg', time: '2023-05-20', rating: 5, content: '女性专项很贴心，检查全面。' }
+						]
+					},
+					4: {
+						id: 4,
+						name: '老年体检套餐',
+						price: 1280,
+						originalPrice: 1500,
+						tags: ['老年', '心脑血管', '骨密度'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '适合60岁以上老年人，重点检查心脑血管、骨密度、听力等项目。',
+						suitablePeople: '适合60岁以上老年人，关注心脑血管、骨密度、听力等健康问题。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '心脑血管', name: '脑血流图', desc: '脑部血流情况检测' },
+							{ category: '骨密度', name: '骨密度', desc: '骨质疏松筛查' },
+							{ category: '听力', name: '听力检查', desc: '老年听力筛查' },
+							{ category: '视力', name: '视力检查', desc: '老年视力筛查' },
+							{ category: '影像检查', name: 'B超', desc: '腹部、盆腔等' }
+						],
+						notices: [
+							'体检前避免剧烈运动',
+							'体检当天请空腹',
+							'如有慢性病请携带相关病历资料'
+						],
+						reviews: [
+							{ id: 1, name: '刘大爷', avatar: '/static/images/avatar1.jpg', time: '2023-04-15', rating: 5, content: '老年套餐很细致，检查项目多。' }
+						]
+					},
+					5: {
+						id: 5,
+						name: '高端全身体检套餐',
+						price: 2580,
+						originalPrice: 3000,
+						tags: ['高端', '深度筛查', '基因检测'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '适合高净值人群，包含全身多系统深度筛查，含肿瘤、心脑血管、基因检测等。',
+						suitablePeople: '适合高净值人群，追求健康管理和疾病早筛。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '专项检查', name: '肿瘤标志物', desc: '多种肿瘤早筛' },
+							{ category: '心脏检查', name: '心脏彩超', desc: '心脏结构及功能' },
+							{ category: '影像检查', name: '脑MRI', desc: '脑部结构及病变筛查' },
+							{ category: '基因检测', name: '基因检测', desc: '疾病易感基因筛查' },
+							{ category: '影像检查', name: '全身CT', desc: '全身系统影像筛查' }
+						],
+						notices: [
+							'体检前请提前预约',
+							'部分项目需空腹',
+							'如需基因检测请提前采样'
+						],
+						reviews: [
+							{ id: 1, name: '高先生', avatar: '/static/images/avatar1.jpg', time: '2023-03-12', rating: 5, content: '高端套餐体验很好，服务周到。' }
+						]
+					},
+					6: {
+						id: 6,
+						name: '入职体检套餐',
+						price: 180,
+						originalPrice: 200,
+						tags: ['入职', '基础', '经济'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '适合新员工入职，包含基础健康检查项目，满足大部分企业入职要求。',
+						suitablePeople: '适合新员工入职体检。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '一般检查', name: '血压', desc: '测量收缩压和舒张压' }
+						],
+						notices: [
+							'体检当天请空腹',
+							'请携带身份证件',
+							'如有特殊要求请提前说明'
+						],
+						reviews: [
+							{ id: 1, name: '新员工', avatar: '/static/images/avatar2.jpg', time: '2023-02-01', rating: 4, content: '入职套餐很实用，流程顺畅。' }
+						]
+					},
+					7: {
+						id: 7,
+						name: '公务员专项体检套餐',
+						price: 680,
+						originalPrice: 800,
+						tags: ['公务员', '专项', '标准'],
+						hospitalId: 1,
+						hospitalName: '沈阳市云医院-和平分院',
+						hospitalAddress: '沈阳市和平区南京南街61号',
+						hospitalImage: '/static/images/hospital1.jpg',
+						description: '针对公务员体检标准，包含传染病筛查、基础健康检查等。',
+						suitablePeople: '适合公务员及相关岗位体检。',
+						items: [
+							{ category: '一般检查', name: '身高体重', desc: '测量身高、体重，计算BMI' },
+							{ category: '血液检查', name: '血常规', desc: '检查红细胞、白细胞、血小板等' },
+							{ category: '血液检查', name: '肝功能', desc: 'ALT、AST等肝功能指标' },
+							{ category: '血液检查', name: '肾功能', desc: '尿素氮、肌酐等肾功能指标' },
+							{ category: '血液检查', name: '血脂', desc: '总胆固醇、甘油三酯等' },
+							{ category: '血液检查', name: '血糖', desc: '空腹血糖' },
+							{ category: '影像检查', name: '胸部X光', desc: '肺部、心脏等胸腔器官' },
+							{ category: '心电检查', name: '心电图', desc: '心脏电活动检测' },
+							{ category: '传染病筛查', name: '乙肝五项', desc: '乙肝病毒相关抗原抗体检测' }
+						],
+						notices: [
+							'体检当天请空腹',
+							'请携带身份证件',
+							'如有特殊要求请提前说明'
+						],
+						reviews: [
+							{ id: 1, name: '公务员', avatar: '/static/images/avatar1.jpg', time: '2023-01-10', rating: 4, content: '公务员套餐很标准，检查细致。' }
+						]
+					}
 				}
 			}
 		},
@@ -250,12 +392,15 @@
 		},
 		onLoad(options) {
 			if (options && options.id) {
-				this.loadPackageDetail(options.id);
+				const id = Number(options.id);
+				if (this.demoPackages[id]) {
+					this.packageInfo = this.demoPackages[id];
+				} else {
+					uni.showToast({ title: '暂无该套餐演示数据', icon: 'none' });
+					uni.navigateBack();
+				}
 			} else {
-				uni.showToast({
-					title: '缺少套餐ID参数',
-					icon: 'none'
-				});
+				uni.showToast({ title: '缺少套餐ID参数', icon: 'none' });
 				uni.navigateBack();
 			}
 		},
