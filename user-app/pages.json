@@ -25,6 +25,12 @@
 			}
 		},
 		{
+			"path": "pages/appointment/appointment-select",
+			"style": {
+				"navigationBarTitleText": "预约方式选择"
+			}
+		},
+		{
 			"path": "pages/hospital/hospital",
 			"style": {
 				"navigationBarTitleText": "选择体检医院"
@@ -90,6 +96,12 @@
 			"path": "pages/consult/consult",
 			"style": {
 				"navigationBarTitleText": "专家咨询"
+			}
+		},
+		{
+			"path": "pages/chat/chat",
+			"style": {
+				"navigationBarTitleText": "医生咨询"
 			}
 		}
 	],
