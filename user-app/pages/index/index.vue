@@ -118,7 +118,7 @@
 				serviceList: [{
 						name: '体检预约',
 						icon: '/static/images/icon-appointment.png',
-						url: '/pages/appointment/appointment-select'
+						url: '/pages/appointment/appointment-flow'
 					},
 					{
 						name: '体检报告',
@@ -203,7 +203,11 @@
 		},
 		methods: {
 			navigateTo(url) {
-				if (url === '/pages/appointment/appointment') {
+				console.log('navigateTo:', url);
+				// 如果是 tabBar 页面，改用 switchTab
+				if (url === '/pages/report/report') {
+					uni.navigateTo({ url }); // 或 uni.switchTab({ url });
+				} else if (url === '/pages/appointment/appointment') {
 					let id = this.packageList && this.packageList.length > 0 ? this.packageList[0].id : '';
 					if (id) {
 						uni.navigateTo({ url: `/pages/appointment/appointment?packageId=${id}` });
