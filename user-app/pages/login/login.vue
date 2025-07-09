@@ -2,9 +2,9 @@
 	<view class="content">
 		<!-- 页面标题 -->
 		<view class="page-header">
-			<view class="back-btn" @click="goBack">
+			<!-- <view class="back-btn" @click="goBack">
 				<text class="iconfont icon-back">&#xe65e;</text>
-			</view>
+			</view> -->
 			<text class="page-title">欢迎登录熙康健康</text>
 		</view>
 		

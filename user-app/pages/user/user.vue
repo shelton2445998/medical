@@ -52,7 +52,7 @@
 						<image :src="item.icon" class="health-icon" mode="aspectFit"></image>
 						<text class="health-name">{{item.name}}</text>
 					</view>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 		</view>
@@ -65,21 +65,21 @@
 						<image src="/static/images/icons/icon-settings.png" class="setting-icon" mode="aspectFit"></image>
 						<text class="setting-name">设置</text>
 					</view>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 				<view class="setting-item" @click="navigateTo('/pages/feedback/feedback')">
 					<view class="setting-item-left">
 						<image src="/static/images/icons/icon-feedback.png" class="setting-icon" mode="aspectFit"></image>
 						<text class="setting-name">意见反馈</text>
 					</view>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 				<view class="setting-item" @click="navigateTo('/pages/about/about')">
 					<view class="setting-item-left">
 						<image src="/static/images/icons/icon-about.png" class="setting-icon" mode="aspectFit"></image>
 						<text class="setting-name">关于我们</text>
 					</view>
-					<text class="iconfont icon-right">&#xe65f;</text>
+					<text class="iconfont icon-right"></text>
 				</view>
 			</view>
 		</view>
