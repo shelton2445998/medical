@@ -64,7 +64,7 @@
 <script>
 	import service from '../../service.js'
 	import { mapMutations } from 'vuex'
-	
+	import md5 from "js-md5"
 	export default {
 		data() {
 			return {
@@ -76,7 +76,7 @@
 		methods: {
 			...mapMutations(['login']),
 			// 登录
-			bindLogin() {
+			async bindLogin() {
 				if (this.account.length < 5) {
 					uni.showToast({
 						icon: 'none',
@@ -92,14 +92,20 @@
 					return;
 				}
 				
-				const users = service.getUsers();
-				const userInfo = users.find(user => user.account === this.account && user.password === this.password);
-				
-				if (userInfo) {
+				try {
+					uni.showLoading({
+						title: '登录中...'
+					});
+					
+					// 调用后端登录接口
+					const res = await service.accountLogin(this.account, this.password);
+					
+					// 存储token和用户信息
 					this.login(this.account);
-					uni.setStorageSync('uniIdToken', 'mock-token');
+					uni.setStorageSync('uniIdToken', res.token);
 					uni.setStorageSync('username', this.account);
 					
+					uni.hideLoading();
 					uni.showToast({
 						title: '登录成功'
 					});
@@ -107,10 +113,11 @@
 					uni.switchTab({
 						url: '/pages/index/index'
 					});
-				} else {
+				} catch (error) {
+					uni.hideLoading();
 					uni.showToast({
 						icon: 'none',
-						title: '用户名或密码错误'
+						title: error.message || '登录失败，请重试'
 					});
 				}
 			},

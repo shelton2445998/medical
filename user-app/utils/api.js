@@ -53,6 +53,8 @@ export const reportApi = {
 export const userApi = {
   // 用户登录
   login: `${API_BASE_URL}/user/login`,
+  // 账号密码登录
+  accountLogin: `${API_BASE_URL}/app/accountLogin`,
   // 用户注册
   register: `${API_BASE_URL}/user/register`,
   // 获取用户信息
