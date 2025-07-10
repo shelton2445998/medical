@@ -1,13 +1,5 @@
 <template>
 	<view class="content">
-		<!-- 页面标题 -->
-		<view class="page-header">
-			<view class="back-btn" @click="goBack">
-				<text class="iconfont icon-back"></text>
-			</view>
-			<text class="page-title">选择体检机构</text>
-		</view>
-		
 		<!-- 搜索框 -->
 		<view class="search-box">
 			<text class="iconfont icon-search"></text>
@@ -169,35 +161,7 @@
 	min-height: 100vh;
 }
 
-.page-header {
-	position: relative;
-	background-color: #1296db;
-	padding: 20rpx 0;
-	text-align: center;
-	
-	.back-btn {
-		position: absolute;
-		left: 30rpx;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 60rpx;
-		height: 60rpx;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		
-		.iconfont {
-			color: #ffffff;
-			font-size: 40rpx;
-		}
-	}
-	
-	.page-title {
-		color: #ffffff;
-		font-size: 36rpx;
-		font-weight: bold;
-	}
-}
+
 
 .search-box {
 	display: flex;

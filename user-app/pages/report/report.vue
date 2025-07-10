@@ -1,10 +1,5 @@
 <template>
 	<view class="content">
-		<!-- 页面标题 -->
-		<view class="page-header">
-			<text class="page-title">体检报告</text>
-		</view>
-		
 		<!-- 报告列表 -->
 		<view class="report-list" v-if="reportList.length > 0">
 			<view class="report-item" v-for="(item, index) in reportList" :key="index" @click="viewReport(item)">
@@ -168,17 +163,7 @@
 	min-height: 100vh;
 }
 
-.page-header {
-	background-color: #1296db;
-	padding: 20rpx 0;
-	text-align: center;
-	
-	.page-title {
-		color: #ffffff;
-		font-size: 36rpx;
-		font-weight: bold;
-	}
-}
+
 
 .report-list {
 	padding: 20rpx;
