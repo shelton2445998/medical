@@ -37,15 +37,15 @@
 				</view>
 				<view class="report-actions">
 					<button class="action-btn" @click.stop="shareReport(item)">
-						<text class="iconfont icon-share">&#xe60f;</text>
-						<text>分享</text>
+					  <image src="/static/icon/share.png" mode="aspectFit" class="btn-icon"></image>
+					  <text>分享</text>
 					</button>
 					<button class="action-btn" @click.stop="downloadReport(item)">
-						<text class="iconfont icon-download">&#xe60f;</text>
+						<image src="/static/icon/download.png" mode="aspectFit" class="btn-icon"></image>
 						<text>下载</text>
 					</button>
 					<button class="action-btn primary" @click.stop="viewReport(item)">
-						<text class="iconfont icon-view">&#xe60f;</text>
+						<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
 						<text>查看</text>
 					</button>
 				</view>
@@ -156,6 +156,13 @@
 	font-weight: normal;
 	font-style: normal;
 	src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
+}
+
+.btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
+  vertical-align: middle;
 }
 
 .content {

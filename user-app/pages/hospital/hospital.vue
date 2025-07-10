@@ -29,7 +29,7 @@
 					</view>
 					<view class="hospital-actions">
 						<button class="call-btn" @click.stop="callHospital(item.phone)">
-							<text class="iconfont icon-call"></text>
+							<image src="/static/icon/dial1.png" mode="aspectFit" class="btn-icon"></image>
 							<text>拨打电话</text>
 						</button>
 						<button class="map-btn" @click.stop="openMap(item)">
@@ -161,7 +161,12 @@
 	min-height: 100vh;
 }
 
-
+.btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
+  vertical-align: middle;
+}
 
 .search-box {
 	display: flex;
