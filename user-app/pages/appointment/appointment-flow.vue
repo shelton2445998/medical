@@ -99,6 +99,30 @@ export default {
       selectedDate: ''
     }
   },
+  onLoad() {
+    // 检查是否有已选择的医院和套餐
+    const selectedHospital = uni.getStorageSync('selectedHospital');
+    const selectedPackage = uni.getStorageSync('selectedPackage');
+    
+    if (selectedHospital && selectedPackage) {
+      // 如果已有选择的医院和套餐，直接跳到填写信息步骤
+      this.selectedHospital = JSON.parse(selectedHospital);
+      this.selectedPackage = JSON.parse(selectedPackage);
+      this.step = 3; // 直接跳到填写信息步骤
+    } else if (selectedPackage) {
+      // 如果只有套餐信息（从套餐详情页进入），设置套餐并跳到填写信息步骤
+      this.selectedPackage = JSON.parse(selectedPackage);
+      // 从套餐信息中获取医院信息
+      if (this.selectedPackage.hospitalId) {
+        this.selectedHospital = {
+          id: this.selectedPackage.hospitalId,
+          name: this.selectedPackage.hospitalName,
+          address: this.selectedPackage.hospitalAddress
+        };
+      }
+      this.step = 3; // 直接跳到填写信息步骤
+    }
+  },
   methods: {
     onHospitalChange(e) {
       this.selectedHospital = this.hospitalList[e.detail.value];
@@ -117,8 +141,14 @@ export default {
     pay() {
       uni.showToast({ title: '支付成功', icon: 'success' });
       this.step = 5;
+      // 清除存储的医院和套餐信息
+      uni.removeStorageSync('selectedHospital');
+      uni.removeStorageSync('selectedPackage');
     },
     goHome() {
+      // 清除存储的医院和套餐信息
+      uni.removeStorageSync('selectedHospital');
+      uni.removeStorageSync('selectedPackage');
       uni.reLaunch({ url: '/pages/index/index' });
     }
   }

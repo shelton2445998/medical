@@ -459,12 +459,14 @@
 					});
 				}
 			},
-			// 演示预约成功
+			// 立即预约
 			makeAppointment() {
-				uni.showToast({
-					title: '预约成功！',
-					icon: 'success',
-					duration: 2000
+				// 存储选择的套餐信息
+				uni.setStorageSync('selectedPackage', JSON.stringify(this.packageInfo));
+				
+				// 跳转到预约流程页面
+				uni.navigateTo({
+					url: '/pages/appointment/appointment-flow'
 				});
 			},
 			// 跳转到专家咨询界面

@@ -23,7 +23,7 @@
 		
 		<!-- 套餐列表 -->
 		<view class="package-list">
-			<view class="package-item" v-for="(item, index) in filteredPackages" :key="index">
+			<view class="package-item" v-for="(item, index) in filteredPackages" :key="index" @click="selectPackage(item)">
 				<view class="package-header">
 					<text class="package-name">{{item.name}}</text>
 					<text class="package-tag">{{getTypeName(item.type)}}</text>
@@ -207,9 +207,9 @@
 				// 存储选择的套餐信息
 				uni.setStorageSync('selectedPackage', JSON.stringify(pkg));
 				
-				// 跳转到预约确认页面
+				// 跳转到原来的预约流程页面
 				uni.navigateTo({
-					url: '/pages/appointment-confirm/appointment-confirm'
+					url: '/pages/appointment/appointment-flow'
 				});
 			},
 			// 查看套餐详情

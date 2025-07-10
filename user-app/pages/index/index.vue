@@ -118,7 +118,7 @@
 				serviceList: [{
 						name: '体检预约',
 						icon: '/static/images/icon-appointment.png',
-						url: '/pages/appointment/appointment-flow'
+						url: '/pages/appointment/appointment'
 					},
 					{
 						name: '体检报告',
@@ -206,14 +206,25 @@
 				console.log('navigateTo:', url);
 				// 如果是 tabBar 页面，改用 switchTab
 				if (url === '/pages/report/report') {
-					uni.navigateTo({ url }); // 或 uni.switchTab({ url });
+					// 体检报告跳转到指定URL
+					// #ifdef H5
+					window.location.href = 'http://localhost:8080/#/pages/report/report';
+					// #endif
+					// #ifndef H5
+					uni.navigateTo({ 
+						url: '/pages/report/report' 
+					});
+					// #endif
 				} else if (url === '/pages/appointment/appointment') {
-					let id = this.packageList && this.packageList.length > 0 ? this.packageList[0].id : '';
-					if (id) {
-						uni.navigateTo({ url: `/pages/appointment/appointment?packageId=${id}` });
-					} else {
-						uni.navigateTo({ url });
-					}
+					// 体检预约跳转到医院选择页面
+					// #ifdef H5
+					window.location.href = 'http://localhost:8080/#/pages/hospital/hospital';
+					// #endif
+					// #ifndef H5
+					uni.navigateTo({ 
+						url: '/pages/hospital/hospital' 
+					});
+					// #endif
 				} else {
 					uni.navigateTo({ url });
 				}

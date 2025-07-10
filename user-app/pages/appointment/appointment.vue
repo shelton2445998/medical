@@ -260,7 +260,7 @@
 
 <style lang="scss">
 .content {
-	padding-bottom: 120rpx;
+	padding-bottom: 230rpx;
 }
 
 .search-container {
@@ -596,10 +596,11 @@
 	position: fixed;
 	left: 0;
 	right: 0;
-	bottom: 0;
+	bottom: 100rpx;
 	padding: 20rpx;
 	background-color: #ffffff;
 	box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+	z-index: 999;
 	
 	.bottom-btn {
 		height: 90rpx;
