@@ -3,8 +3,8 @@
 		<!-- 顶部搜索栏 -->
 		<view class="search-container">
 			<view class="search-box">
-				<text class="iconfont icon-search">&#xe65c;</text>
-				<input type="text" placeholder="搜索医院、体检套餐" />
+				<text class="iconfont icon-search"></text>
+				<input type="text" placeholder="搜索医院、体检套餐" v-model="searchKeyword" @input="searchHospitals" />
 			</view>
 		</view>
 
@@ -34,7 +34,7 @@
 			</view>
 			<view class="hospital-list">
 				<view class="hospital-item" v-for="(item, index) in hospitalList" :key="index" @click="selectHospital(item)">
-					<image :src="item.image" mode="aspectFill" class="hospital-image"></image>
+					<image :src="item.image || '/static/images/hospital1.jpg'" mode="aspectFill" class="hospital-image"></image>
 					<view class="hospital-info">
 						<text class="hospital-name">{{item.name}}</text>
 						<view class="hospital-tags">
@@ -46,6 +46,14 @@
 						</view>
 					</view>
 				</view>
+			</view>
+			<!-- 加载状态 -->
+			<view class="loading-container" v-if="hospitalLoading">
+				<text class="loading-text">加载中...</text>
+			</view>
+			<!-- 空状态 -->
+			<view class="empty-container" v-if="!hospitalLoading && hospitalList.length === 0">
+				<text class="empty-text">暂无推荐医院</text>
 			</view>
 		</view>
 
@@ -60,6 +68,30 @@
 			</view>
 			<view class="package-list">
 				<view class="package-item" v-for="(item, index) in packageList" :key="index" @click="selectPackage(item)">
+					<image :src="item.image" mode="aspectFill" class="package-image"></image>
+					<view class="package-info">
+						<text class="package-name">{{item.name}}</text>
+						<text class="package-desc">{{item.description}}</text>
+						<view class="package-price-box">
+							<text class="package-price">¥{{item.price}}</text>
+							<text class="package-original-price" v-if="item.originalPrice">¥{{item.originalPrice}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 推荐套餐 -->
+		<view class="section">
+			<view class="section-header">
+				<text class="section-title">推荐套餐</text>
+				<view class="more" @click="navigateTo('/pages/package/package')">
+					<text>更多</text>
+					<text class="iconfont icon-right"></text>
+				</view>
+			</view>
+			<view class="package-list">
+				<view class="package-item" v-for="(item, index) in recommendPackages" :key="index" @click="selectPackage(item)">
 					<image :src="item.image" mode="aspectFill" class="package-image"></image>
 					<view class="package-info">
 						<text class="package-name">{{item.name}}</text>
@@ -99,9 +131,18 @@
 </template>
 
 <script>
+	import { get, hospitalApi, packageApi } from '@/utils/request.js';
+	
 	export default {
 		data() {
 			return {
+				// 搜索关键词
+				searchKeyword: '',
+				// 医院加载状态
+				hospitalLoading: false,
+				// 医院列表
+				hospitalList: [],
+				// 基础数据
 				bannerList: [{
 						image: '/static/images/banner1.jpg',
 						url: '/pages/package/package'
@@ -134,21 +175,6 @@
 						name: '在线咨询',
 						icon: '/static/images/icon-consult.png',
 						url: '/pages/consult/consult'
-					}
-				],
-				hospitalList: [{
-						id: 1,
-						name: '沈阳市云医院-和平分院',
-						image: '/static/images/hospital1.jpg',
-						tags: ['三甲', '综合医院'],
-						address: '沈阳市和平区南京南街61号'
-					},
-					{
-						id: 2,
-						name: '沈阳市云医院-沈河分院',
-						image: '/static/images/hospital2.jpg',
-						tags: ['三甲', '综合医院'],
-						address: '沈阳市沈河区北站路33号'
 					}
 				],
 				packageList: [{
@@ -195,15 +221,127 @@
 						type: 2,
 						url: 'https://www.163.com/dy/article/I6JGCGOQ0552CRD4.html'
 					}
-				]
+				],
+				recommendPackages: [],
 			}
 		},
 		onLoad() {
-
+			// 页面加载时获取推荐医院
+			this.getRecommendHospitals();
+			this.getRecommendPackages();
 		},
 		methods: {
+			// 获取推荐医院列表
+			async getRecommendHospitals() {
+				this.hospitalLoading = true;
+				
+				try {
+					const result = await get(hospitalApi.getRecommendHospitals);
+					
+					// 检查返回的数据结构
+					if (result && result.data) {
+						this.hospitalList = result.data;
+					} else if (Array.isArray(result)) {
+						this.hospitalList = result;
+					} else {
+						this.hospitalList = [];
+					}
+					// 处理医院数据，确保有默认图片和标签
+					this.hospitalList.forEach((hospital, index) => {
+						// 设置默认图片（使用多张图片循环）
+						const defaultImages = [
+							'/static/images/hospital1.jpg',
+							'/static/images/hospital2.jpg',
+							'/static/images/hospital3.jpg',
+							'/static/images/hospital4.jpg'
+						];
+						hospital.image = defaultImages[index % defaultImages.length];
+						// 设置默认标签
+						hospital.tags = ['综合医院'];
+						// 确保地址字段存在
+						if (!hospital.address) {
+							hospital.address = '地址信息待完善';
+						}
+					});
+				} catch (error) {
+					// 如果接口失败，使用测试数据
+					this.hospitalList = [
+						{
+							id: 1,
+							name: '沈阳市云医院-和平分院',
+							image: '/static/images/hospital1.jpg',
+							tags: ['三甲', '综合医院'],
+							address: '沈阳市和平区南京南街61号'
+						},
+						{
+							id: 2,
+							name: '沈阳市云医院-沈河分院',
+							image: '/static/images/hospital2.jpg',
+							tags: ['三甲', '综合医院'],
+							address: '沈阳市沈河区北站路33号'
+						}
+					];
+					uni.showToast({
+						title: '使用测试数据',
+						icon: 'none'
+					});
+				} finally {
+					this.hospitalLoading = false;
+				}
+			},
+			
+			// 搜索医院
+			async searchHospitals() {
+				if (!this.searchKeyword.trim()) {
+					// 如果搜索关键词为空，重新获取推荐医院
+					this.getRecommendHospitals();
+					return;
+				}
+				
+				try {
+					const result = await get(hospitalApi.getHospitalList, {
+						keyword: this.searchKeyword.trim(),
+						pageIndex: 1,
+						pageSize: 10
+					});
+					
+					// 检查返回的数据结构
+					let hospitalData = null;
+					if (result && result.data) {
+						hospitalData = result.data;
+					} else if (result && result.records) {
+						hospitalData = result;
+					}
+					
+					if (hospitalData && hospitalData.records) {
+						this.hospitalList = hospitalData.records;
+						// 处理医院数据
+						this.hospitalList.forEach((hospital, index) => {
+							// 设置默认图片（使用多张图片循环）
+							const defaultImages = [
+								'/static/images/hospital1.jpg',
+								'/static/images/hospital2.jpg',
+								'/static/images/hospital3.jpg',
+								'/static/images/hospital4.jpg'
+							];
+							hospital.image = defaultImages[index % defaultImages.length];
+							// 设置默认标签
+							hospital.tags = ['综合医院'];
+							// 确保地址字段存在
+							if (!hospital.address) {
+								hospital.address = '地址信息待完善';
+							}
+						});
+					}
+				} catch (error) {
+					uni.showToast({
+						title: error.message || '搜索医院失败',
+						icon: 'none'
+					});
+				}
+			},
+			
 			navigateTo(url) {
-				console.log('navigateTo:', url);
 				// 如果是 tabBar 页面，改用 switchTab
 				if (url === '/pages/report/report') {
 					// 体检报告跳转到指定URL
@@ -240,9 +378,7 @@
 				});
 			},
 			viewNews(news) {
-				console.log("111111111111111111111")
 				if (news.url) {
-					console.log("加载出")
 					uni.showLoading({
 						title: '加载中...'
 					});
@@ -254,12 +390,30 @@
 						}
 					});
 				} else {
-					console.log("未加载出")
 					uni.navigateTo({
 						url: `/pages/news-detail/news-detail?id=${news.id}`
 					});
 				}
-			}
+			},
+			async getRecommendPackages() {
+				try {
+					const result = await get(packageApi.getRecommendPackages);
+					if (result && result.data) {
+						this.recommendPackages = result.data.map((item, index) => ({
+							id: item.id,
+							name: item.name,
+							price: item.price || 0,
+							description: item.description || '',
+							tags: item.tags || [],
+							image: `/static/images/package${(index % 4) + 1}.jpg`
+						}));
+					} else {
+						this.recommendPackages = [];
+					}
+				} catch (e) {
+					this.recommendPackages = [];
+				}
+			},
 		}
 	}
 </script>
@@ -439,6 +593,32 @@
 					}
 				}
 			}
+		}
+	}
+
+	// 加载状态样式
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 40rpx 0;
+		
+		.loading-text {
+			font-size: 28rpx;
+			color: #999999;
+		}
+	}
+
+	// 空状态样式
+	.empty-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 40rpx 0;
+		
+		.empty-text {
+			font-size: 28rpx;
+			color: #999999;
 		}
 	}
 

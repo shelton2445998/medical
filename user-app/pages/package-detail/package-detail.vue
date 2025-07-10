@@ -127,6 +127,7 @@
 </template>
 
 <script>
+	import { get, packageApi } from '@/utils/request.js';
 	export default {
 		data() {
 			return {
@@ -433,18 +434,31 @@
 				return Object.values(categories);
 			}
 		},
-		onLoad(options) {
+		async onLoad(options) {
 			if (options && options.id) {
-				const id = Number(options.id);
-				if (this.demoPackages[id]) {
-					this.packageInfo = this.demoPackages[id];
-				} else {
-					uni.showToast({ title: '暂无该套餐演示数据', icon: 'none' });
-					uni.navigateBack();
+				try {
+					const result = await get(packageApi.getPackageDetail(options.id));
+					if (result && result.data) {
+						this.packageInfo = {
+							id: result.data.id,
+							name: result.data.name,
+							price: result.data.price || 0,
+							originalPrice: result.data.originalPrice || result.data.price || 0,
+							tags: result.data.tags || [],
+							hospitalId: result.data.hospitalId || '',
+							hospitalName: result.data.hospitalName || '',
+							hospitalAddress: result.data.hospitalAddress || '',
+							hospitalImage: result.data.hospitalImage || '/static/images/hospital1.jpg',
+							description: result.data.description || '',
+							suitablePeople: result.data.suitablePeople || '',
+							items: result.data.items || [],
+							notices: result.data.notices || [],
+							reviews: result.data.reviews || []
+						};
+					}
+				} catch (e) {
+					uni.showToast({ title: '加载套餐详情失败', icon: 'none' });
 				}
-			} else {
-				uni.showToast({ title: '缺少套餐ID参数', icon: 'none' });
-				uni.navigateBack();
 			}
 		},
 		methods: {

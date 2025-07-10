@@ -48,6 +48,7 @@
 </template>
 
 <script>
+	import { get, packageApi } from '@/utils/request.js';
 	export default {
 		data() {
 			return {
@@ -58,126 +59,43 @@
 					{ id: 2, name: '高级' },
 					{ id: 3, name: '专项' }
 				],
-				packages: [
-					// 标准体检套餐
-					{
-						id: 1,
-						name: '标准体检套餐',
-						type: 1,
-						price: 399,
-						discountPrice: 299,
-						description: '适合25-45岁人群，包含血常规、尿常规、肝功能、肾功能、血脂、血糖等基础检查项目，全面了解健康状况。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '身高体重', '血压', '视力', '胸部X光', 'B超'],
-						sold: 1234,
-						recommend: true
-					},
-					// 男性专项体检套餐
-					{
-						id: 2,
-						name: '男性专项体检套餐',
-						type: 3,
-						price: 1200,
-						discountPrice: 980,
-						description: '针对男性健康，增加前列腺、肿瘤筛查等专项检查，适合30岁以上男性。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '前列腺B超', '肿瘤标志物', '心电图', '胸部X光'],
-						sold: 756,
-						recommend: false
-					},
-					// 女性专项体检套餐
-					{
-						id: 3,
-						name: '女性专项体检套餐',
-						type: 3,
-						price: 1300,
-						discountPrice: 1040,
-						description: '针对女性健康，增加乳腺、妇科、HPV等专项检查，适合30岁以上女性。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '乳腺彩超', '妇科检查', 'HPV检测', '心电图', 'B超'],
-						sold: 892,
-						recommend: false
-					},
-					// 老年体检套餐
-					{
-						id: 4,
-						name: '老年体检套餐',
-						type: 3,
-						price: 1500,
-						discountPrice: 1280,
-						description: '适合60岁以上老年人，重点检查心脑血管、骨密度、听力等项目。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '心电图', '脑血流图', '骨密度', '听力检查', '视力检查', 'B超'],
-						sold: 654,
-						recommend: false
-					},
-					// 高端全身体检套餐
-					{
-						id: 5,
-						name: '高端全身体检套餐',
-						type: 2,
-						price: 3000,
-						discountPrice: 2580,
-						description: '适合高净值人群，包含全身多系统深度筛查，含肿瘤、心脑血管、基因检测等。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '肿瘤标志物', '心脏彩超', '脑MRI', '基因检测', '全身CT'],
-						sold: 321,
-						recommend: true
-					},
-					// 入职体检套餐
-					{
-						id: 6,
-						name: '入职体检套餐',
-						type: 1,
-						price: 200,
-						discountPrice: 180,
-						description: '适合新员工入职，包含基础健康检查项目，满足大部分企业入职要求。',
-						items: ['血常规', '尿常规', '肝功能', '胸部X光', '心电图', '身高体重', '血压'],
-						sold: 888,
-						recommend: false
-					},
-					// 儿童体检套餐
-					{
-						id: 7,
-						name: '儿童体检套餐',
-						type: 3,
-						price: 600,
-						discountPrice: 480,
-						description: '适合3-14岁儿童，包含生长发育、视力、听力、常规血尿等检查，关注儿童健康成长。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血糖', '微量元素', '生长发育评估', '视力检查', '听力筛查', '心电图', '胸部X光'],
-						sold: 520,
-						recommend: false
-					},
-					// 高级体检套餐
-					{
-						id: 8,
-						name: '高级体检套餐',
-						type: 2,
-						price: 899,
-						discountPrice: 699,
-						description: '适合45岁以上人群，包含心脑血管、肿瘤筛查等全面检查，帮助早期发现慢性病和肿瘤风险。',
-						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '心电图', '心脏彩超', '脑血流图', '肿瘤标志物', '胸部X光', '腹部B超'],
-						sold: 432,
-						recommend: true
-					}
-				],
+				packages: [],
 				filteredPackages: [],
 				selectedHospital: null
 			}
 		},
 		onLoad() {
-			// 初始化显示所有套餐
-			this.filteredPackages = this.packages;
+			this.getPackageList();
 			
 			// 获取选择的医院信息
 			let hospitalInfo = uni.getStorageSync('selectedHospital');
 			if (hospitalInfo) {
 				this.selectedHospital = JSON.parse(hospitalInfo);
 			}
-			
-			// 获取套餐列表数据
-			this.getPackageList();
 		},
 		methods: {
-			// 获取套餐列表
-			getPackageList() {
-				// 这里可以替换为实际的API调用
-				console.log('获取套餐列表');
+			async getPackageList() {
+				try {
+					const result = await get(packageApi.getPackageList, { pageIndex: 1, pageSize: 20 });
+					if (result && result.data && result.data.list) {
+						this.packages = result.data.list.map((item, index) => ({
+							id: item.id,
+							name: item.name,
+							type: item.type || 1,
+							price: item.price || 0,
+							discountPrice: item.discountPrice || item.price || 0,
+							description: item.description || '',
+							items: item.items || [],
+							sold: item.sold || 0,
+							recommend: item.recommend || false
+						}));
+					} else {
+						this.packages = [];
+					}
+					this.filteredPackages = this.packages;
+				} catch (e) {
+					uni.showToast({ title: '获取套餐失败', icon: 'none' });
+				}
 			},
 			// 切换套餐类型
 			switchType(typeId) {
