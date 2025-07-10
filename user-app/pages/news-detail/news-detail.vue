@@ -4,7 +4,7 @@
       <view class="back-btn" @click="goBack">
         <text class="iconfont icon-back"></text>
       </view>
-      <text class="page-title">资讯详情</text>
+      <!-- <text class="page-title">资讯详情</text> -->
     </view>
     
     <view class="news-detail" v-if="newsDetail">
@@ -38,18 +38,6 @@ export default {
       // 模拟获取新闻详情
       // 实际项目中这里应该是 API 调用
       const newsMap = {
-        1: {
-          id: 1,
-          title: '每天一个苹果，医生远离我？水果的健康真相',
-          image: '/static/images/news1.jpg',
-          source: '健康时报',
-          time: '2023-07-08',
-          content: `
-            <p>苹果富含多种维生素和矿物质，是健康饮食的重要组成部分。</p>
-            <p>研究表明，每天吃一个苹果确实有助于预防多种疾病。</p>
-            <p>但是，仅仅依靠苹果并不能保证健康，还需要均衡的饮食和适当的运动。</p>
-          `
-        },
 		5: {
 			id: 5,
 			title: '健康早餐的5个标准，你达标了吗？',
