@@ -57,24 +57,19 @@ public class UserDto implements Serializable {
     private Long userRoleId;
 
     @Schema(description = "状态 1：正常，0：禁用")
-    @NotNull(message = "状态 1：正常，0：禁用不能为空")
     private Boolean status;
 
     @Schema(description = "注册时间")
-    @NotNull(message = "注册时间不能为空")
     private Date registerTime;
 
     @Schema(description = "注册IP")
-    @NotBlank(message = "注册IP不能为空")
     @Length(max = 20, message = "注册IP长度超过限制")
     private String registerIp;
 
     @Schema(description = "最后登录时间")
-    @NotNull(message = "最后登录时间不能为空")
     private Date lastLoginTime;
 
     @Schema(description = "最后登录IP")
-    @NotBlank(message = "最后登录IP不能为空")
     @Length(max = 20, message = "最后登录IP长度超过限制")
     private String lastLoginIp;
 

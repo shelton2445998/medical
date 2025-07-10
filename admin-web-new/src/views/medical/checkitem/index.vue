@@ -13,7 +13,7 @@
         <el-input v-model="searchForm.name" placeholder="请输入项目名称" clearable />
       </el-form-item>
       <el-form-item label="所属科室">
-        <el-select v-model="searchForm.department" placeholder="请选择科室" clearable>
+        <el-select v-model="searchForm.departmentId" placeholder="请选择科室" clearable>
           <el-option 
             v-for="item in departmentOptions" 
             :key="item.value" 
@@ -38,24 +38,27 @@
     <!-- 表格区域 -->
     <el-table :data="tableData" border style="width: 100%" v-loading="loading">
       <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column prop="code" label="项目编码" width="120" />
+      <el-table-column prop="id" label="项目编码" width="120" />
       <el-table-column prop="name" label="项目名称" min-width="120" />
       <el-table-column prop="price" label="项目价格" width="100">
         <template #default="scope">
           <span>{{ formatPrice(scope.row.price) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="department" label="所属科室" width="100" />
-      <el-table-column prop="type" label="项目类型" width="80" />
+      <el-table-column label="所属科室" width="120">
+        <template #default="scope">
+          <span>{{ getDepartmentName(scope.row.departmentId) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip />
       <el-table-column prop="status" label="状态" width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-            {{ scope.row.status === 1 ? '启用' : '禁用' }}
+          <el-tag :type="scope.row.status ? 'success' : 'danger'">
+            {{ scope.row.status ? '启用' : '禁用' }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column prop="remark" label="备注" min-width="180" show-overflow-tooltip />
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="scope">
           <el-button type="primary" link @click="editItem(scope.row)">编辑</el-button>
@@ -63,7 +66,7 @@
             type="primary"
             link
             @click="changeStatus(scope.row)"
-          >{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
+          >{{ scope.row.status ? '禁用' : '启用' }}</el-button>
           <el-button type="danger" link @click="deleteItem(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -96,8 +99,8 @@
         <el-form-item label="项目价格" prop="price">
           <el-input-number v-model="itemForm.price" :min="0" :precision="2" :step="10" />
         </el-form-item>
-        <el-form-item label="所属科室" prop="department">
-          <el-select v-model="itemForm.department" placeholder="请选择科室">
+        <el-form-item label="所属科室" prop="departmentId">
+          <el-select v-model="itemForm.departmentId" placeholder="请选择科室">
             <el-option 
               v-for="item in departmentOptions" 
               :key="item.value" 
@@ -106,21 +109,14 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="项目类型" prop="type">
-          <el-select v-model="itemForm.type" placeholder="请选择类型">
-            <el-option label="检验" value="检验" />
-            <el-option label="检查" value="检查" />
-            <el-option label="其他" value="其他" />
-          </el-select>
+        <el-form-item label="项目描述" prop="description">
+          <el-input v-model="itemForm.description" type="textarea" rows="3" placeholder="请输入项目描述" />
         </el-form-item>
         <el-form-item label="项目状态" prop="status">
           <el-radio-group v-model="itemForm.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
+            <el-radio :label="true">启用</el-radio>
+            <el-radio :label="false">禁用</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="itemForm.remark" type="textarea" rows="3" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -138,24 +134,22 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { http } from '@/utils/http';
 
-// 科室选项
-const departmentOptions = [
-  { label: '内科', value: '内科' },
-  { label: '外科', value: '外科' },
-  { label: '妇科', value: '妇科' },
-  { label: '儿科', value: '儿科' },
-  { label: '五官科', value: '五官科' },
-  { label: '皮肤科', value: '皮肤科' },
-  { label: '检验科', value: '检验科' },
-  { label: '影像科', value: '影像科' },
-  { label: '其他', value: '其他' }
-];
+// 科室选项，改为从数据库中获取
+const departmentOptions = reactive([
+  { label: '检验科', value: 2007 },
+  { label: '影像科', value: 2006 },
+  { label: '心脑血管科', value: 2005 },
+  { label: '内科', value: 2001 },
+  { label: '外科', value: 2002 },
+  { label: '妇科', value: 2003 },
+  { label: '儿科', value: 2004 }
+]);
 
 // 搜索表单
 const searchForm = reactive({
   name: '',
-  department: '',
-  type: ''
+  departmentId: null,
+  status: null
 });
 
 // 表格数据
@@ -173,20 +167,18 @@ const pageInfo = reactive({
 const itemFormRef = ref();
 const itemForm = reactive({
   id: '',
-  code: '',
   name: '',
+  departmentId: null, // 数据库中是Long类型
   price: 0,
-  department: '',
-  type: '',
-  status: 1,
-  remark: ''
+  description: '',
+  status: true
 });
 
 const formRules = {
   name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
+  departmentId: [{ required: true, message: '请选择所属科室', trigger: 'change' }],
   price: [{ required: true, message: '请输入项目价格', trigger: 'change' }],
-  department: [{ required: true, message: '请选择所属科室', trigger: 'change' }],
-  type: [{ required: true, message: '请选择项目类型', trigger: 'change' }]
+  description: [{ required: true, message: '请输入项目描述', trigger: 'blur' }]
 };
 
 // 弹窗控制
@@ -194,8 +186,14 @@ const formType = ref('add'); // add或edit
 const formVisible = ref(false);
 
 // 格式化价格
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
   return `¥${price.toFixed(2)}`;
+};
+
+// 获取科室名称
+const getDepartmentName = (departmentId: number) => {
+  const dept = departmentOptions.find(item => item.value === departmentId);
+  return dept ? dept.label : departmentId;
 };
 
 // 获取项目列表
@@ -207,8 +205,8 @@ const getItemsList = async () => {
       pageNum: pageInfo.current,
       pageSize: pageInfo.size
     };
-    const res = await http.get('/admin/examination/check-item/list', { params });
-    tableData.value = res.records || [];
+    const res: any = await http.get('/admin/check-item/list', { params });
+    tableData.value = res.list || [];
     pageInfo.total = res.total || 0;
   } catch (error) {
     console.error('获取项目列表失败:', error);
@@ -251,11 +249,11 @@ const openAddDialog = () => {
 };
 
 // 编辑项目
-const editItem = async (row) => {
+const editItem = async (row: any) => {
   formType.value = 'edit';
   resetForm();
   try {
-    const res = await http.get(`/admin/examination/check-item/${row.id}`);
+    const res: any = await http.get(`/admin/check-item/detail/${row.id}`);
     if (res) {
       Object.keys(itemForm).forEach(key => {
         itemForm[key] = res[key] !== undefined ? res[key] : itemForm[key];
@@ -270,16 +268,20 @@ const editItem = async (row) => {
 // 重置表单
 const resetForm = () => {
   Object.keys(itemForm).forEach(key => {
-    itemForm[key] = key === 'status' ? 1 : key === 'price' ? 0 : '';
+    itemForm[key] = key === 'status' ? true : key === 'price' ? 0 : key === 'departmentId' ? null : '';
   });
   itemFormRef.value?.clearValidate();
 };
 
 // 修改项目状态
-const changeStatus = async (row) => {
+const changeStatus = async (row: any) => {
   try {
-    await http.put(`/admin/examination/check-item/status/${row.id}/${row.status === 1 ? 0 : 1}`);
-    ElMessage.success(`${row.status === 1 ? '禁用' : '启用'}成功`);
+    // 使用POST请求
+    await http.post('/admin/check-item/status', {
+      id: row.id,
+      status: !row.status
+    });
+    ElMessage.success(`${row.status ? '禁用' : '启用'}成功`);
     getItemsList();
   } catch (error) {
     console.error('修改状态失败:', error);
@@ -287,14 +289,14 @@ const changeStatus = async (row) => {
 };
 
 // 删除项目
-const deleteItem = (row) => {
+const deleteItem = (row: any) => {
   ElMessageBox.confirm('确定要删除该项目吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
     try {
-      await http.delete(`/admin/examination/check-item/${row.id}`);
+      await http.post(`/admin/check-item/delete/${row.id}`);
       ElMessage.success('删除成功');
       getItemsList();
     } catch (error) {
@@ -310,12 +312,23 @@ const submitForm = async () => {
   try {
     await itemFormRef.value.validate();
     
-    const url = formType.value === 'add' 
-      ? '/admin/examination/check-item/add' 
-      : '/admin/examination/check-item/update';
+    // 确保提交的数据符合后端要求
+    const formData = { ...itemForm };
+    // 确保departmentId是数字类型
+    if (formData.departmentId) {
+      formData.departmentId = Number(formData.departmentId);
+    }
     
-    await http.post(url, itemForm);
-    ElMessage.success(`${formType.value === 'add' ? '添加' : '编辑'}成功`);
+    if (formType.value === 'add') {
+      // 添加使用POST
+      await http.post('/admin/check-item/add', formData);
+      ElMessage.success('添加成功');
+    } else {
+      // 更新使用POST请求
+      await http.post('/admin/check-item/update', formData);
+      ElMessage.success('编辑成功');
+    }
+    
     formVisible.value = false;
     getItemsList();
   } catch (error) {

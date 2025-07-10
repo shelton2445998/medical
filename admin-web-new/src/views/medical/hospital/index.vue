@@ -158,9 +158,16 @@ const getHospitalList = async () => {
       type: queryParams.type || undefined
     };
     // 修改API路径，使用正确的接口
-    const res = await http.get('/admin/hospital/list', { params });
-    if (res && res.data) {
-      hospitalList.value = res.data.records || [];
+    const res = await http.get('/admin/hospital/list', { params }) as any;
+    
+    // 处理返回的数据结构
+    if (res && res.list && Array.isArray(res.list)) {
+      // 直接返回的是分页对象
+      hospitalList.value = res.list;
+      total.value = res.total || 0;
+    } else if (res && res.data && res.data.list && Array.isArray(res.data.list)) {
+      // ApiResult 包装的分页对象
+      hospitalList.value = res.data.list;
       total.value = res.data.total || 0;
     } else {
       throw new Error('数据格式错误');
@@ -241,6 +248,7 @@ const handleDelete = (row: Hospital) => {
     type: 'warning'
   }).then(async () => {
     try {
+      // 使用DELETE请求
       await http.delete(`/admin/hospital/delete/${row.id}`);
       ElMessage.success('删除成功');
       getHospitalList();
@@ -254,9 +262,17 @@ const handleDelete = (row: Hospital) => {
 const submitForm = async () => {
   try {
     await formRef.value.validate();
-    const url = form.id ? '/admin/hospital/update' : '/admin/hospital/add';
-    await http.post(url, form);
-    ElMessage.success(form.id ? '修改成功' : '新增成功');
+    
+    if (form.id) {
+      // 编辑操作使用PUT请求
+      await http.put('/admin/hospital/update', form);
+      ElMessage.success('修改成功');
+    } else {
+      // 新增操作使用POST请求
+      await http.post('/admin/hospital/add', form);
+      ElMessage.success('新增成功');
+    }
+    
     dialog.visible = false;
     getHospitalList();
   } catch (error) {

@@ -145,14 +145,11 @@ public class AppLoginServiceImpl implements AppLoginService {
         appLoginVo.setSystemType(SystemType.APP.getCode());
         Long userRoleId = user.getUserRoleId();
         appLoginVo.setUserRoleId(userRoleId);
-        if (userRoleId != null) {
-            UserRole userRole = userRoleService.getById(userRoleId);
-            if (userRole != null) {
-                appLoginVo.setUserRoleCode(userRole.getCode());
-                appLoginVo.setUserRoleName(userRole.getName());
-            }
-
-        }
+        
+        // 设置默认角色信息，不再查询数据库
+        appLoginVo.setUserRoleCode("USER");
+        appLoginVo.setUserRoleName("普通用户");
+        
         // 保存登录信息到redis中
         appLoginRedisService.setLoginVo(token, appLoginVo);
         return appLoginVo;

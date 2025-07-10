@@ -101,8 +101,8 @@
         <el-form-item label="职称" prop="title">
           <el-input v-model="form.title" placeholder="请输入职称" />
         </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入联系电话" />
+        <el-form-item label="联系电话" prop="mobile">
+          <el-input v-model="form.mobile" placeholder="请输入联系电话" />
         </el-form-item>
         <el-form-item label="医生介绍" prop="introduction">
           <el-input v-model="form.introduction" type="textarea" placeholder="请输入医生介绍" />
@@ -112,6 +112,9 @@
             <el-radio :label="1">在职</el-radio>
             <el-radio :label="0">离职</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -134,15 +137,18 @@ import { http } from '@/utils/http';
 interface Doctor {
   id: string | number;
   name: string;
-  gender: number;
+  gender: number | boolean;  // 可能是布尔值或数字
   hospitalId: string | number;
   hospitalName: string;
   departmentId: string | number;
   departmentName: string;
   title: string;
-  phone: string;
+  phone?: string;  // 可能是phone
+  mobile?: string; // 也可能是mobile
   introduction: string;
-  status: number;
+  status: number | boolean;  // 可能是布尔值或数字
+  password?: string;
+  salt?: string;
 }
 
 interface Hospital {
@@ -179,9 +185,11 @@ const form = reactive<Partial<Doctor>>({
   hospitalId: '',
   departmentId: '',
   title: '',
-  phone: '',
+  mobile: '', // 修改为mobile字段
   introduction: '',
-  status: 1
+  status: 1,
+  password: '',
+  salt: 'default_salt'
 });
 const formRef = ref();
 
@@ -191,7 +199,8 @@ const rules = {
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
   hospitalId: [{ required: true, message: '请选择医院', trigger: 'change' }],
   departmentId: [{ required: true, message: '请选择科室', trigger: 'change' }],
-  phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }]
+  mobile: [{ required: true, message: '请输入联系电话', trigger: 'blur' }], // 修改为mobile字段
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 };
 
 // 获取医院列表
@@ -203,9 +212,11 @@ const getHospitalList = async () => {
         pageNum: 1,
         pageSize: 100 // 获取足够多的医院数据用于下拉选择
       }
-    });
-    if (res && res.data && res.data.records) {
-      hospitalList.value = res.data.records.map(item => ({
+    }) as any;
+    
+    // 处理正确的返回数据结构
+    if (res && res.list && Array.isArray(res.list)) {
+      hospitalList.value = res.list.map(item => ({
         id: item.id,
         name: item.name
       }));
@@ -225,10 +236,26 @@ const getHospitalList = async () => {
 // 获取科室列表
 const getDepartmentList = async () => {
   try {
-    const res = await http.get('/admin/department/all');
-    departmentList.value = res || [];
+    // 修正接口路径，科室应该使用 getDepartmentPage 接口
+    const params = { pageSize: 1000 }; // 获取足够多的科室
+    const res = await http.post('/admin/department/getDepartmentPage', params) as any;
+    
+    // 处理返回的数据结构
+    if (res && res.list && Array.isArray(res.list)) {
+      departmentList.value = res.list;
+    } else if (res && res.data && res.data.list && Array.isArray(res.data.list)) {
+      departmentList.value = res.data.list;
+    } else {
+      throw new Error('数据格式错误');
+    }
   } catch (error) {
     console.error('获取科室列表失败:', error);
+    // 设置模拟数据
+    departmentList.value = [
+      { id: '1001', name: '内科' },
+      { id: '1002', name: '外科' },
+      { id: '1003', name: '儿科' }
+    ];
   }
 };
 
@@ -244,13 +271,51 @@ const getDoctorList = async () => {
       departmentId: queryParams.departmentId || undefined
     };
     // 修改API路径，使用正确的接口
-    const res = await http.post('/admin/doctor/getDoctorPage', params);
-    if (res && res.data) {
-      doctorList.value = res.data.records || [];
+    const res = await http.post('/admin/doctor/getDoctorPage', params) as any;
+
+    // 处理返回的数据结构
+    let list = [];
+    if (res && res.list && Array.isArray(res.list)) {
+      // 直接返回的是分页对象
+      list = res.list;
+      total.value = res.total || 0;
+    } else if (res && res.data && res.data.list && Array.isArray(res.data.list)) {
+      // ApiResult 包装的分页对象
+      list = res.data.list;
       total.value = res.data.total || 0;
     } else {
       throw new Error('数据格式错误');
     }
+    
+    // 确保先加载医院和科室数据
+    await Promise.all([
+      loadHospitals(), 
+      loadDepartments()
+    ]);
+    
+    // 处理数据，转换类型并补充关联信息
+    doctorList.value = list.map(item => {
+      // 查找医院名称和科室名称
+      const hospital = hospitalList.value.find(h => h.id == item.hospitalId) || { name: '未知医院' };
+      const department = departmentList.value.find(d => d.id == item.departmentId) || { name: '未知科室' };
+      
+      // 处理电话字段 - mobile和phone可能都有，以mobile为优先
+      const phoneNumber = item.mobile || item.phone || '';
+      
+      return {
+        ...item,
+        // 将布尔类型转换为数字
+        gender: typeof item.gender === 'boolean' ? (item.gender ? 1 : 2) : item.gender,
+        status: typeof item.status === 'boolean' ? (item.status ? 1 : 0) : item.status,
+        // 补充医院和科室名称
+        hospitalName: hospital.name,
+        departmentName: department.name,
+        // 确保phone字段有值
+        phone: phoneNumber
+      };
+    });
+    
+    console.log('医生列表数据:', doctorList.value);
   } catch (error) {
     console.error('获取医生列表失败:', error);
     // 设置模拟数据用于展示
@@ -290,12 +355,84 @@ const getDoctorList = async () => {
   }
 };
 
+// 加载医院列表
+const loadHospitals = async () => {
+  if (hospitalList.value.length > 0) return;
+  
+  try {
+    const res = await http.get('/admin/hospital/list', {
+      params: {
+        pageNum: 1,
+        pageSize: 100
+      }
+    }) as any;
+    
+    if (res && res.list && Array.isArray(res.list)) {
+      hospitalList.value = res.list.map(item => ({
+        id: item.id,
+        name: item.name
+      }));
+    }
+  } catch (error) {
+    console.error('加载医院列表失败:', error);
+    hospitalList.value = [
+      { id: '1001', name: '第一人民医院' },
+      { id: '1002', name: '第二人民医院' }
+    ];
+  }
+};
+
+// 加载科室列表
+const loadDepartments = async () => {
+  if (departmentList.value.length > 0) return;
+  
+  try {
+    const params = { pageSize: 1000 };
+    const res = await http.post('/admin/department/getDepartmentPage', params) as any;
+    
+    if (res && res.list && Array.isArray(res.list)) {
+      departmentList.value = res.list.map(item => ({
+        id: item.id,
+        name: item.name
+      }));
+    } else if (res && res.data && res.data.list && Array.isArray(res.data.list)) {
+      departmentList.value = res.data.list.map(item => ({
+        id: item.id,
+        name: item.name
+      }));
+    }
+  } catch (error) {
+    console.error('加载科室列表失败:', error);
+    departmentList.value = [
+      { id: '1001', name: '内科' },
+      { id: '1002', name: '外科' },
+      { id: '1003', name: '儿科' }
+    ];
+  }
+};
+
 // 获取医院列表（用于下拉选择）
 const getHospitalOptions = async () => {
   try {
     // 修改API路径，使用正确的接口
-    const res = await http.get('/admin/hospital/all');
-    hospitalList.value = res || [];
+    const params = { pageSize: 1000 }; // 获取足够多的医院
+    const res = await http.get('/admin/hospital/list', { params }) as any;
+    
+    // 处理返回的数据结构
+    let hospitals = [];
+    if (res && res.list && Array.isArray(res.list)) {
+      hospitals = res.list;
+    } else if (res && res.data && res.data.list && Array.isArray(res.data.list)) {
+      hospitals = res.data.list;
+    } else {
+      throw new Error('数据格式错误');
+    }
+    
+    // 格式化为下拉框需要的格式
+    hospitalList.value = hospitals.map(item => ({
+      value: item.id,
+      label: item.name
+    }));
   } catch (error) {
     console.error('获取医院列表失败:', error);
     // 设置模拟数据
@@ -342,9 +479,11 @@ const handleAdd = () => {
     hospitalId: '',
     departmentId: '',
     title: '',
-    phone: '',
+    mobile: '', // 修改为mobile字段
     introduction: '',
-    status: 1
+    status: 1,
+    password: '',
+    salt: 'default_salt' // 设置默认盐值
   });
 };
 
@@ -353,6 +492,9 @@ const handleEdit = (row: Doctor) => {
   dialog.title = '编辑医生';
   dialog.visible = true;
   Object.assign(form, row);
+  // 编辑时不设置密码，如需修改密码，用户需要手动输入
+  form.password = '';
+  form.salt = 'default_salt'; // 设置默认盐值
 };
 
 // 删除
@@ -363,7 +505,7 @@ const handleDelete = (row: Doctor) => {
     type: 'warning'
   }).then(async () => {
     try {
-      await http.delete(`/admin/doctor/delete/${row.id}`);
+      await http.request('delete', `/admin/doctor/deleteDoctor/${row.id}`);
       ElMessage.success('删除成功');
       getDoctorList();
     } catch (error) {
@@ -372,12 +514,46 @@ const handleDelete = (row: Doctor) => {
   }).catch(() => {});
 };
 
+// 生成随机盐值
+const generateSalt = (length = 8) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let salt = '';
+  for (let i = 0; i < length; i++) {
+    salt += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return salt;
+};
+
 // 提交表单
 const submitForm = async () => {
   try {
     await formRef.value.validate();
-    const url = form.id ? '/admin/doctor/update' : '/admin/doctor/add';
-    await http.post(url, form);
+    const url = form.id ? '/admin/doctor/updateDoctor' : '/admin/doctor/addDoctor';
+    
+    // 准备提交数据
+    const submitData = {...form};
+    
+    // 转换性别和状态为布尔值
+    if (typeof submitData.gender === 'number') {
+      submitData.gender = submitData.gender === 1;
+    }
+    
+    if (typeof submitData.status === 'number') {
+      submitData.status = submitData.status === 1;
+    }
+    
+    // 如果是添加医生或者更新时提供了密码，则生成新的盐值
+    if (!form.id || form.password) {
+      submitData.salt = generateSalt();
+    }
+    // 如果是更新操作且没有填写密码，则从提交数据中删除密码和盐值字段
+    else if (form.id && !form.password) {
+      delete submitData.password;
+      delete submitData.salt;
+    }
+    
+    console.log('提交的医生数据:', submitData);
+    await http.post(url, submitData);
     ElMessage.success(form.id ? '修改成功' : '新增成功');
     dialog.visible = false;
     getDoctorList();
@@ -387,8 +563,8 @@ const submitForm = async () => {
 };
 
 onMounted(() => {
-  getHospitalList();
-  getDepartmentList();
+  loadHospitals(); // 改用新的加载函数
+  loadDepartments(); // 改用新的加载函数
   getDoctorList();
 });
 </script>

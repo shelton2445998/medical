@@ -155,6 +155,23 @@ class Http {
     ): Promise<P> {
         return this.request<P>("get", url, {params}, config);
     }
+
+    /** 单独抽离的put工具函数 */
+    public put<P>(
+        url: string,
+        data?: Record<string, any>,
+        config?: PureHttpRequestConfig
+    ): Promise<P> {
+        return this.request<P>("put", url, {data}, config);
+    }
+
+    /** 单独抽离的delete工具函数 */
+    public delete<P>(
+        url: string,
+        config?: PureHttpRequestConfig
+    ): Promise<P> {
+        return this.request<P>("delete", url, {}, config);
+    }
 }
 
 export const http = new Http();

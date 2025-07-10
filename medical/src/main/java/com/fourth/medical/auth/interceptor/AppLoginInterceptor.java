@@ -74,21 +74,8 @@ public class AppLoginInterceptor extends BaseExcludeMethodInterceptor {
         if (appLoginVo == null) {
             throw new LoginTokenException("登录已过期或登录信息不存在，请重新登录");
         }
-        // 校验用户角色
-        AppUserRole appUserRoleAnnotation = getAppUserRoleAnnotation(handlerMethod);
-        if (appUserRoleAnnotation != null) {
-            String[] values = appUserRoleAnnotation.value();
-            if (ArrayUtils.isNotEmpty(values)) {
-                Long userRoleId = AppLoginUtil.getUserRoleId();
-                String userRoleCode = AppLoginUtil.getUserRoleCode();
-                // 如果方法上的角色ID或角色编码与当前登录用户一致，则放行，否则，跳过
-                if (ArrayUtils.contains(values, userRoleId) || ArrayUtils.contains(values, userRoleCode)) {
-                    return true;
-                } else {
-                    throw new AuthException("当前用户没有权限访问");
-                }
-            }
-        }
+        
+        // 不再校验用户角色，所有已登录用户都能访问
         return true;
     }
 

@@ -1,6 +1,6 @@
 import { userApi } from './utils/api.js';
-import request from './utils/request.js';
-import md5 from 'md5.js';
+import { post } from './utils/request.js';
+import md5 from 'md5';
 
 // 管理账号信息
 const USERS_KEY = 'USERS_KEY';
@@ -35,7 +35,7 @@ const accountLogin = async function(account, password) {
            const encryptedPwd = md5(password).toString(); // 确保输出为字符串
     
     // 调用登录接口
-    const res = await request.post(userApi.accountLogin, {
+    const res = await post(userApi.accountLogin, {
       username: account,
       password: encryptedPwd
     });
