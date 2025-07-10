@@ -5,7 +5,7 @@
 			<view class="back-btn" @click="goBack">
 				<text class="iconfont icon-back"></text>
 			</view>
-			<text class="page-title">健康资讯</text>
+			<!-- <text class="page-title">健康资讯</text> -->
 		</view>
 
 		<!-- 资讯分类 -->
@@ -156,10 +156,10 @@
 	}
 
 	.page-header {
-		position: relative;
-		background-color: #1296db;
-		padding: 20rpx 0;
-		text-align: center;
+		// position: relative;
+		// background-color: #1296db;
+		// padding: 20rpx 0;
+		// text-align: center;
 
 		.back-btn {
 			position: absolute;

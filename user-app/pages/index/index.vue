@@ -108,7 +108,7 @@
 					},
 					{
 						image: '/static/images/banner2.jpg',
-						url: '/pages/hospital/hospital'
+						url: '/pages/news/news'
 					},
 					{
 						image: '/static/images/banner3.jpg',
