@@ -45,16 +45,16 @@
 		<view class="section">
 			<view class="section-header">
 				<text class="section-title">检查项目</text>
-				<text class="item-count">共{{packageInfo.items.length}}项</text>
+				<text class="item-count">共{{packageInfo.items && packageInfo.items.length ? packageInfo.items.length : 0}}项</text>
 			</view>
 			<view class="item-list">
-				<view class="item-category" v-for="(category, categoryIndex) in categoryItems" :key="categoryIndex">
+				<view class="item-category" v-for="(category, categoryIndex) in categoryItems || []" :key="categoryIndex">
 					<view class="category-header">
 						<text class="category-name">{{category.name}}</text>
-						<text class="category-count">{{category.items.length}}项</text>
+						<text class="category-count">{{category.items && category.items.length ? category.items.length : 0}}项</text>
 					</view>
 					<view class="category-items">
-						<view class="item" v-for="(item, itemIndex) in category.items" :key="itemIndex">
+						<view class="item" v-for="(item, itemIndex) in (category.items || [])" :key="itemIndex">
 							<text class="item-name">{{item.name}}</text>
 							<text class="item-desc">{{item.desc}}</text>
 						</view>
@@ -95,7 +95,7 @@
 					<text class="iconfont icon-right">&#xe65f;</text>
 				</view>
 			</view>
-			<view class="review-list" v-if="packageInfo.reviews.length > 0">
+			<view class="review-list" v-if="packageInfo.reviews && packageInfo.reviews.length > 0">
 				<view class="review-item" v-for="(item, index) in packageInfo.reviews" :key="index">
 					<view class="reviewer-info">
 						<image class="reviewer-avatar" :src="item.avatar" mode="aspectFill"></image>

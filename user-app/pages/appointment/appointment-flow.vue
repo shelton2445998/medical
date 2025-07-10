@@ -37,8 +37,20 @@
         <input class="input" v-model="name" placeholder="请输入姓名" />
       </view>
       <view class="form-item">
+        <text class="label">性别：</text>
+        <picker :range="['男','女']" @change="onGenderChange">
+          <view class="picker-box">
+            <text>{{ gender || '请选择性别' }}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="form-item">
         <text class="label">手机号：</text>
         <input class="input" v-model="phone" placeholder="请输入手机号" type="number" maxlength="11" />
+      </view>
+      <view class="form-item">
+        <text class="label">身份证号：</text>
+        <input class="input" v-model="idCard" placeholder="请输入身份证号" maxlength="18" />
       </view>
       <view class="form-item">
         <text class="label">预约日期：</text>
@@ -48,7 +60,11 @@
           </view>
         </picker>
       </view>
-      <button class="next-btn" @click="nextStep" :disabled="!name || !phone || !selectedDate">下一步</button>
+      <view class="form-item">
+        <text class="label">备注：</text>
+        <input class="input" v-model="remark" placeholder="可填写特殊需求或备注" />
+      </view>
+      <button class="next-btn" @click="nextStep" :disabled="!name || !phone || !selectedDate || !gender || !idCard">下一步</button>
     </view>
 
     <!-- Step 4: 支付预约 -->
@@ -58,19 +74,50 @@
         <view>医院：{{ selectedHospital.name }}</view>
         <view>套餐：{{ selectedPackage.name }}</view>
         <view>姓名：{{ name }}</view>
+        <view>性别：{{ gender }}</view>
         <view>手机号：{{ phone }}</view>
+        <view>身份证号：{{ idCard }}</view>
         <view>日期：{{ selectedDate }}</view>
-        <view>价格：?{{ selectedPackage.price }}</view>
+        <view>备注：{{ remark }}</view>
+        <view>套餐价格：¥{{ selectedPackage.price }}</view>
+        <view>优惠：¥{{ discount }}</view>
+        <view class="total-price">应付总额：<text class="price">¥{{ totalPrice }}</text></view>
+      </view>
+      <view class="pay-method-box">
+        <view class="pay-method-title">请选择支付方式：</view>
+        <radio-group @change="onPayMethodChange">
+          <view class="pay-method-list">
+            <label v-for="(item, idx) in payMethods" :key="idx" class="pay-method-item">
+              <radio :value="item" :checked="payMethod === item" />
+              <text>{{ item }}</text>
+            </label>
+          </view>
+        </radio-group>
       </view>
       <view class="pay-btn-box">
-        <button class="pay-btn" @click="pay">支付预约</button>
+        <button class="pay-btn" @click="showPayModal" :disabled="!payMethod">支付预约</button>
+      </view>
+      <!-- 支付二维码弹窗 -->
+      <view v-if="showPay" class="pay-modal-mask" @click.self="closePayModal">
+        <view class="pay-modal">
+          <view class="pay-modal-title">{{ payMethod }}扫码支付</view>
+          <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
+          <button class="pay-confirm-btn" @click="pay">已支付</button>
+          <button class="pay-cancel-btn" @click="closePayModal">取消</button>
+        </view>
       </view>
     </view>
 
     <!-- 支付成功 -->
     <view v-else-if="step === 5" class="step-panel">
-      <view class="success-icon">?</view>
+      <view class="success-icon">✔</view>
       <view class="success-text">预约支付成功！</view>
+      <view class="order-info">
+        <view>预约单号：{{ orderNo }}</view>
+        <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
+        <view class="success-tips">请凭预约单号或二维码到医院前台报到</view>
+        <view class="success-tips">如需改期/取消，请在预约记录中操作</view>
+      </view>
       <button class="back-btn" @click="goHome">返回首页</button>
     </view>
   </view>
@@ -95,8 +142,22 @@ export default {
       selectedHospital: null,
       selectedPackage: null,
       name: '',
+      gender: '',
       phone: '',
-      selectedDate: ''
+      idCard: '',
+      selectedDate: '',
+      remark: '',
+      payMethods: ['微信支付', '支付宝', '医保支付'],
+      payMethod: '',
+      showPay: false,
+      orderNo: '',
+      discount: 0
+    }
+  },
+  computed: {
+    totalPrice() {
+      // 可根据套餐和优惠计算
+      return (this.selectedPackage ? (this.selectedPackage.price - this.discount) : 0).toFixed(2);
     }
   },
   onLoad() {
@@ -133,17 +194,39 @@ export default {
     onDateChange(e) {
       this.selectedDate = e.detail.value;
     },
+    onGenderChange(e) {
+      this.gender = ['男', '女'][e.detail.value];
+    },
+    onPayMethodChange(e) {
+      this.payMethod = e.detail.value;
+    },
     nextStep() {
       if (this.step < 4) {
         this.step++;
       }
     },
+    showPayModal() {
+      this.showPay = true;
+    },
+    closePayModal() {
+      this.showPay = false;
+    },
     pay() {
-      uni.showToast({ title: '支付成功', icon: 'success' });
-      this.step = 5;
-      // 清除存储的医院和套餐信息
-      uni.removeStorageSync('selectedHospital');
-      uni.removeStorageSync('selectedPackage');
+      // 模拟支付
+      this.showPay = false;
+      uni.showLoading({ title: '支付中...' });
+      setTimeout(() => {
+        uni.hideLoading();
+        this.orderNo = 'YY' + Date.now();
+        this.step = 5;
+        // 清除存储的医院和套餐信息
+        uni.removeStorageSync('selectedHospital');
+        uni.removeStorageSync('selectedPackage');
+        // 支付成功后2秒自动返回首页
+        setTimeout(() => {
+          uni.reLaunch({ url: '/pages/index/index' });
+        }, 2000);
+      }, 1500);
     },
     goHome() {
       // 清除存储的医院和套餐信息
@@ -262,5 +345,97 @@ export default {
   background: #ff5a5f;
   width: 80%;
   margin: 0 auto;
+}
+.pay-method-box {
+  margin-top: 30rpx;
+  padding: 20rpx;
+  background: #f5f5f5;
+  border-radius: 10rpx;
+}
+.pay-method-title {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.pay-method-list {
+  display: flex;
+  flex-direction: column;
+}
+.pay-method-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+.pay-method-item text {
+  margin-left: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.order-info {
+  margin-top: 30rpx;
+  padding: 20rpx;
+  background: #f5f5f5;
+  border-radius: 10rpx;
+  text-align: center;
+}
+.qrcode {
+  width: 200rpx;
+  height: 200rpx;
+  margin: 20rpx auto;
+}
+.success-tips {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+.total-price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff5a5f;
+  margin-top: 20rpx;
+  text-align: right;
+}
+.price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff5a5f;
+}
+.pay-modal-mask {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pay-modal {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 40rpx 30rpx;
+  width: 500rpx;
+  box-shadow: 0 2rpx 20rpx rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pay-modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+.pay-confirm-btn {
+  background: #1296db;
+  color: #fff;
+  border-radius: 8rpx;
+  margin-top: 30rpx;
+  width: 100%;
+}
+.pay-cancel-btn {
+  background: #eee;
+  color: #333;
+  border-radius: 8rpx;
+  margin-top: 20rpx;
+  width: 100%;
 }
 </style> 
