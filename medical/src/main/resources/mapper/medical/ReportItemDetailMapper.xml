@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.ReportItemDetailMapper">
+
+    <select id="getReportItemDetailById" resultType="com.fourth.medical.medical.vo.ReportItemDetailVo">
+        select *
+        from report_item_detail
+        where id = #{id}
+    </select>
+
+    <select id="getReportItemDetailPage" parameterType="com.fourth.medical.medical.query.ReportItemDetailQuery"
+            resultType="com.fourth.medical.medical.vo.ReportItemDetailVo">
+        select *
+        from report_item_detail
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppReportItemDetailById" resultType="com.fourth.medical.medical.vo.AppReportItemDetailVo">
+        select *
+        from report_item_detail
+        where id = #{id}
+    </select>
+
+    <select id="getAppReportItemDetailPage" parameterType="com.fourth.medical.medical.query.AppReportItemDetailQuery"
+            resultType="com.fourth.medical.medical.vo.AppReportItemDetailVo">
+        select *
+        from report_item_detail
+        <where>
+        </where>
+    </select>
+
+</mapper>

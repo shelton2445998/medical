@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.SetmealDetailMapper">
+
+    <select id="getSetmealDetailById" resultType="com.fourth.medical.medical.vo.SetmealDetailVo">
+        select *
+        from setmeal_detail
+        where id = #{id}
+    </select>
+
+    <select id="getSetmealDetailPage" parameterType="com.fourth.medical.medical.query.SetmealDetailQuery"
+            resultType="com.fourth.medical.medical.vo.SetmealDetailVo">
+        select *
+        from setmeal_detail
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppSetmealDetailById" resultType="com.fourth.medical.medical.vo.AppSetmealDetailVo">
+        select *
+        from setmeal_detail
+        where id = #{id}
+    </select>
+
+    <select id="getAppSetmealDetailPage" parameterType="com.fourth.medical.medical.query.AppSetmealDetailQuery"
+            resultType="com.fourth.medical.medical.vo.AppSetmealDetailVo">
+        select *
+        from setmeal_detail
+        <where>
+        </where>
+    </select>
+
+</mapper>

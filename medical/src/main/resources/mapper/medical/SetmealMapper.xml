@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.SetmealMapper">
+
+    <select id="getSetmealById" resultType="com.fourth.medical.medical.vo.SetmealVo">
+        select *
+        from setmeal
+        where id = #{id}
+    </select>
+
+    <select id="getSetmealPage" parameterType="com.fourth.medical.medical.query.SetmealQuery"
+            resultType="com.fourth.medical.medical.vo.SetmealVo">
+        select *
+        from setmeal
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="getAppSetmealById" resultType="com.fourth.medical.medical.vo.AppSetmealVo">
+        select *
+        from setmeal
+        where id = #{id}
+    </select>
+
+    <select id="getAppSetmealPage" parameterType="com.fourth.medical.medical.query.AppSetmealQuery"
+            resultType="com.fourth.medical.medical.vo.AppSetmealVo">
+        select *
+        from setmeal
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

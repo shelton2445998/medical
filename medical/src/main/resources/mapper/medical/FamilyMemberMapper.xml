@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.FamilyMemberMapper">
+
+    <select id="getFamilyMemberById" resultType="com.fourth.medical.medical.vo.FamilyMemberVo">
+        select *
+        from family_member
+        where id = #{id}
+    </select>
+
+    <select id="getFamilyMemberPage" parameterType="com.fourth.medical.medical.query.FamilyMemberQuery"
+            resultType="com.fourth.medical.medical.vo.FamilyMemberVo">
+        select *
+        from family_member
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="getAppFamilyMemberById" resultType="com.fourth.medical.medical.vo.AppFamilyMemberVo">
+        select *
+        from family_member
+        where id = #{id}
+    </select>
+
+    <select id="getAppFamilyMemberPage" parameterType="com.fourth.medical.medical.query.AppFamilyMemberQuery"
+            resultType="com.fourth.medical.medical.vo.AppFamilyMemberVo">
+        select *
+        from family_member
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

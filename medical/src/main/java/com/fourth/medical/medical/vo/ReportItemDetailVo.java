@@ -1,0 +1,49 @@
+package com.fourth.medical.medical.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 体检报告检查项明细查询结果
+ *
+ * @author fourth
+ * @since 2025-07-09
+ */
+@Data
+@Schema(description = "体检报告检查项明细查询结果")
+public class ReportItemDetailVo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Schema(description = "主键")
+    private Long id;
+
+    @Schema(description = "报告ID")
+    private Long reportId;
+
+    @Schema(description = "检查项明细ID")
+    private Long detailId;
+
+    @Schema(description = "检查值")
+    private String value;
+
+    @Schema(description = "是否异常 0:正常，1:异常")
+    private Integer isAbnormal;
+
+    @Schema(description = "创建人ID")
+    private Long createId;
+
+    @Schema(description = "创建时间")
+    private Date createTime;
+
+    @Schema(description = "修改人ID")
+    private Long updateId;
+
+    @Schema(description = "修改时间")
+    private Date updateTime;
+
+}
+

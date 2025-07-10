@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.InvoiceMapper">
+
+    <select id="getInvoiceById" resultType="com.fourth.medical.medical.vo.InvoiceVo">
+        select *
+        from invoice
+        where id = #{id}
+    </select>
+
+    <select id="getInvoicePage" parameterType="com.fourth.medical.medical.query.InvoiceQuery"
+            resultType="com.fourth.medical.medical.vo.InvoiceVo">
+        select *
+        from invoice
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppInvoiceById" resultType="com.fourth.medical.medical.vo.AppInvoiceVo">
+        select *
+        from invoice
+        where id = #{id}
+    </select>
+
+    <select id="getAppInvoicePage" parameterType="com.fourth.medical.medical.query.AppInvoiceQuery"
+            resultType="com.fourth.medical.medical.vo.AppInvoiceVo">
+        select *
+        from invoice
+        <where>
+        </where>
+    </select>
+
+</mapper>

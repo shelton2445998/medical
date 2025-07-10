@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.CheckitemDetailMapper">
+
+    <select id="getCheckitemDetailById" resultType="com.fourth.medical.medical.vo.CheckitemDetailVo">
+        select *
+        from checkitem_detail
+        where id = #{id}
+    </select>
+
+    <select id="getCheckitemDetailPage" parameterType="com.fourth.medical.medical.query.CheckitemDetailQuery"
+            resultType="com.fourth.medical.medical.vo.CheckitemDetailVo">
+        select *
+        from checkitem_detail
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="getAppCheckitemDetailById" resultType="com.fourth.medical.medical.vo.AppCheckitemDetailVo">
+        select *
+        from checkitem_detail
+        where id = #{id}
+    </select>
+
+    <select id="getAppCheckitemDetailPage" parameterType="com.fourth.medical.medical.query.AppCheckitemDetailQuery"
+            resultType="com.fourth.medical.medical.vo.AppCheckitemDetailVo">
+        select *
+        from checkitem_detail
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

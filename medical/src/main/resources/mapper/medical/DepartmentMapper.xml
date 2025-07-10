@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.DepartmentMapper">
+
+    <select id="getDepartmentById" resultType="com.fourth.medical.medical.vo.DepartmentVo">
+        select *
+        from department
+        where id = #{id}
+    </select>
+
+    <select id="getDepartmentPage" parameterType="com.fourth.medical.medical.query.DepartmentQuery"
+            resultType="com.fourth.medical.medical.vo.DepartmentVo">
+        select *
+        from department
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="getAppDepartmentById" resultType="com.fourth.medical.medical.vo.AppDepartmentVo">
+        select *
+        from department
+        where id = #{id}
+    </select>
+
+    <select id="getAppDepartmentPage" parameterType="com.fourth.medical.medical.query.AppDepartmentQuery"
+            resultType="com.fourth.medical.medical.vo.AppDepartmentVo">
+        select *
+        from department
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.OverallResultMapper">
+
+    <select id="getOverallResultById" resultType="com.fourth.medical.medical.vo.OverallResultVo">
+        select *
+        from overall_result
+        where id = #{id}
+    </select>
+
+    <select id="getOverallResultPage" parameterType="com.fourth.medical.medical.query.OverallResultQuery"
+            resultType="com.fourth.medical.medical.vo.OverallResultVo">
+        select *
+        from overall_result
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppOverallResultById" resultType="com.fourth.medical.medical.vo.AppOverallResultVo">
+        select *
+        from overall_result
+        where id = #{id}
+    </select>
+
+    <select id="getAppOverallResultPage" parameterType="com.fourth.medical.medical.query.AppOverallResultQuery"
+            resultType="com.fourth.medical.medical.vo.AppOverallResultVo">
+        select *
+        from overall_result
+        <where>
+        </where>
+    </select>
+
+</mapper>

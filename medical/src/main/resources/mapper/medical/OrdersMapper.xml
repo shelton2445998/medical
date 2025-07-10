@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.OrdersMapper">
+
+    <select id="getOrdersById" resultType="com.fourth.medical.medical.vo.OrdersVo">
+        select *
+        from orders
+        where id = #{id}
+    </select>
+
+    <select id="getOrdersPage" parameterType="com.fourth.medical.medical.query.OrdersQuery"
+            resultType="com.fourth.medical.medical.vo.OrdersVo">
+        select *
+        from orders
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppOrdersById" resultType="com.fourth.medical.medical.vo.AppOrdersVo">
+        select *
+        from orders
+        where id = #{id}
+    </select>
+
+    <select id="getAppOrdersPage" parameterType="com.fourth.medical.medical.query.AppOrdersQuery"
+            resultType="com.fourth.medical.medical.vo.AppOrdersVo">
+        select *
+        from orders
+        <where>
+        </where>
+    </select>
+
+</mapper>

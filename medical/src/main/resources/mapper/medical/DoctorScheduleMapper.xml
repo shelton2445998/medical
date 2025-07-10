@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fourth.medical.medical.mapper.DoctorScheduleMapper">
+
+    <select id="getDoctorScheduleById" resultType="com.fourth.medical.medical.vo.DoctorScheduleVo">
+        select *
+        from doctor_schedule
+        where id = #{id}
+    </select>
+
+    <select id="getDoctorSchedulePage" parameterType="com.fourth.medical.medical.query.DoctorScheduleQuery"
+            resultType="com.fourth.medical.medical.vo.DoctorScheduleVo">
+        select *
+        from doctor_schedule
+        <where>
+        </where>
+    </select>
+
+    <select id="getAppDoctorScheduleById" resultType="com.fourth.medical.medical.vo.AppDoctorScheduleVo">
+        select *
+        from doctor_schedule
+        where id = #{id}
+    </select>
+
+    <select id="getAppDoctorSchedulePage" parameterType="com.fourth.medical.medical.query.AppDoctorScheduleQuery"
+            resultType="com.fourth.medical.medical.vo.AppDoctorScheduleVo">
+        select *
+        from doctor_schedule
+        <where>
+        </where>
+    </select>
+
+</mapper>
