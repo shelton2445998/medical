@@ -55,7 +55,7 @@
         <el-table-column prop="patientName" label="患者姓名" width="120" />
         <el-table-column prop="gender" label="性别" width="80">
           <template #default="scope">
-            {{ scope.row.gender === 'male' ? '男' : '女' }}
+            {{ scope.row.gender === 'male' ? '男' : scope.row.gender === 'female' ? '女' : '未知' }}
           </template>
         </el-table-column>
         <el-table-column prop="age" label="年龄" width="80" />
@@ -132,9 +132,7 @@ axios.interceptors.response.use(response => {
         ElMessage.error('服务器内部错误')
         break
     }
-  } else {
-    ElMessage.error('网络异常')
-  }
+  } 
   return Promise.reject(error)
 })
 
@@ -231,6 +229,7 @@ export default {
       waitingPatients.value = [
         {
           appointmentId: 'AP20230815001',
+		  patientId: 'P20230001', // 补充患者ID
           patientName: '张三',
           gender: 'male',
           age: 45,
@@ -239,6 +238,7 @@ export default {
         },
         {
           appointmentId: 'AP20230815003',
+		  patientId: 'P20230002', // 补充患者ID
           patientName: '李四',
           gender: 'male',
           age: 32,
@@ -247,6 +247,7 @@ export default {
         },
         {
           appointmentId: 'AP20230815005',
+		  patientId: 'P20230003', // 补充患者ID
           patientName: '王五',
           gender: 'male',
           age: 28,
@@ -255,6 +256,7 @@ export default {
         },
         {
           appointmentId: 'AP20230815007',
+		  patientId: 'P20230004', // 补充患者ID
           patientName: '赵六',
           gender: 'female',
           age: 52,
@@ -263,6 +265,7 @@ export default {
         },
         {
           appointmentId: 'AP20230815009',
+		  patientId: 'P20230005', // 补充患者ID
           patientName: '钱七',
           gender: 'female',
           age: 35,
@@ -284,6 +287,7 @@ export default {
         path: '/home/medical-records',
         query: {
           appointmentId: patient.appointmentId,
+		  patientId: patient.patientId, // 补充患者ID
           patientName: patient.patientName
         }
       })

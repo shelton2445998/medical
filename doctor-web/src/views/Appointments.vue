@@ -374,7 +374,20 @@ export default {
           symptoms: '右腿疼痛，行走困难',
           status: 'confirmed',
           createTime: '2023-08-13 09:15:00'
-        }
+        },
+		 {
+		      appointmentId: 'AP20230815003',
+		      patientId: 'P20230003',
+		      patientName: '王五',
+		      patientPhone: '13800138003',
+		      department: 'pediatrics',
+		      doctorName: '赵医生',
+		      appointmentDate: '2023-08-16',
+		      timeSlot: 'morning',
+		      symptoms: '咳嗽，流鼻涕',
+		      status: 'waiting',
+		      createTime: '2023-08-14 16:40:00'
+		    }
       ]
       total.value = 2
     }
@@ -426,14 +439,20 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
+			 // const backendStatus = statusMap[targetStatus] || targetStatus
           // 文档中医生端更新预约状态的接口：PUT /api/doctor/appointment/status
-          const { data: res } = await axios.put('/api/doctor/appointment/status', {
-            appointmentId: row.appointmentId,
-            status: targetStatus,
-            remark: '' // 非取消操作无需备注
-          })
+   //        const { data: res } = await axios.put('/api/doctor/appointment/status', {
+   //          appointmentId: row.appointmentId,
+   //          status: targetStatus,
+   //          remark: '' ,// 非取消操作无需备注
+			
+   //        })
           if (res.code === 200) {
             ElMessage.success(`预约已${statusText}`)
+			const index = appointmentsList.value.findIndex(item => item.appointmentId === row.appointmentId)
+			        if (index !== -1) {
+			          appointmentsList.value[index] = { ...appointmentsList.value[index], status: targetStatus }
+			        }
             fetchAppointmentsList()
           } else {
             ElMessage.error(res.message || '更新状态失败')

@@ -55,7 +55,7 @@
         <el-table-column prop="patientId" label="患者ID" width="120" />
         <el-table-column prop="gender" label="性别" width="80">
           <template #default="scope">
-            {{ scope.row.gender === 'male' ? '男' : '女' }}
+            {{ scope.row.gender === 'male' ? '男' : scope.row.gender === 'female' ? '女' : '未知' }}
           </template>
         </el-table-column>
         <el-table-column prop="age" label="年龄" width="80" />
@@ -634,7 +634,7 @@ export default {
       // 重置表单
       Object.keys(recordForm).forEach(key => {
         if (key === 'diagnoseDate') {
-          recordForm[key] = new Date()
+          recordForm.diagnoseDate = new Date().toISOString().split('T')[0] // 格式化为 'YYYY-MM-DD'
         } else if (key === 'recordType') {
           recordForm[key] = 'firstVisit'
         } else {
@@ -744,7 +744,7 @@ export default {
               res = await axios.put(`/api/doctor/report/update`, recordForm)
             } else {
               // 新建病历：使用POST方法，修正接口URL
-              res = await axios.post('/api/doctor/appointment/result', recordForm)
+              res = await axios.post('/api/doctor/report/create', recordForm)
             }
             
             if (res.data.code === 200) {
