@@ -12,13 +12,13 @@
 		<view class="login-form">
 			<!-- 手机号 -->
 			<view class="form-item">
-				<text class="iconfont icon-phone">&#xe639;</text>
+				<image src="/static/icon/phone.png" mode="aspectFit" class="btn-icon"></image>
 				<input type="text" v-model="account" placeholder="请输入手机号码" maxlength="11" />
 			</view>
 			
 			<!-- 密码 -->
 			<view class="form-item">
-				<text class="iconfont icon-lock"></text>
+				<image src="/static/icon/password.png" mode="aspectFit" class="btn-icon"></image>
 				<input type="password" v-model="password" placeholder="请输入密码" password />
 				<text class="forget-pwd" @click="navigateTo('/pages/pwd/pwd')">忘记密码?</text>
 			</view>
@@ -35,13 +35,13 @@
 				</view>
 				<view class="oauth-box">
 					<view class="oauth-item" @click="oauthLogin('weixin')">
-						<text class="iconfont icon-weixin"></text>
+						<image src="/static/icon/WeChat.png" mode="aspectFit" class="btn-icon"></image>
 					</view>
 					<view class="oauth-item" @click="oauthLogin('qq')">
-						<text class="iconfont icon-qq"></text>
+						<image src="/static/icon/qq.png" mode="aspectFit" class="btn-icon"></image>
 					</view>
 					<view class="oauth-item" @click="oauthLogin('weibo')">
-						<text class="iconfont icon-weibo"></text>
+						<image src="/static/icon/weibo.png" mode="aspectFit" class="btn-icon"></image>
 					</view>
 				</view>
 			</view>
@@ -141,6 +141,14 @@
 	font-weight: normal;
 	font-style: normal;
 	src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
+}
+
+.btn-icon {
+  width: 60rpx;
+  height: 60rpx;
+  // margin-right: 10rpx;
+  vertical-align: middle;
+  object-fit: cover;
 }
 
 .content {

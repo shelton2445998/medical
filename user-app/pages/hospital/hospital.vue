@@ -33,7 +33,7 @@
 							<text>拨打电话</text>
 						</button>
 						<button class="map-btn" @click.stop="openMap(item)">
-							<text class="iconfont icon-map"></text>
+							<image src="/static/icon/map.png" mode="aspectFit" class="btn-icon"></image>
 							<text>查看地图</text>
 						</button>
 					</view>
