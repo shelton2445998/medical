@@ -140,122 +140,94 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				bannerList: [
-					{
-						image: '/static/images/banner1.jpg',
-						url: '/pages/package/package'
-					},
-					{
-						image: '/static/images/banner2.jpg',
-						url: '/pages/news/news'
-					},
-					{
-						image: '/static/images/banner3.jpg',
-						url: '/pages/appointment/appointment'
-					}
-				],
-				serviceList: [
-					{
-						name: '全身体检',
-						icon: '/static/images/icons/icon-full-body.png',
-						url: '/pages/package/package?type=full'
-					},
-					{
-						name: '男性体检',
-						icon: '/static/images/icons/icon-male.png',
-						url: '/pages/package/package?type=male'
-					},
-					{
-						name: '女性体检',
-						icon: '/static/images/icons/icon-female.png',
-						url: '/pages/package/package?type=female'
-					},
-					{
-						name: '老年体检',
-						icon: '/static/images/icons/icon-elder.png',
-						url: '/pages/package/package?type=elder'
-					},
-					{
-						name: '儿童体检',
-						icon: '/static/images/icons/icon-child.png',
-						url: '/pages/package/package?type=child'
-					}
-				],
-				hospitalList: [
-					{
-						id: 1,
-						name: '沈阳市云医院-和平分院',
-						image: '/static/images/hospital1.jpg',
-						tags: ['三甲', '综合医院'],
-						address: '沈阳市和平区南京南街61号'
-					},
-					{
-						id: 2,
-						name: '沈阳市云医院-沈河分院',
-						image: '/static/images/hospital2.jpg',
-						tags: ['三甲', '综合医院'],
-						address: '沈阳市沈河区北站路33号'
-					}
-				],
-				packageList: [
-					{
-						id: 1,
-						name: '标准体检套餐',
-						image: '/static/images/package1.jpg',
-						description: '适合25-45岁人群，包含血常规、尿常规、肝功能等基础检查',
-						price: '299',
-						originalPrice: '399'
-					},
-					{
-						id: 2,
-						name: '高级体检套餐',
-						image: '/static/images/package2.jpg',
-						description: '适合45岁以上人群，包含心脑血管、肿瘤筛查等全面检查',
-						price: '699',
-						originalPrice: '899'
-					},
-					{
-						id: 3,
-						name: '女性专属套餐',
-						image: '/static/images/package3.jpg',
-						description: '针对女性健康定制，包含妇科检查、乳腺检查等女性特有项目',
-						price: '499',
-						originalPrice: '599'
-					}
-				],
-				noticeList: [
-					'体检前一天请清淡饮食，避免辛辣、油腻食物',
-					'体检当天请空腹，禁食8-12小时',
-					'体检前一天晚上请保证充足睡眠',
-					'体检当天请携带身份证等有效证件',
-					'体检报告一般在3-5个工作日出具，可在APP查看'
-				]
+import { get, hospitalApi, packageApi } from '@/utils/request.js';
+export default {
+	data() {
+		return {
+			bannerList: [
+				{ image: '/static/images/banner1.jpg', url: '/pages/package/package' },
+				{ image: '/static/images/banner2.jpg', url: '/pages/news/news' },
+				{ image: '/static/images/banner3.jpg', url: '/pages/appointment/appointment' }
+			],
+			serviceList: [
+				{ name: '全身体检', icon: '/static/images/icons/icon-full-body.png', url: '/pages/package/package?type=full' },
+				{ name: '男性体检', icon: '/static/images/icons/icon-male.png', url: '/pages/package/package?type=male' },
+				{ name: '女性体检', icon: '/static/images/icons/icon-female.png', url: '/pages/package/package?type=female' },
+				{ name: '老年体检', icon: '/static/images/icons/icon-elder.png', url: '/pages/package/package?type=elder' },
+				{ name: '儿童体检', icon: '/static/images/icons/icon-child.png', url: '/pages/package/package?type=child' }
+			],
+			hospitalList: [],
+			packageList: [],
+			noticeList: [
+				'体检前一天请清淡饮食，避免辛辣、油腻食物',
+				'体检当天请空腹，禁食8-12小时',
+				'体检前一天晚上请保证充足睡眠',
+				'体检当天请携带身份证等有效证件',
+				'体检报告一般在3-5个工作日出具，可在APP查看'
+			]
+		}
+	},
+	onLoad() {
+		this.getRecommendHospitals();
+		this.getRecommendPackages();
+	},
+	methods: {
+		async getRecommendHospitals() {
+			try {
+				const result = await get(hospitalApi.getRecommendHospitals);
+				if (result && result.data) {
+					this.hospitalList = result.data.map((hospital, index) => {
+						const defaultImages = [
+							'/static/images/hospital1.jpg',
+							'/static/images/hospital2.jpg',
+							'/static/images/hospital3.jpg',
+							'/static/images/hospital4.jpg'
+						];
+						return {
+							...hospital,
+							image: defaultImages[index % defaultImages.length],
+							tags: hospital.tags || ['综合医院'],
+							address: hospital.address || '地址信息待完善'
+						};
+					});
+				} else {
+					this.hospitalList = [];
+				}
+			} catch (e) {
+				this.hospitalList = [];
 			}
 		},
-		onLoad() {
-			
-		},
-		methods: {
-			navigateTo(url) {
-				uni.navigateTo({
-					url: url
-				});
-			},
-			selectHospital(hospital) {
-				uni.navigateTo({
-					url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}`
-				});
-			},
-			selectPackage(pkg) {
-				uni.navigateTo({
-					url: `/pages/package-detail/package-detail?id=${pkg.id}`
-				});
+		async getRecommendPackages() {
+			try {
+				const result = await get(packageApi.getRecommendPackages);
+				if (result && result.data) {
+					this.packageList = result.data.map((item, index) => ({
+						id: item.id,
+						name: item.name,
+						price: item.price || 0,
+						originalPrice: item.originalPrice || item.price || 0,
+						description: item.description || '',
+						tags: item.tags || [],
+						image: `/static/images/package${(index % 4) + 1}.jpg`
+					}));
+				} else {
+					this.packageList = [];
+				}
+			} catch (e) {
+				this.packageList = [];
 			}
+		},
+		navigateTo(url) {
+			uni.navigateTo({ url });
+		},
+		selectHospital(hospital) {
+			uni.navigateTo({ url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}` });
+		},
+		selectPackage(pkg) {
+			uni.navigateTo({ url: `/pages/package-detail/package-detail?id=${pkg.id}` });
 		}
 	}
+}
 </script>
 
 <style lang="scss">

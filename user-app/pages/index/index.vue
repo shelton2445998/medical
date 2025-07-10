@@ -57,34 +57,10 @@
 			</view>
 		</view>
 
-		<!-- 热门套餐 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">热门套餐</text>
-				<view class="more" @click="navigateTo('/pages/package/package')">
-					<text>更多</text>
-					<text class="iconfont icon-right"></text>
-				</view>
-			</view>
-			<view class="package-list">
-				<view class="package-item" v-for="(item, index) in packageList" :key="index" @click="selectPackage(item)">
-					<image :src="item.image" mode="aspectFill" class="package-image"></image>
-					<view class="package-info">
-						<text class="package-name">{{item.name}}</text>
-						<text class="package-desc">{{item.description}}</text>
-						<view class="package-price-box">
-							<text class="package-price">¥{{item.price}}</text>
-							<text class="package-original-price" v-if="item.originalPrice">¥{{item.originalPrice}}</text>
-						</view>
-					</view>
-				</view>
-			</view>
-		</view>
-
 		<!-- 推荐套餐 -->
 		<view class="section">
 			<view class="section-header">
-				<text class="section-title">推荐套餐</text>
+				<text class="section-title">热门套餐</text>
 				<view class="more" @click="navigateTo('/pages/package/package')">
 					<text>更多</text>
 					<text class="iconfont icon-right"></text>
