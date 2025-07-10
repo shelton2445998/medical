@@ -7,8 +7,10 @@
 		<view class="package-info">
 			<view class="package-name">{{packageInfo.name}}</view>
 			<view class="package-price-box">
-				<text class="package-price">¥{{packageInfo.price}}</text>
-				<text class="package-original-price" v-if="packageInfo.originalPrice">¥{{packageInfo.originalPrice}}</text>
+				<view class="price-left">
+					<text class="package-price">¥{{packageInfo.price}}</text>
+					<text class="package-original-price" v-if="packageInfo.originalPrice">¥{{packageInfo.originalPrice}}</text>
+				</view>
 				<text class="package-discount" v-if="packageInfo.originalPrice">{{discount}}折</text>
 			</view>
 			<view class="package-tags">
@@ -203,7 +205,7 @@
 					3: {
 						id: 3,
 						name: '女性专项体检套餐',
-						price: 1080,
+						price: 1040,
 						originalPrice: 1300,
 						tags: ['女性', '专项', '健康'],
 						hospitalId: 1,
@@ -412,9 +414,9 @@
 			// 计算折扣
 			discount() {
 				if (this.packageInfo.originalPrice) {
-					return Math.floor(this.packageInfo.price / this.packageInfo.originalPrice * 10);
+					return (this.packageInfo.price / this.packageInfo.originalPrice * 10).toFixed(1);
 				}
-				return 10;
+				return '10.0';
 			},
 			// 按类别分组的检查项目
 			categoryItems() {
@@ -502,8 +504,14 @@
 	
 	.package-price-box {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
+		justify-content: space-between;
 		margin-bottom: 20rpx;
+		
+		.price-left {
+			display: flex;
+			align-items: baseline;
+		}
 		
 		.package-price {
 			font-size: 40rpx;
@@ -523,8 +531,8 @@
 			font-size: 24rpx;
 			color: #ffffff;
 			background-color: #ff5a5f;
-			padding: 4rpx 10rpx;
-			border-radius: 4rpx;
+			padding: 6rpx 12rpx;
+			border-radius: 20rpx;
 		}
 	}
 	

@@ -22,10 +22,12 @@
 					<text class="package-recommend" v-if="item.recommend">推荐</text>
 				</view>
 				<view class="package-price">
-					<text class="price-label">套餐价格：</text>
-					<text class="price-value">¥{{item.discountPrice}}</text>
-					<text class="price-original">¥{{item.price}}</text>
-					<text class="price-discount">{{Math.round(item.discountPrice/item.price*10)}}折</text>
+					<view class="price-left">
+						<text class="price-label">套餐价格：</text>
+						<text class="price-value">¥{{item.discountPrice}}</text>
+						<text class="price-original">¥{{item.price}}</text>
+					</view>
+					<text class="price-discount">{{getDiscountText(item)}}</text>
 				</view>
 				<view class="package-desc">
 					<text>{{item.description}}</text>
@@ -87,7 +89,7 @@
 						name: '女性专项体检套餐',
 						type: 3,
 						price: 1300,
-						discountPrice: 1080,
+						discountPrice: 1040,
 						description: '针对女性健康，增加乳腺、妇科、HPV等专项检查，适合30岁以上女性。',
 						items: ['血常规', '尿常规', '肝功能', '肾功能', '血脂', '血糖', '乳腺彩超', '妇科检查', 'HPV检测', '心电图', 'B超'],
 						sold: 892,
@@ -223,6 +225,11 @@
 			// 返回上一页
 			goBack() {
 				uni.navigateBack();
+			},
+			// 获取折扣文本
+			getDiscountText(item) {
+				const discount = (item.discountPrice / item.price * 10).toFixed(1);
+				return discount + '折';
 			}
 		}
 	}
@@ -310,7 +317,13 @@
 		.package-price {
 			display: flex;
 			align-items: center;
+			justify-content: space-between;
 			margin-bottom: 20rpx;
+			
+			.price-left {
+				display: flex;
+				align-items: center;
+			}
 			
 			.price-label {
 				font-size: 26rpx;
@@ -328,6 +341,14 @@
 				font-size: 24rpx;
 				color: #999999;
 				text-decoration: line-through;
+			}
+			
+			.price-discount {
+				font-size: 22rpx;
+				color: #ffffff;
+				background-color: #ff5a5f;
+				padding: 4rpx 12rpx;
+				border-radius: 20rpx;
 			}
 		}
 		
