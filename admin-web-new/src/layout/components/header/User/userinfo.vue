@@ -52,7 +52,7 @@ import type {FormInstance, FormRules} from "element-plus";
 import {ElMessage} from "element-plus";
 import {validateEmail, validatePhoneNumber} from "@/utils/validate";
 import {system_status} from "@/utils/status";
-import {getProfileApi, updateProfile} from "@/api/user";
+import {getProfile, updateProfile} from "@/api/user";
 import Upload from "@/components/Upload/index.vue";
 
 const {userinfo} = storeToRefs(useUserStoreHook());
@@ -97,7 +97,7 @@ const rules = reactive<FormRules>({
 
 // 获取用户信息
 const getUserInfo = () => {
-  getProfileApi().then(res => {
+  getProfile().then(res => {
     userForm.value = {...userForm.value, ...res}
   })
 }
