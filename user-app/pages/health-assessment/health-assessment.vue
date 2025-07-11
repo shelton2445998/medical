@@ -1,10 +1,5 @@
 <template>
 	<view class="content">
-		<!-- 页面标题 -->
-		<view class="page-header">
-			<text class="page-title">健康评估</text>
-		</view>
-		
 		<!-- 评估类型选择 -->
 		<view class="assessment-types">
 			<view class="type-item" v-for="(type, index) in assessmentTypes" :key="index" @click="startAssessment(type)">

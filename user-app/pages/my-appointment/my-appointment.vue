@@ -1,14 +1,14 @@
 <template>
 	<view class="content">
-		<!-- 页面标题 -->
+<!-- 		页面标题
 		<view class="page-header">
-<!-- 			<view class="back-btn" @click="goBack">
+			<view class="back-btn" @click="goBack">
 				<text class="iconfont icon-back">&#xe65e;</text>
-			</view> -->
+			</view>
 			<text class="page-title">我的预约</text>
-		</view>
+		</view> -->
 		
-		<!-- 预约状态选项卡 -->
+		<!-- 预约状态选项卡
 		<view class="status-tabs">
 			<view 
 				class="tab-item" 
