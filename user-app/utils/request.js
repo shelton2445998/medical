@@ -1,5 +1,6 @@
 // 请求工具函数
 import { hospitalApi, packageApi, appointmentApi, reportApi, userApi } from './api.js';
+import service from '../service.js';
 
 /**
  * 统一请求函数
@@ -9,7 +10,7 @@ import { hospitalApi, packageApi, appointmentApi, reportApi, userApi } from './a
 export function request(options) {
   return new Promise((resolve, reject) => {
     // 获取token
-    const token = uni.getStorageSync('uniIdToken');
+    const token = service.getToken();
     
     // 构建请求头
     const headers = {

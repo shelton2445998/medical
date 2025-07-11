@@ -2,233 +2,223 @@
 	<view class="content">
 		<!-- 页面标题 -->
 		<view class="page-header">
-			<text class="page-title">健康指标</text>
+			<text class="page-title">健康检查项目</text>
+			<text class="page-subtitle">了解您的健康指标正常范围</text>
 		</view>
 		
-		<!-- 指标概览 -->
-		<view class="overview-section">
-			<view class="overview-item" v-for="(item, index) in overviewData" :key="index">
-				<view class="overview-icon">
-					<image :src="item.icon" mode="aspectFit"></image>
-				</view>
-				<view class="overview-info">
-					<text class="overview-name">{{item.name}}</text>
-					<text class="overview-value">{{item.value}}</text>
-					<text class="overview-unit">{{item.unit}}</text>
-				</view>
-				<view class="overview-status" :class="item.status">
-					<text>{{getStatusText(item.status)}}</text>
-				</view>
+		<!-- 搜索框 -->
+		<view class="search-box">
+			<view class="search-input">
+				<text class="iconfont icon-search"></text>
+				<input type="text" v-model="searchText" placeholder="搜索检查项目" @input="filterIndicators" />
+				<text class="iconfont icon-clear" v-if="searchText" @tap="clearSearch"></text>
 			</view>
 		</view>
 		
 		<!-- 指标详情 -->
 		<view class="indicator-section">
-			<view class="section-title">指标详情</view>
+			<view class="section-header">
+				<view class="section-title">
+					<text class="title-icon"></text>
+					<text>项目详情</text>
+				</view>
+				<text class="indicator-count">共 {{filteredIndicators.length}} 项</text>
+			</view>
+			
+			<!-- 无数据提示 -->
+			<view class="no-data" v-if="filteredIndicators.length === 0">
+				<text class="no-data-text">暂无匹配的检查项目</text>
+			</view>
+			
+			<!-- 指标列表 -->
 			<view class="indicator-list">
-				<view class="indicator-item" v-for="(indicator, index) in indicators" :key="index" @click="viewDetail(indicator)">
+				<view class="indicator-item" 
+					  v-for="(indicator, index) in filteredIndicators" 
+					  :key="index"
+					  :class="{'expanded': expandedIndex === index}"
+					  @tap="toggleExpand(index)">
 					<view class="indicator-header">
 						<view class="indicator-info">
-							<image :src="indicator.icon" class="indicator-icon" mode="aspectFit"></image>
+							<text class="indicator-index">{{index + 1}}</text>
 							<text class="indicator-name">{{indicator.name}}</text>
 						</view>
-						<view class="indicator-status" :class="indicator.status">
-							<text>{{getStatusText(indicator.status)}}</text>
+						<view class="expand-icon">
+							<text class="iconfont" :class="expandedIndex === index ? 'icon-up' : 'icon-down'"></text>
 						</view>
 					</view>
 					<view class="indicator-data">
 						<view class="data-item">
-							<text class="data-label">当前值</text>
-							<text class="data-value">{{indicator.currentValue}}{{indicator.unit}}</text>
-						</view>
-						<view class="data-item">
 							<text class="data-label">正常范围</text>
-							<text class="data-range">{{indicator.normalRange}}</text>
-						</view>
-						<view class="data-item">
-							<text class="data-label">测量时间</text>
-							<text class="data-time">{{indicator.measureTime}}</text>
+							<text class="data-range">{{indicator.normalValue || '暂无数据'}}</text>
 						</view>
 					</view>
-					<view class="indicator-trend">
-						<text class="trend-label">趋势</text>
-						<view class="trend-chart">
-							<view class="trend-point" v-for="(point, idx) in indicator.trend" :key="idx" :style="{height: point + '%'}"></view>
+					<view class="indicator-detail" v-if="expandedIndex === index">
+						<view class="detail-item">
+							<text class="detail-label">检查项ID</text>
+							<text class="detail-value">{{indicator.id}}</text>
+						</view>
+						<view class="detail-item" v-if="indicator.description">
+							<text class="detail-label">项目描述</text>
+							<text class="detail-value">{{indicator.description || '暂无描述'}}</text>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		
-		<!-- 添加记录 -->
-		<view class="add-record-section">
-			<button class="add-btn" @click="addRecord">
-				<image src="/static/images/icons/icon-add.png" mode="aspectFit" class="add-icon"></image>
-				<text>添加记录</text>
-			</button>
-		</view>
-		
-		<!-- 健康建议 -->
-		<view class="advice-section">
-			<view class="section-title">健康建议</view>
-			<view class="advice-list">
-				<view class="advice-item" v-for="(advice, index) in healthAdvice" :key="index">
-					<view class="advice-icon">
-						<image :src="advice.icon" mode="aspectFit"></image>
-					</view>
-					<view class="advice-content">
-						<text class="advice-title">{{advice.title}}</text>
-						<text class="advice-desc">{{advice.description}}</text>
-					</view>
-				</view>
-			</view>
+		<!-- 返回顶部按钮 -->
+		<view class="back-to-top" v-if="showBackToTop" @tap="scrollToTop">
+			<text class="iconfont icon-top"></text>
 		</view>
 	</view>
 </template>
 
 <script>
+	import { getCheckitemDetailList } from '@/api/health-indicator.js';
+	
 	export default {
 		data() {
 			return {
-				overviewData: [
-					{
-						name: '身高',
-						value: '165.2',
-						unit: 'cm',
-						icon: '/static/images/icons/icon-weight.png',
-						status: 'normal'
-					},
-					{
-						name: '体重',
-						value: '65.2',
-						unit: 'kg',
-						icon: '/static/images/icons/icon-weight.png',
-						status: 'normal'
-					},
-					{
-						name: '血压',
-						value: '120/80',
-						unit: 'mmHg',
-						icon: '/static/images/icons/icon-blood-pressure.png',
-						status: 'normal'
-					},
-					{
-						name: '血糖',
-						value: '5.2',
-						unit: 'mmol/L',
-						icon: '/static/images/icons/icon-blood-sugar.png',
-						status: 'normal'
-					},
-					{
-						name: '心率',
-						value: '72',
-						unit: 'bpm',
-						icon: '/static/images/icons/icon-heart-rate.png',
-						status: 'normal'
-					}
-				],
-				indicators: [
-					{
-						id: 1,
-						name: 'BMI',
-						icon: '/static/images/icons/icon-weight.png',
-						currentValue: '65.2',
-						unit: 'kg',
-						normalRange: '50-80kg',
-						measureTime: '2023-07-15 08:30',
-						status: 'normal',
-						trend: [60, 62, 63, 64, 65, 65.2]
-					},
-					{
-						id: 2,
-						name: '血压',
-						icon: '/static/images/icons/icon-blood-pressure.png',
-						currentValue: '120/80',
-						unit: 'mmHg',
-						normalRange: '90-140/60-90mmHg',
-						measureTime: '2023-07-15 09:00',
-						status: 'normal',
-						trend: [110, 115, 118, 120, 122, 120]
-					},
-					{
-						id: 3,
-						name: '血糖',
-						icon: '/static/images/icons/icon-blood-sugar.png',
-						currentValue: '5.2',
-						unit: 'mmol/L',
-						normalRange: '3.9-6.1mmol/L',
-						measureTime: '2023-07-15 07:30',
-						status: 'normal',
-						trend: [4.8, 5.0, 5.1, 5.3, 5.2, 5.2]
-					},
-					{
-						id: 4,
-						name: '心率',
-						icon: '/static/images/icons/icon-heart-rate.png',
-						currentValue: '72',
-						unit: 'bpm',
-						normalRange: '60-100bpm',
-						measureTime: '2023-07-15 08:45',
-						status: 'normal',
-						trend: [68, 70, 71, 73, 72, 72]
-					}
-				],
-				healthAdvice: [
-					{
-						title: '定期监测',
-						description: '建议每周测量一次体重，每天测量血压',
-						icon: '/static/images/icons/icon-monitor.png'
-					},
-					{
-						title: '健康饮食',
-						description: '控制盐分摄入，多吃蔬菜水果',
-						icon: '/static/images/icons/icon-diet.png'
-					},
-					{
-						title: '适量运动',
-						description: '每周进行3-5次有氧运动',
-						icon: '/static/images/icons/icon-exercise.png'
-					},
-					{
-						title: '规律作息',
-						description: '保证充足睡眠，避免熬夜',
-						icon: '/static/images/icons/icon-sleep.png'
-					}
-				]
+				indicators: [],         // 原始指标数据
+				searchText: '',         // 搜索文本
+				expandedIndex: -1,      // 当前展开的项目索引，-1表示没有展开的项目
+				showBackToTop: false,   // 是否显示返回顶部按钮
+				scrollTop: 0            // 页面滚动位置
+			}
+		},
+		computed: {
+			// 过滤后的指标列表
+			filteredIndicators() {
+				if (!this.searchText) {
+					return this.indicators;
+				}
+				
+				const searchLower = this.searchText.toLowerCase();
+				return this.indicators.filter(item => 
+					item.name.toLowerCase().includes(searchLower) || 
+					(item.normalValue && item.normalValue.toLowerCase().includes(searchLower))
+				);
 			}
 		},
 		onLoad() {
-			// 获取健康指标数据
-			this.getHealthData();
+			try {
+				console.log("页面加载 - onLoad触发");
+				// 获取健康指标数据
+				this.getHealthData();
+			} catch (error) {
+				console.error("onLoad错误:", error);
+			}
 		},
+		
+		// // 每次页面显示时调用
+		// onShow() {
+		// 	try {
+		// 		// 获取健康指标数据
+		// 		console.log("页面显示 - onShow触发");
+		// 		this.getHealthData();
+		// 	} catch (error) {
+		// 		console.error("onShow错误:", error);
+		// 	}
+		// },
+		
+		// 页面初次渲染完成时
+		onReady() {
+			try {
+				console.log("页面初次渲染完成 - onReady触发");
+			} catch (error) {
+				console.error("onReady错误:", error);
+			}
+		},
+		
+		// 监听页面滚动
+		onPageScroll(e) {
+			this.scrollTop = e.scrollTop;
+			this.showBackToTop = e.scrollTop > 200;
+		},
+		
 		methods: {
 			// 获取健康数据
-			getHealthData() {
-				// 这里可以替换为实际的API调用
-				console.log('获取健康数据');
-			},
-			// 查看详情
-			viewDetail(indicator) {
-				uni.navigateTo({
-					url: `/pages/indicator-detail/indicator-detail?id=${indicator.id}&name=${indicator.name}`
+			async getHealthData() {
+				console.log('开始获取健康数据...');
+				uni.showLoading({
+					title: '加载中...'
 				});
+				
+				try {
+					// 调用API获取检查项明细数据
+					const response = await getCheckitemDetailList();
+					
+					// 检查响应结构
+					if (!response) {
+						throw new Error('API响应为空');
+					}
+					
+					if (!response.data) {
+						throw new Error('API响应缺少data字段');
+					}
+					
+					if (!response.data.list) {
+						throw new Error('API响应缺少list字段');
+					}
+					
+					// 将API返回的数据映射到indicators数组
+					this.indicators = response.data.list.map((item, index) => {
+						return {
+							id: item.id || index + 1,
+							name: item.name || `指标${index + 1}`,
+							normalValue: item.normalValue || '暂无数据',
+							description: item.description || null
+						};
+					});
+					
+					console.log('成功获取健康指标数据', this.indicators);
+					
+					// 如果数据为空，显示提示
+					if (this.indicators.length === 0) {
+						uni.showToast({
+							title: '暂无检查项目数据',
+							icon: 'none'
+						});
+					}
+				} catch (error) {
+					console.error('获取健康指标数据失败', error);
+					uni.showToast({
+						title: '获取数据失败: ' + (error.message || '未知错误'),
+						icon: 'none',
+						duration: 3000
+					});
+				} finally {
+					uni.hideLoading();
+				}
 			},
-			// 添加记录
-			addRecord() {
-				uni.navigateTo({
-					url: '/pages/add-indicator/add-indicator'
+			
+			// 过滤指标
+			filterIndicators() {
+				// 重置展开状态
+				this.expandedIndex = -1;
+			},
+			
+			// 清除搜索
+			clearSearch() {
+				this.searchText = '';
+				this.expandedIndex = -1;
+			},
+			
+			// 切换展开/折叠状态
+			toggleExpand(index) {
+				if (this.expandedIndex === index) {
+					this.expandedIndex = -1; // 如果点击的是当前展开项，则折叠
+				} else {
+					this.expandedIndex = index; // 否则展开点击项
+				}
+			},
+			
+			// 返回顶部
+			scrollToTop() {
+				uni.pageScrollTo({
+					scrollTop: 0,
+					duration: 300
 				});
-			},
-			// 获取状态文本
-			getStatusText(status) {
-				const statusMap = {
-					'excellent': '优秀',
-					'good': '良好',
-					'normal': '正常',
-					'warning': '偏高',
-					'danger': '异常'
-				};
-				return statusMap[status] || '';
 			}
 		}
 	}
@@ -243,96 +233,48 @@
 
 .page-header {
 	text-align: center;
-	padding: 40rpx 0;
+	padding: 30rpx 0 40rpx;
 	
 	.page-title {
-		font-size: 36rpx;
+		font-size: 40rpx;
 		font-weight: bold;
-		color: #333333;
+		color: #2979ff;
+		margin-bottom: 10rpx;
+		display: block;
+	}
+	
+	.page-subtitle {
+		font-size: 26rpx;
+		color: #666;
+		display: block;
 	}
 }
 
-.overview-section {
-	background-color: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	margin-bottom: 30rpx;
+.search-box {
+	padding: 0 20rpx 20rpx;
 	
-	.overview-item {
+	.search-input {
+		background-color: #ffffff;
+		border-radius: 40rpx;
+		padding: 15rpx 30rpx;
 		display: flex;
 		align-items: center;
-		padding: 20rpx 0;
-		border-bottom: 1px solid #f5f5f5;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 		
-		&:last-child {
-			border-bottom: none;
+		.iconfont {
+			color: #999;
+			font-size: 32rpx;
+			margin-right: 10rpx;
 		}
 		
-		.overview-icon {
-			width: 60rpx;
-			height: 60rpx;
-			margin-right: 20rpx;
-			
-			image {
-				width: 100%;
-				height: 100%;
-			}
-		}
-		
-		.overview-info {
+		input {
 			flex: 1;
-			
-			.overview-name {
-				font-size: 28rpx;
-				color: #333333;
-				margin-bottom: 8rpx;
-				display: block;
-			}
-			
-			.overview-value {
-				font-size: 32rpx;
-				font-weight: bold;
-				color: #1296db;
-				margin-bottom: 4rpx;
-				display: block;
-			}
-			
-			.overview-unit {
-				font-size: 22rpx;
-				color: #999999;
-				display: block;
-			}
+			height: 60rpx;
+			font-size: 28rpx;
 		}
 		
-		.overview-status {
-			padding: 8rpx 16rpx;
-			border-radius: 15rpx;
-			font-size: 22rpx;
-			
-			&.excellent {
-				background-color: #52c41a;
-				color: #ffffff;
-			}
-			
-			&.good {
-				background-color: #1296db;
-				color: #ffffff;
-			}
-			
-			&.normal {
-				background-color: #faad14;
-				color: #ffffff;
-			}
-			
-			&.warning {
-				background-color: #ff7a45;
-				color: #ffffff;
-			}
-			
-			&.danger {
-				background-color: #ff4d4f;
-				color: #ffffff;
-			}
+		.icon-clear {
+			padding: 10rpx;
 		}
 	}
 }
@@ -342,12 +284,47 @@
 	border-radius: 20rpx;
 	padding: 30rpx;
 	margin-bottom: 30rpx;
+	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 	
-	.section-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333333;
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 30rpx;
+		
+		.section-title {
+			display: flex;
+			align-items: center;
+			
+			.title-icon {
+				width: 8rpx;
+				height: 30rpx;
+				background-color: #2979ff;
+				border-radius: 4rpx;
+				margin-right: 15rpx;
+			}
+			
+			text {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
+			}
+		}
+		
+		.indicator-count {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+	
+	.no-data {
+		padding: 100rpx 0;
+		text-align: center;
+		
+		.no-data-text {
+			font-size: 28rpx;
+			color: #999;
+		}
 	}
 	
 	.indicator-list {
@@ -356,6 +333,12 @@
 			border-radius: 15rpx;
 			padding: 25rpx;
 			margin-bottom: 20rpx;
+			transition: all 0.3s;
+			
+			&.expanded {
+				background-color: #eef5ff;
+				box-shadow: 0 4rpx 12rpx rgba(41, 121, 255, 0.1);
+			}
 			
 			.indicator-header {
 				display: flex;
@@ -367,47 +350,35 @@
 					display: flex;
 					align-items: center;
 					
-					.indicator-icon {
+					.indicator-index {
 						width: 40rpx;
 						height: 40rpx;
+						background-color: #2979ff;
+						color: #fff;
+						font-size: 24rpx;
+						border-radius: 50%;
+						display: flex;
+						align-items: center;
+						justify-content: center;
 						margin-right: 15rpx;
 					}
 					
 					.indicator-name {
-						font-size: 28rpx;
+						font-size: 30rpx;
 						font-weight: bold;
 						color: #333333;
 					}
 				}
 				
-				.indicator-status {
-					padding: 6rpx 12rpx;
-					border-radius: 12rpx;
-					font-size: 20rpx;
-					
-					&.excellent {
-						background-color: #52c41a;
-						color: #ffffff;
+				.expand-icon {
+					.iconfont {
+						font-size: 24rpx;
+						color: #999;
+						transition: transform 0.3s;
 					}
 					
-					&.good {
-						background-color: #1296db;
-						color: #ffffff;
-					}
-					
-					&.normal {
-						background-color: #faad14;
-						color: #ffffff;
-					}
-					
-					&.warning {
-						background-color: #ff7a45;
-						color: #ffffff;
-					}
-					
-					&.danger {
-						background-color: #ff4d4f;
-						color: #ffffff;
+					.icon-up {
+						transform: rotate(180deg);
 					}
 				}
 			}
@@ -419,55 +390,48 @@
 				
 				.data-item {
 					flex: 1;
-					text-align: center;
 					
 					.data-label {
-						font-size: 22rpx;
+						font-size: 24rpx;
 						color: #999999;
 						margin-bottom: 8rpx;
 						display: block;
 					}
 					
-					.data-value {
-						font-size: 26rpx;
-						font-weight: bold;
-						color: #333333;
-						display: block;
-					}
-					
 					.data-range {
-						font-size: 24rpx;
-						color: #666666;
-						display: block;
-					}
-					
-					.data-time {
-						font-size: 22rpx;
-						color: #999999;
+						font-size: 28rpx;
+						color: #2979ff;
+						font-weight: 500;
 						display: block;
 					}
 				}
 			}
 			
-			.indicator-trend {
-				.trend-label {
-					font-size: 24rpx;
-					color: #666666;
+			.indicator-detail {
+				background-color: rgba(255, 255, 255, 0.7);
+				border-radius: 10rpx;
+				padding: 20rpx;
+				margin-top: 20rpx;
+				border-top: 1px dashed #e0e0e0;
+				
+				.detail-item {
 					margin-bottom: 15rpx;
-					display: block;
-				}
-				
-				.trend-chart {
-					display: flex;
-					align-items: end;
-					height: 60rpx;
-					gap: 8rpx;
 					
-					.trend-point {
-						flex: 1;
-						background-color: #1296db;
-						border-radius: 2rpx;
-						min-height: 4rpx;
+					&:last-child {
+						margin-bottom: 0;
+					}
+					
+					.detail-label {
+						font-size: 24rpx;
+						color: #999;
+						margin-bottom: 5rpx;
+						display: block;
+					}
+					
+					.detail-value {
+						font-size: 26rpx;
+						color: #666;
+						display: block;
 					}
 				}
 			}
@@ -475,84 +439,48 @@
 	}
 }
 
-.add-record-section {
-	margin-bottom: 30rpx;
+.back-to-top {
+	position: fixed;
+	right: 30rpx;
+	bottom: 100rpx;
+	width: 80rpx;
+	height: 80rpx;
+	background-color: rgba(41, 121, 255, 0.8);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
+	z-index: 99;
 	
-	.add-btn {
-		width: 100%;
-		height: 90rpx;
-		background-color: #1296db;
-		color: #ffffff;
-		border-radius: 45rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 28rpx;
-		
-		.add-icon {
-			width: 40rpx;
-			height: 40rpx;
-			margin-right: 15rpx;
-		}
-		
-		&::after {
-			border: none;
-		}
+	.iconfont {
+		color: #fff;
+		font-size: 40rpx;
 	}
 }
 
-.advice-section {
-	background-color: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	
-	.section-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333333;
-		margin-bottom: 30rpx;
-	}
-	
-	.advice-list {
-		.advice-item {
-			display: flex;
-			align-items: center;
-			padding: 20rpx 0;
-			border-bottom: 1px solid #f5f5f5;
-			
-			&:last-child {
-				border-bottom: none;
-			}
-			
-			.advice-icon {
-				width: 60rpx;
-				height: 60rpx;
-				margin-right: 20rpx;
-				
-				image {
-					width: 100%;
-					height: 100%;
-				}
-			}
-			
-			.advice-content {
-				flex: 1;
-				
-				.advice-title {
-					font-size: 28rpx;
-					font-weight: bold;
-					color: #333333;
-					margin-bottom: 8rpx;
-					display: block;
-				}
-				
-				.advice-desc {
-					font-size: 24rpx;
-					color: #666666;
-					display: block;
-				}
-			}
-		}
-	}
+/* 简单的图标字体定义 */
+.iconfont {
+	font-family: "iconfont" !important;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
-</style> 
+
+/* 使用通用字符作为图标 */
+.icon-search:before {
+	content: "\1F50D"; /* 放大镜 */
+}
+.icon-clear:before {
+	content: "\2715"; /* X符号 */
+}
+.icon-down:before {
+	content: "\25BC"; /* 向下箭头 */
+}
+.icon-up:before {
+	content: "\25B2"; /* 向上箭头 */
+}
+.icon-top:before {
+	content: "\2191"; /* 上箭头 */
+}
+</style>
