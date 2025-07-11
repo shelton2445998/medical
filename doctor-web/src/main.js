@@ -8,14 +8,19 @@ import axios from 'axios'
 import './assets/css/global.css'
 
 // 配置axios
-axios.defaults.baseURL = 'http://localhost:3000/api'
+axios.defaults.baseURL = '/api'  // 修改为使用vue.config.js中配置的代理前缀
 axios.defaults.timeout = 8000 // 设置8秒超时时间
 
 // 请求拦截器
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('doctorToken')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    // 设置正确格式的token，确保使用标准的头部名称
+    config.headers.Authorization = token
+    // 确保请求头中包含正确的Content-Type
+    if (config.method === 'post') {
+      config.headers['Content-Type'] = 'application/json;charset=UTF-8'
+    }
   }
   return config
 })
@@ -28,8 +33,8 @@ axios.interceptors.response.use(
   error => {
     console.error('API请求错误:', error)
     // 在控制台显示一个友好的消息
-    console.info('系统当前处于演示模式，使用静态数据展示功能')
-    // 将错误继续向下传递，让各组件自行处理静态数据
+    console.info('请求失败，请检查网络连接或联系管理员')
+    // 将错误继续向下传递，让各组件自行处理
     return Promise.reject(error)
   }
 )

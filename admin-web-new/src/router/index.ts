@@ -1,14 +1,10 @@
 // @ts-ignore
 import type {App} from 'vue';
-import {createRouter, createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
-import basicRoutes from "@/router/basic";
+import {createRouter, createWebHashHistory} from "vue-router";
+import basicRoutes from './basic'
 
-export const router: Router = createRouter({
+export const router = createRouter({
     history: createWebHashHistory(),
-    routes: [...basicRoutes] as RouteRecordRaw[]
-})
-
-
-export function setupRouter(app: App<Element>) {
-    app.use(router);
-}
+    routes: [...basicRoutes],
+    strict: true,
+});

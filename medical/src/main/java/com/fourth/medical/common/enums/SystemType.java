@@ -12,7 +12,8 @@ import java.util.Map;
 public enum SystemType {
 
     ADMIN(1, "Admin管理后台"),
-    APP(2, "APP移动端端");
+    APP(2, "APP移动端端"),
+    DOCTOR(3, "医生端");
 
     private Integer code;
     private String desc;

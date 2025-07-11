@@ -14,12 +14,12 @@ import com.fourth.medical.medical.vo.DoctorVo;
 import com.fourth.medical.medical.query.AppDoctorQuery;
 import com.fourth.medical.medical.vo.AppDoctorVo;
 import com.fourth.medical.util.PagingUtil;
+import com.fourth.medical.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 
@@ -41,6 +41,15 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
     public boolean addDoctor(DoctorDto dto) {
         Doctor doctor = new Doctor();
         BeanUtils.copyProperties(dto, doctor);
+        
+        // 自动生成盐值
+        String salt = PasswordUtil.generateSalt();
+        doctor.setSalt(salt);
+        
+        // 加密密码
+        String encryptedPassword = PasswordUtil.encrypt(dto.getPassword(), salt);
+        doctor.setPassword(encryptedPassword);
+        
         return save(doctor);
     }
 
@@ -52,6 +61,21 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
         if (doctor == null) {
             throw new BusinessException("医生不存在");
         }
+        
+        // 如果修改了密码，需要重新加密
+        if (dto.getPassword() != null && !dto.getPassword().equals(doctor.getPassword())) {
+            // 获取原始盐值或生成新的盐值
+            String salt = doctor.getSalt();
+            if (dto.getSalt() != null && !dto.getSalt().equals(salt)) {
+                salt = dto.getSalt();
+                doctor.setSalt(salt);
+            }
+            
+            // 使用盐值加密密码
+            String encryptedPassword = PasswordUtil.encrypt(dto.getPassword(), salt);
+            dto.setPassword(encryptedPassword);
+        }
+        
         BeanUtils.copyProperties(dto, doctor);
         return updateById(doctor);
     }
@@ -91,5 +115,4 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
         Paging<AppDoctorVo> paging = new Paging<>(list);
         return paging;
     }
-
 }

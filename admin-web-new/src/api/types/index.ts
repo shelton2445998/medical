@@ -36,3 +36,6 @@ export interface ListResultType {
     list:Array<any>
     total?:number
 }
+
+// 导出API类型定义
+export * from './apiTypes'

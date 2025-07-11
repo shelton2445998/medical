@@ -42,6 +42,14 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     SysUser getSysUserByUsername(String username);
 
     /**
+     * 根据手机号获取登录用户对象
+     *
+     * @param mobile
+     * @return
+     */
+    SysUser getSysUserByMobile(String mobile);
+
+    /**
      * 根据角色ID获取用户数量
      *
      * @param roleId

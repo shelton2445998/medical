@@ -50,5 +50,13 @@ public interface DoctorMapper extends BaseMapper<Doctor> {
      * @return
      */
     List<AppDoctorVo> getAppDoctorPage(AppDoctorQuery query);
+    
+    /**
+     * 根据手机号查询医生
+     *
+     * @param mobile
+     * @return
+     */
+    Doctor getDoctorByMobile(String mobile);
 
 }

@@ -13,6 +13,24 @@
         select *
         from setmeal_detail
         <where>
+            <if test="setmealId != null">
+                and setmeal_id = #{setmealId}
+            </if>
+            <if test="hospitalId != null">
+                and hospital_id = #{hospitalId}
+            </if>
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="packageType != null">
+                and package_type = #{packageType}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%') or description like concat('%',#{keyword},'%'))
+            </if>
         </where>
     </select>
 
@@ -27,6 +45,24 @@
         select *
         from setmeal_detail
         <where>
+            <if test="setmealId != null">
+                and setmeal_id = #{setmealId}
+            </if>
+            <if test="hospitalId != null">
+                and hospital_id = #{hospitalId}
+            </if>
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="packageType != null">
+                and package_type = #{packageType}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%',#{keyword},'%') or description like concat('%',#{keyword},'%'))
+            </if>
         </where>
     </select>
 

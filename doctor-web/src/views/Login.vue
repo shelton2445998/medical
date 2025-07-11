@@ -3,10 +3,10 @@
     <div class="login-box">
       <div class="title">医生工作站</div>
       <div class="subtitle">医疗预约管理系统</div>
-      <div class="demo-tip">演示模式：API不可用时，可使用任意用户名密码登录</div>
+      <div class="demo-tip">演示模式：API不可用时，可使用任意手机号和密码登录</div>
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
-        <el-form-item prop="username">
-          <el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="请输入用户名"></el-input>
+        <el-form-item prop="mobile">
+          <el-input v-model="loginForm.mobile" prefix-icon="el-icon-phone" placeholder="请输入手机号"></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password" placeholder="请输入密码"></el-input>
@@ -33,14 +33,14 @@ export default {
     const loading = ref(false)
 
     const loginForm = reactive({
-      username: '',
+      mobile: '',
       password: ''
     })
 
     const loginRules = {
-      username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' },
-        { min: 3, max: 20, message: '用户名长度应在3到20个字符之间', trigger: 'blur' }
+      mobile: [
+        { required: true, message: '请输入手机号', trigger: 'blur' },
+        { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
       ],
       password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -55,33 +55,24 @@ export default {
         if (valid) {
           try {
             loading.value = true
-            // 修正医生登录接口URL，符合文档中医生端认证接口规范
-            const { data: res } = await axios.post('/api/doctor/login', loginForm)
+            // 使用手机号和密码登录
+            const { data: res } = await axios.post('/doctor/login', loginForm)
             if (res.code === 200) {
+              // 直接使用后端返回的token，不做任何修改
               localStorage.setItem('doctorToken', res.data.token)
-              localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
+              // 根据实际返回的结构存储医生信息
+              if (res.data.doctorInfo) {
+                localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
+              }
               ElMessage.success('登录成功')
               router.push('/home/dashboard')
             } else {
-              ElMessage.error(res.message || '登录失败，请检查用户名和密码')
+              ElMessage.error(res.message || '登录失败，请检查手机号和密码')
             }
           } catch (error) {
             console.error('登录出错：', error)
-            // API失效时使用静态演示数据登录
-            const mockDoctorInfo = {
-              doctorId: 'D2023001',
-              name: loginForm.username || '演示医生',
-              department: 'internal',
-              departmentName: '内科',
-              title: '主治医师',
-              phone: '13800138000'
-            }
-            // 生成模拟token
-            const mockToken = 'mock_token_' + Math.random().toString(36).substring(2)
-            localStorage.setItem('doctorToken', mockToken)
-            localStorage.setItem('doctorInfo', JSON.stringify(mockDoctorInfo))
-            ElMessage.success('登录成功(演示模式)')
-            router.push('/home/dashboard')
+            // 显示错误信息，不再使用模拟数据
+            ElMessage.error('登录失败，服务器连接异常')
           } finally {
             loading.value = false
           }

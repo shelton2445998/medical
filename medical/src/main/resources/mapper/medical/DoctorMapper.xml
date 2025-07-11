@@ -35,5 +35,11 @@
             </if>
         </where>
     </select>
+    
+    <select id="getDoctorByMobile" resultType="com.fourth.medical.medical.entity.Doctor">
+        select *
+        from doctor
+        where mobile = #{mobile}
+    </select>
 
 </mapper>
