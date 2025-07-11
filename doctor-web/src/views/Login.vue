@@ -25,6 +25,15 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
+// 1. 配置后端基础地址（需与后端服务地址一致，如http://localhost:8080）
+const BACKEND_BASE_URL = 'http://localhost:8888'
+
+// 2. 创建axios实例，配置跨域携带凭证
+const request = axios.create({
+  baseURL: BACKEND_BASE_URL,
+  withCredentials: true // 允许跨域请求携带Cookie，与后端配置匹配
+})
+
 export default {
   name: 'LoginView',
   setup() {
@@ -55,12 +64,11 @@ export default {
         if (valid) {
           try {
             loading.value = true
-            // 使用手机号和密码登录
-            const { data: res } = await axios.post('/doctor/login', loginForm)
+            // 3. 补充/api前缀，与文档接口路径一致
+            const { data: res } = await request.post('/api/doctor/login', loginForm)
+            
             if (res.code === 200) {
-              // 直接使用后端返回的token，不做任何修改
               localStorage.setItem('doctorToken', res.data.token)
-              // 根据实际返回的结构存储医生信息
               if (res.data.doctorInfo) {
                 localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
               }
@@ -71,8 +79,13 @@ export default {
             }
           } catch (error) {
             console.error('登录出错：', error)
-            // 显示错误信息，不再使用模拟数据
-            ElMessage.error('登录失败，服务器连接异常')
+            if (error.response?.status === 404) {
+              ElMessage.error('接口不存在，请检查路径是否正确')
+            } else if (error.message.includes('Network Error')) {
+              ElMessage.error('服务器未启动或地址错误')
+            } else {
+              ElMessage.error('登录失败，服务器连接异常')
+            }
           } finally {
             loading.value = false
           }
@@ -92,6 +105,7 @@ export default {
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .login-container {
   height: 100vh;
   display: flex;
