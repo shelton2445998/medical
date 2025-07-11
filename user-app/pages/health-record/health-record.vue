@@ -141,7 +141,7 @@
 .content {
 	background-color: #f5f5f5;
 	min-height: 100vh;
-	padding: 100rpx 0 120rpx;
+	padding: 0 0 120rpx;
 	position: relative;
 }
 
