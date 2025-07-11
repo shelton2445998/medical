@@ -146,6 +146,24 @@
 			"style": {
 				"navigationBarTitleText": "我的收藏"
 			}
+		},
+		{
+			"path": "pages/health-assessment/health-assessment",
+			"style": {
+				"navigationBarTitleText": "健康评估"
+			}
+		},
+		{
+			"path": "pages/health-indicator/health-indicator",
+			"style": {
+				"navigationBarTitleText": "健康指标"
+			}
+		},
+		{
+			"path": "pages/assessment-questionnaire/assessment-questionnaire",
+			"style": {
+				"navigationBarTitleText": "健康评估"
+			}
 		}
 	],
 	"tabBar": {

@@ -159,13 +159,13 @@
 						name: '健康评估',
 						icon: '/static/images/icons/icon-assessment.png',
 						url: '/pages/health-assessment/health-assessment',
-						implemented: false
+						implemented: true
 					},
 					{
 						name: '健康指标',
 						icon: '/static/images/icons/icon-indicator.png',
 						url: '/pages/health-indicator/health-indicator',
-						implemented: false
+						implemented: true
 					},
 					{
 						name: '健康档案',
