@@ -66,10 +66,19 @@
 				searchKeyword: '',
 				hospitals: [],
 				filteredHospitals: [],
-				loading: false
+				loading: false,
+				memberId: null,
+				memberName: ''
 			}
 		},
-		onLoad() {
+		onLoad(options) {
+			// 获取家庭成员信息
+			if (options.memberId) {
+				this.memberId = options.memberId;
+			}
+			if (options.memberName) {
+				this.memberName = options.memberName;
+			}
 			// 获取医院列表数据
 			this.getHospitalList();
 		},
@@ -230,9 +239,15 @@
 				// 存储选择的医院信息
 				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
 				
+				// 构建跳转URL，包含家庭成员信息
+				let packageUrl = '/pages/package/package';
+				if (this.memberId && this.memberName) {
+					packageUrl += `?memberId=${this.memberId}&memberName=${this.memberName}`;
+				}
+				
 				// 跳转到套餐选择页面
 				uni.navigateTo({
-					url: '/pages/package/package'
+					url: packageUrl
 				});
 			},
 			// 拨打电话

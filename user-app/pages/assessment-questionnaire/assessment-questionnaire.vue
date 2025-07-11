@@ -1,12 +1,12 @@
 <template>
 	<view class="content">
-		<!-- Ò³Ãæ±êÌâ -->
+		<!-- é¡µé¢æ ‡é¢˜ -->
 		<view class="page-header">
 			<text class="page-title">{{assessmentType}}</text>
-			<text class="page-subtitle">ÇëÈçÊµ»Ø´ğÒÔÏÂÎÊÌâ</text>
+			<text class="page-subtitle">è¯·å¦‚å®å›ç­”ä»¥ä¸‹é—®é¢˜</text>
 		</view>
 		
-		<!-- ½ø¶ÈÌõ -->
+		<!-- è¿›åº¦æ¡ -->
 		<view class="progress-section">
 			<view class="progress-bar">
 				<view class="progress-fill" :style="{width: progress + '%'}"></view>
@@ -14,13 +14,13 @@
 			<text class="progress-text">{{currentIndex + 1}} / {{questions.length}}</text>
 		</view>
 		
-		<!-- ÎÊÌâÁĞ±í -->
+		<!-- é—®é¢˜åˆ—è¡¨ -->
 		<view class="question-section" v-if="currentQuestion">
 			<view class="question-item">
 				<text class="question-title">{{currentQuestion.title}}</text>
 				<text class="question-desc" v-if="currentQuestion.description">{{currentQuestion.description}}</text>
 				
-				<!-- µ¥Ñ¡Ìâ -->
+				<!-- å•é€‰é¢˜ -->
 				<view class="options-list" v-if="currentQuestion.type === 'single'">
 					<view 
 						class="option-item" 
@@ -36,7 +36,7 @@
 					</view>
 				</view>
 				
-				<!-- ¶àÑ¡Ìâ -->
+				<!-- å¤šé€‰é¢˜ -->
 				<view class="options-list" v-if="currentQuestion.type === 'multiple'">
 					<view 
 						class="option-item" 
@@ -52,7 +52,7 @@
 					</view>
 				</view>
 				
-				<!-- ÊıÖµÊäÈë -->
+				<!-- æ•°å€¼è¾“å…¥ -->
 				<view class="input-section" v-if="currentQuestion.type === 'number'">
 					<input 
 						class="number-input" 
@@ -65,25 +65,25 @@
 			</view>
 		</view>
 		
-		<!-- ²Ù×÷°´Å¥ -->
+		<!-- æ“ä½œæŒ‰é’® -->
 		<view class="action-section">
 			<button 
 				class="action-btn prev-btn" 
 				v-if="currentIndex > 0"
 				@click="prevQuestion"
-			>ÉÏÒ»Ìâ</button>
+			>ä¸Šä¸€é¢˜</button>
 			<button 
 				class="action-btn next-btn" 
 				v-if="currentIndex < questions.length - 1"
 				@click="nextQuestion"
 				:disabled="!canNext"
-			>ÏÂÒ»Ìâ</button>
+			>ä¸‹ä¸€é¢˜</button>
 			<button 
 				class="action-btn submit-btn" 
 				v-if="currentIndex === questions.length - 1"
 				@click="submitAssessment"
 				:disabled="!canSubmit"
-			>Ìá½»ÆÀ¹À</button>
+			>æäº¤è¯„ä¼°</button>
 		</view>
 	</view>
 </template>
@@ -102,72 +102,72 @@
 				questions: [
 					{
 						id: 1,
-						title: 'ÄúµÄÄêÁäÊÇ¶àÉÙ£¿',
+						title: 'æ‚¨çš„å¹´é¾„æ˜¯å¤šå°‘ï¼Ÿ',
 						type: 'number',
-						placeholder: 'ÇëÊäÈëÄêÁä',
-						unit: 'Ëê'
+						placeholder: 'è¯·è¾“å…¥å¹´é¾„',
+						unit: 'å²'
 					},
 					{
 						id: 2,
-						title: 'ÄúµÄĞÔ±ğÊÇ£¿',
+						title: 'æ‚¨çš„æ€§åˆ«æ˜¯ï¼Ÿ',
 						type: 'single',
 						options: [
-							{value: 'male', text: 'ÄĞ'},
-							{value: 'female', text: 'Å®'}
+							{value: 'male', text: 'ç”·'},
+							{value: 'female', text: 'å¥³'}
 						]
 					},
 					{
 						id: 3,
-						title: 'ÄúµÄÉí¸ßÊÇ¶àÉÙ£¿',
+						title: 'æ‚¨çš„èº«é«˜æ˜¯å¤šå°‘ï¼Ÿ',
 						type: 'number',
-						placeholder: 'ÇëÊäÈëÉí¸ß',
+						placeholder: 'è¯·è¾“å…¥èº«é«˜',
 						unit: 'cm'
 					},
 					{
 						id: 4,
-						title: 'ÄúµÄÌåÖØÊÇ¶àÉÙ£¿',
+						title: 'æ‚¨çš„ä½“é‡æ˜¯å¤šå°‘ï¼Ÿ',
 						type: 'number',
-						placeholder: 'ÇëÊäÈëÌåÖØ',
+						placeholder: 'è¯·è¾“å…¥ä½“é‡',
 						unit: 'kg'
 					},
 					{
 						id: 5,
-						title: 'ÄúÊÇ·ñÓĞ¸ßÑªÑ¹²¡Ê·£¿',
+						title: 'æ‚¨æ˜¯å¦æœ‰é«˜è¡€å‹ç—…å²ï¼Ÿ',
 						type: 'single',
 						options: [
-							{value: 'yes', text: 'ÊÇ'},
-							{value: 'no', text: '·ñ'}
+							{value: 'yes', text: 'æ˜¯'},
+							{value: 'no', text: 'å¦'}
 						]
 					},
 					{
 						id: 6,
-						title: 'ÄúÊÇ·ñÓĞÌÇÄò²¡²¡Ê·£¿',
+						title: 'æ‚¨æ˜¯å¦æœ‰ç³–å°¿ç—…ç—…å²ï¼Ÿ',
 						type: 'single',
 						options: [
-							{value: 'yes', text: 'ÊÇ'},
-							{value: 'no', text: '·ñ'}
+							{value: 'yes', text: 'æ˜¯'},
+							{value: 'no', text: 'å¦'}
 						]
 					},
 					{
 						id: 7,
-						title: 'ÄúÊÇ·ñÎüÑÌ£¿',
+						title: 'æ‚¨æ˜¯å¦å¸çƒŸï¼Ÿ',
 						type: 'single',
 						options: [
-							{value: 'yes', text: 'ÊÇ'},
-							{value: 'no', text: '·ñ'},
-							{value: 'quit', text: 'ÒÑ½äÑÌ'}
+							{value: 'yes', text: 'æ˜¯'},
+							{value: 'no', text: 'å¦'},
+							{value: 'quit', text: 'å·²æˆ’çƒŸ'}
 						]
 					},
 					{
 						id: 8,
-						title: 'ÄúÃ¿ÖÜÔË¶¯ÆµÂÊÈçºÎ£¿',
+						title: 'æ‚¨æ¯å‘¨è¿åŠ¨é¢‘ç‡å¦‚ä½•ï¼Ÿ',
 						type: 'single',
 						options: [
-							{value: 'never', text: '´Ó²»ÔË¶¯'},
-							{value: 'rarely', text: 'Å¼¶ûÔË¶¯'},
-							{value: 'sometimes', text: 'ÓĞÊ±ÔË¶¯'},
-							{value: 'often', text: '¾­³£ÔË¶¯'},
-							{value: 'always', text: 'Ã¿ÌìÔË¶¯'}
+							{value: 'never', text: 'ä»ä¸è¿åŠ¨'},
+							{value: 'rarely', text: 'å¶å°”è¿åŠ¨'},
+							{value: 'sometimes', text: 'æœ‰æ—¶è¿åŠ¨'},
+							{value: 'often', text: 'ç»å¸¸è¿åŠ¨'},
+							{value: 'always', text: 'æ¯å¤©è¿åŠ¨'}
 						]
 					}
 				]
@@ -196,15 +196,15 @@
 			}
 		},
 		onLoad(options) {
-			this.assessmentType = options.typeName || '½¡¿µÆÀ¹À';
+			this.assessmentType = options.typeName || 'å¥åº·è¯„ä¼°';
 			this.typeId = options.typeId || '';
 		},
 		methods: {
-			// Ñ¡Ôñ´ğ°¸£¨µ¥Ñ¡Ìâ£©
+			// é€‰æ‹©ç­”æ¡ˆï¼ˆå•é€‰é¢˜ï¼‰
 			selectAnswer(value) {
 				this.selectedAnswer = value;
 			},
-			// ÇĞ»»´ğ°¸£¨¶àÑ¡Ìâ£©
+			// åˆ‡æ¢ç­”æ¡ˆï¼ˆå¤šé€‰é¢˜ï¼‰
 			toggleAnswer(value) {
 				const index = this.selectedAnswers.indexOf(value);
 				if (index > -1) {
@@ -213,7 +213,7 @@
 					this.selectedAnswers.push(value);
 				}
 			},
-			// ±£´æµ±Ç°´ğ°¸
+			// ä¿å­˜å½“å‰ç­”æ¡ˆ
 			saveAnswer() {
 				const question = this.currentQuestion;
 				let answer = '';
@@ -231,7 +231,7 @@
 					answer: answer
 				};
 			},
-			// ÏÂÒ»Ìâ
+			// ä¸‹ä¸€é¢˜
 			nextQuestion() {
 				if (!this.canNext) return;
 				
@@ -239,20 +239,20 @@
 				this.currentIndex++;
 				this.resetAnswer();
 			},
-			// ÉÏÒ»Ìâ
+			// ä¸Šä¸€é¢˜
 			prevQuestion() {
 				if (this.currentIndex > 0) {
 					this.currentIndex--;
 					this.loadAnswer();
 				}
 			},
-			// ÖØÖÃ´ğ°¸
+			// é‡ç½®ç­”æ¡ˆ
 			resetAnswer() {
 				this.selectedAnswer = '';
 				this.selectedAnswers = [];
 				this.numberAnswer = '';
 			},
-			// ¼ÓÔØ´ğ°¸
+			// åŠ è½½ç­”æ¡ˆ
 			loadAnswer() {
 				const savedAnswer = this.answers[this.currentIndex];
 				if (savedAnswer) {
@@ -266,21 +266,21 @@
 					}
 				}
 			},
-			// Ìá½»ÆÀ¹À
+			// æäº¤è¯„ä¼°
 			submitAssessment() {
 				if (!this.canSubmit) return;
 				
 				this.saveAnswer();
 				
 				uni.showLoading({
-					title: 'ÕıÔÚÆÀ¹À...'
+					title: 'æ­£åœ¨è¯„ä¼°...'
 				});
 				
-				// Ä£ÄâÆÀ¹À¹ı³Ì
+				// æ¨¡æ‹Ÿè¯„ä¼°è¿‡ç¨‹
 				setTimeout(() => {
 					uni.hideLoading();
 					
-					// ¼ÆËãÆÀ¹À½á¹û
+					// è®¡ç®—è¯„ä¼°ç»“æœ
 					const score = this.calculateScore();
 					const resultLevel = this.getResultLevel(score);
 					
@@ -289,29 +289,29 @@
 					});
 				}, 2000);
 			},
-			// ¼ÆËãÆÀ·Ö
+			// è®¡ç®—è¯„åˆ†
 			calculateScore() {
 				let score = 100;
 				
-				// ¼òµ¥µÄÆÀ·ÖÂß¼­
+				// ç®€å•çš„è¯„åˆ†é€»è¾‘
 				this.answers.forEach(answer => {
 					if (answer.questionId === 5 && answer.answer === 'yes') {
-						score -= 20; // ¸ßÑªÑ¹¼õ·Ö
+						score -= 20; // é«˜è¡€å‹å‡åˆ†
 					}
 					if (answer.questionId === 6 && answer.answer === 'yes') {
-						score -= 25; // ÌÇÄò²¡¼õ·Ö
+						score -= 25; // ç³–å°¿ç—…å‡åˆ†
 					}
 					if (answer.questionId === 7 && answer.answer === 'yes') {
-						score -= 15; // ÎüÑÌ¼õ·Ö
+						score -= 15; // å¸çƒŸå‡åˆ†
 					}
 					if (answer.questionId === 8 && answer.answer === 'never') {
-						score -= 10; // ²»ÔË¶¯¼õ·Ö
+						score -= 10; // ä¸è¿åŠ¨å‡åˆ†
 					}
 				});
 				
 				return Math.max(score, 0);
 			},
-			// »ñÈ¡½á¹ûµÈ¼¶
+			// è·å–ç»“æœç­‰çº§
 			getResultLevel(score) {
 				if (score >= 90) return 'excellent';
 				if (score >= 80) return 'good';

@@ -35,7 +35,7 @@
 				<view class="package-items">
 					<text class="items-title">检查项目：</text>
 					<view class="items-list">
-						<text class="item-tag" v-for="(tag, tagIndex) in item.items" :key="tagIndex">{{tag}}</text>
+						<text class="item-tag" v-for="(tag, tagIndex) in item.checkItems" :key="tagIndex">{{tag}}</text>
 					</view>
 				</view>
 				<view class="package-footer">
@@ -61,10 +61,20 @@
 				],
 				packages: [],
 				filteredPackages: [],
-				selectedHospital: null
+				selectedHospital: null,
+				memberId: null,
+				memberName: ''
 			}
 		},
-		onLoad() {
+		onLoad(options) {
+			// 获取家庭成员信息
+			if (options.memberId) {
+				this.memberId = options.memberId;
+			}
+			if (options.memberName) {
+				this.memberName = options.memberName;
+			}
+			
 			this.getPackageList();
 			
 			// 获取选择的医院信息
@@ -85,7 +95,9 @@
 							price: item.price || 0,
 							discountPrice: item.discountPrice || item.price || 0,
 							description: item.description || '',
-							items: item.items || [],
+							checkItems: item.items || [],
+							suitableCrowd: item.suitableCrowd || '适合一般人群',
+							appointmentNotice: item.appointmentNotice || '请按医院要求准备',
 							sold: item.sold || 0,
 							recommend: item.recommend || false
 						}));
@@ -119,9 +131,15 @@
 				// 存储选择的套餐信息
 				uni.setStorageSync('selectedPackage', JSON.stringify(pkg));
 				
-				// 跳转到原来的预约流程页面
+				// 构建跳转URL，包含家庭成员信息
+				let flowUrl = '/pages/appointment/appointment-flow';
+				if (this.memberId && this.memberName) {
+					flowUrl += `?memberId=${this.memberId}&memberName=${this.memberName}`;
+				}
+				
+				// 跳转到预约流程页面
 				uni.navigateTo({
-					url: '/pages/appointment/appointment-flow'
+					url: flowUrl
 				});
 			},
 			// 查看套餐详情

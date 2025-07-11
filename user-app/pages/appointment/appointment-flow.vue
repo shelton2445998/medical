@@ -32,6 +32,9 @@
     <!-- Step 3: 填写信息 -->
     <view v-else-if="step === 3" class="step-panel">
       <view class="step-title">请填写预约信息</view>
+      <view v-if="memberName" class="member-info">
+        <text class="member-label">为家庭成员预约：{{memberName}}</text>
+      </view>
       <view class="form-item">
         <text class="label">姓名：</text>
         <input class="input" v-model="name" placeholder="请输入姓名" />
@@ -95,33 +98,33 @@
           <view class="section-title">套餐信息</view>
           <view class="info-item">
             <text class="label">套餐名称：</text>
-            <text class="value">{{ selectedPackage.name }}</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
           </view>
           <view class="info-item">
             <text class="label">套餐类型：</text>
-            <text class="value">{{ getPackageTypeName(selectedPackage.type) }}</text>
+            <text class="value">{{ selectedPackage ? getPackageTypeName(selectedPackage.type) : '暂无类型信息' }}</text>
           </view>
           <view class="info-item">
             <text class="label">套餐介绍：</text>
-            <text class="value">{{ selectedPackage.description }}</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.description : '暂无介绍信息' }}</text>
           </view>
           <view class="info-item">
             <text class="label">适用人群：</text>
-            <text class="value">{{ selectedPackage.suitableCrowd }}</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.suitableCrowd : '暂无适用人群信息' }}</text>
           </view>
           <view class="info-item">
             <text class="label">检查项目：</text>
-            <text class="value">{{ selectedPackage.checkItems.join('、') }}</text>
+            <text class="value">{{ selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : '暂无检查项目信息' }}</text>
           </view>
           <view class="info-item">
             <text class="label">预约须知：</text>
-            <text class="value">{{ selectedPackage.appointmentNotice }}</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.appointmentNotice : '暂无预约须知' }}</text>
           </view>
           <view class="info-item">
             <text class="label">套餐原价：</text>
-            <text class="value price">¥{{ selectedPackage.price }}</text>
+            <text class="value price">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
           </view>
-          <view class="info-item" v-if="selectedPackage.discountPrice">
+          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
             <text class="label">优惠价格：</text>
             <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
           </view>
@@ -167,9 +170,9 @@
           <view class="section-title">费用信息</view>
           <view class="info-item">
             <text class="label">套餐原价：</text>
-            <text class="value">¥{{ selectedPackage.price }}</text>
+            <text class="value">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
           </view>
-          <view class="info-item" v-if="selectedPackage.discountPrice">
+          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
             <text class="label">优惠价格：</text>
             <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
           </view>
@@ -234,6 +237,8 @@ export default {
     return {
       step: 1,
       stepLabels: ['选择医院', '选择套餐', '填写信息', '支付预约'],
+      memberId: null,
+      memberName: '',
       hospitalList: [
         { id: 1, name: '沈阳市云医院-和平分院' },
         { id: 2, name: '沈阳市云医院-沈河分院' }
@@ -317,7 +322,15 @@ export default {
       return finalPrice.toFixed(2);
     }
   },
-  onLoad() {
+  onLoad(options) {
+    // 获取家庭成员信息
+    if (options.memberId) {
+      this.memberId = options.memberId;
+    }
+    if (options.memberName) {
+      this.memberName = options.memberName;
+    }
+    
     // 检查是否有已选择的医院和套餐
     const selectedHospital = uni.getStorageSync('selectedHospital');
     const selectedPackage = uni.getStorageSync('selectedPackage');
@@ -327,11 +340,16 @@ export default {
       this.selectedHospital = JSON.parse(selectedHospital);
       this.selectedPackage = JSON.parse(selectedPackage);
       this.step = 3; // 直接跳到填写信息步骤
+      
+      // 如果是为家庭成员预约，预填家庭成员信息
+      if (this.memberName) {
+        this.name = this.memberName;
+      }
     } else if (selectedPackage) {
       // 如果只有套餐信息（从套餐详情页进入），设置套餐并跳到填写信息步骤
       this.selectedPackage = JSON.parse(selectedPackage);
       // 从套餐信息中获取医院信息
-      if (this.selectedPackage.hospitalId) {
+      if (this.selectedPackage && this.selectedPackage.hospitalId) {
         this.selectedHospital = {
           id: this.selectedPackage.hospitalId,
           name: this.selectedPackage.hospitalName,
@@ -339,6 +357,11 @@ export default {
         };
       }
       this.step = 3; // 直接跳到填写信息步骤
+      
+      // 如果是为家庭成员预约，预填家庭成员信息
+      if (this.memberName) {
+        this.name = this.memberName;
+      }
     }
   },
   methods: {
@@ -391,8 +414,8 @@ export default {
       // 构建订单数据，对应数据库字段
       const orderData = {
         user_id: uni.getStorageSync('userId') || 1, // 用户ID
-        setmeal_id: this.selectedPackage.id, // 套餐ID
-        hospital_id: this.selectedHospital.id, // 医院ID
+        setmeal_id: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID
+        hospital_id: this.selectedHospital ? this.selectedHospital.id : null, // 医院ID
         doctor_id: null, // 医生ID，暂时为空
         appointment_date: this.selectedDate, // 预约日期
         time_slot: this.selectedTime, // 时间段
@@ -467,6 +490,21 @@ export default {
   font-weight: bold;
   color: #1296db;
   margin-bottom: 30rpx;
+}
+
+.member-info {
+  background: #e6f7ff;
+  border: 1rpx solid #91d5ff;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.member-label {
+  font-size: 28rpx;
+  color: #1296db;
+  font-weight: bold;
 }
 .picker-box {
   background: #f5f5f5;

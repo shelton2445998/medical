@@ -139,7 +139,7 @@
 						name: '家庭成员',
 						icon: '/static/images/icons/icon-family.png',
 						url: '/pages/family/family',
-						implemented: false
+						implemented: true
 					},
 					{
 						name: '在线咨询',

@@ -164,6 +164,30 @@
 			"style": {
 				"navigationBarTitleText": "健康评估"
 			}
+		},
+		{
+			"path": "pages/family/family",
+			"style": {
+				"navigationBarTitleText": "家庭成员"
+			}
+		},
+		{
+			"path": "pages/add-family-member/add-family-member",
+			"style": {
+				"navigationBarTitleText": "添加家庭成员"
+			}
+		},
+		{
+			"path": "pages/edit-family-member/edit-family-member",
+			"style": {
+				"navigationBarTitleText": "编辑家庭成员"
+			}
+		},
+		{
+			"path": "pages/member-health/member-health",
+			"style": {
+				"navigationBarTitleText": "成员健康档案"
+			}
 		}
 	],
 	"tabBar": {
