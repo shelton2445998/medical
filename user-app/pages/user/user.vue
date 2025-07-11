@@ -178,7 +178,7 @@
 					});
 					return;
 				}
-				
+				console.log(url);
 				uni.navigateTo({
 					url: url
 				});

@@ -12,8 +12,8 @@
 		<view class="login-form">
 			<!-- 手机号 -->
 			<view class="form-item">
-				<image src="/static/icon/phone.png" mode="aspectFit" class="btn-icon"></image>
-				<input type="text" v-model="account" placeholder="请输入手机号码" maxlength="11" />
+				<image src="/static/icon/user1.png" mode="aspectFit" class="btn-icon"></image>
+				<input type="text" v-model="account" placeholder="请输入用户名" maxlength="11" />
 			</view>
 			
 			<!-- 密码 -->
