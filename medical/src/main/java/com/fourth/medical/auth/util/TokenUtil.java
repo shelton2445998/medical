@@ -54,6 +54,18 @@ public class TokenUtil {
     }
 
     /**
+     * 生成医生端Token
+     *
+     * @param userId
+     * @return
+     */
+    public static String generateDoctorToken(Long userId) {
+        String userMd5 = DigestUtils.md5Hex(userId.toString());
+        String doctorToken = LoginConstant.DOCTOR_TOKEN_PREFIX + userMd5 + "." + UUIDUtil.getUuid();
+        return doctorToken;
+    }
+
+    /**
      * 获取短的ID
      *
      * @param userId
@@ -126,6 +138,8 @@ public class TokenUtil {
             checkAdminToken(token);
         } else if (SystemType.APP == systemType) {
             checkAppToken(token);
+        } else if (SystemType.DOCTOR == systemType) {
+            checkDoctorToken(token);
         }
         return token;
     }
@@ -150,10 +164,14 @@ public class TokenUtil {
                 return CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
             }
             return null;
+        } else if (SystemType.DOCTOR == systemType) {
+            // 医生端token的cookie
+            return CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
         } else {
             String cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.ADMIN_COOKIE_TOKEN_NAME);
             if (StringUtils.isBlank(cookieValue)) {
-                if (HttpServletRequestUtil.isDocRequest()) {
+                cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
+                if (StringUtils.isBlank(cookieValue) && HttpServletRequestUtil.isDocRequest()) {
                     cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
                 }
             }
@@ -187,4 +205,15 @@ public class TokenUtil {
         }
     }
 
+    /**
+     * 校验是否是医生端的token
+     *
+     * @param token
+     */
+    public static void checkDoctorToken(String token) {
+        SystemType systemType = SystemTypeUtil.getSystemTypeByToken(token);
+        if (SystemType.DOCTOR != systemType) {
+            throw new LoginTokenException("非医生端token");
+        }
+    }
 }

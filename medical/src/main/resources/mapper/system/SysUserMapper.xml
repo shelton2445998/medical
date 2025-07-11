@@ -46,6 +46,12 @@
         where u.username = #{username}
     </select>
 
+    <select id="getSysUserByMobile" resultType="com.fourth.medical.system.entity.SysUser">
+        select u.*
+        from sys_user u
+        where u.phone = #{mobile}
+    </select>
+
     <select id="getCountByRoleId" resultType="java.lang.Integer">
         select count(1)
         from sys_user

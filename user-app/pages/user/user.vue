@@ -34,9 +34,16 @@
 				<text class="card-title">我的服务</text>
 			</view>
 			<view class="service-grid">
-				<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
+				<view 
+					class="service-item" 
+					v-for="(item, index) in serviceList" 
+					:key="index" 
+					:class="{ 'coming-soon': !item.implemented }"
+					@click="navigateTo(item.url)"
+				>
 					<image :src="item.icon" class="service-icon" mode="aspectFit"></image>
 					<text class="service-name">{{item.name}}</text>
+					<text class="coming-soon-tag" v-if="!item.implemented">即将上线</text>
 				</view>
 			</view>
 		</view>
@@ -47,10 +54,17 @@
 				<text class="card-title">健康管理</text>
 			</view>
 			<view class="health-list">
-				<view class="health-item" v-for="(item, index) in healthMenuList" :key="index" @click="navigateTo(item.url)">
+				<view 
+					class="health-item" 
+					v-for="(item, index) in healthMenuList" 
+					:key="index" 
+					:class="{ 'coming-soon': !item.implemented }"
+					@click="navigateTo(item.url)"
+				>
 					<view class="health-item-left">
 						<image :src="item.icon" class="health-icon" mode="aspectFit"></image>
 						<text class="health-name">{{item.name}}</text>
+						<text class="coming-soon-text" v-if="!item.implemented">即将上线</text>
 					</view>
 					<text class="iconfont icon-right"></text>
 				</view>
@@ -106,49 +120,58 @@
 					{
 						name: '我的预约',
 						icon: '/static/images/icons/icon-appointment.png',
-						url: '/pages/my-appointment/my-appointment'
+						url: '/pages/my-appointment/my-appointment',
+						implemented: true
 					},
 					{
 						name: '体检报告',
 						icon: '/static/images/icons/icon-report.png',
-						url: '/pages/report/report'
+						url: '/pages/report/report',
+						implemented: true
 					},
 					{
 						name: '健康档案',
 						icon: '/static/images/icons/icon-record.png',
-						url: '/pages/health-record/health-record'
+						url: '/pages/health-record/health-record',
+						implemented: true
 					},
 					{
 						name: '家庭成员',
 						icon: '/static/images/icons/icon-family.png',
-						url: '/pages/family/family'
+						url: '/pages/family/family',
+						implemented: true
 					},
 					{
 						name: '在线咨询',
 						icon: '/static/images/icons/icon-consult.png',
-						url: '/pages/consult/consult'
+						url: '/pages/consult/consult',
+						implemented: true
 					},
 					{
 						name: '我的收藏',
 						icon: '/static/images/icons/icon-favorite.png',
-						url: '/pages/favorite/favorite'
+						url: '/pages/favorite/favorite',
+						implemented: true
 					}
 				],
 				healthMenuList: [
 					{
 						name: '健康评估',
 						icon: '/static/images/icons/icon-assessment.png',
-						url: '/pages/health-assessment/health-assessment'
+						url: '/pages/health-assessment/health-assessment',
+						implemented: true
 					},
 					{
 						name: '健康指标',
 						icon: '/static/images/icons/icon-indicator.png',
-						url: '/pages/health-indicator/health-indicator'
+						url: '/pages/health-indicator/health-indicator',
+						implemented: true
 					},
 					{
 						name: '健康档案',
 						icon: '/static/images/icons/icon-record.png',
-						url: '/pages/health-record/health-record'
+						url: '/pages/health-record/health-record',
+						implemented: true
 					}
 				]
 			}
@@ -171,6 +194,8 @@
 			},
 			// 页面跳转
 			navigateTo(url) {
+				console.log('准备跳转到:', url);
+				
 				// 如果未登录且不是登录页，先跳转到登录页
 				if (!this.hasLogin && url !== '/pages/login/login') {
 					uni.navigateTo({
@@ -179,9 +204,57 @@
 					return;
 				}
 				
-				uni.navigateTo({
-					url: url
-				});
+				// 检查是否是tabBar页面
+				const tabBarPages = [
+					'/pages/index/index',
+					'/pages/appointment/appointment',
+					'/pages/report/report',
+					'/pages/user/user'
+				];
+				
+				if (tabBarPages.includes(url)) {
+					// 使用switchTab跳转到tabBar页面
+					uni.switchTab({
+						url: url,
+						success: () => {
+							console.log('tabBar页面跳转成功:', url);
+						},
+						fail: (err) => {
+							console.error('tabBar页面跳转失败:', err);
+							uni.showToast({
+								title: '页面跳转失败',
+								icon: 'none'
+							});
+						}
+					});
+				} else {
+					// 使用navigateTo跳转到普通页面
+					uni.navigateTo({
+						url: url,
+						success: () => {
+							console.log('页面跳转成功:', url);
+						},
+						fail: (err) => {
+							console.error('页面跳转失败:', err);
+							console.error('失败URL:', url);
+							
+							// 检查是否是页面不存在
+							if (err.errMsg && err.errMsg.includes('not found')) {
+								uni.showModal({
+									title: '功能开发中',
+									content: '该功能正在开发中，敬请期待！',
+									showCancel: false,
+									confirmText: '知道了'
+								});
+							} else {
+								uni.showToast({
+									title: '页面跳转失败',
+									icon: 'none'
+								});
+							}
+						}
+					});
+				}
 			},
 			// 登录
 			bindLogin() {
@@ -373,6 +446,11 @@
 		flex-direction: column;
 		align-items: center;
 		margin-bottom: 30rpx;
+		position: relative;
+		
+		&.coming-soon {
+			opacity: 0.6;
+		}
 		
 		.service-icon {
 			width: 80rpx;
@@ -383,6 +461,18 @@
 		.service-name {
 			font-size: 26rpx;
 			color: #333333;
+		}
+		
+		.coming-soon-tag {
+			position: absolute;
+			top: -5rpx;
+			right: 10rpx;
+			background-color: #ff9500;
+			color: #ffffff;
+			font-size: 20rpx;
+			padding: 4rpx 8rpx;
+			border-radius: 10rpx;
+			transform: scale(0.8);
 		}
 	}
 }
@@ -399,9 +489,14 @@
 			border-bottom: none;
 		}
 		
+		&.coming-soon {
+			opacity: 0.6;
+		}
+		
 		.health-item-left, .setting-item-left {
 			display: flex;
 			align-items: center;
+			position: relative;
 			
 			.health-icon, .setting-icon {
 				width: 40rpx;
@@ -412,6 +507,19 @@
 			.health-name, .setting-name {
 				font-size: 28rpx;
 				color: #333333;
+			}
+			
+			.coming-soon-text {
+				position: absolute;
+				right: -80rpx;
+				top: 50%;
+				transform: translateY(-50%);
+				background-color: #ff9500;
+				color: #ffffff;
+				font-size: 20rpx;
+				padding: 4rpx 8rpx;
+				border-radius: 10rpx;
+				transform: scale(0.8);
 			}
 		}
 		

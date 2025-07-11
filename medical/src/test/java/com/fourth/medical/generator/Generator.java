@@ -30,7 +30,7 @@ public class Generator {
     public static void main(String[] args) throws Exception {
         GeneratorProperties config = new GeneratorProperties();
         // 包名称
-        config.setPackageName("com.fourth.medical");
+        config.setPackageName("com.fourth.medicaltest");
         // 模块名称
         config.setModuleName("medical");
         // 作者
@@ -47,9 +47,9 @@ public class Generator {
         // 排除的表前缀
         config.setTablePrefixes(Arrays.asList("tb_", "b_", "c_", "test_"));
         // 是否生成后台代码
-        config.setGeneratorBackend(true);
+        config.setGeneratorBackend(false);
         // 是否生成App后端代码
-        config.setGeneratorAppBackend(true);
+        config.setGeneratorAppBackend(false);
         // 是否生成前端代码
         config.setGeneratorFrontend(true);
         // 是否校验字段

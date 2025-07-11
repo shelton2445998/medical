@@ -40,6 +40,8 @@ public class SystemTypeUtil {
             return SystemType.ADMIN;
         } else if (servletPath.startsWith(LoginConstant.APP_URL_PREFIX)) {
             return SystemType.APP;
+        } else if (servletPath.startsWith(LoginConstant.DOCTOR_URL_PREFIX)) {
+            return SystemType.DOCTOR;
         }
         return null;
     }
@@ -59,6 +61,8 @@ public class SystemTypeUtil {
             return SystemType.ADMIN;
         } else if (token.startsWith(LoginConstant.APP_TOKEN_PREFIX)) {
             return SystemType.APP;
+        } else if (token.startsWith(LoginConstant.DOCTOR_TOKEN_PREFIX)) {
+            return SystemType.DOCTOR;
         }
         return null;
     }
@@ -111,6 +115,19 @@ public class SystemTypeUtil {
     public static boolean isAppSystem() {
         SystemType systemType = getSystemTypeByToken();
         if (SystemType.APP == systemType) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否是医生端系统
+     *
+     * @return
+     */
+    public static boolean isDoctorSystem() {
+        SystemType systemType = getSystemTypeByToken();
+        if (SystemType.DOCTOR == systemType) {
             return true;
         }
         return false;

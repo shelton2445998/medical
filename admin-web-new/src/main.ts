@@ -1,7 +1,7 @@
 import {createApp} from 'vue'
 import App from './App.vue'
 import {setupStore} from "@/store";
-import {setupRouter} from "@/router";
+import {router} from "@/router";
 import {setupDirective} from "@/directives";
 import ElementPlus from "element-plus";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue"
@@ -33,7 +33,7 @@ setupDirective(app)
 setupStore(app)
 
 /** 配置 路由*/
-setupRouter(app)
+app.use(router)
 
 app
     .use(ElementPlus)

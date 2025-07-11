@@ -1,7 +1,7 @@
 package com.fourth.medical.auth.controller;
 
-import com.fourth.medical.auth.dto.LoginDto;
-import com.fourth.medical.auth.service.LoginService;
+import com.fourth.medical.auth.dto.DoctorLoginDto;
+import com.fourth.medical.auth.service.DoctorLoginService;
 import com.fourth.medical.auth.vo.LoginTokenVo;
 import com.fourth.medical.auth.vo.LoginVo;
 import com.fourth.medical.common.constant.LoginConstant;
@@ -34,12 +34,12 @@ import javax.validation.Valid;
 public class DoctorLoginController {
 
     @Autowired
-    private LoginService loginService;
+    private DoctorLoginService doctorLoginService;
 
     /**
      * 医生登录
      *
-     * @param loginDto
+     * @param doctorLoginDto
      * @param request
      * @param response
      * @return
@@ -47,9 +47,9 @@ public class DoctorLoginController {
      */
     @PostMapping("/login")
     @Operation(summary = "医生登录")
-    public ApiResult<LoginTokenVo> login(@Valid @RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
-        // 这里复用登录服务，实际项目中可能需要专门的医生登录服务
-        LoginTokenVo loginTokenVo = loginService.login(loginDto);
+    public ApiResult<LoginTokenVo> login(@Valid @RequestBody DoctorLoginDto doctorLoginDto, HttpServletRequest request, HttpServletResponse response) {
+        // 使用医生登录服务进行手机号+密码登录
+        LoginTokenVo loginTokenVo = doctorLoginService.login(doctorLoginDto);
         // 输出token到cookie
         CookieUtil.addCookie(LoginConstant.DOCTOR_COOKIE_TOKEN_NAME, loginTokenVo.getToken(), request, response);
         return ApiResult.success(loginTokenVo);
@@ -64,8 +64,8 @@ public class DoctorLoginController {
     @GetMapping("/info")
     @Operation(summary = "获取医生信息")
     public ApiResult<LoginVo> getLoginUserInfo() {
-        // 复用登录服务获取医生信息
-        LoginVo loginVo = loginService.getLoginUserInfo();
+        // 获取医生信息
+        LoginVo loginVo = doctorLoginService.getLoginDoctorInfo();
         return ApiResult.success(loginVo);
     }
 
@@ -79,7 +79,7 @@ public class DoctorLoginController {
     @Operation(summary = "医生退出")
     public ApiResult<Boolean> logout(HttpServletRequest request, HttpServletResponse response) {
         // 删除缓存
-        loginService.logout();
+        doctorLoginService.logout();
         // 从cookie中删除token
         CookieUtil.deleteCookie(LoginConstant.DOCTOR_COOKIE_TOKEN_NAME, request, response);
         return ApiResult.success();

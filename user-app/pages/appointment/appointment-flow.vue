@@ -32,6 +32,9 @@
     <!-- Step 3: 填写信息 -->
     <view v-else-if="step === 3" class="step-panel">
       <view class="step-title">请填写预约信息</view>
+      <view v-if="memberName" class="member-info">
+        <text class="member-label">为家庭成员预约：{{memberName}}</text>
+      </view>
       <view class="form-item">
         <text class="label">姓名：</text>
         <input class="input" v-model="name" placeholder="请输入姓名" />
@@ -61,6 +64,14 @@
         </picker>
       </view>
       <view class="form-item">
+        <text class="label">预约时间：</text>
+        <picker :range="timeSlots" @change="onTimeChange">
+          <view class="picker-box">
+            <text>{{ selectedTime || '点击选择时间' }}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="form-item">
         <text class="label">备注：</text>
         <input class="input" v-model="remark" placeholder="可填写特殊需求或备注" />
       </view>
@@ -71,37 +82,134 @@
     <view v-else-if="step === 4" class="step-panel">
       <view class="step-title">请确认预约信息并支付</view>
       <view class="confirm-info">
-        <view>医院：{{ selectedHospital.name }}</view>
-        <view>套餐：{{ selectedPackage.name }}</view>
-        <view>姓名：{{ name }}</view>
-        <view>性别：{{ gender }}</view>
-        <view>手机号：{{ phone }}</view>
-        <view>身份证号：{{ idCard }}</view>
-        <view>日期：{{ selectedDate }}</view>
-        <view>备注：{{ remark }}</view>
-        <view>套餐价格：¥{{ selectedPackage.price }}</view>
-        <view>优惠：¥{{ discount }}</view>
-        <view class="total-price">应付总额：<text class="price">¥{{ totalPrice }}</text></view>
+        <view class="info-section">
+          <view class="section-title">医院信息</view>
+          <view class="info-item">
+            <text class="label">医院名称：</text>
+            <text class="value">{{ selectedHospital.name }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">医院地址：</text>
+            <text class="value">{{ selectedHospital.address || '暂无地址信息' }}</text>
+          </view>
+        </view>
+        
+        <view class="info-section">
+          <view class="section-title">套餐信息</view>
+          <view class="info-item">
+            <text class="label">套餐名称：</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">套餐类型：</text>
+            <text class="value">{{ selectedPackage ? getPackageTypeName(selectedPackage.type) : '暂无类型信息' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">套餐介绍：</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.description : '暂无介绍信息' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">适用人群：</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.suitableCrowd : '暂无适用人群信息' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">检查项目：</text>
+            <text class="value">{{ selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : '暂无检查项目信息' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">预约须知：</text>
+            <text class="value">{{ selectedPackage ? selectedPackage.appointmentNotice : '暂无预约须知' }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">套餐原价：</text>
+            <text class="value price">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
+          </view>
+          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
+            <text class="label">优惠价格：</text>
+            <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
+          </view>
+        </view>
+        
+        <view class="info-section">
+          <view class="section-title">个人信息</view>
+          <view class="info-item">
+            <text class="label">姓名：</text>
+            <text class="value">{{ name }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">性别：</text>
+            <text class="value">{{ gender }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">手机号：</text>
+            <text class="value">{{ phone }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">身份证号：</text>
+            <text class="value">{{ idCard }}</text>
+          </view>
+        </view>
+        
+        <view class="info-section">
+          <view class="section-title">预约信息</view>
+          <view class="info-item">
+            <text class="label">预约日期：</text>
+            <text class="value">{{ selectedDate }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">预约时间：</text>
+            <text class="value">{{ selectedTime || '上午(08:00-12:00)' }}</text>
+          </view>
+          <view class="info-item" v-if="remark">
+            <text class="label">备注：</text>
+            <text class="value">{{ remark }}</text>
+          </view>
+        </view>
+        
+        <view class="info-section">
+          <view class="section-title">费用信息</view>
+          <view class="info-item">
+            <text class="label">套餐原价：</text>
+            <text class="value">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
+          </view>
+          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
+            <text class="label">优惠价格：</text>
+            <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
+          </view>
+          <view class="info-item" v-else-if="discount > 0">
+            <text class="label">优惠金额：</text>
+            <text class="value discount">-¥{{ discount }}</text>
+          </view>
+          <view class="info-item total">
+            <text class="label">应付总额：</text>
+            <text class="value total-price">¥{{ totalPrice }}</text>
+          </view>
+        </view>
       </view>
+      
       <view class="pay-method-box">
         <view class="pay-method-title">请选择支付方式：</view>
         <radio-group @change="onPayMethodChange">
           <view class="pay-method-list">
             <label v-for="(item, idx) in payMethods" :key="idx" class="pay-method-item">
-              <radio :value="item" :checked="payMethod === item" />
-              <text>{{ item }}</text>
+              <radio :value="item.value" :checked="payMethod === item.value" />
+              <text>{{ item.name }}</text>
             </label>
           </view>
         </radio-group>
       </view>
+      
       <view class="pay-btn-box">
         <button class="pay-btn" @click="showPayModal" :disabled="!payMethod">支付预约</button>
       </view>
+      
       <!-- 支付二维码弹窗 -->
       <view v-if="showPay" class="pay-modal-mask" @click.self="closePayModal">
         <view class="pay-modal">
-          <view class="pay-modal-title">{{ payMethod }}扫码支付</view>
+          <view class="pay-modal-title">{{ getPayMethodName(payMethod) }}扫码支付</view>
+          <view class="pay-amount">支付金额：¥{{ totalPrice }}</view>
           <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
+          <view class="pay-tips">请使用{{ getPayMethodName(payMethod) }}扫描二维码完成支付</view>
           <button class="pay-confirm-btn" @click="pay">已支付</button>
           <button class="pay-cancel-btn" @click="closePayModal">取消</button>
         </view>
@@ -129,15 +237,57 @@ export default {
     return {
       step: 1,
       stepLabels: ['选择医院', '选择套餐', '填写信息', '支付预约'],
+      memberId: null,
+      memberName: '',
       hospitalList: [
         { id: 1, name: '沈阳市云医院-和平分院' },
         { id: 2, name: '沈阳市云医院-沈河分院' }
       ],
       packageList: [
-        { id: 1, name: '标准体检套餐', price: 299 },
-        { id: 2, name: '高级体检套餐', price: 699 },
-        { id: 3, name: '女性专项体检套餐', price: 399 },
-        { id: 4, name: '儿童体检套餐', price: 199 }
+        { 
+          id: 1, 
+          name: '标准体检套餐', 
+          price: 299,
+          discountPrice: 269,
+          type: 1,
+          description: '包含常规体检项目，适合一般健康检查',
+          checkItems: ['血常规', '尿常规', '血压测量', '心电图'],
+          suitableCrowd: '18-60岁健康人群',
+          appointmentNotice: '请空腹8小时以上，避免剧烈运动'
+        },
+        { 
+          id: 2, 
+          name: '高级体检套餐', 
+          price: 699,
+          discountPrice: 599,
+          type: 2,
+          description: '包含基础套餐及更多专项检查，适合中老年人',
+          checkItems: ['血常规', '尿常规', '肝功能', '肾功能', '心电图', '彩超'],
+          suitableCrowd: '40岁以上中老年人',
+          appointmentNotice: '请空腹12小时以上，避免饮酒'
+        },
+        { 
+          id: 3, 
+          name: '女性专项体检套餐', 
+          price: 399,
+          discountPrice: 359,
+          type: 3,
+          description: '针对女性健康的专项检查，包含乳腺、妇科检查等',
+          checkItems: ['血常规', '尿常规', '妇科检查', '乳腺彩超', '宫颈涂片'],
+          suitableCrowd: '18岁以上女性',
+          appointmentNotice: '避开月经期，请空腹8小时以上'
+        },
+        { 
+          id: 4, 
+          name: '儿童体检套餐', 
+          price: 199,
+          discountPrice: 179,
+          type: 3,
+          description: '专为儿童设计的体检套餐，检查项目适合儿童',
+          checkItems: ['血常规', '尿常规', '身高体重', '视力检查', '听力检查'],
+          suitableCrowd: '3-12岁儿童',
+          appointmentNotice: '请家长陪同，避免空腹时间过长'
+        }
       ],
       selectedHospital: null,
       selectedPackage: null,
@@ -147,20 +297,40 @@ export default {
       idCard: '',
       selectedDate: '',
       remark: '',
-      payMethods: ['微信支付', '支付宝', '医保支付'],
+      payMethods: [
+        { name: '微信支付', value: 2 },
+        { name: '支付宝', value: 1 },
+        { name: '医保支付', value: 3 }
+      ],
       payMethod: '',
       showPay: false,
       orderNo: '',
-      discount: 0
+      discount: 0,
+      selectedTime: '上午(08:00-12:00)',
+      timeSlots: [
+        '上午(08:00-12:00)',
+        '下午(14:00-18:00)',
+        '晚上(19:00-21:00)'
+      ]
     }
   },
   computed: {
     totalPrice() {
-      // 可根据套餐和优惠计算
-      return (this.selectedPackage ? (this.selectedPackage.price - this.discount) : 0).toFixed(2);
+      if (!this.selectedPackage) return 0;
+      // 优先使用优惠价格，如果没有则使用原价减去优惠金额
+      const finalPrice = this.selectedPackage.discountPrice || (this.selectedPackage.price - this.discount);
+      return finalPrice.toFixed(2);
     }
   },
-  onLoad() {
+  onLoad(options) {
+    // 获取家庭成员信息
+    if (options.memberId) {
+      this.memberId = options.memberId;
+    }
+    if (options.memberName) {
+      this.memberName = options.memberName;
+    }
+    
     // 检查是否有已选择的医院和套餐
     const selectedHospital = uni.getStorageSync('selectedHospital');
     const selectedPackage = uni.getStorageSync('selectedPackage');
@@ -170,11 +340,16 @@ export default {
       this.selectedHospital = JSON.parse(selectedHospital);
       this.selectedPackage = JSON.parse(selectedPackage);
       this.step = 3; // 直接跳到填写信息步骤
+      
+      // 如果是为家庭成员预约，预填家庭成员信息
+      if (this.memberName) {
+        this.name = this.memberName;
+      }
     } else if (selectedPackage) {
       // 如果只有套餐信息（从套餐详情页进入），设置套餐并跳到填写信息步骤
       this.selectedPackage = JSON.parse(selectedPackage);
       // 从套餐信息中获取医院信息
-      if (this.selectedPackage.hospitalId) {
+      if (this.selectedPackage && this.selectedPackage.hospitalId) {
         this.selectedHospital = {
           id: this.selectedPackage.hospitalId,
           name: this.selectedPackage.hospitalName,
@@ -182,6 +357,11 @@ export default {
         };
       }
       this.step = 3; // 直接跳到填写信息步骤
+      
+      // 如果是为家庭成员预约，预填家庭成员信息
+      if (this.memberName) {
+        this.name = this.memberName;
+      }
     }
   },
   methods: {
@@ -197,8 +377,23 @@ export default {
     onGenderChange(e) {
       this.gender = ['男', '女'][e.detail.value];
     },
+    onTimeChange(e) {
+      this.selectedTime = this.timeSlots[e.detail.value];
+    },
     onPayMethodChange(e) {
       this.payMethod = e.detail.value;
+    },
+    getPackageTypeName(type) {
+      const typeMap = {
+        1: '基础套餐',
+        2: '高级套餐', 
+        3: '专项套餐'
+      };
+      return typeMap[type] || '未知类型';
+    },
+    getPayMethodName(value) {
+      const method = this.payMethods.find(item => item.value == value);
+      return method ? method.name : '未知支付方式';
     },
     nextStep() {
       if (this.step < 4) {
@@ -215,6 +410,26 @@ export default {
       // 模拟支付
       this.showPay = false;
       uni.showLoading({ title: '支付中...' });
+      
+      // 构建订单数据，对应数据库字段
+      const orderData = {
+        user_id: uni.getStorageSync('userId') || 1, // 用户ID
+        setmeal_id: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID
+        hospital_id: this.selectedHospital ? this.selectedHospital.id : null, // 医院ID
+        doctor_id: null, // 医生ID，暂时为空
+        appointment_date: this.selectedDate, // 预约日期
+        time_slot: this.selectedTime, // 时间段
+        status: 2, // 状态：2-已支付
+        amount: this.totalPrice, // 订单金额
+        pay_time: new Date().toISOString(), // 支付时间
+        pay_type: this.payMethod, // 支付方式
+        transaction_id: 'TX' + Date.now(), // 支付交易号
+        remark: this.remark // 备注信息
+      };
+      
+      // 这里应该调用后端API保存订单数据
+      console.log('订单数据：', orderData);
+      
       setTimeout(() => {
         uni.hideLoading();
         this.orderNo = 'YY' + Date.now();
@@ -276,6 +491,21 @@ export default {
   color: #1296db;
   margin-bottom: 30rpx;
 }
+
+.member-info {
+  background: #e6f7ff;
+  border: 1rpx solid #91d5ff;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.member-label {
+  font-size: 28rpx;
+  color: #1296db;
+  font-weight: bold;
+}
 .picker-box {
   background: #f5f5f5;
   border-radius: 10rpx;
@@ -333,7 +563,78 @@ export default {
   font-size: 28rpx;
   color: #333;
   margin-bottom: 30rpx;
-  line-height: 2;
+}
+
+.info-section {
+  margin-bottom: 30rpx;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 10rpx;
+  border-left: 4rpx solid #1296db;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1296db;
+  margin-bottom: 15rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 1rpx solid #e9ecef;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+  padding: 8rpx 0;
+}
+
+.info-item .label {
+  color: #666;
+  font-size: 26rpx;
+  min-width: 120rpx;
+}
+
+.info-item .value {
+  color: #333;
+  font-size: 26rpx;
+  text-align: right;
+  flex: 1;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.info-item .price {
+  color: #ff5a5f;
+  font-weight: bold;
+}
+
+.info-item .discount-price {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.info-item .discount {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.info-item.total {
+  border-top: 1rpx solid #e9ecef;
+  padding-top: 15rpx;
+  margin-top: 15rpx;
+}
+
+.info-item.total .label {
+  font-weight: bold;
+  color: #333;
+}
+
+.info-item.total .total-price {
+  color: #ff5a5f;
+  font-size: 32rpx;
+  font-weight: bold;
 }
 .pay-btn-box {
   display: flex;
@@ -422,7 +723,23 @@ export default {
 .pay-modal-title {
   font-size: 32rpx;
   font-weight: bold;
-  margin-bottom: 30rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.pay-amount {
+  font-size: 28rpx;
+  color: #ff5a5f;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.pay-tips {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+  margin: 20rpx 0;
 }
 .pay-confirm-btn {
   background: #1296db;

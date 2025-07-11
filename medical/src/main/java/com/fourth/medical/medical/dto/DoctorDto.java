@@ -35,7 +35,6 @@ public class DoctorDto implements Serializable {
     private String password;
 
     @Schema(description = "盐值")
-    @NotBlank(message = "盐值不能为空")
     @Length(max = 32, message = "盐值长度超过限制")
     private String salt;
 
