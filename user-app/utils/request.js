@@ -8,14 +8,25 @@ import { hospitalApi, packageApi, appointmentApi, reportApi, userApi } from './a
  */
 export function request(options) {
   return new Promise((resolve, reject) => {
+    // 获取token
+    const token = uni.getStorageSync('uniIdToken');
+    
+    // 构建请求头
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.header
+    };
+    
+    // 如果有token，添加到请求头
+    if (token) {
+      headers['Authorization'] = token;
+    }
+    
     uni.request({
       url: options.url,
       method: options.method || 'GET',
       data: options.data || {},
-      header: {
-        'Content-Type': 'application/json',
-        ...options.header
-      },
+      header: headers,
       success: (res) => {
         if (res.statusCode === 200) {
           if (res.data && res.data.code === 200) {

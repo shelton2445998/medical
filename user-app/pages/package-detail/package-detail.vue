@@ -127,7 +127,8 @@
 </template>
 
 <script>
-	import { get, packageApi } from '@/utils/request.js';
+	import { get, post } from '@/utils/request.js';
+	import { packageApi } from '@/utils/api.js';
 	export default {
 		data() {
 			return {
@@ -422,41 +423,74 @@
 			// 按类别分组的检查项目
 			categoryItems() {
 				const categories = {};
-				this.packageInfo.items.forEach(item => {
-					if (!categories[item.category]) {
-						categories[item.category] = {
-							name: item.category,
-							items: []
-						};
-					}
-					categories[item.category].items.push(item);
-				});
+				if (this.packageInfo.items && Array.isArray(this.packageInfo.items)) {
+					this.packageInfo.items.forEach(item => {
+						if (!categories[item.category]) {
+							categories[item.category] = {
+								name: item.category,
+								items: []
+							};
+						}
+						categories[item.category].items.push(item);
+					});
+				}
 				return Object.values(categories);
 			}
 		},
 		async onLoad(options) {
 			if (options && options.id) {
 				try {
-					const result = await get(packageApi.getPackageDetail(options.id));
+					// 直接调用套餐详情接口
+					const result = await post(packageApi.getSetmealDetail(options.id));
 					if (result && result.data) {
+						// 解析JSON字段
+						let items = [];
+						let notices = [];
+						let reviews = [];
+						
+						if (result.data.checkItems) {
+							try {
+								items = JSON.parse(result.data.checkItems);
+							} catch (e) {
+								console.log('解析检查项目失败:', e);
+							}
+						}
+						
+						if (result.data.appointmentNotices) {
+							try {
+								notices = JSON.parse(result.data.appointmentNotices);
+							} catch (e) {
+								console.log('解析预约须知失败:', e);
+							}
+						}
+						
+						if (result.data.userReviews) {
+							try {
+								reviews = JSON.parse(result.data.userReviews);
+							} catch (e) {
+								console.log('解析用户评价失败:', e);
+							}
+						}
+						
 						this.packageInfo = {
 							id: result.data.id,
 							name: result.data.name,
-							price: result.data.price || 0,
-							originalPrice: result.data.originalPrice || result.data.price || 0,
+							price: result.data.discountPrice || result.data.price || 0, // 显示优惠价格
+							originalPrice: result.data.price || 0, // 显示原价
 							tags: result.data.tags || [],
 							hospitalId: result.data.hospitalId || '',
 							hospitalName: result.data.hospitalName || '',
 							hospitalAddress: result.data.hospitalAddress || '',
 							hospitalImage: result.data.hospitalImage || '/static/images/hospital1.jpg',
 							description: result.data.description || '',
-							suitablePeople: result.data.suitablePeople || '',
-							items: result.data.items || [],
-							notices: result.data.notices || [],
-							reviews: result.data.reviews || []
+							suitablePeople: result.data.suitableCrowd || '',
+							items: items,
+							notices: notices,
+							reviews: reviews
 						};
 					}
 				} catch (e) {
+					console.error('加载套餐详情失败:', e);
 					uni.showToast({ title: '加载套餐详情失败', icon: 'none' });
 				}
 			}
