@@ -48,45 +48,101 @@ export default {
       ]
     }
 
-    const handleLogin = () => {
-      if (!loginFormRef.value) return
-      
-      loginFormRef.value.validate(async (valid) => {
-        if (valid) {
-          try {
-            loading.value = true
-            // 修正医生登录接口URL，符合文档中医生端认证接口规范
-            const { data: res } = await axios.post('/api/doctor/login', loginForm)
-            if (res.code === 200) {
-              localStorage.setItem('doctorToken', res.data.token)
-              localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
-              ElMessage.success('登录成功')
-              router.push('/home/dashboard')
-            } else {
-              ElMessage.error(res.message || '登录失败，请检查用户名和密码')
-            }
-          } catch (error) {
-            console.error('登录出错：', error)
-            // API失效时使用静态演示数据登录
-            const mockDoctorInfo = {
-              doctorId: 'D2023001',
-              name: loginForm.username || '演示医生',
-              department: 'internal',
-              departmentName: '内科',
-              title: '主治医师',
-              phone: '13800138000'
-            }
-            // 生成模拟token
-            const mockToken = 'mock_token_' + Math.random().toString(36).substring(2)
-            localStorage.setItem('doctorToken', mockToken)
-            localStorage.setItem('doctorInfo', JSON.stringify(mockDoctorInfo))
-            ElMessage.success('登录成功(演示模式)')
-            router.push('/home/dashboard')
-          } finally {
-            loading.value = false
-          }
+    // 创建axios实例
+    const api = axios.create({
+      baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:8888',
+      timeout: 10000,
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const handleLogin = async () => {
+      try {
+        loading.value = true;
+        
+        // 先检查后端是否可用
+        if (!await checkBackendAvailability()) {
+          useDemoMode();
+          return;
         }
-      })
+        
+        const { data: res } = await api.post('/doctor/login', loginForm);
+        
+        if (res.code === 200) {
+          // 存储token和医生信息
+          localStorage.setItem('doctorToken', res.data.token);
+          localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo));
+          
+          // 设置全局axios请求头
+          api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+          
+          ElMessage.success('登录成功');
+          router.push('/home/dashboard');
+        } else {
+          ElMessage.error(res.message || '登录失败');
+        }
+      } catch (error) {
+        handleApiError(error);
+      } finally {
+        loading.value = false;
+      }
+    }
+    
+    // 检查后端是否可用
+    const checkBackendAvailability = async () => {
+      try {
+        await api.get('/health');
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    
+    // 统一的API错误处理
+    const handleApiError = (error) => {
+      if (error.response) {
+        const status = error.response.status;
+        const msg = error.response.data?.message || '请求错误';
+        
+        if (status === 401) {
+          ElMessage.error('认证失败: ' + msg);
+        } else if (status === 403) {
+          ElMessage.error('权限不足: ' + msg);
+        } else if (status >= 500) {
+          ElMessage.error('服务器错误: ' + msg);
+        } else {
+          ElMessage.error(`请求错误 (${status}): ${msg}`);
+        }
+      } else if (error.request) {
+        ElMessage.error('网络错误，无法连接到服务器');
+        useDemoMode();
+      } else {
+        ElMessage.error('请求配置错误: ' + error.message);
+      }
+    }
+    
+    // 演示模式专用函数
+    const useDemoMode = () => {
+      const mockDoctorInfo = {
+        doctorId: 'D2023001',
+        name: loginForm.username || '演示医生',
+        department: 'internal',
+        departmentName: '内科',
+        title: '主治医师',
+        phone: '13800138000'
+      };
+      
+      const mockToken = 'demo_' + Math.random().toString(36).slice(2);
+      localStorage.setItem('doctorToken', mockToken);
+      localStorage.setItem('doctorInfo', JSON.stringify(mockDoctorInfo));
+      
+      // 设置模拟请求头
+      api.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+      
+      ElMessage.warning('API不可用，已进入演示模式');
+      router.push('/home/dashboard');
     }
 
     return {
