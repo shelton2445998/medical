@@ -92,6 +92,13 @@
 			return {
 				overviewData: [
 					{
+						name: '身高',
+						value: '165.2',
+						unit: 'cm',
+						icon: '/static/images/icons/icon-weight.png',
+						status: 'normal'
+					},
+					{
 						name: '体重',
 						value: '65.2',
 						unit: 'kg',
@@ -123,7 +130,7 @@
 				indicators: [
 					{
 						id: 1,
-						name: '体重',
+						name: 'BMI',
 						icon: '/static/images/icons/icon-weight.png',
 						currentValue: '65.2',
 						unit: 'kg',
