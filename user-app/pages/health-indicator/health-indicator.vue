@@ -145,6 +145,22 @@
 				});
 				
 				try {
+					// 检查是否有token
+					const token = uni.getStorageSync('TOKEN_KEY');
+					if (!token) {
+						uni.hideLoading();
+						uni.showToast({
+							title: '请先登录',
+							icon: 'none',
+							duration: 2000
+						});
+						// 跳转到登录页
+						uni.navigateTo({
+							url: '/pages/login/login'
+						});
+						return;
+					}
+					
 					// 调用API获取检查项明细数据
 					const response = await getCheckitemDetailList();
 					

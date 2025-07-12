@@ -135,6 +135,8 @@
 </template>
 
 <script>
+	import { getReportDetail } from '@/api/report'
+	
 	export default {
 		data() {
 			return {
@@ -145,76 +147,21 @@
 					{ label: '异常', value: 'abnormal' }
 				],
 				reportInfo: {
-					id: 1,
-					packageName: '基础体检套餐',
-					reportDate: '2023-06-25',
-					hospitalName: '沈阳市云医院-和平分院',
-					personName: '张三',
-					gender: '男',
-					age: 35,
-					examDate: '2023-06-20',
-					abnormalCount: 2,
-					totalCount: 35,
-					adviceCount: 3,
-					adviceList: [
-						'建议合理饮食，少食多餐，避免高脂肪、高糖分食物，增加蔬菜水果摄入。',
-						'建议适当增加有氧运动，每周至少3-5次，每次30分钟以上。',
-						'建议保持良好作息习惯，每天保证7-8小时睡眠。'
-					]
+					packageName: '',
+					reportDate: '',
+					hospitalName: '',
+					personName: '',
+					gender: '',
+					age: 0,
+					examDate: '',
+					abnormalCount: 0,
+					totalCount: 0,
+					adviceCount: 0,
+					adviceList: []
 				},
-				examResults: [
-					{
-						name: '血压',
-						value: '145/90',
-						unit: 'mmHg',
-						referenceRange: '收缩压<140mmHg，舒张压<90mmHg',
-						isAbnormal: true,
-						description: '血压偏高，属于轻度高血压范围。',
-						advice: '建议减少盐分摄入，保持规律运动，必要时遵医嘱服用降压药。',
-						expanded: false
-					},
-					{
-						name: '血糖',
-						value: '5.2',
-						unit: 'mmol/L',
-						referenceRange: '3.9-6.1 mmol/L',
-						isAbnormal: false,
-						description: '血糖在正常范围内。',
-						advice: '',
-						expanded: false
-					},
-					{
-						name: '总胆固醇',
-						value: '5.8',
-						unit: 'mmol/L',
-						referenceRange: '2.8-5.2 mmol/L',
-						isAbnormal: true,
-						description: '总胆固醇偏高，可能增加心血管疾病风险。',
-						advice: '建议减少高脂肪食物摄入，增加运动量，必要时遵医嘱服用调脂药物。',
-						expanded: false
-					},
-					{
-						name: '肝功能',
-						value: '正常',
-						unit: '',
-						referenceRange: '正常',
-						isAbnormal: false,
-						description: '肝功能各项指标在正常范围内。',
-						advice: '',
-						expanded: false
-					},
-					{
-						name: '肾功能',
-						value: '正常',
-						unit: '',
-						referenceRange: '正常',
-						isAbnormal: false,
-						description: '肾功能各项指标在正常范围内。',
-						advice: '',
-						expanded: false
-					}
-				],
-				filteredResults: []
+				examResults: [],
+				filteredResults: [],
+				loading: false
 			}
 		},
 		onLoad(options) {
@@ -229,9 +176,50 @@
 		},
 		methods: {
 			// 获取报告详情
-			getReportDetail() {
-				// 这里可以替换为实际的API调用
-				console.log('获取报告详情', this.reportId);
+			async getReportDetail() {
+				this.loading = true;
+				try {
+					const res = await getReportDetail(this.reportId);
+					
+					// 更新报告基本信息
+					this.reportInfo = {
+						packageName: res.packageName || '',
+						reportDate: res.reportDate || '',
+						hospitalName: res.hospitalName || '',
+						personName: res.personName || '',
+						gender: res.gender || '',
+						age: res.age || 0,
+						examDate: res.examDate || '',
+						abnormalCount: res.abnormalCount || 0,
+						totalCount: res.totalCount || 0,
+						adviceCount: res.adviceList?.length || 0,
+						adviceList: res.adviceList || []
+					};
+					
+					// 更新检查结果数据
+					this.examResults = (res.examResults || []).map(item => ({
+						name: item.name || '',
+						value: item.value || '',
+						unit: item.unit || '',
+						referenceRange: item.referenceRange || '',
+						isAbnormal: item.isAbnormal || false,
+						description: item.description || '',
+						advice: item.advice || '',
+						expanded: false
+					}));
+					
+					// 初始化过滤结果
+					this.filteredResults = this.examResults;
+					
+				} catch (error) {
+					console.error('获取报告详情失败:', error);
+					uni.showToast({
+						title: '获取报告详情失败',
+						icon: 'none'
+					});
+				} finally {
+					this.loading = false;
+				}
 			},
 			// 切换筛选条件
 			switchFilter(filter) {

@@ -21,6 +21,9 @@ export function request(options) {
     // 如果有token，添加到请求头
     if (token) {
       headers['Authorization'] = token;
+      console.log('请求头已添加Token:', headers);
+    } else {
+      console.warn('请求未携带Token');
     }
     
     uni.request({
@@ -29,6 +32,7 @@ export function request(options) {
       data: options.data || {},
       header: headers,
       success: (res) => {
+        console.log('API响应:', res);
         if (res.statusCode === 200) {
           if (res.data && res.data.code === 200) {
             resolve(res.data);
@@ -37,6 +41,19 @@ export function request(options) {
           } else {
             reject(new Error(res.data?.message || res.data?.msg || '请求失败'));
           }
+        } else if (res.statusCode === 401) {
+          // 未授权错误处理
+          console.warn('未授权访问，跳转到登录页');
+          uni.showToast({
+            title: '登录已过期，请重新登录',
+            icon: 'none',
+            duration: 2000
+          });
+          // 跳转到登录页
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+          reject(new Error('请登录后再操作'));
         } else {
           reject(new Error(`HTTP ${res.statusCode}: ${res.data?.message || res.data?.msg || '请求失败'}`));
         }

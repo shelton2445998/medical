@@ -62,44 +62,14 @@
 </template>
 
 <script>
+	import { getCurrentUserReports } from '@/api/report';
+	
 	export default {
 		data() {
 			return {
-				reportList: [
-					{
-						id: 1,
-						packageName: '基础体检套餐',
-						reportDate: '2023-06-25',
-						hospitalName: '沈阳市云医院-和平分院',
-						personName: '张三',
-						examDate: '2023-06-20',
-						abnormalCount: 2,
-						totalCount: 35,
-						adviceCount: 3
-					},
-					{
-						id: 2,
-						packageName: '高级体检套餐',
-						reportDate: '2023-05-15',
-						hospitalName: '沈阳市云医院-沈河分院',
-						personName: '张三',
-						examDate: '2023-05-10',
-						abnormalCount: 0,
-						totalCount: 50,
-						adviceCount: 2
-					},
-					{
-						id: 3,
-						packageName: '男性健康套餐',
-						reportDate: '2023-03-20',
-						hospitalName: '沈阳市云医院-和平分院',
-						personName: '张三',
-						examDate: '2023-03-15',
-						abnormalCount: 1,
-						totalCount: 45,
-						adviceCount: 4
-					}
-				]
+				reportList: [],
+				loading: false,
+				error: null
 			}
 		},
 		onLoad() {
@@ -108,9 +78,33 @@
 		},
 		methods: {
 			// 获取报告列表
-			getReportList() {
-				// 这里可以替换为实际的API调用
-				console.log('获取报告列表');
+			async getReportList() {
+				this.loading = true;
+				this.error = null;
+				
+				try {
+					const res = await getCurrentUserReports();
+					this.reportList = res.map(item => ({
+						id: item.id,
+						packageName: item.packageName || '未命名套餐',
+						reportDate: item.reportDate || '',
+						hospitalName: item.hospitalName || '',
+						personName: item.personName || '',
+						examDate: item.examDate || '',
+						abnormalCount: item.abnormalCount || 0,
+						totalCount: item.totalCount || 0,
+						adviceCount: item.adviceCount || 0
+					}));
+				} catch (error) {
+					console.error('获取报告列表失败:', error);
+					this.error = error;
+					uni.showToast({
+						title: '获取报告列表失败',
+						icon: 'none'
+					});
+				} finally {
+					this.loading = false;
+				}
 			},
 			// 查看报告
 			viewReport(report) {
