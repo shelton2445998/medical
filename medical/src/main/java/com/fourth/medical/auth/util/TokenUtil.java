@@ -1,9 +1,9 @@
 package com.fourth.medical.auth.util;
 
 import com.fourth.medical.auth.cache.TokenCache;
+import com.fourth.medical.auth.exception.LoginTokenException;
 import com.fourth.medical.common.constant.LoginConstant;
 import com.fourth.medical.common.enums.SystemType;
-import com.fourth.medical.framework.exception.LoginTokenException;
 import com.fourth.medical.util.CookieUtil;
 import com.fourth.medical.util.HttpServletRequestUtil;
 import com.fourth.medical.util.SystemTypeUtil;
@@ -97,11 +97,27 @@ public class TokenUtil {
      * @return
      */
     public static String getToken() {
-
-
         // 从当前线程获取
         String token = TokenCache.get();
-
+        
+        if (StringUtils.isBlank(token)) {
+            log.warn("当前线程中没有找到token，可能TokenInterceptor未正确设置");
+            
+            // 尝试从请求中获取
+            try {
+                HttpServletRequest request = HttpServletRequestUtil.getRequest();
+                if (request != null) {
+                    token = getToken(request);
+                    if (StringUtils.isNotBlank(token)) {
+                        // 获取到token后设置到ThreadLocal中
+                        TokenCache.set(token);
+                        log.info("从请求中获取token成功，已设置到ThreadLocal: {}", token);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("尝试获取当前请求对象失败", e);
+            }
+        }
 
         return token;
     }

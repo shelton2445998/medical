@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author geekidea
  * @date 2022/6/26
@@ -63,9 +65,39 @@ public class AppLoginUtil {
                 // 如果获取到了，放入线程缓存
                 if (appLoginVo != null) {
                     AppLoginCache.set(appLoginVo);
+                    log.info("成功从token获取APP用户并保存到线程: userId={}", appLoginVo.getUserId());
                 }
             }
         }
+        return appLoginVo;
+    }
+    
+    /**
+     * 从请求中获取登录用户信息
+     * 
+     * @param request HTTP请求
+     * @return 登录用户信息
+     */
+    public static AppLoginVo getLoginVo(HttpServletRequest request) {
+        if (request == null) {
+            log.warn("获取APP登录信息失败: request为空");
+            return null;
+        }
+        
+        // 先从请求中获取token
+        String token = TokenUtil.getToken(request);
+        if (StringUtils.isBlank(token)) {
+            log.warn("从请求中获取APP登录信息失败: token为空");
+            return null;
+        }
+        
+        // 通过token获取用户信息
+        AppLoginVo appLoginVo = getLoginVo(token);
+        if (appLoginVo != null) {
+            // 保存到线程本地变量中
+            AppLoginCache.set(appLoginVo);
+        }
+        
         return appLoginVo;
     }
 

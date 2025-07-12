@@ -23,17 +23,16 @@ public class TokenInterceptor extends BaseExcludeMethodInterceptor {
 
     @Override
     protected boolean preHandleMethod(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        // 获取token
-        String token = TokenUtil.getToken(request);
-        
         // 获取请求路径
         String servletPath = request.getServletPath();
+        
+        // 从请求中获取token
+        String token = TokenUtil.getToken(request);
         
         if (StringUtils.isBlank(token)) {
             // 对于APP路径，尝试从其他地方获取token
             if (servletPath.startsWith("/app")) {
-                log.debug("APP路径请求: {}", servletPath);
-                // 尝试从其他地方获取token（如果需要）
+                log.debug("APP路径请求: {}, 但未获取到token", servletPath);
             }
             return true;
         }
@@ -44,7 +43,12 @@ public class TokenInterceptor extends BaseExcludeMethodInterceptor {
         // 记录日志
         SystemType systemType = SystemTypeUtil.getSystemTypeByToken(token);
         if (systemType != null) {
-            log.debug("请求路径: {}, Token类型: {}", servletPath, systemType.getDesc());
+            log.debug("请求路径: {}, Token类型: {}, Token值: {}", servletPath, systemType.getDesc(), token);
+            
+            // 对于APP请求，额外记录日志以帮助诊断
+            if (servletPath.startsWith("/app") && SystemType.APP == systemType) {
+                log.info("APP请求验证: 路径={}, token已设置到ThreadLocal", servletPath);
+            }
         }
 
         return true;
