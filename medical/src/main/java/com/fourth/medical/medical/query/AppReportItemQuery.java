@@ -15,6 +15,9 @@ import lombok.Data;
 public class AppReportItemQuery extends BasePageQuery {
 
     private static final long serialVersionUID = 1L;
+    
+    @Schema(description = "用户ID")
+    private Long userId;
 
 }
 

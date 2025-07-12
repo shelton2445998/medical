@@ -13,6 +13,9 @@
         select *
         from report_item
         <where>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
         </where>
     </select>
 
@@ -27,6 +30,9 @@
         select *
         from report_item
         <where>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
         </where>
     </select>
     
