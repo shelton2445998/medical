@@ -13,7 +13,44 @@
         select *
         from doctor_schedule
         <where>
+            <if test="doctorId != null">
+                doctor_id = #{doctorId}
+            </if>
+            <if test="startDate != null">
+                and work_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                and work_date &lt;= #{endDate}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
         </where>
+    </select>
+    
+    <select id="getDoctorScheduleListByDoctorId" resultType="com.fourth.medical.medical.vo.DoctorScheduleVo">
+        select ds.*, 
+               d.name as doctor_name,
+               d.title as doctor_title,
+               dept.name as department_name,
+               h.name as hospital_name
+        from doctor_schedule ds
+        left join doctor d on ds.doctor_id = d.id
+        left join department dept on d.department_id = dept.id
+        left join hospital h on d.hospital_id = h.id
+        <where>
+            ds.doctor_id = #{doctorId}
+            <if test="query.startDate != null">
+                and ds.work_date &gt;= #{query.startDate}
+            </if>
+            <if test="query.endDate != null">
+                and ds.work_date &lt;= #{query.endDate}
+            </if>
+            <if test="query.status != null">
+                and ds.status = #{query.status}
+            </if>
+        </where>
+        order by ds.work_date asc, ds.time_slot asc
     </select>
 
     <select id="getAppDoctorScheduleById" resultType="com.fourth.medical.medical.vo.AppDoctorScheduleVo">

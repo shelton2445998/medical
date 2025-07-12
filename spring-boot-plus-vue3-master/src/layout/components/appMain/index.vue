@@ -24,9 +24,11 @@
 
 <script lang="ts" setup>
 // 页面加载时
+import { onMounted } from 'vue';
 import {NextLoading} from "@/utils/loading";
 
 onMounted(() => {
+  console.log('AppMain组件已挂载');
   NextLoading.done(600);
 });
 </script>

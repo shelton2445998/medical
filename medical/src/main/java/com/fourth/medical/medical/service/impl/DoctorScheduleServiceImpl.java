@@ -76,6 +76,11 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
         Paging<DoctorScheduleVo> paging = new Paging<>(list);
         return paging;
     }
+    
+    @Override
+    public List<DoctorScheduleVo> getDoctorScheduleListByDoctorId(Long doctorId, DoctorScheduleQuery query) {
+        return doctorScheduleMapper.getDoctorScheduleListByDoctorId(doctorId, query);
+    }
 
     @Override
     public AppDoctorScheduleVo getAppDoctorScheduleById(Long id) {

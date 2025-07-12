@@ -17,6 +17,17 @@ import java.util.Date;
 public class DoctorScheduleQuery extends BasePageQuery {
 
     private static final long serialVersionUID = 1L;
-
+    
+    @Schema(description = "医生ID")
+    private Long doctorId;
+    
+    @Schema(description = "开始日期")
+    private Date startDate;
+    
+    @Schema(description = "结束日期")
+    private Date endDate;
+    
+    @Schema(description = "状态 0:停诊，1:正常")
+    private Boolean status;
 }
 

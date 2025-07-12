@@ -23,6 +23,7 @@ import {useUserStoreHook} from "@/store/modules/user";
 import {Lock, Iphone} from "@element-plus/icons-vue"
 import md5 from "js-md5"
 import {NextLoading} from "@/utils/loading"
+import {initStaticRoutes} from "@/router/staticRoutes";
 
 const router = useRouter();
 
@@ -48,6 +49,8 @@ const login = () => {
     password: md5(ruleForm.password)
   }).then(async () => {
     NextLoading.start();
+    // 初始化静态路由
+    await initStaticRoutes();
     await router.push('/')
   })
 }

@@ -24,6 +24,10 @@
             <el-icon><calendar /></el-icon>
             <span>预约管理</span>
           </el-menu-item>
+          <el-menu-item index="/home/examination-reports">
+            <el-icon><document-checked /></el-icon>
+            <span>体检报告</span>
+          </el-menu-item>
           <el-menu-item index="/home/medical-records">
             <el-icon><document /></el-icon>
             <span>病历管理</span>
@@ -31,6 +35,14 @@
           <el-menu-item index="/home/prescriptions">
             <el-icon><tickets /></el-icon>
             <span>处方管理</span>
+          </el-menu-item>
+          <el-menu-item index="/home/schedule">
+            <el-icon><timer /></el-icon>
+            <span>排班管理</span>
+          </el-menu-item>
+          <el-menu-item index="/home/profile">
+            <el-icon><setting /></el-icon>
+            <span>个人设置</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -41,6 +53,7 @@
             <el-icon class="menu-toggle" @click="toggleSidebar"><fold /></el-icon>
           </div>
           <div class="header-right">
+            <el-button type="primary" size="small" @click="goToProfilePage" style="margin-right: 15px;">个人设置</el-button>
             <el-dropdown trigger="click">
               <span class="el-dropdown-link">
                 {{ doctorInfo.name || '医生' }}
@@ -103,9 +116,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown } from '@element-plus/icons-vue'
+import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown, DocumentChecked, Timer, Setting } from '@element-plus/icons-vue'
 import store from '@/store'
-import { getDoctorInfo, doctorLogout } from '@/api/doctor'
+import { getDoctorInfo, doctorLogout, updatePassword } from '@/api/doctor'
 
 export default {
   name: 'HomeView',
@@ -116,7 +129,10 @@ export default {
     Document,
     Tickets,
     Fold,
-    ArrowDown
+    ArrowDown,
+    DocumentChecked,
+    Timer,
+    Setting
   },
   setup() {
     const route = useRoute()
@@ -210,7 +226,10 @@ export default {
       passwordFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            // 这里应调用修改密码的API
+            await updatePassword({
+              oldPassword: passwordForm.oldPassword,
+              newPassword: passwordForm.newPassword
+            })
             ElMessage.success('密码修改成功')
             changePasswordDialogVisible.value = false
             // 重置表单
@@ -219,7 +238,7 @@ export default {
             passwordForm.confirmPassword = ''
           } catch (error) {
             console.error('修改密码失败：', error)
-            ElMessage.error('修改密码失败，请稍后重试')
+            ElMessage.error(error.message || '修改密码失败，请稍后重试')
           }
         }
       })
@@ -245,6 +264,11 @@ export default {
         }
       }).catch(() => {})
     }
+
+    // 跳转到个人设置页面
+    const goToProfilePage = () => {
+      router.push('/home/profile')
+    }
     
     return {
       doctorInfo,
@@ -259,7 +283,8 @@ export default {
       openPersonalInfo,
       openChangePassword,
       submitChangePassword,
-      handleLogout
+      handleLogout,
+      goToProfilePage
     }
   }
 }

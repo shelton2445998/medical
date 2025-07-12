@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
-import { formatFlatteningRoutes, formatTwoStageRoutes, router } from '@/router/index';
-import { dynamicRoutes, notFoundRoutes, rootRoutes } from '@/router/route';
+import { router } from '@/router/index';
+import { dynamicRoutes, notFoundRoutes } from '@/router/route';
 import { storeToRefs } from 'pinia';
 import { useRoutesList } from '@/store/modules/routesList';
 import { useUserStore } from '@/store/modules/user';
@@ -13,12 +13,9 @@ export async function initStaticRoutes() {
   try {
     // 保存到用户菜单
     useUserStore().setMenu(doctorRoutes);
-
-    // 设置根路由的子路由
-    rootRoutes[0].children = doctorRoutes[0].children;
     
     // 添加路由
-    await addStaticRoutes([...rootRoutes, ...dynamicRoutes]);
+    await addStaticRoutes([...doctorRoutes, ...dynamicRoutes]);
     
     return Promise.resolve(doctorRoutes);
   } catch (error) {
@@ -38,10 +35,8 @@ const addStaticRoutes = async (routes: Array<RouteRecordRaw>) => {
   
   isColumnsMenuHover.value = true;
 
-  const finallyRoutes = formatTwoStageRoutes(formatFlatteningRoutes(routes));
-  
   // 添加路由
-  finallyRoutes.forEach((route: RouteRecordRaw) => {
+  routes.forEach((route: RouteRecordRaw) => {
     router.addRoute(route);
   });
 
@@ -58,6 +53,9 @@ export async function resetRouter() {
   const routes = router.getRoutes();
   routes.forEach((route) => {
     const { name } = route;
-    router.hasRoute(name as string) && router.removeRoute(name as string);
+    // 保留基础路由，不重置
+    if (name !== 'Login' && name !== '404' && name !== undefined) {
+      router.hasRoute(name as string) && router.removeRoute(name as string);
+    }
   });
 } 

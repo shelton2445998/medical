@@ -35,6 +35,21 @@ const routes = [
         path: 'prescriptions',
         name: 'Prescriptions',
         component: () => import('../views/Prescriptions.vue')
+      },
+      {
+        path: 'examination-reports',
+        name: 'ExaminationReports',
+        component: () => import('../views/ExaminationReports.vue')
+      },
+      {
+        path: 'schedule',
+        name: 'Schedule',
+        component: () => import('../views/Schedule.vue')
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('../views/Profile.vue')
       }
     ]
   },

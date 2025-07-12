@@ -7,11 +7,10 @@ import {router} from "@/router/index";
 import type {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
 import {closeNProgress, startNProgress} from "@/utils/nprogress";
 import {getToken} from "@/utils/auth";
-import {initBackEndControlRoutes} from "@/router/backEnd"
 import {useUserStoreHook} from "@/store/modules/user";
 import {NextLoading} from '@/utils/loading';
 import {ElMessage, ElMessageBox} from "element-plus";
-
+import {initStaticRoutes} from "@/router/staticRoutes";
 
 /** 路由白名单 */
 const whiteList = ["/login","/404"];
@@ -21,30 +20,21 @@ router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormali
     if (whiteList.includes(to.path)) {
         next();
     } else if (getToken()) {
-        if (useUserStoreHook().menuList.length > 0) {
-            next();
-        } else {
+        // 如果是首次访问或刷新页面，需要初始化路由
+        if (!router.hasRoute('doctor')) {
             // 界面 loading 动画开始执行
             if (window.nextLoading === undefined) NextLoading.start();
-            const routers = await initBackEndControlRoutes();
-            if (routers.length > 0) {
-                next({path: to.path, query: to.query});
-            } else {
-                ElMessageBox.confirm(
-                    '当前账号权限不足，请联系管理员分配权限。',
-                    '提示',
-                    {
-                        confirmButtonText: '确定',
-                        showCancelButton:false,
-                        type: 'warning',
-                    })
-                    .then(async () => {
-
-                    }).catch(() => {
-                })
-                NextLoading.done(600);
-                next(`/login`)
-            }
+            
+            // 使用静态路由替代后端路由
+            await initStaticRoutes();
+            
+            // 路由初始化完成后跳转
+            next({ path: to.fullPath, replace: true });
+            
+            // 完成加载
+            NextLoading.done(600);
+        } else {
+            next();
         }
     } else {
         next(`/login?redirect=${to.fullPath}`)

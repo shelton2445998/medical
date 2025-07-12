@@ -11,9 +11,16 @@ export function doctorLogin(data) {
 
 // 获取医生信息
 export function getDoctorInfo() {
+  console.log('正在请求医生信息API')
   return request({
     url: '/doctor/info',
     method: 'get'
+  }).then(response => {
+    console.log('医生信息API响应:', response)
+    return response
+  }).catch(error => {
+    console.error('医生信息API错误:', error)
+    throw error
   })
 }
 
@@ -160,6 +167,67 @@ export function getPatientList(params) {
 export function getPatientDetail(id) {
   return request({
     url: `/doctor/patient/detail/${id}`,
+    method: 'get'
+  })
+}
+
+// 录入体检结果
+export function submitExaminationResults(data) {
+  return request({
+    url: '/doctor/appointment/result',
+    method: 'post',
+    data
+  })
+}
+
+// 获取体检报告列表
+export function getReportList(params) {
+  return request({
+    url: '/doctor/report/list',
+    method: 'get',
+    params
+  })
+}
+
+// 获取报告详情
+export function getReportDetail(id) {
+  return request({
+    url: `/doctor/report/detail/${id}`,
+    method: 'get'
+  })
+}
+
+// 生成体检报告
+export function generateReport(data) {
+  return request({
+    url: '/doctor/report/generate',
+    method: 'post',
+    data
+  })
+}
+
+// 更新体检报告
+export function updateReport(data) {
+  return request({
+    url: '/doctor/report/update',
+    method: 'put',
+    data
+  })
+}
+
+// 修改个人密码
+export function updatePassword(data) {
+  return request({
+    url: '/doctor/password',
+    method: 'put',
+    data
+  })
+}
+
+// 获取患者历史体检记录
+export function getPatientExamHistory(id) {
+  return request({
+    url: `/doctor/patient/exam-history/${id}`,
     method: 'get'
   })
 } 

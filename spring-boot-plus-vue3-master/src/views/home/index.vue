@@ -3,7 +3,7 @@
     <!-- 简单欢迎区域 -->
     <el-card class="welcome-card">
       <h1>欢迎使用医生工作站</h1>
-      <p>今天是 {{ new Date().toLocaleDateString() }}</p>
+      <p>今天是 {{ today }}</p>
     </el-card>
 
     <!-- 简单统计卡片 -->
@@ -46,21 +46,23 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      quickFunctions: [
-        '患者管理',
-        '预约管理',
-        '诊断记录',
-        '处方管理',
-        '数据统计',
-        '个人设置'
-      ]
-    };
-  }
-};
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+
+// 今天日期
+const today = computed(() => {
+  return new Date().toLocaleDateString();
+});
+
+// 快捷功能
+const quickFunctions = ref([
+  '患者管理',
+  '预约管理',
+  '诊断记录',
+  '处方管理',
+  '数据统计',
+  '个人设置'
+]);
 </script>
 
 <style scoped>

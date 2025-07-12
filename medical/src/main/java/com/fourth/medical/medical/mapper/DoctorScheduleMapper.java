@@ -7,6 +7,7 @@ import com.fourth.medical.medical.vo.DoctorScheduleVo;
 import com.fourth.medical.medical.query.AppDoctorScheduleQuery;
 import com.fourth.medical.medical.vo.AppDoctorScheduleVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -34,6 +35,15 @@ public interface DoctorScheduleMapper extends BaseMapper<DoctorSchedule> {
      * @return
      */
     List<DoctorScheduleVo> getDoctorSchedulePage(DoctorScheduleQuery query);
+    
+    /**
+     * 根据医生ID和日期范围获取医生排班列表
+     *
+     * @param doctorId 医生ID
+     * @param query 查询条件
+     * @return 医生排班列表
+     */
+    List<DoctorScheduleVo> getDoctorScheduleListByDoctorId(@Param("doctorId") Long doctorId, @Param("query") DoctorScheduleQuery query);
 
     /**
      * App医生排班详情
