@@ -68,36 +68,40 @@ public interface OrdersService extends IService<Orders> {
      * App体检预约订单详情
      *
      * @param id
+     * @param token
      * @return
      * @throws Exception
      */
-    AppOrdersVo getAppOrdersById(Long id);
+    AppOrdersVo getAppOrdersById(Long id, String token);
 
     /**
      * App体检预约订单分页列表
      *
      * @param query
+     * @param token
      * @return
      * @throws Exception
      */
-    Paging<AppOrdersVo> getAppOrdersPage(AppOrdersQuery query);
+    Paging<AppOrdersVo> getAppOrdersPage(AppOrdersQuery query, String token);
     
     /**
      * 创建App体检预约
      *
      * @param dto
+     * @param token
      * @return
      * @throws Exception
      */
-    AppOrdersVo createAppOrders(AppOrdersDto dto);
+    AppOrdersVo createAppOrders(AppOrdersDto dto, String token);
     
     /**
      * 取消App体检预约
      *
      * @param id
+     * @param token
      * @return
      * @throws Exception
      */
-    boolean cancelAppOrders(Long id);
+    boolean cancelAppOrders(Long id, String token);
 
 }
