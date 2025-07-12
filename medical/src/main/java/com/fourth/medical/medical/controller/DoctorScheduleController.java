@@ -87,7 +87,7 @@ public class DoctorScheduleController {
      */
     @PostMapping("/add")
     @Operation(summary = "添加医生排班")
-    public ApiResult addDoctorSchedule(@Valid @RequestBody DoctorScheduleDto dto, HttpServletRequest request) {
+    public ApiResult addDoctorSchedule(@RequestBody DoctorScheduleDto dto, HttpServletRequest request) {
         // 从请求头中获取token
         String token = TokenUtil.getToken(request);
         if (StringUtils.isBlank(token)) {
@@ -115,9 +115,15 @@ public class DoctorScheduleController {
             return ApiResult.fail("不能添加过去的排班");
         }
         
-        // 添加医生排班
-        boolean flag = doctorScheduleService.addDoctorSchedule(dto);
-        return ApiResult.result(flag);
+        // 在设置了doctorId后再进行验证
+        try {
+            // 添加医生排班
+            boolean flag = doctorScheduleService.addDoctorSchedule(dto);
+            return ApiResult.result(flag);
+        } catch (Exception e) {
+            log.error("添加医生排班失败", e);
+            return ApiResult.fail("添加排班失败：" + e.getMessage());
+        }
     }
     
     /**

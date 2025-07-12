@@ -3,6 +3,7 @@ package com.fourth.medical.auth.util;
 import com.fourth.medical.auth.cache.AppLoginCache;
 import com.fourth.medical.auth.service.AppLoginRedisService;
 import com.fourth.medical.auth.vo.AppLoginVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
  * @author geekidea
  * @date 2022/6/26
  **/
+@Slf4j
 @Component
 public class AppLoginUtil {
 
@@ -28,10 +30,22 @@ public class AppLoginUtil {
      */
     public static AppLoginVo getLoginVo(String token) {
         if (StringUtils.isBlank(token)) {
+            log.warn("获取APP登录信息失败: token为空");
             return null;
         }
-        AppLoginVo appLoginVo = appLoginRedisService.getLoginVo(token);
-        return appLoginVo;
+        
+        try {
+            AppLoginVo appLoginVo = appLoginRedisService.getLoginVo(token);
+            if (appLoginVo == null) {
+                log.warn("从Redis获取APP登录信息失败: token={}", token);
+            } else {
+                log.debug("成功获取APP用户信息: userId={}, username={}", appLoginVo.getUserId(), appLoginVo.getUsername());
+            }
+            return appLoginVo;
+        } catch (Exception e) {
+            log.error("从Redis获取APP登录信息异常: token=" + token, e);
+            return null;
+        }
     }
 
     /**
@@ -40,7 +54,19 @@ public class AppLoginUtil {
      * @return
      */
     public static AppLoginVo getLoginVo() {
-        return AppLoginCache.get();
+        AppLoginVo appLoginVo = AppLoginCache.get();
+        if (appLoginVo == null) {
+            // 如果线程缓存中没有，尝试从token中获取
+            String token = TokenUtil.getToken();
+            if (StringUtils.isNotBlank(token)) {
+                appLoginVo = getLoginVo(token);
+                // 如果获取到了，放入线程缓存
+                if (appLoginVo != null) {
+                    AppLoginCache.set(appLoginVo);
+                }
+            }
+        }
+        return appLoginVo;
     }
 
     /**

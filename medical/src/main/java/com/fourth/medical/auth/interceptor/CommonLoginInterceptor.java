@@ -114,7 +114,14 @@ public class CommonLoginInterceptor extends BaseExcludeMethodInterceptor {
             
             if (loginVo == null) {
 
-                throw new LoginTokenException("登录已过期或登录信息不存在，请重新登录");
+                // 如果从缓存中获取不到，尝试再次从Redis中获取
+                loginVo = AppLoginUtil.getLoginVo(token);
+                if (loginVo != null) {
+                    // 将APP移动端的登录信息保存到当前线程中
+                    AppLoginCache.set(loginVo);
+                } else {
+                    throw new LoginTokenException("登录已过期或登录信息不存在，请重新登录");
+                }
             }
         } else if (SystemType.DOCTOR == systemType) {
 

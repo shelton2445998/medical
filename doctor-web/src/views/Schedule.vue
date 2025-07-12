@@ -27,6 +27,7 @@
         <template #date-cell="{ data }">
           <div class="calendar-day">
             <p class="date">{{ data.day.split('-').slice(2).join('-') }}</p>
+            <p class="date-debug">{{ data.day }}</p>
             <div class="schedule-info">
               <div
                 v-for="schedule in getSchedulesByDate(data.day)"
@@ -183,8 +184,19 @@ export default {
           }
         }
         
+        console.log('请求排班数据参数:', params)
         const res = await getDoctorSchedules(params)
+        console.log('获取排班数据响应:', res)
+        
         scheduleList.value = res.data || []
+        
+        // 处理日期格式，确保与日历组件兼容
+        scheduleList.value.forEach(item => {
+          if (item.workDate && item.workDate.includes(' ')) {
+            // 保留原始日期，同时添加格式化后的日期用于比较
+            item.formattedDate = item.workDate.split(' ')[0]
+          }
+        })
       } catch (error) {
         console.error('获取排班数据失败', error)
         ElMessage.error('获取排班数据失败')
@@ -195,7 +207,13 @@ export default {
     
     // 根据日期获取排班列表
     const getSchedulesByDate = (dateStr) => {
-      return scheduleList.value.filter(item => item.workDate === dateStr)
+      console.log('当前日期:', dateStr, '所有排班:', scheduleList.value)
+      return scheduleList.value.filter(item => {
+        // 优先使用格式化后的日期，如果没有则拆分原始日期
+        const itemDate = item.formattedDate || (item.workDate && item.workDate.split(' ')[0])
+        console.log(`比较: ${itemDate} === ${dateStr} => ${itemDate === dateStr}`)
+        return itemDate === dateStr
+      })
     }
     
     // 获取患者数量标签类型
@@ -328,11 +346,13 @@ export default {
         if (valid) {
           try {
             const data = {
-              workDate: scheduleForm.workDate,
+              workDate: scheduleForm.workDate, // 直接使用字符串格式的日期，后端会正确解析
               timeSlot: scheduleForm.timeSlot,
               maxNumber: scheduleForm.maxNumber,
               status: scheduleForm.status
             }
+            
+            console.log('提交排班数据:', data)
             
             if (isEdit.value) {
               data.id = scheduleForm.id
@@ -359,16 +379,19 @@ export default {
     }
     
     onMounted(() => {
+      console.log('组件挂载，初始化日期范围')
       const now = new Date()
       const start = new Date(now)
       const end = new Date(now)
       end.setDate(end.getDate() + 30)
       
+      // 确保日期格式为 YYYY-MM-DD
       filterDate.value = [
         start.toISOString().split('T')[0],
         end.toISOString().split('T')[0]
       ]
       
+      console.log('初始日期范围:', filterDate.value)
       fetchScheduleData()
     })
     
@@ -426,6 +449,13 @@ export default {
   text-align: right;
   margin: 5px;
   font-size: 14px;
+}
+
+.date-debug {
+  text-align: right;
+  margin: 0 5px;
+  font-size: 10px;
+  color: #999;
 }
 
 .schedule-info {
