@@ -29,5 +29,11 @@
         <where>
         </where>
     </select>
+    
+    <select id="getReportItemsByUserId" resultType="com.fourth.medical.medical.vo.ReportItemVo">
+        select *
+        from report_item
+        where user_id = #{userId}
+    </select>
 
 </mapper>

@@ -91,5 +91,9 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
         Paging<AppReportItemVo> paging = new Paging<>(list);
         return paging;
     }
-
+    
+    @Override
+    public List<ReportItemVo> getReportItemsByUserId(Long userId) {
+        return reportItemMapper.getReportItemsByUserId(userId);
+    }
 }
