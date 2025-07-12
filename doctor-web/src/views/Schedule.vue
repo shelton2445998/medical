@@ -11,77 +11,111 @@
 
     <el-card>
       <div class="filter-container">
-        <el-date-picker
-          v-model="filterDate"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-        />
-        <el-button type="primary" @click="fetchScheduleData">查询</el-button>
+        <div class="week-navigation">
+          <el-button type="default" @click="prevWeek">
+            <el-icon><ArrowLeft /></el-icon> 上一周
+          </el-button>
+          <span class="week-display">{{ weekRangeDisplay }}</span>
+          <el-button type="default" @click="nextWeek">
+            下一周 <el-icon><ArrowRight /></el-icon>
+          </el-button>
+        </div>
+        <el-button type="primary" @click="fetchScheduleData">刷新</el-button>
       </div>
 
-      <el-calendar v-model="selectedDate">
-        <template #date-cell="{ data }">
-          <div class="calendar-day">
-            <p class="date">{{ data.day.split('-').slice(2).join('-') }}</p>
-            <p class="date-debug">{{ data.day }}</p>
-            <div class="schedule-info">
-              <div
-                v-for="schedule in getSchedulesByDate(data.day)"
-                :key="schedule.id"
-                class="schedule-item"
-                :class="{ 'schedule-disabled': schedule.status === 0 }"
-              >
-                <div class="time-slot">{{ schedule.timeSlot }}</div>
-                <div class="patient-count">
-                  <el-tag :type="getPatientCountTagType(schedule)">
-                    {{ schedule.reservedNumber }} / {{ schedule.maxNumber }}
-                  </el-tag>
-                </div>
-                <div class="schedule-actions">
-                  <el-button
-                    v-if="schedule.status === 1"
-                    type="danger"
-                    size="small"
-                    @click.stop="handleCancelSchedule(schedule)"
-                  >
-                    停诊
-                  </el-button>
-                  <el-button
-                    v-else
-                    type="success"
-                    size="small"
-                    @click.stop="handleResumeSchedule(schedule)"
-                  >
-                    恢复
-                  </el-button>
-                  <el-button
-                    type="primary"
-                    size="small"
-                    @click.stop="handleEditSchedule(schedule)"
-                  >
-                    编辑
-                  </el-button>
-                  <el-button
-                    v-if="canDeleteSchedule(schedule)"
-                    type="danger"
-                    size="small"
-                    @click.stop="handleDeleteSchedule(schedule)"
-                  >
-                    删除
-                  </el-button>
-                </div>
-              </div>
-              <div v-if="getSchedulesByDate(data.day).length === 0" class="no-schedule">
-                无排班
-              </div>
+      <div class="week-calendar">
+        <div class="week-header">
+          <div v-for="(day, index) in weekDays" :key="index" class="week-day-header">
+            {{ day.dayOfWeek }}<br>{{ day.dateStr }}
+          </div>
+        </div>
+        <div class="week-body">
+          <div 
+            v-for="(day, index) in weekDays" 
+            :key="index" 
+            class="week-day" 
+            :class="{ 
+              'has-schedule': hasSchedule(day.fullDate),
+              'selected-day': selectedDay === day.fullDate
+            }"
+            @click="selectDay(day.fullDate)"
+          >
+            <div v-for="schedule in getSchedulesByDate(day.fullDate)" :key="schedule.id" class="schedule-item-mini">
+              <span :class="{ 'disabled-schedule': schedule.status === false }">
+                {{ schedule.timeSlot.substring(0, 2) }} ({{ schedule.reservedNumber }}/{{ schedule.maxNumber }})
+              </span>
+            </div>
+            <div v-if="getSchedulesByDate(day.fullDate).length === 0" class="no-schedule-mini">
+              无排班
             </div>
           </div>
-        </template>
-      </el-calendar>
+        </div>
+      </div>
+
+      <div v-if="selectedDay" class="day-detail">
+        <div class="day-detail-header">
+          <h3>{{ formatSelectedDay }} 排班详情</h3>
+          <el-button type="primary" size="small" @click="handleAddScheduleForDay">
+            <el-icon><Plus /></el-icon> 添加排班
+          </el-button>
+        </div>
+        <div v-if="getSchedulesByDate(selectedDay).length === 0" class="no-schedule-detail">
+          该日无排班，请点击添加排班按钮创建新排班。
+        </div>
+        <div v-else class="schedule-list">
+          <div 
+            v-for="schedule in getSchedulesByDate(selectedDay)" 
+            :key="schedule.id" 
+            class="schedule-detail-item"
+            :class="{ 'schedule-disabled': schedule.status === false }"
+          >
+            <div class="schedule-detail-info">
+              <div class="time-slot">{{ schedule.timeSlot }}</div>
+              <div class="patient-count">
+                <el-tag :type="getPatientCountTagType(schedule)">
+                  已预约: {{ schedule.reservedNumber }} / {{ schedule.maxNumber }}
+                </el-tag>
+                <el-tag :type="schedule.status === true ? 'success' : 'danger'" class="status-tag">
+                  {{ schedule.status === true ? '正常' : '停诊' }}
+                </el-tag>
+              </div>
+            </div>
+            <div class="schedule-actions">
+              <el-button
+                v-if="schedule.status === true"
+                type="danger"
+                size="small"
+                @click="handleCancelSchedule(schedule)"
+              >
+                停诊
+              </el-button>
+              <el-button
+                v-else
+                type="success"
+                size="small"
+                @click="handleResumeSchedule(schedule)"
+              >
+                恢复
+              </el-button>
+              <el-button
+                type="primary"
+                size="small"
+                @click="handleEditSchedule(schedule)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                v-if="canDeleteSchedule(schedule)"
+                type="danger"
+                size="small"
+                @click="handleDeleteSchedule(schedule)"
+              >
+                删除
+              </el-button>
+            </div>
+          </div>
+        </div>
+      </div>
     </el-card>
 
     <!-- 排班表单弹窗 -->
@@ -134,13 +168,15 @@
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import { getDoctorSchedules, addDoctorSchedule, updateDoctorSchedule, deleteDoctorSchedule } from '@/api/doctor'
 
 export default {
   name: 'Schedule',
   components: {
-    Plus
+    Plus,
+    ArrowLeft,
+    ArrowRight
   },
   setup() {
     const loading = ref(false)
@@ -150,6 +186,64 @@ export default {
     const scheduleDialogVisible = ref(false)
     const isEdit = ref(false)
     const scheduleFormRef = ref(null)
+    const selectedDay = ref(null) // 当前选中的日期
+    const currentWeekStart = ref(new Date())
+    
+    // 计算当前显示的周日期
+    const weekDays = computed(() => {
+      const days = []
+      const startOfWeek = new Date(currentWeekStart.value)
+      
+      const weekdayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startOfWeek)
+        currentDate.setDate(startOfWeek.getDate() + i)
+        
+        const year = currentDate.getFullYear()
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+        const day = String(currentDate.getDate()).padStart(2, '0')
+        const dateStr = `${month}-${day}`
+        const fullDate = `${year}-${month}-${day}`
+        const dayOfWeek = weekdayNames[currentDate.getDay()]
+        
+        days.push({
+          date: currentDate,
+          dateStr,
+          fullDate,
+          dayOfWeek
+        })
+      }
+      
+      return days
+    })
+    
+    // 当前周显示的日期范围
+    const weekRangeDisplay = computed(() => {
+      if (weekDays.value.length === 0) return ''
+      
+      const firstDay = weekDays.value[0].date
+      const lastDay = weekDays.value[6].date
+      
+      const firstMonth = firstDay.getMonth() + 1
+      const firstDate = firstDay.getDate()
+      const lastMonth = lastDay.getMonth() + 1
+      const lastDate = lastDay.getDate()
+      
+      return `${firstMonth}月${firstDate}日 - ${lastMonth}月${lastDate}日`
+    })
+    
+    // 格式化选中日期显示
+    const formatSelectedDay = computed(() => {
+      if (!selectedDay.value) return ''
+      
+      const date = new Date(selectedDay.value)
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()]
+      
+      return `${month}月${day}日 (${weekday})`
+    })
     
     const scheduleForm = reactive({
       id: '',
@@ -165,11 +259,80 @@ export default {
       maxNumber: [{ required: true, message: '请输入最大可预约人数', trigger: 'blur' }]
     }
     
+    // 设置周的开始时间为本周的周一
+    const setWeekToCurrentMonday = () => {
+      const now = new Date()
+      const dayOfWeek = now.getDay() // 0是周日，1是周一
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // 调整到周一
+      
+      const monday = new Date(now)
+      monday.setDate(now.getDate() + diff)
+      monday.setHours(0, 0, 0, 0)
+      
+      currentWeekStart.value = monday
+    }
+    
+    // 上一周
+    const prevWeek = () => {
+      const newStart = new Date(currentWeekStart.value)
+      newStart.setDate(newStart.getDate() - 7)
+      currentWeekStart.value = newStart
+      selectedDay.value = null // 切换周时清除选中日期
+      fetchScheduleDataForCurrentWeek()
+    }
+    
+    // 下一周
+    const nextWeek = () => {
+      const newStart = new Date(currentWeekStart.value)
+      newStart.setDate(newStart.getDate() + 7)
+      currentWeekStart.value = newStart
+      selectedDay.value = null // 切换周时清除选中日期
+      fetchScheduleDataForCurrentWeek()
+    }
+    
+    // 选择日期
+    const selectDay = (day) => {
+      selectedDay.value = day
+    }
+    
+    // 判断某天是否有排班
+    const hasSchedule = (dateStr) => {
+      return getSchedulesByDate(dateStr).length > 0
+    }
+    
+    // 为选中的日期添加排班
+    const handleAddScheduleForDay = () => {
+      if (!selectedDay.value) return
+      
+      isEdit.value = false
+      scheduleForm.id = ''
+      scheduleForm.workDate = selectedDay.value
+      scheduleForm.timeSlot = ''
+      scheduleForm.maxNumber = 20
+      scheduleForm.status = true
+      scheduleDialogVisible.value = true
+    }
+    
     // 日期禁用函数 - 禁用今天之前的日期
     const disabledDate = (time) => {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       return time.getTime() < today.getTime()
+    }
+    
+    // 获取指定周的排班数据
+    const fetchScheduleDataForCurrentWeek = async () => {
+      const startDay = new Date(currentWeekStart.value)
+      const endDay = new Date(currentWeekStart.value)
+      endDay.setDate(endDay.getDate() + 6)
+      
+      // 确保日期格式为 YYYY-MM-DD
+      filterDate.value = [
+        startDay.toISOString().split('T')[0],
+        endDay.toISOString().split('T')[0]
+      ]
+      
+      await fetchScheduleData()
     }
     
     // 获取医生排班数据
@@ -207,11 +370,9 @@ export default {
     
     // 根据日期获取排班列表
     const getSchedulesByDate = (dateStr) => {
-      console.log('当前日期:', dateStr, '所有排班:', scheduleList.value)
       return scheduleList.value.filter(item => {
         // 优先使用格式化后的日期，如果没有则拆分原始日期
         const itemDate = item.formattedDate || (item.workDate && item.workDate.split(' ')[0])
-        console.log(`比较: ${itemDate} === ${dateStr} => ${itemDate === dateStr}`)
         return itemDate === dateStr
       })
     }
@@ -252,7 +413,7 @@ export default {
       scheduleForm.workDate = ''
       scheduleForm.timeSlot = ''
       scheduleForm.maxNumber = 20
-      scheduleForm.status = 1
+      scheduleForm.status = true
       scheduleDialogVisible.value = true
     }
     
@@ -282,7 +443,7 @@ export default {
         try {
           await deleteDoctorSchedule(schedule.id)
           ElMessage.success('删除成功')
-          fetchScheduleData()
+          fetchScheduleDataForCurrentWeek()
         } catch (error) {
           console.error('删除失败', error)
           if (error.response && error.response.data && error.response.data.msg) {
@@ -304,11 +465,11 @@ export default {
         try {
           const data = {
             id: schedule.id,
-            status: 0
+            status: false
           }
           await updateDoctorSchedule(data)
           ElMessage.success('操作成功')
-          fetchScheduleData()
+          fetchScheduleDataForCurrentWeek()
         } catch (error) {
           console.error('操作失败', error)
           ElMessage.error('操作失败')
@@ -326,11 +487,11 @@ export default {
         try {
           const data = {
             id: schedule.id,
-            status: 1
+            status: true
           }
           await updateDoctorSchedule(data)
           ElMessage.success('操作成功')
-          fetchScheduleData()
+          fetchScheduleDataForCurrentWeek()
         } catch (error) {
           console.error('操作失败', error)
           ElMessage.error('操作失败')
@@ -346,7 +507,7 @@ export default {
         if (valid) {
           try {
             const data = {
-              workDate: scheduleForm.workDate, // 直接使用字符串格式的日期，后端会正确解析
+              workDate: scheduleForm.workDate,
               timeSlot: scheduleForm.timeSlot,
               maxNumber: scheduleForm.maxNumber,
               status: scheduleForm.status
@@ -363,7 +524,7 @@ export default {
             
             ElMessage.success(isEdit.value ? '修改成功' : '添加成功')
             scheduleDialogVisible.value = false
-            fetchScheduleData()
+            fetchScheduleDataForCurrentWeek()
           } catch (error) {
             console.error('操作失败', error)
             if (error.response && error.response.data && error.response.data.msg) {
@@ -379,20 +540,8 @@ export default {
     }
     
     onMounted(() => {
-      console.log('组件挂载，初始化日期范围')
-      const now = new Date()
-      const start = new Date(now)
-      const end = new Date(now)
-      end.setDate(end.getDate() + 30)
-      
-      // 确保日期格式为 YYYY-MM-DD
-      filterDate.value = [
-        start.toISOString().split('T')[0],
-        end.toISOString().split('T')[0]
-      ]
-      
-      console.log('初始日期范围:', filterDate.value)
-      fetchScheduleData()
+      setWeekToCurrentMonday()
+      fetchScheduleDataForCurrentWeek()
     })
     
     return {
@@ -415,7 +564,16 @@ export default {
       handleDeleteSchedule,
       handleCancelSchedule,
       handleResumeSchedule,
-      submitScheduleForm
+      submitScheduleForm,
+      weekDays,
+      weekRangeDisplay,
+      prevWeek,
+      nextWeek,
+      selectedDay,
+      selectDay,
+      formatSelectedDay,
+      hasSchedule,
+      handleAddScheduleForDay
     }
   }
 }
@@ -436,67 +594,143 @@ export default {
 .filter-container {
   margin-bottom: 20px;
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.calendar-day {
-  height: 100%;
+.week-navigation {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 15px;
 }
 
-.date {
-  text-align: right;
-  margin: 5px;
-  font-size: 14px;
+.week-display {
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 180px;
+  text-align: center;
 }
 
-.date-debug {
-  text-align: right;
-  margin: 0 5px;
-  font-size: 10px;
-  color: #999;
-}
-
-.schedule-info {
-  flex: 1;
-  padding: 5px;
-  overflow-y: auto;
-}
-
-.schedule-item {
-  background-color: #f5f7fa;
+.week-calendar {
+  border: 1px solid #ebeef5;
   border-radius: 4px;
-  padding: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
+}
+
+.week-header {
+  display: flex;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.week-day-header {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-weight: 500;
+}
+
+.week-body {
+  display: flex;
+  height: 120px;
+}
+
+.week-day {
+  flex: 1;
+  border-right: 1px solid #ebeef5;
+  padding: 8px;
+  cursor: pointer;
+  background-color: white;
+  overflow-y: auto;
+  position: relative;
+}
+
+.week-day:last-child {
+  border-right: none;
+}
+
+.week-day:hover {
+  background-color: #f5f7fa;
+}
+
+.has-schedule {
+  background-color: #ecf5ff;
+}
+
+.selected-day {
+  background-color: #b3d8ff !important;
+}
+
+.schedule-item-mini {
   font-size: 12px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-schedule-mini {
+  color: #909399;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.disabled-schedule {
+  color: #f56c6c;
+  text-decoration: line-through;
+}
+
+.day-detail {
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 15px;
+  margin-top: 20px;
+}
+
+.day-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.no-schedule-detail {
+  text-align: center;
+  color: #909399;
+  padding: 20px;
+}
+
+.schedule-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background-color: #f5f7fa;
 }
 
 .schedule-disabled {
-  background-color: #f56c6c20;
-  color: #f56c6c;
+  background-color: rgba(245, 108, 108, 0.1);
+}
+
+.schedule-detail-info {
+  flex: 1;
+}
+
+.status-tag {
+  margin-left: 8px;
 }
 
 .time-slot {
   font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.patient-count {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .schedule-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 5px;
-  margin-top: 5px;
-}
-
-.no-schedule {
-  color: #909399;
-  text-align: center;
-  font-size: 12px;
-  padding: 10px;
 }
 </style> 

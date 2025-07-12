@@ -43,22 +43,18 @@
         </div>
       </template>
       <el-table :data="appointmentsList" style="width: 100%" v-loading="loading">
-        <el-table-column prop="appointmentId" label="预约编号" width="120" />
-        <el-table-column prop="patientName" label="患者姓名" width="100" />
-        <el-table-column prop="patientPhone" label="联系电话" width="130" />
-        <el-table-column prop="department" label="科室" width="100">
-          <template #default="scope">
-            {{ getDepartmentLabel(scope.row.department) }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="id" label="预约编号" width="120" />
+        <el-table-column prop="userName" label="患者姓名" width="100" />
+        <el-table-column prop="userPhone" label="联系电话" width="130" />
+        <el-table-column prop="setmealName" label="套餐名称" width="150" />
+        <el-table-column prop="hospitalName" label="医院名称" width="150" />
         <el-table-column prop="doctorName" label="医生" width="100" />
-        <el-table-column prop="appointmentDate" label="预约日期" width="120" />
-        <el-table-column prop="timeSlot" label="预约时段" width="150">
+        <el-table-column prop="appointmentDate" label="预约日期" width="120">
           <template #default="scope">
-            {{ getTimeSlotLabel(scope.row.timeSlot) }}
+            {{ formatDate(scope.row.appointmentDate) }}
           </template>
         </el-table-column>
-        <el-table-column prop="symptoms" label="症状描述" />
+        <el-table-column prop="timeSlot" label="预约时段" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)">{{ getStatusLabel(scope.row.status) }}</el-tag>
@@ -67,26 +63,26 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
             <el-button 
-              v-if="scope.row.status === 'waiting'" 
+              v-if="scope.row.status === 1" 
               type="primary" 
               size="small" 
-              @click="updateAppointmentStatus(scope.row, 'confirmed')"
+              @click="updateAppointmentStatus(scope.row, 2)"
             >
               确认
             </el-button>
             <el-button 
-              v-if="scope.row.status === 'confirmed'" 
+              v-if="scope.row.status === 2" 
               type="success" 
               size="small" 
-              @click="updateAppointmentStatus(scope.row, 'completed')"
+              @click="updateAppointmentStatus(scope.row, 3)"
             >
               完成
             </el-button>
             <el-button 
-              v-if="['waiting', 'confirmed'].includes(scope.row.status)" 
+              v-if="[1, 2].includes(scope.row.status)" 
               type="danger" 
               size="small" 
-              @click="updateAppointmentStatus(scope.row, 'cancelled', true)"
+              @click="updateAppointmentStatus(scope.row, 0, true)"
             >
               取消
             </el-button>
@@ -215,12 +211,12 @@ export default {
       { value: 'afternoon', label: '下午(14:00-18:00)' }
     ]
     
-    // 状态选项（与文档逻辑一致）
+    // 状态选项（与后端状态一致）
     const statusOptions = [
-      { value: 'waiting', label: '待确认' },
-      { value: 'confirmed', label: '已确认' },
-      { value: 'completed', label: '已完成' },
-      { value: 'cancelled', label: '已取消' }
+      { value: 0, label: '已取消' },
+      { value: 1, label: '待支付' },
+      { value: 2, label: '已支付' },
+      { value: 3, label: '已完成' }
     ]
     
     // 详情对话框
@@ -265,25 +261,26 @@ export default {
       return slot ? slot.label : value
     }
     
-    // 获取状态名称和类型
+    // 获取状态标签
     const getStatusLabel = (status) => {
       const statusMap = {
-        waiting: '待确认',
-        confirmed: '已确认',
-        completed: '已完成',
-        cancelled: '已取消'
+        0: '已取消',
+        1: '待支付',
+        2: '已支付',
+        3: '已完成'
       }
-      return statusMap[status] || status
+      return statusMap[status] || '未知'
     }
     
+    // 获取状态类型
     const getStatusType = (status) => {
-      const typeMap = {
-        waiting: 'warning',
-        confirmed: 'primary',
-        completed: 'success',
-        cancelled: 'info'
+      const statusTypeMap = {
+        0: 'info',
+        1: 'warning',
+        2: 'primary',
+        3: 'success'
       }
-      return typeMap[status] || ''
+      return statusTypeMap[status] || 'info'
     }
     
     // 获取预约列表（修正URL和分页参数）
@@ -291,19 +288,29 @@ export default {
       loading.value = true
       try {
         const params = {
-          pageNum: currentPage.value, // 与文档一致：pageNum
-          pageSize: pageSize.value,   // 与文档一致：pageSize
-          // 处理日期范围（文档未明确格式，假设后端接收startDate和endDate）
-          startDate: searchForm.date[0] || '',
-          endDate: searchForm.date[1] || '',
-          patientName: searchForm.patientName,
-          status: searchForm.status
+          pageIndex: currentPage.value, // 修正为后端BasePageQuery使用的参数名
+          pageSize: pageSize.value
         }
+        
+        // 只有当日期有值时才添加日期参数
+        if (searchForm.date && searchForm.date[0]) {
+          params.startDate = searchForm.date[0]
+        }
+        
+        if (searchForm.date && searchForm.date[1]) {
+          params.endDate = searchForm.date[1]
+        }
+        
+        // 只有当状态有值时才添加状态参数
+        if (searchForm.status !== '') {
+          params.status = searchForm.status
+        }
+        
         // 使用统一的API方法获取数据
         const res = await getAppointmentList(params)
         if (res.code === 200) {
-          appointmentsList.value = res.data.list // 与文档分页格式一致：data.list
-          total.value = res.data.total           // 与文档一致：total
+          appointmentsList.value = res.data.list 
+          total.value = res.data.total      
         } else {
           ElMessage.error(res.msg || '获取预约列表失败')
         }
@@ -473,6 +480,13 @@ export default {
     const exportAppointments = () => {
       ElMessage.success('导出预约数据功能待实现（需后端提供对应接口）')
     }
+
+    // 格式化日期
+    const formatDate = (dateStr) => {
+      if (!dateStr) return ''
+      const date = new Date(dateStr)
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    }
     
     return {
       loading,
@@ -493,6 +507,7 @@ export default {
       getTimeSlotLabel,
       getStatusLabel,
       getStatusType,
+      formatDate,
       handleSearch,
       resetSearch,
       handleCurrentChange,

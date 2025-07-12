@@ -1,9 +1,9 @@
 package com.fourth.medical.auth.util;
 
 import com.fourth.medical.auth.cache.TokenCache;
-import com.fourth.medical.auth.exception.LoginTokenException;
 import com.fourth.medical.common.constant.LoginConstant;
 import com.fourth.medical.common.enums.SystemType;
+import com.fourth.medical.framework.exception.LoginTokenException;
 import com.fourth.medical.util.CookieUtil;
 import com.fourth.medical.util.HttpServletRequestUtil;
 import com.fourth.medical.util.SystemTypeUtil;

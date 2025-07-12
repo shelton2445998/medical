@@ -3,30 +3,90 @@
 <mapper namespace="com.fourth.medical.medical.mapper.OrdersMapper">
 
     <select id="getOrdersById" resultType="com.fourth.medical.medical.vo.OrdersVo">
-        select *
-        from orders
-        where id = #{id}
+        SELECT o.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               s.name AS setmealName,
+               h.name AS hospitalName,
+               d.name AS doctorName
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN setmeal s ON o.setmeal_id = s.id
+        LEFT JOIN hospital h ON o.hospital_id = h.id
+        LEFT JOIN doctor d ON o.doctor_id = d.id
+        WHERE o.id = #{id}
     </select>
 
     <select id="getOrdersPage" parameterType="com.fourth.medical.medical.query.OrdersQuery"
             resultType="com.fourth.medical.medical.vo.OrdersVo">
-        select *
-        from orders
+        SELECT o.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               s.name AS setmealName,
+               h.name AS hospitalName,
+               d.name AS doctorName
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN setmeal s ON o.setmeal_id = s.id
+        LEFT JOIN hospital h ON o.hospital_id = h.id
+        LEFT JOIN doctor d ON o.doctor_id = d.id
         <where>
+            <if test="userId != null">
+                AND o.user_id = #{userId}
+            </if>
+            <if test="setmealId != null">
+                AND o.setmeal_id = #{setmealId}
+            </if>
+            <if test="hospitalId != null">
+                AND o.hospital_id = #{hospitalId}
+            </if>
+            <if test="doctorId != null">
+                AND o.doctor_id = #{doctorId}
+            </if>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+            <if test="startDate != null">
+                AND o.appointment_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND o.appointment_date &lt;= #{endDate}
+            </if>
         </where>
     </select>
 
     <select id="getAppOrdersById" resultType="com.fourth.medical.medical.vo.AppOrdersVo">
-        select *
-        from orders
-        where id = #{id}
+        SELECT o.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               s.name AS setmealName,
+               h.name AS hospitalName,
+               d.name AS doctorName
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN setmeal s ON o.setmeal_id = s.id
+        LEFT JOIN hospital h ON o.hospital_id = h.id
+        LEFT JOIN doctor d ON o.doctor_id = d.id
+        WHERE o.id = #{id}
     </select>
 
     <select id="getAppOrdersPage" parameterType="com.fourth.medical.medical.query.AppOrdersQuery"
             resultType="com.fourth.medical.medical.vo.AppOrdersVo">
-        select *
-        from orders
+        SELECT o.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               s.name AS setmealName,
+               h.name AS hospitalName,
+               d.name AS doctorName
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN setmeal s ON o.setmeal_id = s.id
+        LEFT JOIN hospital h ON o.hospital_id = h.id
+        LEFT JOIN doctor d ON o.doctor_id = d.id
         <where>
+            <if test="userId != null">
+                AND o.user_id = #{userId}
+            </if>
         </where>
     </select>
 

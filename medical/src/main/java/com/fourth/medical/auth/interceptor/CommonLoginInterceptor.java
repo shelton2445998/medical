@@ -120,7 +120,7 @@ public class CommonLoginInterceptor extends BaseExcludeMethodInterceptor {
                     // 将APP移动端的登录信息保存到当前线程中
                     AppLoginCache.set(loginVo);
                 } else {
-                    throw new LoginTokenException("登录已过期或登录信息不存在，请重新登录");
+                throw new LoginTokenException("登录已过期或登录信息不存在，请重新登录");
                 }
             }
         } else if (SystemType.DOCTOR == systemType) {

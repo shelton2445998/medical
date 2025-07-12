@@ -37,13 +37,13 @@ public class AppLoginUtil {
         }
         
         try {
-            AppLoginVo appLoginVo = appLoginRedisService.getLoginVo(token);
+        AppLoginVo appLoginVo = appLoginRedisService.getLoginVo(token);
             if (appLoginVo == null) {
                 log.warn("从Redis获取APP登录信息失败: token={}", token);
             } else {
                 log.debug("成功获取APP用户信息: userId={}, username={}", appLoginVo.getUserId(), appLoginVo.getUsername());
             }
-            return appLoginVo;
+        return appLoginVo;
         } catch (Exception e) {
             log.error("从Redis获取APP登录信息异常: token=" + token, e);
             return null;

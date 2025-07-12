@@ -24,15 +24,30 @@ public class OrdersVo implements Serializable {
 
     @Schema(description = "用户ID")
     private Long userId;
+    
+    @Schema(description = "用户姓名")
+    private String userName;
+    
+    @Schema(description = "用户手机号")
+    private String userPhone;
 
     @Schema(description = "套餐ID")
     private Long setmealId;
+    
+    @Schema(description = "套餐名称")
+    private String setmealName;
 
     @Schema(description = "医院ID")
     private Long hospitalId;
+    
+    @Schema(description = "医院名称")
+    private String hospitalName;
 
     @Schema(description = "医生ID")
     private Long doctorId;
+    
+    @Schema(description = "医生姓名")
+    private String doctorName;
 
     @Schema(description = "预约日期")
     private Date appointmentDate;

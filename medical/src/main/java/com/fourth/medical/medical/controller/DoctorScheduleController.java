@@ -125,6 +125,52 @@ public class DoctorScheduleController {
             return ApiResult.fail("添加排班失败：" + e.getMessage());
         }
     }
+
+    /**
+     * 更新医生排班
+     *
+     * @param dto     排班信息
+     * @param request HTTP请求对象，用于获取请求头中的token
+     * @return 更新结果
+     */
+    @PostMapping("/update")
+    @Operation(summary = "更新医生排班")
+    public ApiResult updateDoctorSchedule(@RequestBody DoctorScheduleDto dto, HttpServletRequest request) {
+        // 从请求头中获取token
+        String token = TokenUtil.getToken(request);
+        if (StringUtils.isBlank(token)) {
+            return ApiResult.fail("未登录或登录已过期");
+        }
+        
+        // 通过token获取医生信息
+        LoginVo loginVo = LoginUtil.getLoginVo(token);
+        if (loginVo == null) {
+            return ApiResult.fail("无法获取医生信息，请重新登录");
+        }
+        
+        Long doctorId = loginVo.getUserId();
+        log.info("更新医生排班: doctorId={}, dto={}", doctorId, dto);
+        
+        // 获取排班信息
+        DoctorScheduleVo scheduleVo = doctorScheduleService.getDoctorScheduleById(dto.getId());
+        if (scheduleVo == null) {
+            return ApiResult.fail("排班不存在");
+        }
+        
+        // 检查是否是本人的排班
+        if (!doctorId.equals(scheduleVo.getDoctorId())) {
+            return ApiResult.fail("只能修改自己的排班");
+        }
+        
+        try {
+            // 更新医生排班
+            boolean flag = doctorScheduleService.updateDoctorSchedule(dto);
+            return ApiResult.result(flag);
+        } catch (Exception e) {
+            log.error("更新医生排班失败", e);
+            return ApiResult.fail("更新排班失败：" + e.getMessage());
+        }
+    }
     
     /**
      * 删除医生排班
