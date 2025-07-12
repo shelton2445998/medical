@@ -114,21 +114,35 @@ public class DoctorLoginServiceImpl implements DoctorLoginService {
 
     @Override
     public LoginVo getLoginDoctorInfo() {
+
+
         LoginVo loginVo = LoginUtil.getLoginVo();
+
         if (loginVo == null) {
+
             throw new LoginException("请先登录");
         }
         // 根据用户ID获取医生信息
         Long doctorId = loginVo.getUserId();
+
         // 获取用户登录时间
         Date loginTime = loginVo.getLoginTime();
+
+
         Doctor doctor = doctorMapper.selectById(doctorId);
+
         if (doctor == null) {
+
             throw new BusinessException("医生信息不存在");
         }
         // 刷新登录信息
+
         String token = TokenUtil.getToken();
+
+
         loginVo = refreshLoginInfo(doctor, token, loginTime);
+
+
         return loginVo;
     }
 

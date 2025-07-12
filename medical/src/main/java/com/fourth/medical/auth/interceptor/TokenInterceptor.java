@@ -21,13 +21,25 @@ public class TokenInterceptor extends BaseExcludeMethodInterceptor {
 
     @Override
     protected boolean preHandleMethod(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+
+
+
+
+        
         // 获取token
+
         String token = TokenUtil.getToken(request);
+
+        
         if (StringUtils.isBlank(token)) {
+
             return true;
         }
+        
         // 设置token值到当前线程中，避免重复获取
+
         TokenCache.set(token);
+
         return true;
     }
 

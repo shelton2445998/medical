@@ -51,7 +51,10 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('doctorToken')
+  console.log('路由拦截器 - 当前路径:', to.path, '是否有token:', !!token)
+  
   if (to.name !== 'Login' && !token) {
+    console.log('未登录，重定向到登录页')
     next({ name: 'Login' })
   } else {
     next()

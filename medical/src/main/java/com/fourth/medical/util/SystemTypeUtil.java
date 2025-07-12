@@ -43,6 +43,7 @@ public class SystemTypeUtil {
         } else if (servletPath.startsWith(LoginConstant.DOCTOR_URL_PREFIX)) {
             return SystemType.DOCTOR;
         }
+        // 对于不匹配任何系统类型前缀的路径，返回null
         return null;
     }
 

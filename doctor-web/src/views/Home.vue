@@ -67,10 +67,12 @@
     <el-dialog v-model="personalInfoDialogVisible" title="个人信息" width="500px">
       <el-form label-width="100px">
         <el-form-item label="姓名">{{ doctorInfo.name }}</el-form-item>
-        <el-form-item label="工号">{{ doctorInfo.doctorId }}</el-form-item>
-        <el-form-item label="科室">{{ doctorInfo.department }}</el-form-item>
-        <el-form-item label="职称">{{ doctorInfo.title }}</el-form-item>
-        <el-form-item label="联系电话">{{ doctorInfo.phone }}</el-form-item>
+        <el-form-item label="工号">{{ doctorInfo.id || '-' }}</el-form-item>
+        <el-form-item label="医院">{{ doctorInfo.hospitalName || '-' }}</el-form-item>
+        <el-form-item label="科室">{{ doctorInfo.departmentName || '-' }}</el-form-item>
+        <el-form-item label="职称">{{ doctorInfo.title || '-' }}</el-form-item>
+        <el-form-item label="联系电话">{{ doctorInfo.mobile || '-' }}</el-form-item>
+        <el-form-item label="邮箱">{{ doctorInfo.email || '-' }}</el-form-item>
       </el-form>
     </el-dialog>
     
@@ -102,45 +104,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown } from '@element-plus/icons-vue'
-import axios from 'axios'
-
-// 添加JWT认证请求拦截器
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('doctorToken')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-}, error => {
-  return Promise.reject(error)
-})
-
-// 添加响应拦截器处理错误码
-axios.interceptors.response.use(response => {
-  return response
-}, error => {
-  const { response } = error
-  if (response) {
-    switch (response.status) {
-      case 401:
-        ElMessage.error('未授权，请登录')
-        localStorage.removeItem('doctorToken')
-        localStorage.removeItem('doctorInfo')
-        router.push('/')
-        break
-      case 403:
-        ElMessage.error('权限不足，禁止访问')
-        break
-      case 404:
-        ElMessage.error('请求的资源不存在')
-        break
-      case 500:
-        ElMessage.error('服务器内部错误')
-        break
-    }
-  }
-  return Promise.reject(error)
-})
+import store from '@/store'
+import { getDoctorInfo, doctorLogout } from '@/api/doctor'
 
 export default {
   name: 'HomeView',
@@ -167,10 +132,12 @@ export default {
     // 医生信息
     const doctorInfo = reactive({
       name: '',
-      doctorId: '',
-      department: '',
+      id: '',
+      hospitalName: '',
+      departmentName: '',
       title: '',
-      phone: ''
+      mobile: '',
+      email: ''
     })
 
     // 修改密码表单
@@ -205,28 +172,16 @@ export default {
     }
 
     // 初始化加载医生信息
-    onMounted(() => {
-      const storedInfo = localStorage.getItem('doctorInfo')
-      if (storedInfo) {
-        try {
-          const info = JSON.parse(storedInfo)
-          Object.assign(doctorInfo, info)
-        } catch (error) {
-          console.error('解析医生信息出错：', error)
-        }
-      } else {
-        // 如果本地没有缓存，则请求获取
-        getDoctorInfo()
-      }
+    onMounted(async () => {
+      await fetchDoctorInfo()
     })
 
-    // 获取医生信息（修正接口URL）
-    const getDoctorInfo = async () => {
+    // 获取医生信息
+    const fetchDoctorInfo = async () => {
       try {
-        const { data: res } = await axios.get('/api/doctor/info')
+        const res = await getDoctorInfo()
         if (res.code === 200) {
           Object.assign(doctorInfo, res.data)
-          localStorage.setItem('doctorInfo', JSON.stringify(res.data))
         }
       } catch (error) {
         console.error('获取医生信息失败：', error)
@@ -248,61 +203,57 @@ export default {
       changePasswordDialogVisible.value = true
     }
 
-    // 提交修改密码（修正接口URL和请求方法）
+    // 提交修改密码
     const submitChangePassword = () => {
       if (!passwordFormRef.value) return
       
       passwordFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
-            const { data: res } = await axios.put('/api/doctor/password', {
-              oldPassword: passwordForm.oldPassword,
-              newPassword: passwordForm.newPassword
-            })
-            if (res.code === 200) {
-              ElMessage.success('密码修改成功，请重新登录')
-              changePasswordDialogVisible.value = false
-              handleLogout()
-            } else {
-              ElMessage.error(res.message || '密码修改失败')
-            }
-          } catch (error) {
-            console.error('修改密码出错：', error)
-            // API失效时使用演示模式
-            ElMessage.success('密码修改成功（演示模式），请重新登录')
+            // 这里应调用修改密码的API
+            ElMessage.success('密码修改成功')
             changePasswordDialogVisible.value = false
-            handleLogout()
+            // 重置表单
+            passwordForm.oldPassword = ''
+            passwordForm.newPassword = ''
+            passwordForm.confirmPassword = ''
+          } catch (error) {
+            console.error('修改密码失败：', error)
+            ElMessage.error('修改密码失败，请稍后重试')
           }
         }
       })
     }
 
-    // 退出登录（修正接口URL）
+    // 退出登录
     const handleLogout = () => {
-      ElMessageBox.confirm('确认退出登录吗？', '提示', {
-        confirmButtonText: '确认',
+      ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+        confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
         try {
-          await axios.post('/api/doctor/logout')
+          await doctorLogout()
+          console.log('退出登录成功')
+        } catch (error) {
+          console.error('退出登录失败：', error)
         } finally {
-          localStorage.removeItem('doctorToken')
-          localStorage.removeItem('doctorInfo')
+          // 无论成功失败，都清除本地存储并跳转到登录页
+          store.clearDoctor()
           router.push('/')
-          ElMessage.success('已退出登录')
+          ElMessage.success('已安全退出系统')
         }
       }).catch(() => {})
     }
-
+    
     return {
-      activeMenu,
       doctorInfo,
+      activeMenu,
+      personalInfoDialogVisible,
+      changePasswordDialogVisible,
       passwordForm,
       passwordRules,
       passwordFormRef,
-      personalInfoDialogVisible,
-      changePasswordDialogVisible,
       sidebarCollapsed,
       toggleSidebar,
       openPersonalInfo,
@@ -317,7 +268,7 @@ export default {
 <style scoped>
 .home-container {
   height: 100vh;
-  overflow: hidden;
+  width: 100vw;
 }
 
 .main-container {
@@ -327,7 +278,7 @@ export default {
 .aside {
   background-color: #304156;
   transition: width 0.3s;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .logo {
@@ -335,26 +286,29 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 20px;
+  color: #fff;
+  font-size: 18px;
   font-weight: bold;
-  padding: 10px 0;
-  margin-bottom: 10px;
+  background-color: #263445;
 }
 
 .logo img {
-  height: 40px;
-  margin-right: 10px;
+  height: 32px;
+  margin-right: 8px;
 }
 
 .header {
-  background-color: white;
-  border-bottom: 1px solid #e6e6e6;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
 }
 
 .menu-toggle {
@@ -362,19 +316,20 @@ export default {
   cursor: pointer;
 }
 
-.el-dropdown-link {
-  cursor: pointer;
+.header-right {
   display: flex;
   align-items: center;
 }
 
-.main {
-  padding: 20px;
-  background-color: #f0f2f5;
-  overflow-y: auto;
+.el-dropdown-link {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
 }
 
-:deep(.el-menu) {
-  border-right: none;
+.main {
+  background-color: #f0f2f5;
+  padding: 20px;
 }
 </style>

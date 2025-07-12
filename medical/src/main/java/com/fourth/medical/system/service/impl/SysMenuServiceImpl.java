@@ -2,6 +2,7 @@ package com.fourth.medical.system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fourth.medical.auth.util.LoginUtil;
+import com.fourth.medical.auth.vo.LoginVo;
 import com.fourth.medical.common.constant.SystemConstant;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.system.dto.SysMenuDto;
@@ -135,15 +136,39 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
     @Override
     public List<SysNavMenuTreeVo> getNavMenuTreeList() {
-        Long userId = LoginUtil.getUserId();
+        LoginVo loginVo = LoginUtil.getLoginVo();
+        if (loginVo == null) {
+            log.warn("获取菜单时用户未登录");
+            return new ArrayList<>();
+        }
+        
+        Long userId = loginVo.getUserId();
+        log.info("获取用户[{}]的导航菜单", userId);
+        
         // 如果是管理员，则查询所有可用菜单，否则获取当前用户所有可用的菜单
         boolean isAdmin = LoginUtil.isAdmin();
         List<SysNavMenuTreeVo> list;
+        
+        // 检查是否是医生角色（可以根据实际情况修改判断条件）
+        boolean isDoctor = loginVo.getRoleId() != null && 
+                          (loginVo.getRoleId() == 2L || // 假设2是医生角色ID
+                           "doctor".equals(loginVo.getRoleName())); // 假设医生角色名为doctor
+        
         if (isAdmin) {
+            log.info("用户是管理员，获取所有菜单");
             list = sysMenuMapper.getNavMenuTreeAllList();
+        } else if (isDoctor) {
+            log.info("用户是医生，获取医生专属菜单");
+            // 这里可以添加特殊逻辑，比如过滤只有医生可见的菜单
+            list = sysMenuMapper.getNavMenuTreeList(userId);
+            // 如果需要，可以在这里添加医生特有的菜单项
         } else {
+            log.info("普通用户，获取用户菜单");
             list = sysMenuMapper.getNavMenuTreeList(userId);
         }
+        
+        log.info("获取到的菜单数量: {}", list != null ? list.size() : 0);
+        
         // 递归返回树形列表
         return recursionSysNavMenuTreeList(0L, list);
     }

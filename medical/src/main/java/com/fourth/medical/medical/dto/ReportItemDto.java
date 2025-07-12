@@ -27,6 +27,9 @@ public class ReportItemDto implements Serializable {
     @Schema(description = "订单ID")
     @NotNull(message = "订单ID不能为空")
     private Long orderId;
+    
+    @Schema(description = "用户ID")
+    private Long userId;
 
     @Schema(description = "检查项ID")
     @NotNull(message = "检查项ID不能为空")

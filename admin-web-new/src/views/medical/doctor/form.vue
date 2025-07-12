@@ -31,34 +31,41 @@
       </el-row>
       <el-row :gutter="10">
          <el-col :span="12">
+           <el-form-item label="头像URL" prop="avatarUrl">
+             <el-input v-model="form.avatarUrl" maxlength="255" placeholder="请输入头像URL"/>
+           </el-form-item>
+         </el-col>
+         <el-col :span="12">
            <el-form-item label="邮箱" prop="email">
              <el-input v-model="form.email" maxlength="100" placeholder="请输入邮箱"/>
            </el-form-item>
          </el-col>
+      </el-row>
+      <el-row :gutter="10">
          <el-col :span="12">
           <el-form-item label="所属医院ID" prop="hospitalId">
             <el-input type="number" v-model="form.hospitalId" placeholder="请输入所属医院ID"/>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="10">
         <el-col :span="12">
           <el-form-item label="科室ID" prop="departmentId">
             <el-input type="number" v-model="form.departmentId" placeholder="请输入科室ID"/>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row :gutter="10">
         <el-col :span="12">
           <el-form-item label="职称" prop="title">
              <el-input v-model="form.title" maxlength="50" placeholder="请输入职称"/>
-           </el-form-item>
+          </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="10">
         <el-col :span="12">
           <el-form-item label="简介" prop="introduction">
             <el-input type="textarea" v-model="form.introduction" maxlength="500" placeholder="请输入简介"/>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row :gutter="10">
         <el-col :span="12">
           <el-form-item label="状态">
             <el-radio-group v-model="form.status">
@@ -96,6 +103,7 @@ let form: any = ref({
     gender:true,
     mobile: null,
     email: null,
+    avatarUrl: null,
     hospitalId: null,
     departmentId: null,
     title: null,

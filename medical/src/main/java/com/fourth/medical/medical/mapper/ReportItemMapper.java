@@ -7,6 +7,7 @@ import com.fourth.medical.medical.vo.ReportItemVo;
 import com.fourth.medical.medical.query.AppReportItemQuery;
 import com.fourth.medical.medical.vo.AppReportItemVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -50,5 +51,12 @@ public interface ReportItemMapper extends BaseMapper<ReportItem> {
      * @return
      */
     List<AppReportItemVo> getAppReportItemPage(AppReportItemQuery query);
-
+    
+    /**
+     * 根据用户ID获取体检报告列表
+     *
+     * @param userId
+     * @return
+     */
+    List<ReportItemVo> getReportItemsByUserId(@Param("userId") Long userId);
 }

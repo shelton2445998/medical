@@ -97,8 +97,13 @@ public class TokenUtil {
      * @return
      */
     public static String getToken() {
+
+
         // 从当前线程获取
-        return TokenCache.get();
+        String token = TokenCache.get();
+
+
+        return token;
     }
 
     /**
@@ -108,39 +113,81 @@ public class TokenUtil {
      * @return
      */
     public static String getToken(HttpServletRequest request) {
+
         if (request == null) {
+
             throw new IllegalArgumentException("request不能为空");
         }
+        
         // 从请求头中获取token
-        String token = request.getHeader(LoginConstant.TOKEN_NAME);
+        String headerToken = request.getHeader(LoginConstant.TOKEN_NAME);
+
+        
+        String token = headerToken;
+        
         if (StringUtils.isBlank(token)) {
             // 从请求参数中获取token
-            token = request.getParameter(LoginConstant.TOKEN_NAME);
+            String paramToken = request.getParameter(LoginConstant.TOKEN_NAME);
+
+            token = paramToken;
         }
+        
         String servletPath = request.getServletPath();
+
+        
         SystemType systemType = SystemTypeUtil.getSystemTypeByPath(servletPath);
+
+        
         if (StringUtils.isBlank(token)) {
             // 从cookie中获取token
-            token = getTokenByCookie(request, systemType);
+
+            String cookieToken = getTokenByCookie(request, systemType);
+
+            
+            token = cookieToken;
             if (StringUtils.isNotBlank(token) && !token.startsWith(LoginConstant.TOKEN_PREFIX)) {
+
                 token = null;
             }
         }
+        
         if (StringUtils.isBlank(token)) {
+
             return null;
         }
+        
+        // 如果是非认证路径（不以/admin、/doctor、/user开头），则不校验token格式
+        if (systemType == null) {
+
+            return token;
+        }
+        
         // 校验token
+
         if (!token.startsWith(LoginConstant.TOKEN_PREFIX)) {
+
             log.error("token错误:" + token);
             throw new LoginTokenException("token错误");
         }
-        if (SystemType.ADMIN == systemType) {
-            checkAdminToken(token);
-        } else if (SystemType.APP == systemType) {
-            checkAppToken(token);
-        } else if (SystemType.DOCTOR == systemType) {
-            checkDoctorToken(token);
+        
+        try {
+            if (SystemType.ADMIN == systemType) {
+
+                checkAdminToken(token);
+            } else if (SystemType.APP == systemType) {
+
+                checkAppToken(token);
+            } else if (SystemType.DOCTOR == systemType) {
+
+                checkDoctorToken(token);
+            }
+
+        } catch (Exception e) {
+
+            throw e;
         }
+        
+
         return token;
     }
 
@@ -151,32 +198,62 @@ public class TokenUtil {
      * @return
      */
     public static String getTokenByCookie(HttpServletRequest request, SystemType systemType) {
+
         Cookie[] cookies = request.getCookies();
+
+        
         if (ArrayUtils.isEmpty(cookies)) {
+
             return null;
         }
-        if (SystemType.ADMIN == systemType) {
-            // 管理系统token的cookie可以通过接口文档传递或者浏览器页面传递
-            return CookieUtil.getCookieValueByName(cookies, LoginConstant.ADMIN_COOKIE_TOKEN_NAME);
-        } else if (SystemType.APP == systemType) {
-            // 判断是否是接口文档请求，是则从cookie中获取，否则不获取，app接口只能通过接口文档传递token的cookie
-            if (HttpServletRequestUtil.isDocRequest()) {
-                return CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
+        
+        // 打印所有cookie便于调试
+        if (cookies != null) {
+
+            for (Cookie cookie : cookies) {
+
             }
-            return null;
+        }
+        
+        String result = null;
+        if (SystemType.ADMIN == systemType) {
+
+            // 管理系统token的cookie可以通过接口文档传递或者浏览器页面传递
+            result = CookieUtil.getCookieValueByName(cookies, LoginConstant.ADMIN_COOKIE_TOKEN_NAME);
+        } else if (SystemType.APP == systemType) {
+
+            // 判断是否是接口文档请求，是则从cookie中获取，否则不获取，app接口只能通过接口文档传递token的cookie
+            boolean isDocRequest = HttpServletRequestUtil.isDocRequest();
+
+            if (isDocRequest) {
+
+                result = CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
+            } else {
+
+                result = null;
+            }
         } else if (SystemType.DOCTOR == systemType) {
+
             // 医生端token的cookie
-            return CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
+            result = CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
         } else {
-            String cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.ADMIN_COOKIE_TOKEN_NAME);
-            if (StringUtils.isBlank(cookieValue)) {
-                cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
-                if (StringUtils.isBlank(cookieValue) && HttpServletRequestUtil.isDocRequest()) {
-                    cookieValue = CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
+
+            result = CookieUtil.getCookieValueByName(cookies, LoginConstant.ADMIN_COOKIE_TOKEN_NAME);
+
+            
+            if (StringUtils.isBlank(result)) {
+                result = CookieUtil.getCookieValueByName(cookies, LoginConstant.DOCTOR_COOKIE_TOKEN_NAME);
+
+                
+                if (StringUtils.isBlank(result) && HttpServletRequestUtil.isDocRequest()) {
+                    result = CookieUtil.getCookieValueByName(cookies, LoginConstant.APP_COOKIE_TOKEN_NAME);
+
                 }
             }
-            return cookieValue;
         }
+        
+
+        return result;
     }
 
     /**

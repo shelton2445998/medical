@@ -46,7 +46,11 @@ public class LoginController {
     @PostMapping("/login")
     @Operation(summary = "管理后台登录")
     public ApiResult<LoginTokenVo> login(@Valid @RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+
+        System.out.println("ABBBBBBBBBBBBBBBBBBBBBrequest: " + request);
+        System.out.println("CCCCCCCCCCCCCCCCCCCCCCresponse: " + response);
         LoginTokenVo loginTokenVo = loginService.login(loginDto);
+        System.out.println("DDDDDDDDDDDDDDDDDDDDDDloginTokenVo: " + loginTokenVo);
         // 输出token到cookie
         CookieUtil.addCookie(LoginConstant.ADMIN_COOKIE_TOKEN_NAME, loginTokenVo.getToken(), request, response);
         return ApiResult.success(loginTokenVo);

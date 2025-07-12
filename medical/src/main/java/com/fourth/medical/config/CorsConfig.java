@@ -24,7 +24,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // 生产环境应替换为具体前端地址
+                        .allowedOriginPatterns("*") // 使用allowedOriginPatterns代替allowedOrigins
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
@@ -40,12 +40,12 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        // 允许访问的源
+        // 允许访问的源 - 使用allowedOriginPatterns
         corsConfiguration.addAllowedOriginPattern("*");
         // 允许访问的请求头
         corsConfiguration.addAllowedHeader("*");
         // 允许访问的请求方式
-        corsConfiguration.setAllowedMethods(Arrays.asList("OPTION", "GET", "POST"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("OPTIONS", "GET", "POST", "PUT", "DELETE"));
         // 是否允许发送cookie
         corsConfiguration.setAllowCredentials(true);
         // 允许响应的头
@@ -54,5 +54,4 @@ public class CorsConfig {
         configurationSource.registerCorsConfiguration("/**", corsConfiguration);
         return new CorsFilter(configurationSource);
     }
-
 }

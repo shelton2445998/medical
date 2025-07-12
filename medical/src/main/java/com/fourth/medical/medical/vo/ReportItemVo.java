@@ -23,6 +23,9 @@ public class ReportItemVo implements Serializable {
 
     @Schema(description = "订单ID")
     private Long orderId;
+    
+    @Schema(description = "用户ID")
+    private Long userId;
 
     @Schema(description = "检查项ID")
     private Long itemId;

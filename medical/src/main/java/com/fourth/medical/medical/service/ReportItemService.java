@@ -9,6 +9,8 @@ import com.fourth.medical.medical.vo.ReportItemVo;
 import com.fourth.medical.medical.query.AppReportItemQuery;
 import com.fourth.medical.medical.vo.AppReportItemVo;
 
+import java.util.List;
+
 
 /**
  * 体检报告检查项信息 服务接口
@@ -80,5 +82,13 @@ public interface ReportItemService extends IService<ReportItem> {
      * @throws Exception
      */
     Paging<AppReportItemVo> getAppReportItemPage(AppReportItemQuery query);
-
+    
+    /**
+     * 根据用户ID获取体检报告列表
+     *
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    List<ReportItemVo> getReportItemsByUserId(Long userId);
 }

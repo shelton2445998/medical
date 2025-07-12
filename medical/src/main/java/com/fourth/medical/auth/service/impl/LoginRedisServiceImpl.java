@@ -44,7 +44,11 @@ public class LoginRedisServiceImpl implements LoginRedisService {
 
     @Override
     public String getLoginRedisKey(String token) {
+
+
         String loginRedisKey = String.format(RedisKey.LOGIN_TOKEN, token);
+
+
         return loginRedisKey;
     }
 
@@ -64,11 +68,18 @@ public class LoginRedisServiceImpl implements LoginRedisService {
 
     @Override
     public LoginVo getLoginVo(String token) {
+
         if (StringUtils.isBlank(token)) {
+
             throw new LoginTokenException("token不能为空");
         }
+
         String loginRedisKey = getLoginRedisKey(token);
+
+
         LoginVo loginVo = (LoginVo) redisTemplate.opsForValue().get(loginRedisKey);
+
+
         return loginVo;
     }
 

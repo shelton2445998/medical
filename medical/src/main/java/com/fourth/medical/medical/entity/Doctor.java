@@ -53,6 +53,9 @@ public class Doctor implements Serializable {
 
     @Schema(description = "简介")
     private String introduction;
+    
+    @Schema(description = "头像URL")
+    private String avatarUrl;
 
     @Schema(description = "状态 0:禁用，1:启用")
     private Boolean status;

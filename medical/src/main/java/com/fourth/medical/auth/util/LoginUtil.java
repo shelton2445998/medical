@@ -30,10 +30,15 @@ public class LoginUtil {
      * @
      */
     public static LoginVo getLoginVo(String token) {
+
         if (StringUtils.isBlank(token)) {
+
             return null;
         }
+
         LoginVo loginVo = loginRedisService.getLoginVo(token);
+
+
         return loginVo;
     }
 
@@ -43,7 +48,12 @@ public class LoginUtil {
      * @return
      */
     public static LoginVo getLoginVo() {
-        return LoginCache.get();
+
+
+        LoginVo loginVo = LoginCache.get();
+
+
+        return loginVo;
     }
 
     /**

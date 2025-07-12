@@ -31,7 +31,12 @@ public class LoginCache {
      * @return
      */
     public static LoginVo get() {
-        return LOGIN_CACHE.get();
+
+
+        LoginVo loginVo = LOGIN_CACHE.get();
+
+
+        return loginVo;
     }
 
     /**

@@ -58,6 +58,10 @@ public class DoctorDto implements Serializable {
 
     @Schema(description = "简介")
     private String introduction;
+    
+    @Schema(description = "头像URL")
+    @Length(max = 255, message = "头像URL长度超过限制")
+    private String avatarUrl;
 
     @Schema(description = "状态 0:禁用，1:启用")
     private Boolean status;

@@ -172,38 +172,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, ElRouter } from 'element-plus'
-import axios from 'axios'
-
-// 配置axios请求拦截器（添加JWT认证头）
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('token') // 假设token存储在localStorage
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-}, error => {
-  return Promise.reject(error)
-})
-
-// 配置axios响应拦截器（处理错误码）
-axios.interceptors.response.use(response => {
-  return response
-}, error => {
-  const { response } = error
-  if (response && response.status === 401) {
-    // 未授权，跳转登录页
-    ElMessage.error('登录已过期，请重新登录')
-    // 假设使用vue-router，这里需根据实际路由配置调整
-    window.location.href = '/login'
-  } else if (response && response.status === 403) {
-    ElMessage.error('权限不足，无法操作')
-  } else if (response && response.status === 404) {
-    ElMessage.error('请求的资源不存在')
-  } else {
-    ElMessage.error('服务器异常，请稍后再试')
-  }
-  return Promise.reject(error)
-})
+import { getAppointmentList } from '@/api/doctor' // 导入API方法
 
 export default {
   name: 'AppointmentsView',
@@ -330,13 +299,13 @@ export default {
           patientName: searchForm.patientName,
           status: searchForm.status
         }
-        // 文档中医生端获取预约列表的正确URL：/api/doctor/appointment/list
-        const { data: res } = await axios.get('/api/doctor/appointment/list', { params })
+        // 使用统一的API方法获取数据
+        const res = await getAppointmentList(params)
         if (res.code === 200) {
           appointmentsList.value = res.data.list // 与文档分页格式一致：data.list
           total.value = res.data.total           // 与文档一致：total
         } else {
-          ElMessage.error(res.message || '获取预约列表失败')
+          ElMessage.error(res.msg || '获取预约列表失败')
         }
       } catch (error) {
         console.error('获取预约列表失败:', error)

@@ -88,6 +88,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public PageHelperClearInterceptor pageHelperClearInterceptor() {
         return new PageHelperClearInterceptor();
     }
+    
+    @Bean
+    public PathBasedAuthInterceptor pathBasedAuthInterceptor() {
+        return new PathBasedAuthInterceptor();
+    }
 
 
     @Bean
@@ -144,6 +149,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // 加入的顺序就是拦截器执行的顺序
         registry.addInterceptor(excludePathInterceptor());
+        
+        // 添加基于路径的认证拦截器，这个拦截器应该最先执行认证检查
+        registry.addInterceptor(pathBasedAuthInterceptor()).addPathPatterns("/**");
+        
         // 没有权限的拦截器，直接返回无权限
         boolean enableNotAuth = notAuthProperties.isEnable();
         if (enableNotAuth) {
@@ -151,8 +160,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
             registry.addInterceptor(notAuthInterceptor()).addPathPatterns(includePaths);
         }
 
-        // token拦截器
-        registry.addInterceptor(tokenInterceptor()).excludePathPatterns("/admin/login", "/app/login");
+        // token拦截器 - 只对需要认证的路径进行拦截
+        registry.addInterceptor(tokenInterceptor()).addPathPatterns("/admin/**", "/doctor/**", "/user/**")
+                .excludePathPatterns("/admin/login", "/doctor/login", "/user/login");
+                
         // 管理后台登录拦截器配置
         boolean enableAdminInterceptor = loginAdminProperties.isEnable();
         if (enableAdminInterceptor) {
@@ -163,6 +174,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                     .addPathPatterns(loginAdminProperties.getIncludePaths())
                     .excludePathPatterns(adminExcludePaths);
         }
+        
         // 移动端端登录拦截器配置
         boolean enableAppInterceptor = loginAppProperties.isEnable();
         if (enableAppInterceptor) {
@@ -170,8 +182,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
             List<String> excludePaths = loginAppProperties.getExcludePaths();
             registry.addInterceptor(loginAppInterceptor()).addPathPatterns(appIncludePaths).excludePathPatterns(excludePaths);
         }
+        
         // 刷新token拦截器
-        registry.addInterceptor(refreshTokenInterceptor());
+        registry.addInterceptor(refreshTokenInterceptor()).addPathPatterns("/admin/**", "/doctor/**", "/user/**");
 
         // 系统公共请求拦截器，子拦截/common/开头的请求
         boolean enableCommonInterceptor = loginCommonProperties.isEnable();

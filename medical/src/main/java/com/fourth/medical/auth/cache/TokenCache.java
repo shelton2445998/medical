@@ -29,7 +29,12 @@ public class TokenCache {
      * @return
      */
     public static String get() {
-        return TOKEN_CACHE.get();
+
+
+        String token = TOKEN_CACHE.get();
+
+
+        return token;
     }
 
     /**
