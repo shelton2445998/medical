@@ -72,10 +72,18 @@
         </picker>
       </view>
       <view class="form-item">
+        <text class="label">选择医生：</text>
+        <picker :range="doctorList" range-key="name" @change="onDoctorChange">
+          <view class="picker-box">
+            <text>{{ selectedDoctor ? selectedDoctor.name : '点击选择医生' }}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="form-item">
         <text class="label">备注：</text>
         <input class="input" v-model="remark" placeholder="可填写特殊需求或备注" />
       </view>
-      <button class="next-btn" @click="nextStep" :disabled="!name || !phone || !selectedDate || !gender || !idCard">下一步</button>
+      <button class="next-btn" @click="nextStep" :disabled="!name || !phone || !selectedDate || !gender || !idCard || !selectedDoctor">下一步</button>
     </view>
 
     <!-- Step 4: 支付预约 -->
@@ -160,6 +168,10 @@
             <text class="label">预约时间：</text>
             <text class="value">{{ selectedTime || '上午(08:00-12:00)' }}</text>
           </view>
+          <view class="info-item" v-if="selectedDoctor">
+            <text class="label">选择医生：</text>
+            <text class="value">{{ selectedDoctor.name }} ({{ selectedDoctor.title }})</text>
+          </view>
           <view class="info-item" v-if="remark">
             <text class="label">备注：</text>
             <text class="value">{{ remark }}</text>
@@ -232,6 +244,8 @@
 </template>
 
 <script>
+import { appointmentApi } from '@/utils/api.js';
+
 export default {
   data() {
     return {
@@ -249,7 +263,7 @@ export default {
           name: '标准体检套餐', 
           price: 299,
           discountPrice: 269,
-          type: 1,
+          type: '1',
           description: '包含常规体检项目，适合一般健康检查',
           checkItems: ['血常规', '尿常规', '血压测量', '心电图'],
           suitableCrowd: '18-60岁健康人群',
@@ -260,7 +274,7 @@ export default {
           name: '高级体检套餐', 
           price: 699,
           discountPrice: 599,
-          type: 2,
+          type: '2',
           description: '包含基础套餐及更多专项检查，适合中老年人',
           checkItems: ['血常规', '尿常规', '肝功能', '肾功能', '心电图', '彩超'],
           suitableCrowd: '40岁以上中老年人',
@@ -271,7 +285,7 @@ export default {
           name: '女性专项体检套餐', 
           price: 399,
           discountPrice: 359,
-          type: 3,
+          type: '3',
           description: '针对女性健康的专项检查，包含乳腺、妇科检查等',
           checkItems: ['血常规', '尿常规', '妇科检查', '乳腺彩超', '宫颈涂片'],
           suitableCrowd: '18岁以上女性',
@@ -282,7 +296,7 @@ export default {
           name: '儿童体检套餐', 
           price: 199,
           discountPrice: 179,
-          type: 3,
+          type: '3',
           description: '专为儿童设计的体检套餐，检查项目适合儿童',
           checkItems: ['血常规', '尿常规', '身高体重', '视力检查', '听力检查'],
           suitableCrowd: '3-12岁儿童',
@@ -298,9 +312,9 @@ export default {
       selectedDate: '',
       remark: '',
       payMethods: [
-        { name: '微信支付', value: 2 },
-        { name: '支付宝', value: 1 },
-        { name: '医保支付', value: 3 }
+        { name: '微信支付', value: '2' },
+        { name: '支付宝', value: '1' },
+        { name: '医保支付', value: '3' }
       ],
       payMethod: '',
       showPay: false,
@@ -311,7 +325,9 @@ export default {
         '上午(08:00-12:00)',
         '下午(14:00-18:00)',
         '晚上(19:00-21:00)'
-      ]
+      ],
+      doctorList: [],
+      selectedDoctor: null
     }
   },
   computed: {
@@ -363,10 +379,18 @@ export default {
         this.name = this.memberName;
       }
     }
+    
+    // 初始化医生列表
+    this.initDoctorList();
+    
+    // 获取用户预约列表
+    this.getAppointmentList();
   },
   methods: {
     onHospitalChange(e) {
       this.selectedHospital = this.hospitalList[e.detail.value];
+      // 选择医院后获取该医院的医生列表
+      this.getDoctorList(this.selectedHospital.id);
     },
     onPackageChange(e) {
       this.selectedPackage = this.packageList[e.detail.value];
@@ -379,6 +403,9 @@ export default {
     },
     onTimeChange(e) {
       this.selectedTime = this.timeSlots[e.detail.value];
+    },
+    onDoctorChange(e) {
+      this.selectedDoctor = this.doctorList[e.detail.value];
     },
     onPayMethodChange(e) {
       this.payMethod = e.detail.value;
@@ -407,47 +434,220 @@ export default {
       this.showPay = false;
     },
     pay() {
-      // 模拟支付
+      // 显示支付中状态
       this.showPay = false;
       uni.showLoading({ title: '支付中...' });
       
-      // 构建订单数据，对应数据库字段
+      // 构建App预约订单数据，对应后端AppOrdersDto结构
       const orderData = {
-        user_id: uni.getStorageSync('userId') || 1, // 用户ID
-        setmeal_id: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID
-        hospital_id: this.selectedHospital ? this.selectedHospital.id : null, // 医院ID
-        doctor_id: null, // 医生ID，暂时为空
-        appointment_date: this.selectedDate, // 预约日期
-        time_slot: this.selectedTime, // 时间段
-        status: 2, // 状态：2-已支付
-        amount: this.totalPrice, // 订单金额
-        pay_time: new Date().toISOString(), // 支付时间
-        pay_type: this.payMethod, // 支付方式
-        transaction_id: 'TX' + Date.now(), // 支付交易号
+        setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID
+        hospitalId: this.selectedHospital ? this.selectedHospital.id : null, // 医院ID
+        doctorId: this.selectedDoctor ? this.selectedDoctor.id : null, // 医生ID
+        familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
+        appointmentDate: this.selectedDate, // 预约日期
+        appointmentTime: this.selectedTime, // 预约时间段
         remark: this.remark // 备注信息
       };
       
-      // 这里应该调用后端API保存订单数据
-      console.log('订单数据：', orderData);
+      console.log('预约订单数据：', orderData);
       
-      setTimeout(() => {
-        uni.hideLoading();
-        this.orderNo = 'YY' + Date.now();
-        this.step = 5;
-        // 清除存储的医院和套餐信息
-        uni.removeStorageSync('selectedHospital');
-        uni.removeStorageSync('selectedPackage');
-        // 支付成功后2秒自动返回首页
-        setTimeout(() => {
-          uni.reLaunch({ url: '/pages/index/index' });
-        }, 2000);
-      }, 1500);
+      // 获取token
+      const token = uni.getStorageSync('uniIdToken');
+      
+      // 使用新的API配置调用后端App预约接口
+      uni.request({
+        url: appointmentApi.createAppointment,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': token || ''
+        },
+        data: orderData,
+        success: (res) => {
+          console.log('预约接口响应：', res);
+          if (res.statusCode === 200 && res.data.code === 200) {
+            // 预约成功
+            uni.hideLoading();
+            this.orderNo = res.data.data.orderNumber || 'YY' + Date.now();
+            this.step = 5;
+            
+            // 清除存储的医院和套餐信息
+            uni.removeStorageSync('selectedHospital');
+            uni.removeStorageSync('selectedPackage');
+            
+            // 显示成功提示
+            uni.showToast({
+              title: '预约成功！',
+              icon: 'success',
+              duration: 2000
+            });
+            
+            // 支付成功后2秒自动返回首页
+            setTimeout(() => {
+              uni.reLaunch({ url: '/pages/index/index' });
+            }, 2000);
+          } else {
+            // 预约失败
+            uni.hideLoading();
+            uni.showToast({
+              title: res.data.msg || '预约失败，请重试',
+              icon: 'none',
+              duration: 2000
+            });
+          }
+        },
+        fail: (err) => {
+          console.error('预约接口调用失败：', err);
+          uni.hideLoading();
+          uni.showToast({
+            title: '网络错误，请检查网络连接',
+            icon: 'none',
+            duration: 2000
+          });
+        }
+      });
     },
     goHome() {
       // 清除存储的医院和套餐信息
       uni.removeStorageSync('selectedHospital');
       uni.removeStorageSync('selectedPackage');
       uni.reLaunch({ url: '/pages/index/index' });
+    },
+    
+    // 获取医生列表（根据医院ID获取对应医生）
+    getDoctorList(hospitalId) {
+      if (!hospitalId) return;
+      
+      // 暂时使用固定的医生列表，后续可以根据医院ID筛选
+      // 这里可以根据hospitalId来筛选对应医院的医生
+      this.doctorList = [
+        { id: 3001, name: '张医生', title: '主任医师', department: '内科' },
+        { id: 3002, name: '李医生', title: '副主任医师', department: '外科' },
+        { id: 3003, name: '王医生', title: '主治医师', department: '妇产科' }
+      ];
+      
+      // 默认选择第一个医生
+      if (this.doctorList.length > 0) {
+        this.selectedDoctor = this.doctorList[0];
+      }
+    },
+    
+    // 初始化医生列表
+    initDoctorList() {
+      // 设置默认医生列表
+      this.doctorList = [
+        { id: 3001, name: '张医生', title: '主任医师', department: '内科' },
+        { id: 3002, name: '李医生', title: '副主任医师', department: '外科' },
+        { id: 3003, name: '王医生', title: '主治医师', department: '妇产科' }
+      ];
+      
+      // 默认选择第一个医生
+      if (this.doctorList.length > 0) {
+        this.selectedDoctor = this.doctorList[0];
+      }
+    },
+    
+    // 获取用户预约列表
+    getAppointmentList() {
+      // 获取token
+      const token = uni.getStorageSync('uniIdToken');
+      
+      uni.request({
+        url: appointmentApi.getAppointmentList,
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': token || ''
+        },
+        success: (res) => {
+          console.log('预约列表响应：', res);
+          if (res.statusCode === 200 && res.data.code === 200) {
+            // 处理预约列表数据
+            const appointmentList = res.data.data.records || [];
+            console.log('预约列表：', appointmentList);
+            // 这里可以将数据存储到本地或传递给其他组件
+            uni.setStorageSync('appointmentList', appointmentList);
+          }
+        },
+        fail: (err) => {
+          console.error('获取预约列表失败：', err);
+        }
+      });
+    },
+    
+    // 获取预约详情
+    getAppointmentDetail(id) {
+      // 获取token
+      const token = uni.getStorageSync('uniIdToken');
+      
+      uni.request({
+        url: appointmentApi.getAppointmentDetail(id),
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': token || ''
+        },
+        success: (res) => {
+          console.log('预约详情响应：', res);
+          if (res.statusCode === 200 && res.data.code === 200) {
+            const appointmentDetail = res.data.data;
+            console.log('预约详情：', appointmentDetail);
+            // 处理预约详情数据
+          }
+        },
+        fail: (err) => {
+          console.error('获取预约详情失败：', err);
+        }
+      });
+    },
+    
+    // 取消预约
+    cancelAppointment(id) {
+      uni.showModal({
+        title: '确认取消',
+        content: '确定要取消这个预约吗？',
+        success: (res) => {
+          if (res.confirm) {
+            // 获取token
+            const token = uni.getStorageSync('uniIdToken');
+            
+            uni.request({
+              url: appointmentApi.cancelAppointment(id),
+              method: 'PUT',
+              header: {
+                'Content-Type': 'application/json',
+                'Authorization': token || ''
+              },
+              success: (res) => {
+                console.log('取消预约响应：', res);
+                if (res.statusCode === 200 && res.data.code === 200) {
+                  uni.showToast({
+                    title: '取消成功',
+                    icon: 'success',
+                    duration: 2000
+                  });
+                  // 刷新预约列表
+                  this.getAppointmentList();
+                } else {
+                  uni.showToast({
+                    title: res.data.msg || '取消失败',
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }
+              },
+              fail: (err) => {
+                console.error('取消预约失败：', err);
+                uni.showToast({
+                  title: '网络错误',
+                  icon: 'none',
+                  duration: 2000
+                });
+              }
+            });
+          }
+        }
+      });
     }
   }
 }

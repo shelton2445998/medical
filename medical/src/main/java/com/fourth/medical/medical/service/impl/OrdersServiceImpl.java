@@ -2,6 +2,8 @@ package com.fourth.medical.medical.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fourth.medical.auth.util.LoginUtil;
+import com.fourth.medical.auth.util.AppLoginUtil;
+import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.OrderByItem;
 import com.fourth.medical.framework.page.OrderMapping;
@@ -23,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -85,12 +88,36 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     }
 
     @Override
-    public AppOrdersVo getAppOrdersById(Long id) {
-        return ordersMapper.getAppOrdersById(id);
+    public AppOrdersVo getAppOrdersById(Long id, String token) {
+        log.info("获取App预约详情，id: {}, token: {}", id, token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
+        
+        // 获取订单详情
+        AppOrdersVo appOrdersVo = ordersMapper.getAppOrdersById(id);
+        if (appOrdersVo == null) {
+            throw new BusinessException("预约订单不存在");
+        }
+        
+        // 验证订单所属用户
+        if (!appOrdersVo.getUserId().equals(appLoginVo.getUserId())) {
+            throw new BusinessException("无权查看此订单");
+        }
+        
+        return appOrdersVo;
     }
 
     @Override
-    public Paging<AppOrdersVo> getAppOrdersPage(AppOrdersQuery query) {
+    public Paging<AppOrdersVo> getAppOrdersPage(AppOrdersQuery query, String token) {
+        log.info("获取App预约列表，token: {}", token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
+        
+        // 设置查询条件，只查询当前用户的订单
+        query.setUserId(appLoginVo.getUserId());
+        
         OrderMapping orderMapping = new OrderMapping();
         orderMapping.put("createTime", "create_time");
         PagingUtil.handlePage(query, orderMapping, OrderByItem.desc("id"));
@@ -101,12 +128,11 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AppOrdersVo createAppOrders(AppOrdersDto dto) {
-        // 获取当前登录用户ID
-        Long userId = LoginUtil.getUserId();
-        if (userId == null) {
-            throw new BusinessException("请先登录");
-        }
+    public AppOrdersVo createAppOrders(AppOrdersDto dto, String token) {
+        log.info("创建App预约，token: {}", token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
         
         // 获取套餐信息
         Setmeal setmeal = setmealMapper.selectById(dto.getSetmealId());
@@ -118,7 +144,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         Orders orders = new Orders();
         BeanUtils.copyProperties(dto, orders);
         // 设置基本信息
-        orders.setUserId(userId);
+        orders.setUserId(appLoginVo.getUserId());
+        orders.setDoctorId(dto.getDoctorId()); // 设置医生ID
+        orders.setTimeSlot(dto.getAppointmentTime()); // 设置时间段
         orders.setOrderNumber(generateOrderNumber());
         orders.setPrice(setmeal.getPrice());
         orders.setStatus(0); // 0-待支付
@@ -129,18 +157,19 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new BusinessException("创建预约失败");
         }
         
+        log.info("创建预约成功，订单ID: {}, 用户ID: {}", orders.getId(), appLoginVo.getUserId());
+        
         // 查询并返回创建的订单
         return ordersMapper.getAppOrdersById(orders.getId());
     }
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean cancelAppOrders(Long id) {
-        // 获取当前登录用户ID
-        Long userId = LoginUtil.getUserId();
-        if (userId == null) {
-            throw new BusinessException("请先登录");
-        }
+    public boolean cancelAppOrders(Long id, String token) {
+        log.info("取消App预约，id: {}, token: {}", id, token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
         
         // 查询订单
         Orders orders = getById(id);
@@ -149,7 +178,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         
         // 验证订单所属
-        if (!orders.getUserId().equals(userId)) {
+        if (!orders.getUserId().equals(appLoginVo.getUserId())) {
             throw new BusinessException("无权操作此订单");
         }
         
@@ -166,7 +195,32 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setStatus(4); // 假设4表示已取消
         orders.setCancelTime(new Date());
         
-        return updateById(orders);
+        boolean result = updateById(orders);
+        if (result) {
+            log.info("取消预约成功，订单ID: {}, 用户ID: {}", id, appLoginVo.getUserId());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 验证token并获取用户信息
+     *
+     * @param token
+     * @return
+     */
+    private AppLoginVo validateTokenAndGetUser(String token) {
+        if (StringUtils.isBlank(token)) {
+            throw new BusinessException("请先登录");
+        }
+        
+        AppLoginVo appLoginVo = AppLoginUtil.getLoginVo(token);
+        if (appLoginVo == null) {
+            throw new BusinessException("登录已过期，请重新登录");
+        }
+        
+        log.info("验证token成功，用户ID: {}, 用户名: {}", appLoginVo.getUserId(), appLoginVo.getUsername());
+        return appLoginVo;
     }
     
     /**

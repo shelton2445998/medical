@@ -31,14 +31,18 @@ export const packageApi = {
   getSetmealDetailPage: `${API_BASE_URL}/app/setmealDetail/getAppSetmealDetailPage`
 };
 
-// 预约相关接口
+// 预约相关接口 - 修正为正确的后端接口路径
 export const appointmentApi = {
   // 创建预约
-  createAppointment: `${API_BASE_URL}/appointment/create`,
+  createAppointment: `${API_BASE_URL}/app/appointment/create`,
   // 获取预约列表
-  getAppointmentList: `${API_BASE_URL}/appointment/list`,
+  getAppointmentList: `${API_BASE_URL}/app/appointment/list`,
+  // 获取预约详情
+  getAppointmentDetail: (id) => `${API_BASE_URL}/app/appointment/detail/${id}`,
   // 取消预约
-  cancelAppointment: (id) => `${API_BASE_URL}/appointment/cancel/${id}`,
+  cancelAppointment: (id) => `${API_BASE_URL}/app/appointment/cancel/${id}`,
+  // 获取医生列表
+  getDoctorList: `${API_BASE_URL}/app/doctor/list`,
 };
 
 // 报告相关接口

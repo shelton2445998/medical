@@ -85,9 +85,10 @@
         LEFT JOIN doctor d ON o.doctor_id = d.id
         <where>
             <if test="userId != null">
-                AND o.user_id = #{userId}
+                and user_id = #{userId}
             </if>
         </where>
+        order by create_time desc
     </select>
 
 </mapper>

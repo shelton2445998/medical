@@ -28,6 +28,10 @@ public class AppOrdersDto implements Serializable {
     @NotNull(message = "医院ID不能为空")
     private Long hospitalId;
 
+    @Schema(description = "医生ID")
+    @NotNull(message = "医生ID不能为空")
+    private Long doctorId;
+
     @Schema(description = "家庭成员ID")
     @NotNull(message = "家庭成员ID不能为空")
     private Long familyMemberId;
