@@ -1,13 +1,13 @@
 package com.fourth.medical.auth.service.impl;
 
-import com.fourth.medical.auth.exception.LoginException;
-import com.fourth.medical.auth.exception.LoginTokenException;
 import com.fourth.medical.auth.service.AppLoginRedisService;
 import com.fourth.medical.auth.util.TokenUtil;
 import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.common.constant.RedisKey;
 import com.fourth.medical.common.enums.SystemType;
 import com.fourth.medical.config.properties.LoginAppProperties;
+import com.fourth.medical.framework.exception.LoginException;
+import com.fourth.medical.framework.exception.LoginTokenException;
 import com.fourth.medical.util.SystemTypeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,7 +141,7 @@ public class AppLoginRedisServiceImpl implements AppLoginRedisService {
      *
      * @param token
      */
-    private void deleteLoginInfoByToken(String token) {
+    public void deleteLoginInfoByToken(String token) {
         if (StringUtils.isBlank(token)) {
             return;
         }
