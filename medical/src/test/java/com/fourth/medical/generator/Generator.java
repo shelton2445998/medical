@@ -30,7 +30,7 @@ public class Generator {
     public static void main(String[] args) throws Exception {
         GeneratorProperties config = new GeneratorProperties();
         // 包名称
-        config.setPackageName("com.fourth.medicaltest");
+        config.setPackageName("com.fourth.medical");
         // 模块名称
         config.setModuleName("medical");
         // 作者
@@ -40,16 +40,14 @@ public class Generator {
         // 生成的表名称
         // 生成的表名称
         List<String> tableNames = Arrays.asList(
-                 "setmeal_detail", "setmeal", "report_item_detail", "report_item",
-                "overall_result", "orders", "notification", "invoice", "hospital", "family_member",
-                "doctor_schedule", "doctor", "department", "checkitem_detail", "checkitem"
+            "report"
         );
         // 排除的表前缀
         config.setTablePrefixes(Arrays.asList("tb_", "b_", "c_", "test_"));
         // 是否生成后台代码
-        config.setGeneratorBackend(false);
+        config.setGeneratorBackend(true);
         // 是否生成App后端代码
-        config.setGeneratorAppBackend(false);
+        config.setGeneratorAppBackend(true);
         // 是否生成前端代码
         config.setGeneratorFrontend(true);
         // 是否校验字段

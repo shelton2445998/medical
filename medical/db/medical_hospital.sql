@@ -16,3 +16,4 @@ create table hospital
 
 INSERT INTO medical.hospital (id, name, phone, address, description, status, create_id, create_time, update_id, update_time) VALUES (1001, '第一人民医院', '0123-12345678', '某某市中心路123号', '三甲综合医院，提供全面的医疗服务', 1, 1, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
 INSERT INTO medical.hospital (id, name, phone, address, description, status, create_id, create_time, update_id, update_time) VALUES (1002, '第二人民医院', '0123-87654321', '某某市健康路456号', '专业体检中心，设备先进，服务贴心', 1, 1, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.hospital (id, name, phone, address, description, status, create_id, create_time, update_id, update_time) VALUES (696263284899845, 'test', '', 'test', '', 1, 1, '2025-07-10 12:42:36', null, '2025-07-10 12:42:37');

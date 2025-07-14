@@ -3,31 +3,61 @@
 <mapper namespace="com.fourth.medical.medical.mapper.ReportItemDetailMapper">
 
     <select id="getReportItemDetailById" resultType="com.fourth.medical.medical.vo.ReportItemDetailVo">
-        select *
-        from report_item_detail
-        where id = #{id}
+        SELECT d.*,
+               c.name AS detailName,
+               c.normal_value AS normalValue,
+               c.unit
+        FROM report_item_detail d
+        LEFT JOIN checkitem_detail c ON d.detail_id = c.id
+        WHERE d.id = #{id}
     </select>
 
     <select id="getReportItemDetailPage" parameterType="com.fourth.medical.medical.query.ReportItemDetailQuery"
             resultType="com.fourth.medical.medical.vo.ReportItemDetailVo">
-        select *
-        from report_item_detail
+        SELECT d.*,
+               c.name AS detailName,
+               c.normal_value AS normalValue,
+               c.unit
+        FROM report_item_detail d
+        LEFT JOIN checkitem_detail c ON d.detail_id = c.id
         <where>
+            <if test="reportId != null">
+                AND d.report_id = #{reportId}
+            </if>
+            <if test="isAbnormal != null">
+                AND d.is_abnormal = #{isAbnormal}
+            </if>
         </where>
+        ORDER BY d.id
     </select>
 
     <select id="getAppReportItemDetailById" resultType="com.fourth.medical.medical.vo.AppReportItemDetailVo">
-        select *
-        from report_item_detail
-        where id = #{id}
+        SELECT d.*,
+               c.name AS detailName,
+               c.normal_value AS normalValue,
+               c.unit
+        FROM report_item_detail d
+        LEFT JOIN checkitem_detail c ON d.detail_id = c.id
+        WHERE d.id = #{id}
     </select>
 
     <select id="getAppReportItemDetailPage" parameterType="com.fourth.medical.medical.query.AppReportItemDetailQuery"
             resultType="com.fourth.medical.medical.vo.AppReportItemDetailVo">
-        select *
-        from report_item_detail
+        SELECT d.*,
+               c.name AS detailName,
+               c.normal_value AS normalValue,
+               c.unit
+        FROM report_item_detail d
+        LEFT JOIN checkitem_detail c ON d.detail_id = c.id
         <where>
+            <if test="reportId != null">
+                AND d.report_id = #{reportId}
+            </if>
+            <if test="isAbnormal != null">
+                AND d.is_abnormal = #{isAbnormal}
+            </if>
         </where>
+        ORDER BY d.id
     </select>
 
 </mapper>

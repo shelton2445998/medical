@@ -26,12 +26,24 @@ public class ReportItemVo implements Serializable {
     
     @Schema(description = "用户ID")
     private Long userId;
+    
+    @Schema(description = "用户姓名")
+    private String userName;
+    
+    @Schema(description = "用户手机号")
+    private String userPhone;
 
     @Schema(description = "检查项ID")
     private Long itemId;
+    
+    @Schema(description = "检查项名称")
+    private String itemName;
 
     @Schema(description = "医生ID")
     private Long doctorId;
+    
+    @Schema(description = "医生姓名")
+    private String doctorName;
 
     @Schema(description = "报告状态 0:未生成，1:已生成")
     private Integer reportStatus;

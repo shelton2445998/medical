@@ -17,6 +17,11 @@ import java.util.Date;
 public class ReportItemDetailQuery extends BasePageQuery {
 
     private static final long serialVersionUID = 1L;
-
+    
+    @Schema(description = "报告ID")
+    private Long reportId;
+    
+    @Schema(description = "是否异常 0:正常，1:异常")
+    private Integer isAbnormal;
 }
 

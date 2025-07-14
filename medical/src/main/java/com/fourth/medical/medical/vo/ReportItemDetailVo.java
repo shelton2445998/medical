@@ -26,6 +26,15 @@ public class ReportItemDetailVo implements Serializable {
 
     @Schema(description = "检查项明细ID")
     private Long detailId;
+    
+    @Schema(description = "明细名称")
+    private String detailName;
+    
+    @Schema(description = "正常值范围")
+    private String normalValue;
+    
+    @Schema(description = "单位")
+    private String unit;
 
     @Schema(description = "检查值")
     private String value;

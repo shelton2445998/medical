@@ -22,3 +22,8 @@ create index notification_user_index
     on notification (user_id);
 
 INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10001, null, null, '系统正式上线公告', '尊敬的用户，预约体检系统已正式上线，欢迎使用！', 3, 0, 1, '2025-07-09 09:47:42', null, '2025-07-09 09:47:42');
+INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10002, 5001, null, '预约成功通知', '您已成功预约2025-07-12的体检服务，请按时到院。', 1, 0, 1, '2025-07-12 15:31:29', null, '2025-07-12 15:31:29');
+INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10003, 5002, null, '支付成功通知', '您的体检预约订单已支付成功，期待您的光临。', 1, 1, 1, '2025-07-12 16:30:00', null, '2025-07-12 16:30:00');
+INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10004, 5001, null, '预约取消通知', '您的2025-07-15体检预约已取消。', 1, 0, 1, '2025-07-11 14:22:35', null, '2025-07-11 14:22:35');
+INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10005, 5002, null, '体检报告通知', '您的体检报告已生成，请登录系统查看或到院领取。', 2, 0, 1, '2025-07-20 16:40:00', null, '2025-07-20 16:40:00');
+INSERT INTO medical.notification (id, user_id, doctor_id, title, content, type, is_read, create_id, create_time, update_id, update_time) VALUES (10006, null, 3001, '新预约通知', '您有一个新的预约安排在2025-07-12，请注意查看。', 1, 0, 1, '2025-07-12 15:31:29', null, '2025-07-12 15:31:29');

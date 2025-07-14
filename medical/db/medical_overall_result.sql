@@ -18,3 +18,4 @@ create index result_doctor_index
 create index result_order_index
     on overall_result (order_id);
 
+INSERT INTO medical.overall_result (id, order_id, content, doctor_id, create_id, create_time, update_id, update_time) VALUES (15001, 10004, '体检结果显示各项指标基本正常，血压略高，建议定期监测血压，保持适当运动，减少盐分摄入。', 3001, 3001, '2025-07-20 16:30:00', null, '2025-07-20 16:30:00');

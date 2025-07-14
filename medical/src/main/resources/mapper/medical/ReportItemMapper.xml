@@ -3,43 +3,103 @@
 <mapper namespace="com.fourth.medical.medical.mapper.ReportItemMapper">
 
     <select id="getReportItemById" resultType="com.fourth.medical.medical.vo.ReportItemVo">
-        select *
-        from report_item
-        where id = #{id}
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
+        WHERE r.id = #{id}
     </select>
 
     <select id="getReportItemPage" parameterType="com.fourth.medical.medical.query.ReportItemQuery"
             resultType="com.fourth.medical.medical.vo.ReportItemVo">
-        select *
-        from report_item
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
         <where>
-            <if test="userId != null">
-                and user_id = #{userId}
+            <if test="doctorId != null">
+                AND r.doctor_id = #{doctorId}
+            </if>
+            <if test="orderId != null">
+                AND r.order_id = #{orderId}
+            </if>
+            <if test="reportStatus != null">
+                AND r.report_status = #{reportStatus}
+            </if>
+            <if test="patientKeyword != null and patientKeyword != ''">
+                AND (u.nickname LIKE CONCAT('%', #{patientKeyword}, '%') OR u.phone LIKE CONCAT('%', #{patientKeyword}, '%'))
             </if>
         </where>
+        ORDER BY r.create_time DESC
     </select>
 
     <select id="getAppReportItemById" resultType="com.fourth.medical.medical.vo.AppReportItemVo">
-        select *
-        from report_item
-        where id = #{id}
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
+        WHERE r.id = #{id}
     </select>
 
     <select id="getAppReportItemPage" parameterType="com.fourth.medical.medical.query.AppReportItemQuery"
             resultType="com.fourth.medical.medical.vo.AppReportItemVo">
-        select *
-        from report_item
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
         <where>
             <if test="userId != null">
-                and user_id = #{userId}
+                AND o.user_id = #{userId}
+            </if>
+            <if test="reportStatus != null">
+                AND r.report_status = #{reportStatus}
             </if>
         </where>
+        ORDER BY r.create_time DESC
     </select>
     
     <select id="getReportItemsByUserId" resultType="com.fourth.medical.medical.vo.ReportItemVo">
-        select *
-        from report_item
-        where user_id = #{userId}
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
+        WHERE o.user_id = #{userId}
+        ORDER BY r.create_time DESC
     </select>
 
 </mapper>

@@ -18,5 +18,16 @@ public class ReportItemQuery extends BasePageQuery {
 
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "医生ID")
+    private Long doctorId;
+    
+    @Schema(description = "订单ID")
+    private Long orderId;
+    
+    @Schema(description = "患者关键词(姓名或手机号)")
+    private String patientKeyword;
+    
+    @Schema(description = "报告状态 0:未生成，1:已生成")
+    private Integer reportStatus;
 }
 

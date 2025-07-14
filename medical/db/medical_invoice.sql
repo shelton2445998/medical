@@ -20,3 +20,5 @@ create table invoice
 create index invoice_order_index
     on invoice (order_id);
 
+INSERT INTO medical.invoice (id, order_id, title, tax_number, amount, type, content, status, pdf_url, create_id, create_time, update_id, update_time) VALUES (12001, 10002, '个人', null, 599.00, 1, '体检服务费', 1, '/invoices/INV10002.pdf', 5002, '2025-07-12 16:35:00', null, '2025-07-12 16:35:00');
+INSERT INTO medical.invoice (id, order_id, title, tax_number, amount, type, content, status, pdf_url, create_id, create_time, update_id, update_time) VALUES (12002, 10004, '个人', null, 269.00, 1, '体检服务费', 1, '/invoices/INV10004.pdf', 5002, '2025-07-20 15:45:00', null, '2025-07-20 15:45:00');

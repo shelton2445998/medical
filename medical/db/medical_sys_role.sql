@@ -19,4 +19,4 @@ create table sys_role
 
 INSERT INTO medical.sys_role (id, code, name, is_system, remark, create_id, create_time, update_id, update_time) VALUES (1, 'admin', '管理员', 1, '系统管理员', 1, '2023-12-12 22:33:06', null, '2023-12-25 12:04:31');
 INSERT INTO medical.sys_role (id, code, name, is_system, remark, create_id, create_time, update_id, update_time) VALUES (2, 'doctor', '医生', 1, '医生角色', 1, '2025-07-09 09:47:31', null, '2025-07-09 09:47:31');
-INSERT INTO medical.sys_role (id, code, name, is_system, remark, create_id, create_time, update_id, update_time) VALUES (3, 'user', '普通用户', 1, '普通用户角色', 1, '2025-07-09 09:47:31', null, '2025-07-09 09:47:31');
+INSERT INTO medical.sys_role (id, code, name, is_system, remark, create_id, create_time, update_id, update_time) VALUES (3, 'user', '普通用户', 1, '普通用户角色', 1, '2025-07-09 09:47:31', 1, '2025-07-09 09:47:31');

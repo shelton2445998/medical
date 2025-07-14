@@ -19,3 +19,9 @@ create index detail_item_index
 create index detail_report_index
     on report_item_detail (report_id);
 
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14001, 13001, 7001, '4.8', 0, 3001, '2025-07-20 15:00:00', null, '2025-07-20 15:00:00');
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14002, 13001, 7002, '145', 0, 3001, '2025-07-20 15:00:00', null, '2025-07-20 15:00:00');
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14003, 13001, 7003, '6.5', 0, 3001, '2025-07-20 15:00:00', null, '2025-07-20 15:00:00');
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14004, 13001, 7004, '230', 0, 3001, '2025-07-20 15:00:00', null, '2025-07-20 15:00:00');
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14005, 13002, 7005, '阴性', 0, 3001, '2025-07-20 15:10:00', null, '2025-07-20 15:10:00');
+INSERT INTO medical.report_item_detail (id, report_id, detail_id, value, is_abnormal, create_id, create_time, update_id, update_time) VALUES (14006, 13002, 7006, '阴性', 0, 3001, '2025-07-20 15:10:00', null, '2025-07-20 15:10:00');

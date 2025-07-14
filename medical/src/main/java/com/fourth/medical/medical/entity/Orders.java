@@ -66,6 +66,9 @@ public class Orders implements Serializable {
 
     @Schema(description = "支付交易号")
     private String transactionId;
+    
+    @Schema(description = "检查项ID列表，多个ID用逗号分隔")
+    private String checkitemIds;
 
     @Schema(description = "创建人ID")
     @TableField(fill = FieldFill.INSERT)
