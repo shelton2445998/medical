@@ -96,6 +96,24 @@
 							<text class="detail-label">结果说明：</text>
 							<text class="detail-value">{{item.description}}</text>
 						</view>
+						<view class="result-conclusion">
+							<text class="detail-label">医生结论：</text>
+							<view class="conclusion-content">
+								<view v-if="typeof item.conclusion === 'string'" class="conclusion-text">
+									{{item.conclusion}}
+								</view>
+								<view v-else-if="Array.isArray(item.conclusion)" class="conclusion-list">
+									<view v-for="(conclusion, index) in item.conclusion" :key="index" class="conclusion-item">
+										<text class="conclusion-category">{{conclusion.category}}</text>
+										<text class="conclusion-name">{{conclusion.name}}</text>
+										<text class="conclusion-desc">{{conclusion.desc}}</text>
+									</view>
+								</view>
+								<view v-else class="conclusion-text">
+									{{item.conclusion}}
+								</view>
+							</view>
+						</view>
 						<view class="result-advice" v-if="item.advice">
 							<text class="detail-label">健康建议：</text>
 							<text class="detail-value">{{item.advice}}</text>
@@ -135,7 +153,7 @@
 </template>
 
 <script>
-	import { getReportDetail } from '@/api/report'
+	import { getCurrentUserReportItemPage, getReportItemConclusion } from '@/api/report'
 	
 	export default {
 		data() {
@@ -179,37 +197,51 @@
 			async getReportDetail() {
 				this.loading = true;
 				try {
-					const res = await getReportDetail(this.reportId);
-					
-					// 更新报告基本信息
-					this.reportInfo = {
-						packageName: res.packageName || '',
-						reportDate: res.reportDate || '',
-						hospitalName: res.hospitalName || '',
-						personName: res.personName || '',
-						gender: res.gender || '',
-						age: res.age || 0,
-						examDate: res.examDate || '',
-						abnormalCount: res.abnormalCount || 0,
-						totalCount: res.totalCount || 0,
-						adviceCount: res.adviceList?.length || 0,
-						adviceList: res.adviceList || []
+					// 使用现有的后端接口获取报告项列表
+					const query = {
+						pageIndex: 1,
+						pageSize: 100,
+						reportId: this.reportId
 					};
 					
-					// 更新检查结果数据
-					this.examResults = (res.examResults || []).map(item => ({
-						name: item.name || '',
-						value: item.value || '',
-						unit: item.unit || '',
-						referenceRange: item.referenceRange || '',
-						isAbnormal: item.isAbnormal || false,
-						description: item.description || '',
-						advice: item.advice || '',
-						expanded: false
-					}));
+					const res = await getCurrentUserReportItemPage(query);
 					
-					// 初始化过滤结果
-					this.filteredResults = this.examResults;
+					if (res && res.success && res.data && res.data.list) {
+						// 更新报告基本信息（这里需要根据实际数据结构调整）
+						this.reportInfo = {
+							packageName: '体检报告',
+							reportDate: new Date().toLocaleDateString(),
+							hospitalName: '体检医院',
+							personName: '体检人',
+							gender: '男',
+							age: 30,
+							examDate: new Date().toLocaleDateString(),
+							abnormalCount: 0,
+							totalCount: res.data.list.length,
+							adviceCount: 0,
+							adviceList: []
+						};
+						
+						// 更新检查结果数据
+						this.examResults = res.data.list.map(item => ({
+							id: item.id,
+							name: item.checkitemName || '',
+							value: item.result || '',
+							unit: item.unit || '',
+							referenceRange: item.referenceRange || '',
+							isAbnormal: item.isAbnormal || false,
+							description: item.description || '',
+							advice: item.advice || '',
+							expanded: false,
+							conclusion: '等待医生检测'
+						}));
+						
+						// 获取检查项结论
+						await this.loadCheckitemConclusions();
+						
+						// 初始化过滤结果
+						this.filteredResults = this.examResults;
+					}
 					
 				} catch (error) {
 					console.error('获取报告详情失败:', error);
@@ -219,6 +251,38 @@
 					});
 				} finally {
 					this.loading = false;
+				}
+			},
+			
+			// 加载检查项结论
+			async loadCheckitemConclusions() {
+				for (let i = 0; i < this.examResults.length; i++) {
+					const result = this.examResults[i];
+					if (result.id) {
+						try {
+							const conclusionRes = await getReportItemConclusion(result.id);
+							if (conclusionRes && conclusionRes.success) {
+								if (conclusionRes.data && conclusionRes.data !== '等待医生检测') {
+									// 解析JSON格式的结论
+									try {
+										const conclusionData = JSON.parse(conclusionRes.data);
+										if (Array.isArray(conclusionData)) {
+											result.conclusion = conclusionData;
+										} else {
+											result.conclusion = conclusionRes.data;
+										}
+									} catch (e) {
+										result.conclusion = conclusionRes.data;
+									}
+								} else {
+									result.conclusion = '等待医生检测';
+								}
+							}
+						} catch (error) {
+							console.error('获取检查项结论失败:', error);
+							result.conclusion = '等待医生检测';
+						}
+					}
 				}
 			},
 			// 切换筛选条件
@@ -490,7 +554,7 @@
 			border-radius: 8rpx;
 			font-size: 26rpx;
 			
-			.reference-range, .result-desc, .result-advice {
+			.reference-range, .result-desc, .result-conclusion, .result-advice {
 				margin-bottom: 10rpx;
 				
 				&:last-child {
@@ -503,6 +567,54 @@
 				
 				.detail-value {
 					color: #333333;
+				}
+			}
+			
+			.result-conclusion {
+				.conclusion-content {
+					margin-top: 10rpx;
+					
+					.conclusion-text {
+						font-size: 24rpx;
+						color: #333333;
+						line-height: 1.5;
+						padding: 10rpx;
+						background-color: #f8f9fa;
+						border-radius: 8rpx;
+					}
+					
+					.conclusion-list {
+						.conclusion-item {
+							margin-bottom: 15rpx;
+							padding: 15rpx;
+							background-color: #f8f9fa;
+							border-radius: 8rpx;
+							border-left: 4rpx solid #1296db;
+							
+							.conclusion-category {
+								display: block;
+								font-size: 22rpx;
+								color: #1296db;
+								font-weight: bold;
+								margin-bottom: 8rpx;
+							}
+							
+							.conclusion-name {
+								display: block;
+								font-size: 24rpx;
+								color: #333333;
+								font-weight: bold;
+								margin-bottom: 6rpx;
+							}
+							
+							.conclusion-desc {
+								display: block;
+								font-size: 22rpx;
+								color: #666666;
+								line-height: 1.4;
+							}
+						}
+					}
 				}
 			}
 			

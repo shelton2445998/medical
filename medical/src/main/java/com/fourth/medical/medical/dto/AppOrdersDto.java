@@ -46,5 +46,8 @@ public class AppOrdersDto implements Serializable {
 
     @Schema(description = "备注")
     private String remark;
+    
+    @Schema(description = "检查项ID列表，多个ID用逗号分隔")
+    private String checkitemIds;
 
 } 

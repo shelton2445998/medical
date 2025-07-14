@@ -1,5 +1,13 @@
 <template>
 	<view class="content">
+		<!-- 动态背景装饰 -->
+		<view class="floating-shapes">
+			<view class="shape shape-1"></view>
+			<view class="shape shape-2"></view>
+			<view class="shape shape-3"></view>
+			<view class="shape shape-4"></view>
+		</view>
+		
 		<!-- 搜索框 -->
 		<view class="search-box">
 			<text class="iconfont icon-search"></text>
@@ -10,17 +18,25 @@
 		<view class="hospital-list">
 			<!-- 加载状态 -->
 			<view v-if="loading" class="loading-container">
+				<view class="loading-spinner"></view>
 				<text class="loading-text">正在加载医院列表...</text>
 			</view>
 			
 			<!-- 空状态 -->
 			<view v-else-if="filteredHospitals.length === 0" class="empty-container">
+				<view class="empty-icon">🏥</view>
 				<text class="empty-text">暂无医院数据</text>
 			</view>
 			
 			<!-- 医院列表 -->
 			<view v-else>
-				<view class="hospital-item" v-for="(item, index) in filteredHospitals" :key="index" @click="selectHospital(item)">
+				<view 
+					class="hospital-item" 
+					v-for="(item, index) in filteredHospitals" 
+					:key="index" 
+					@click="selectHospital(item)"
+					:style="{ animationDelay: index * 0.1 + 's' }"
+				>
 					<image class="hospital-image" :src="item.image" mode="aspectFill"></image>
 					<view class="hospital-info">
 						<view class="hospital-header">
@@ -276,8 +292,102 @@
 
 <style lang="scss">
 .content {
-	background-color: #f5f5f5;
+	background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
 	min-height: 100vh;
+	padding-top: 0;
+	padding-bottom: 40rpx;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+		animation: flow 20s linear infinite;
+		pointer-events: none;
+	}
+	
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+		animation: shimmer 8s ease-in-out infinite;
+		pointer-events: none;
+	}
+}
+
+.floating-shapes {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	
+	.shape {
+		position: absolute;
+		background-color: rgba(255, 255, 255, 0.1);
+		border-radius: 50%;
+		animation: float 10s infinite ease-in-out;
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: scale(1.3);
+			background-color: rgba(255, 255, 255, 0.2);
+		}
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: -10%;
+			left: -10%;
+			width: 120%;
+			height: 120%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+			border-radius: 50%;
+			animation: pulse 3s ease-in-out infinite;
+		}
+	}
+	
+	.shape-1 {
+		width: 100px;
+		height: 100px;
+		top: 10%;
+		left: 10%;
+		animation-delay: -2s;
+	}
+	
+	.shape-2 {
+		width: 150px;
+		height: 150px;
+		top: 70%;
+		right: 10%;
+		animation-delay: -4s;
+	}
+	
+	.shape-3 {
+		width: 120px;
+		height: 120px;
+		bottom: 20%;
+		left: 30%;
+		animation-delay: -6s;
+	}
+	
+	.shape-4 {
+		width: 180px;
+		height: 180px;
+		bottom: 50%;
+		right: 20%;
+		animation-delay: -8s;
+	}
 }
 
 .btn-icon {
@@ -285,59 +395,217 @@
   height: 40rpx;
   margin-right: 10rpx;
   vertical-align: middle;
+  transition: all 0.3s ease;
 }
 
 .search-box {
 	display: flex;
 	align-items: center;
-	background-color: #ffffff;
+	background-color: rgba(255, 255, 255, 0.95);
 	padding: 20rpx 30rpx;
-	border-radius: 10rpx;
+	border-radius: 16rpx;
 	margin: 20rpx;
-	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
+	transition: all 0.3s ease;
+	animation: slideInDown 0.8s ease-out;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: shimmer 3s ease-in-out infinite;
+	}
+	
+	&:hover {
+		transform: translateY(-2rpx);
+		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+		background-color: rgba(255, 255, 255, 0.98);
+	}
 	
 	.iconfont {
 		font-size: 40rpx;
 		color: #999999;
 		margin-right: 20rpx;
+		transition: all 0.3s ease;
+		
+		&:hover {
+			color: #0984e3;
+			transform: scale(1.1);
+		}
 	}
 	
 	input {
 		flex: 1;
 		font-size: 28rpx;
 		color: #333333;
+		transition: all 0.3s ease;
+		
+		&:focus {
+			color: #0984e3;
+		}
 	}
 }
 
 .hospital-list {
 	padding: 0 20rpx;
 	
-	.loading-container, .empty-container {
+	.loading-container {
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		padding: 100rpx 0;
 		
-		.loading-text, .empty-text {
+		.loading-spinner {
+			width: 60rpx;
+			height: 60rpx;
+			border: 4rpx solid rgba(255, 255, 255, 0.3);
+			border-top: 4rpx solid #ffffff;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 20rpx;
+		}
+		
+		.loading-text {
 			font-size: 28rpx;
-			color: #999999;
+			color: #ffffff;
+			text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+		}
+	}
+	
+	.empty-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 100rpx 0;
+		
+		.empty-icon {
+			font-size: 80rpx;
+			margin-bottom: 20rpx;
+			animation: bounce 2s infinite;
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: scale(1.2);
+			}
+		}
+		
+		.empty-text {
+			font-size: 28rpx;
+			color: #ffffff;
+			text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
 		}
 	}
 	
 	.hospital-item {
 		display: flex;
-		background-color: #ffffff;
-		border-radius: 10rpx;
+		background-color: rgba(255, 255, 255, 0.95);
+		border-radius: 16rpx;
 		margin-bottom: 20rpx;
 		padding: 30rpx;
-		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
 		position: relative;
+		overflow: hidden;
+		animation: fadeIn 0.5s ease-out;
+		transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		cursor: pointer;
+		
+		&:nth-child(1) { animation-delay: 0.1s; }
+		&:nth-child(2) { animation-delay: 0.2s; }
+		&:nth-child(3) { animation-delay: 0.3s; }
+		&:nth-child(4) { animation-delay: 0.4s; }
+		&:nth-child(5) { animation-delay: 0.5s; }
+		&:nth-child(6) { animation-delay: 0.6s; }
+		&:nth-child(7) { animation-delay: 0.7s; }
+		&:nth-child(8) { animation-delay: 0.8s; }
+		&:nth-child(9) { animation-delay: 0.9s; }
+		&:nth-child(10) { animation-delay: 1s; }
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+			transition: left 0.6s ease;
+		}
+		
+		&::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(116, 185, 255, 0.1), rgba(9, 132, 227, 0.1));
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			pointer-events: none;
+		}
+		
+		/* 流动治愈感背景 */
+		&::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(circle, rgba(116, 185, 255, 0.1) 0%, transparent 70%);
+			animation: flow 15s linear infinite;
+			pointer-events: none;
+		}
+		
+		&:hover {
+			transform: translateY(-8rpx) scale(1.02);
+			box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.2);
+			background-color: rgba(255, 255, 255, 0.98);
+			
+			&::before {
+				left: 100%;
+			}
+			
+			&::after {
+				opacity: 1;
+			}
+			
+			.hospital-name {
+				color: #0984e3;
+				transform: translateX(5rpx);
+			}
+			
+			.hospital-tag {
+				transform: scale(1.1);
+			}
+			
+			.hospital-image {
+				transform: scale(1.05);
+			}
+		}
+		
+		&:active {
+			transform: translateY(-4rpx) scale(0.98);
+			transition: all 0.1s ease;
+		}
 		
 		.hospital-image {
 			width: 180rpx;
 			height: 180rpx;
 			border-radius: 10rpx;
 			margin-right: 20rpx;
+			transition: all 0.3s ease;
+			box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 		}
 		
 		.hospital-info {
@@ -347,20 +615,24 @@
 				display: flex;
 				align-items: center;
 				margin-bottom: 10rpx;
+				transition: all 0.3s ease;
 				
 				.hospital-name {
 					font-size: 32rpx;
 					font-weight: bold;
 					color: #333333;
 					margin-right: 20rpx;
+					transition: all 0.3s ease;
 				}
 				
 				.hospital-tag {
 					font-size: 22rpx;
-					color: #1296db;
-					background-color: rgba(18, 150, 219, 0.1);
+					color: #0984e3;
+					background-color: rgba(9, 132, 227, 0.1);
 					padding: 4rpx 10rpx;
 					border-radius: 6rpx;
+					transition: all 0.3s ease;
+					animation: pulse 2s infinite;
 				}
 			}
 			
@@ -370,17 +642,29 @@
 				font-size: 24rpx;
 				color: #666666;
 				margin-bottom: 10rpx;
+				transition: all 0.3s ease;
 				
 				.iconfont {
 					font-size: 28rpx;
 					color: #999999;
 					margin-right: 10rpx;
+					transition: all 0.3s ease;
+				}
+				
+				&:hover {
+					color: #0984e3;
+					
+					.iconfont {
+						color: #0984e3;
+						transform: scale(1.1);
+					}
 				}
 			}
 			
 			.hospital-actions {
 				display: flex;
 				margin-top: 20rpx;
+				transition: all 0.3s ease;
 				
 				button {
 					display: flex;
@@ -395,14 +679,27 @@
 					margin-right: 20rpx;
 					height: 60rpx;
 					line-height: 1;
+					transition: all 0.3s ease;
+					cursor: pointer;
 					
 					.iconfont {
 						font-size: 28rpx;
 						margin-right: 6rpx;
+						transition: all 0.3s ease;
 					}
 					
 					&::after {
 						border: none;
+					}
+					
+					&:hover {
+						background-color: rgba(18, 150, 219, 0.2);
+						transform: translateY(-3rpx) scale(1.05);
+						box-shadow: 0 4rpx 12rpx rgba(18, 150, 219, 0.3);
+					}
+					
+					&:active {
+						transform: translateY(-1rpx) scale(0.98);
 					}
 				}
 			}
@@ -415,7 +712,111 @@
 			transform: translateY(-50%);
 			font-size: 40rpx;
 			color: #cccccc;
+			transition: all 0.3s ease;
 		}
+		
+		&:hover .icon-arrow-right {
+			color: #0984e3;
+			transform: translateY(-50%) translateX(5rpx);
+		}
+	}
+}
+
+@keyframes float {
+	0% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+	25% {
+		transform: translateY(-10px) translateX(10px) scale(1.05);
+		opacity: 0.9;
+	}
+	50% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+	75% {
+		transform: translateY(10px) translateX(-10px) scale(1.05);
+		opacity: 0.9;
+	}
+	100% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+}
+
+@keyframes flow {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes shimmer {
+	0%, 100% {
+		opacity: 0.3;
+		transform: translateX(-100%);
+	}
+	50% {
+		opacity: 0.6;
+		transform: translateX(100%);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30rpx);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes bounce {
+	0%, 20%, 50%, 80%, 100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-10rpx);
+	}
+	60% {
+		transform: translateY(-5rpx);
+	}
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
 	}
 }
 </style> 

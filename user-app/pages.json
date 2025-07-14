@@ -42,7 +42,9 @@
 		{
 			"path": "pages/appointment/appointment-flow",
 			"style": {
-				"navigationBarTitleText": "体检预约"
+				"navigationBarTitleText": "体检预约",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
 			}
 		},
 		{
@@ -56,7 +58,9 @@
 		{
 			"path": "pages/hospital/hospital",
 			"style": {
-				"navigationBarTitleText": "选择体检医院"
+				"navigationBarTitleText": "选择体检医院",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
 			}
 		},
 		{

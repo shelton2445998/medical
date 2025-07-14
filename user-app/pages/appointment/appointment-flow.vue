@@ -1,229 +1,396 @@
 <template>
   <view class="appointment-flow-content">
+    <!-- 动态背景装饰 -->
+    <view class="floating-shapes">
+      <view class="shape shape-1"></view>
+      <view class="shape shape-2"></view>
+      <view class="shape shape-3"></view>
+      <view class="shape shape-4"></view>
+    </view>
+    
+    <!-- 页面头部 -->
+    <view class="page-header">
+      <view class="header-icon">🏥</view>
+      <view class="header-title">体检预约</view>
+      <view class="header-desc">简单几步，轻松完成预约</view>
+    </view>
+    
+    <!-- 步骤指示器 -->
     <view class="step-indicator">
-      <view v-for="(label, idx) in stepLabels" :key="idx" :class="['step', {active: step === idx+1}]">
-        <text>{{ label }}</text>
-        <view v-if="idx < stepLabels.length" class="step-arrow">→</view>
+      <view v-for="(label, idx) in stepLabels" :key="idx" :class="['step', {active: step === idx+1, completed: step > idx+1}]">
+        <view class="step-circle">
+          <text class="step-number">{{idx + 1}}</text>
+          <text class="step-check" v-if="step > idx+1">✓</text>
+        </view>
+        <text class="step-label">{{ label }}</text>
+        <view v-if="idx < stepLabels.length - 1" class="step-arrow">→</view>
       </view>
     </view>
 
     <!-- Step 1: 选择医院 -->
     <view v-if="step === 1" class="step-panel">
-      <view class="step-title">请选择医院</view>
-      <picker :range="hospitalList" range-key="name" @change="onHospitalChange">
-        <view class="picker-box">
-          <text>{{ selectedHospital ? selectedHospital.name : '点击选择医院' }}</text>
+      <view class="step-card">
+        <view class="card-header">
+          <view class="card-icon">🏥</view>
+          <view class="card-title">选择医院</view>
+          <view class="card-desc">请选择您要体检的医院</view>
         </view>
-      </picker>
-      <button class="next-btn" @click="nextStep" :disabled="!selectedHospital">下一步</button>
+        
+        <view class="hospital-selection">
+          <view 
+            class="hospital-item" 
+            v-for="(hospital, index) in hospitalList" 
+            :key="index"
+            :class="{active: selectedHospital && selectedHospital.id === hospital.id}"
+            @click="selectHospital(hospital)"
+          >
+            <view class="hospital-info">
+              <text class="hospital-name">{{hospital.name}}</text>
+              <text class="hospital-address">{{hospital.address || '地址信息待完善'}}</text>
+            </view>
+            <view class="hospital-check">
+              <text class="check-icon" v-if="selectedHospital && selectedHospital.id === hospital.id">✓</text>
+            </view>
+          </view>
+        </view>
+        
+        <button class="next-btn" @click="nextStep" :disabled="!selectedHospital">
+          <text class="btn-icon">→</text>
+          <text class="btn-text">下一步</text>
+        </button>
+      </view>
     </view>
 
     <!-- Step 2: 选择套餐 -->
     <view v-else-if="step === 2" class="step-panel">
-      <view class="step-title">请选择体检套餐</view>
-      <picker :range="packageList" range-key="name" @change="onPackageChange">
-        <view class="picker-box">
-          <text>{{ selectedPackage ? selectedPackage.name : '点击选择套餐' }}</text>
+      <view class="step-card">
+        <view class="card-header">
+          <view class="card-icon">📋</view>
+          <view class="card-title">选择套餐</view>
+          <view class="card-desc">请选择适合您的体检套餐</view>
         </view>
-      </picker>
-      <button class="next-btn" @click="nextStep" :disabled="!selectedPackage">下一步</button>
+        
+        <view class="package-selection">
+          <view 
+            class="package-item" 
+            v-for="(pkg, index) in packageList" 
+            :key="index"
+            :class="{active: selectedPackage && selectedPackage.id === pkg.id}"
+            @click="selectPackage(pkg)"
+          >
+            <view class="package-header">
+              <text class="package-name">{{pkg.name}}</text>
+              <view class="package-price">
+                <text class="price-symbol">¥</text>
+                <text class="price-value">{{pkg.discountPrice || pkg.price}}</text>
+                <text class="price-original" v-if="pkg.discountPrice">¥{{pkg.price}}</text>
+              </view>
+            </view>
+            <text class="package-desc">{{pkg.description}}</text>
+            <view class="package-tags">
+              <text class="package-tag">{{getPackageTypeName(pkg.type)}}</text>
+              <text class="package-tag">{{pkg.suitableCrowd}}</text>
+            </view>
+            <view class="package-check">
+              <text class="check-icon" v-if="selectedPackage && selectedPackage.id === pkg.id">✓</text>
+            </view>
+          </view>
+        </view>
+        
+        <button class="next-btn" @click="nextStep" :disabled="!selectedPackage">
+          <text class="btn-icon">→</text>
+          <text class="btn-text">下一步</text>
+        </button>
+      </view>
     </view>
 
     <!-- Step 3: 填写信息 -->
     <view v-else-if="step === 3" class="step-panel">
-      <view class="step-title">请填写预约信息</view>
+      <view class="step-card">
+        <view class="card-header">
+          <view class="card-icon">📝</view>
+          <view class="card-title">填写信息</view>
+          <view class="card-desc">请填写您的预约信息</view>
+        </view>
+        
       <view v-if="memberName" class="member-info">
-        <text class="member-label">为家庭成员预约：{{memberName}}</text>
+          <view class="member-badge">
+            <text class="member-icon">👥</text>
+            <text class="member-text">为家庭成员预约：{{memberName}}</text>
       </view>
+        </view>
+        
+        <view class="form-section">
       <view class="form-item">
-        <text class="label">姓名：</text>
-        <input class="input" v-model="name" placeholder="请输入姓名" />
+            <text class="form-label">姓名</text>
+            <input class="form-input" v-model="name" placeholder="请输入姓名" />
       </view>
+          
       <view class="form-item">
-        <text class="label">性别：</text>
-        <picker :range="['男','女']" @change="onGenderChange">
-          <view class="picker-box">
-            <text>{{ gender || '请选择性别' }}</text>
+            <text class="form-label">性别</text>
+            <view class="gender-selection">
+              <view 
+                class="gender-option" 
+                :class="{active: gender === '男'}"
+                @click="selectGender('男')"
+              >
+                <text class="gender-icon">👨</text>
+                <text class="gender-text">男</text>
           </view>
-        </picker>
+              <view 
+                class="gender-option" 
+                :class="{active: gender === '女'}"
+                @click="selectGender('女')"
+              >
+                <text class="gender-icon">👩</text>
+                <text class="gender-text">女</text>
+              </view>
+            </view>
       </view>
 
       <view class="form-item">
-        <text class="label">预约日期：</text>
-        <picker mode="date" @change="onDateChange">
-          <view class="picker-box">
-            <text>{{ selectedDate || '点击选择日期' }}</text>
+            <text class="form-label">预约日期</text>
+            <picker mode="date" @change="onDateChange" class="date-picker">
+              <view class="picker-display">
+                <text class="picker-text">{{ selectedDate || '点击选择日期' }}</text>
+                <text class="picker-icon">📅</text>
           </view>
         </picker>
       </view>
+          
       <view class="form-item">
-        <text class="label">预约时间：</text>
-        <picker :range="timeSlots" @change="onTimeChange">
-          <view class="picker-box">
-            <text>{{ selectedTime || '点击选择时间' }}</text>
+            <text class="form-label">预约时间</text>
+            <picker :range="timeSlots" @change="onTimeChange">
+              <view class="picker-display">
+                <text class="picker-text" :class="{ 'placeholder': !selectedTime }">
+                  {{ selectedTime || '请选择预约时间' }}
+                </text>
+                <text class="picker-icon">⏰</text>
+              </view>
+            </picker>
           </view>
-        </picker>
-      </view>
+          
       <view class="form-item">
-        <text class="label">选择医生：</text>
-        <picker :range="doctorList" range-key="name" @change="onDoctorChange">
-          <view class="picker-box">
-            <text>{{ selectedDoctor ? selectedDoctor.name : '点击选择医生' }}</text>
+            <text class="form-label">选择医生</text>
+            <picker :range="doctorList" range-key="name" @change="onDoctorChange">
+              <view class="picker-display">
+                <text class="picker-text" :class="{ 'placeholder': !selectedDoctor }">
+                  {{ selectedDoctor ? `${selectedDoctor.name} (${selectedDoctor.title})` : '张医生 (主任医师)' }}
+                </text>
+                <text class="picker-icon">👨‍⚕️</text>
+              </view>
+            </picker>
           </view>
-        </picker>
-      </view>
+          
       <view class="form-item">
-        <text class="label">备注：</text>
-        <input class="input" v-model="remark" placeholder="可填写特殊需求或备注" />
+            <text class="form-label">备注</text>
+            <textarea class="form-textarea" v-model="remark" placeholder="可填写特殊需求或备注" />
       </view>
-      <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !gender || !selectedDoctor">下一步</button>
+        </view>
+        
+        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !gender">
+          <text class="btn-icon">→</text>
+          <text class="btn-text">下一步</text>
+        </button>
+      </view>
     </view>
 
     <!-- Step 4: 支付预约 -->
     <view v-else-if="step === 4" class="step-panel">
-      <view class="step-title">请确认预约信息并支付</view>
-      <view class="confirm-info">
-        <view class="info-section">
-          <view class="section-title">医院信息</view>
-          <view class="info-item">
-            <text class="label">医院名称：</text>
-            <text class="value">{{ selectedHospital.name }}</text>
+      <view class="step-card">
+        <view class="card-header">
+          <view class="card-icon">💳</view>
+          <view class="card-title">确认支付</view>
+          <view class="card-desc">请确认预约信息并完成支付</view>
           </view>
-          <view class="info-item">
-            <text class="label">医院地址：</text>
-            <text class="value">{{ selectedHospital.address || '暂无地址信息' }}</text>
+        
+        <view class="confirm-section">
+          <!-- 医院信息 -->
+          <view class="info-card">
+            <view class="info-header">
+              <text class="info-icon">🏥</text>
+              <text class="info-title">医院信息</text>
+          </view>
+            <view class="info-content">
+              <view class="info-row">
+                <text class="info-label">医院名称</text>
+                <text class="info-value">{{ selectedHospital.name }}</text>
+        </view>
+              <view class="info-row">
+                <text class="info-label">医院地址</text>
+                <text class="info-value">{{ selectedHospital.address || '暂无地址信息' }}</text>
+          </view>
+          </view>
+          </view>
+          
+          <!-- 套餐信息 -->
+          <view class="info-card">
+            <view class="info-header">
+              <text class="info-icon">📋</text>
+              <text class="info-title">套餐信息</text>
+          </view>
+            <view class="info-content">
+              <view class="info-row">
+                <text class="info-label">套餐名称</text>
+                <text class="info-value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
+          </view>
+              <view class="info-row">
+                <text class="info-label">套餐类型</text>
+                <text class="info-value">{{ selectedPackage ? getPackageTypeName(selectedPackage.type) : '暂无类型信息' }}</text>
+          </view>
+              <view class="info-row">
+                <text class="info-label">适用人群</text>
+                <text class="info-value">{{ selectedPackage ? selectedPackage.suitableCrowd : '暂无适用人群信息' }}</text>
+          </view>
+              <view class="info-row">
+                <text class="info-label">检查项目</text>
+                <text class="info-value">{{ selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : '暂无检查项目信息' }}</text>
+              </view>
           </view>
         </view>
         
-        <view class="info-section">
-          <view class="section-title">套餐信息</view>
-          <view class="info-item">
-            <text class="label">套餐名称：</text>
-            <text class="value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
+          <!-- 个人信息 -->
+          <view class="info-card">
+            <view class="info-header">
+              <text class="info-icon">👤</text>
+              <text class="info-title">个人信息</text>
           </view>
-          <view class="info-item">
-            <text class="label">套餐类型：</text>
-            <text class="value">{{ selectedPackage ? getPackageTypeName(selectedPackage.type) : '暂无类型信息' }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">套餐介绍：</text>
-            <text class="value">{{ selectedPackage ? selectedPackage.description : '暂无介绍信息' }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">适用人群：</text>
-            <text class="value">{{ selectedPackage ? selectedPackage.suitableCrowd : '暂无适用人群信息' }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">检查项目：</text>
-            <text class="value">{{ selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : '暂无检查项目信息' }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">预约须知：</text>
-            <text class="value">{{ selectedPackage ? selectedPackage.appointmentNotice : '暂无预约须知' }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">套餐原价：</text>
-            <text class="value price">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
-          </view>
-          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
-            <text class="label">优惠价格：</text>
-            <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
+            <view class="info-content">
+              <view class="info-row">
+                <text class="info-label">姓名</text>
+                <text class="info-value">{{ name }}</text>
+              </view>
+              <view class="info-row">
+                <text class="info-label">性别</text>
+                <text class="info-value">{{ gender }}</text>
+              </view>
           </view>
         </view>
         
-        <view class="info-section">
-          <view class="section-title">个人信息</view>
-          <view class="info-item">
-            <text class="label">姓名：</text>
-            <text class="value">{{ name }}</text>
+          <!-- 预约信息 -->
+          <view class="info-card">
+            <view class="info-header">
+              <text class="info-icon">📅</text>
+              <text class="info-title">预约信息</text>
           </view>
-          <view class="info-item">
-            <text class="label">性别：</text>
-            <text class="value">{{ gender }}</text>
+            <view class="info-content">
+              <view class="info-row">
+                <text class="info-label">预约日期</text>
+                <text class="info-value">{{ selectedDate }}</text>
           </view>
-        </view>
-        
-        <view class="info-section">
-          <view class="section-title">预约信息</view>
-          <view class="info-item">
-            <text class="label">预约日期：</text>
-            <text class="value">{{ selectedDate }}</text>
+              <view class="info-row">
+                <text class="info-label">预约时间</text>
+                <text class="info-value">{{ selectedTime || '上午(08:00-12:00)' }}</text>
           </view>
-          <view class="info-item">
-            <text class="label">预约时间：</text>
-            <text class="value">{{ selectedTime || '上午(08:00-12:00)' }}</text>
-          </view>
-          <view class="info-item" v-if="selectedDoctor">
-            <text class="label">选择医生：</text>
-            <text class="value">{{ selectedDoctor.name }} ({{ selectedDoctor.title }})</text>
-          </view>
-          <view class="info-item" v-if="remark">
-            <text class="label">备注：</text>
-            <text class="value">{{ remark }}</text>
+              <view class="info-row">
+                <text class="info-label">选择医生</text>
+                <text class="info-value">{{ selectedDoctor ? selectedDoctor.name + ' (' + selectedDoctor.title + ')' : '张医生 (主任医师)' }}</text>
+              </view>
+              <view class="info-row" v-if="remark">
+                <text class="info-label">备注</text>
+                <text class="info-value">{{ remark }}</text>
+              </view>
           </view>
         </view>
         
-        <view class="info-section">
-          <view class="section-title">费用信息</view>
-          <view class="info-item">
-            <text class="label">套餐原价：</text>
-            <text class="value">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
+          <!-- 费用信息 -->
+          <view class="info-card price-card">
+            <view class="info-header">
+              <text class="info-icon">💰</text>
+              <text class="info-title">费用信息</text>
           </view>
-          <view class="info-item" v-if="selectedPackage && selectedPackage.discountPrice">
-            <text class="label">优惠价格：</text>
-            <text class="value discount-price">¥{{ selectedPackage.discountPrice }}</text>
+            <view class="info-content">
+              <view class="info-row">
+                <text class="info-label">套餐原价</text>
+                <text class="info-value price-original">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
           </view>
-          <view class="info-item" v-else-if="discount > 0">
-            <text class="label">优惠金额：</text>
-            <text class="value discount">-¥{{ discount }}</text>
+              <view class="info-row" v-if="selectedPackage && selectedPackage.discountPrice">
+                <text class="info-label">优惠价格</text>
+                <text class="info-value price-discount">¥{{ selectedPackage.discountPrice }}</text>
           </view>
-          <view class="info-item total">
-            <text class="label">应付总额：</text>
-            <text class="value total-price">¥{{ totalPrice }}</text>
+              <view class="info-row total-row">
+                <text class="info-label">应付总额</text>
+                <text class="info-value total-price">¥{{ totalPrice }}</text>
+              </view>
           </view>
         </view>
       </view>
       
-      <view class="pay-method-box">
-        <view class="pay-method-title">请选择支付方式：</view>
-        <radio-group @change="onPayMethodChange">
-          <view class="pay-method-list">
-            <label v-for="(item, idx) in payMethods" :key="idx" class="pay-method-item">
-              <radio :value="item.value" :checked="payMethod === item.value" />
-              <text>{{ item.name }}</text>
-            </label>
+        <!-- 支付方式 -->
+        <view class="payment-section">
+          <view class="payment-header">
+            <text class="payment-title">选择支付方式</text>
           </view>
-        </radio-group>
+          <view class="payment-methods">
+            <view 
+              class="payment-method" 
+              v-for="(method, index) in payMethods" 
+              :key="index"
+              :class="{active: payMethod === method.value}"
+              @click="selectPayMethod(method.value)"
+            >
+              <view class="method-icon">
+                <text class="method-symbol">{{method.name === '微信支付' ? '💚' : method.name === '支付宝' ? '💙' : '🏥'}}</text>
       </view>
-      
-      <view class="pay-btn-box">
-        <button class="pay-btn" @click="showPayModal" :disabled="!payMethod">支付预约</button>
+              <text class="method-name">{{method.name}}</text>
+              <view class="method-check">
+                <text class="check-icon" v-if="payMethod === method.value">✓</text>
+              </view>
+            </view>
+          </view>
       </view>
+        
+        <button class="pay-btn" @click="showPayModal" :disabled="!payMethod">
+          <text class="btn-icon">💳</text>
+          <text class="btn-text">立即支付 ¥{{ totalPrice }}</text>
+        </button>
       
       <!-- 支付二维码弹窗 -->
       <view v-if="showPay" class="pay-modal-mask" @click.self="closePayModal">
         <view class="pay-modal">
-          <view class="pay-modal-title">{{ getPayMethodName(payMethod) }}扫码支付</view>
+            <view class="modal-header">
+              <text class="modal-title">{{ getPayMethodName(payMethod) }}扫码支付</text>
+              <text class="modal-close" @click="closePayModal">✕</text>
+            </view>
+            <view class="modal-content">
           <view class="pay-amount">支付金额：¥{{ totalPrice }}</view>
           <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
           <view class="pay-tips">请使用{{ getPayMethodName(payMethod) }}扫描二维码完成支付</view>
+            </view>
+            <view class="modal-actions">
           <button class="pay-confirm-btn" @click="pay">已支付</button>
           <button class="pay-cancel-btn" @click="closePayModal">取消</button>
+            </view>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 支付成功 -->
-    <view v-else-if="step === 5" class="step-panel">
-      <view class="success-icon">✔</view>
-      <view class="success-text">预约支付成功！</view>
-      <view class="order-info">
-        <view>预约单号：{{ orderNo }}</view>
-        <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
-        <view class="success-tips">请凭预约单号或二维码到医院前台报到</view>
-        <view class="success-tips">如需改期/取消，请在预约记录中操作</view>
+    <!-- Step 5: 预约成功 -->
+    <view v-else-if="step === 5" class="step-panel success-panel">
+      <view class="success-card">
+        <view class="success-icon">✅</view>
+        <view class="success-title">预约成功！</view>
+        <view class="success-desc">您的预约已提交，请按时到院体检</view>
+        <view class="success-info">
+          <view class="info-item">
+            <text class="info-label">预约编号</text>
+            <text class="info-value">{{orderNo}}</text>
       </view>
-      <button class="back-btn" @click="goHome">返回首页</button>
+          <view class="info-item">
+            <text class="info-label">体检医院</text>
+            <text class="info-value">{{selectedHospital.name}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">体检时间</text>
+            <text class="info-value">{{selectedDate}} {{selectedTime}}</text>
+          </view>
+        </view>
+        <button class="back-btn" @click="goBack">
+          <text class="btn-icon">🏠</text>
+          <text class="btn-text">返回首页</text>
+        </button>
+      </view>
     </view>
   </view>
 </template>
@@ -239,8 +406,8 @@ export default {
       memberId: null,
       memberName: '',
       hospitalList: [
-        { id: 1, name: '沈阳市云医院-和平分院' },
-        { id: 2, name: '沈阳市云医院-沈河分院' }
+        { id: 1, name: '沈阳市云医院-和平分院', address: '沈阳市和平区南京南街123号' },
+        { id: 2, name: '沈阳市云医院-沈河分院', address: '沈阳市沈河区文化路100号' }
       ],
       packageList: [
         { 
@@ -370,28 +537,37 @@ export default {
     this.getAppointmentList();
   },
   methods: {
-    onHospitalChange(e) {
-      this.selectedHospital = this.hospitalList[e.detail.value];
+    selectHospital(hospital) {
+      this.selectedHospital = hospital;
       // 选择医院后获取该医院的医生列表
       this.getDoctorList(this.selectedHospital.id);
     },
-    onPackageChange(e) {
-      this.selectedPackage = this.packageList[e.detail.value];
+    selectPackage(pkg) {
+      this.selectedPackage = pkg;
+    },
+    selectGender(gender) {
+      this.gender = gender;
+    },
+    onTimeChange(e) {
+      const index = e.detail.value;
+      this.selectedTime = this.timeSlots[index];
+    },
+    onDoctorChange(e) {
+      const index = e.detail.value;
+      console.log('医生选择事件触发，index:', index, 'doctorList:', this.doctorList);
+      if (index >= 0 && index < this.doctorList.length) {
+        this.selectedDoctor = this.doctorList[index];
+        console.log('选择医生:', this.selectedDoctor);
+      } else {
+        this.selectedDoctor = null;
+        console.log('医生选择无效，设置为null');
+      }
+    },
+    selectPayMethod(value) {
+      this.payMethod = value;
     },
     onDateChange(e) {
       this.selectedDate = e.detail.value;
-    },
-    onGenderChange(e) {
-      this.gender = ['男', '女'][e.detail.value];
-    },
-    onTimeChange(e) {
-      this.selectedTime = this.timeSlots[e.detail.value];
-    },
-    onDoctorChange(e) {
-      this.selectedDoctor = this.doctorList[e.detail.value];
-    },
-    onPayMethodChange(e) {
-      this.payMethod = e.detail.value;
     },
     getPackageTypeName(type) {
       const typeMap = {
@@ -417,22 +593,67 @@ export default {
       this.showPay = false;
     },
     pay() {
+      // 验证必需字段
+      if (!this.selectedPackage || !this.selectedPackage.id) {
+        uni.showToast({
+          title: '请选择体检套餐',
+          icon: 'none',
+          duration: 2000
+        });
+        return;
+      }
+      
+      if (!this.selectedHospital || !this.selectedHospital.id) {
+        uni.showToast({
+          title: '请选择医院',
+          icon: 'none',
+          duration: 2000
+        });
+        return;
+      }
+      
+      // 如果没有选择医生，使用默认医生ID 3001
+      if (!this.selectedDoctor || !this.selectedDoctor.id) {
+        console.log('未选择医生，使用默认医生ID: 3001');
+        this.selectedDoctor = { id: 3001, name: '张医生', title: '主任医师', department: '内科' };
+      }
+      
+      if (!this.selectedDate) {
+        uni.showToast({
+          title: '请选择预约日期',
+          icon: 'none',
+          duration: 2000
+        });
+        return;
+      }
+      
+      if (!this.selectedTime) {
+        uni.showToast({
+          title: '请选择预约时间',
+          icon: 'none',
+          duration: 2000
+        });
+        return;
+      }
+      
       // 显示支付中状态
       this.showPay = false;
       uni.showLoading({ title: '支付中...' });
       
       // 构建App预约订单数据，对应后端AppOrdersDto结构
       const orderData = {
-        setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID
-        hospitalId: this.selectedHospital ? this.selectedHospital.id : null, // 医院ID
-        doctorId: this.selectedDoctor ? this.selectedDoctor.id : null, // 医生ID
+        setmealId: this.selectedPackage.id, // 套餐ID
+        hospitalId: this.selectedHospital.id, // 医院ID
+        doctorId: this.selectedDoctor ? this.selectedDoctor.id : 3001, // 医生ID，默认3001
         familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
         appointmentDate: this.selectedDate, // 预约日期
         appointmentTime: this.selectedTime, // 预约时间段
-        remark: this.remark // 备注信息
+        remark: this.remark || '' // 备注信息
       };
       
       console.log('预约订单数据：', orderData);
+      console.log('selectedDoctor:', this.selectedDoctor);
+      console.log('selectedDoctor.id:', this.selectedDoctor ? this.selectedDoctor.id : 'null');
       
       // 获取token
       const token = uni.getStorageSync('uniIdToken');
@@ -490,7 +711,7 @@ export default {
         }
       });
     },
-    goHome() {
+    goBack() {
       // 清除存储的医院和套餐信息
       uni.removeStorageSync('selectedHospital');
       uni.removeStorageSync('selectedPackage');
@@ -527,6 +748,7 @@ export default {
       // 默认选择第一个医生
       if (this.doctorList.length > 0) {
         this.selectedDoctor = this.doctorList[0];
+        console.log('初始化医生列表，默认选择:', this.selectedDoctor);
       }
     },
     
@@ -636,306 +858,1693 @@ export default {
 }
 </script>
 
-<style scoped>
-.appointment-flow-content {
-  background: #f5f5f5;
+<style lang="scss" scoped>
+.flow-content {
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
   min-height: 100vh;
+  padding-top: 0;
   padding-bottom: 40rpx;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: flow 20s linear infinite;
+    pointer-events: none;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+    animation: shimmer 8s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
+
+.floating-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+
+  .shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    filter: blur(50px);
+    animation: float 15s infinite ease-in-out;
+    transition: all 0.3s ease;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    &.shape-1 {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-delay: -2s;
+    }
+    &.shape-2 {
+      width: 150px;
+      height: 150px;
+      top: 70%;
+      left: 30%;
+      animation-delay: -5s;
+    }
+    &.shape-3 {
+      width: 120px;
+      height: 120px;
+      top: 20%;
+      right: 20%;
+      animation-delay: -8s;
+    }
+    &.shape-4 {
+      width: 180px;
+      height: 180px;
+      bottom: 10%;
+      right: 50%;
+      animation-delay: -10s;
+    }
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-20px) translateX(20px) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(20px) translateX(-20px) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes flow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10rpx);
+  }
+  60% {
+    transform: translateY(-5rpx);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes success {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.main-content {
+  padding: 40rpx 40rpx 0 40rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.success-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  text-align: center;
+  animation: slideInUp 0.8s ease-out;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  
+  &:hover {
+    transform: translateY(-2rpx);
+    box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.98);
+  }
+  
+  /* 流动治愈感背景 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(116, 185, 255, 0.1) 0%, transparent 70%);
+    animation: flow 15s linear infinite;
+    pointer-events: none;
+  }
+  
+  .success-icon {
+    font-size: 120rpx;
+    color: #00b894;
+    margin-bottom: 30rpx;
+    animation: success 1s ease-out;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    &:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 4rpx 8rpx rgba(0, 184, 148, 0.3));
+    }
+  }
+  
+  .success-title {
+    font-size: 44rpx;
+  font-weight: bold;
+    color: #333333;
+    margin-bottom: 20rpx;
+    transition: all 0.3s ease;
+  }
+  
+  .success-desc {
+  font-size: 28rpx;
+    color: #666666;
+    line-height: 1.5;
+    margin-bottom: 40rpx;
+    transition: all 0.3s ease;
+  }
+  
+  .appointment-info {
+    background: rgba(116, 185, 255, 0.1);
+    border-radius: 16rpx;
+    padding: 30rpx;
+    margin-bottom: 40rpx;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(116, 185, 255, 0.15);
+      transform: translateY(-2rpx);
+    }
+    
+    .info-item {
+  display: flex;
+      justify-content: space-between;
+  align-items: center;
+      margin-bottom: 20rpx;
+      transition: all 0.3s ease;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      &:hover {
+        transform: translateX(5rpx);
+      }
+      
+      .info-label {
+        font-size: 28rpx;
+        color: #666666;
+        transition: all 0.3s ease;
+      }
+      
+      .info-value {
+        font-size: 28rpx;
+        color: #333333;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          color: #0984e3;
+        }
+      }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+  animation: slideInUp 0.8s ease-out 0.5s both;
+  opacity: 0;
+  transform: translateY(30rpx);
+  
+  .action-btn {
+  flex: 1;
+    height: 100rpx;
+    border-radius: 50rpx;
+    font-size: 28rpx;
+    font-weight: bold;
+  border: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    &.primary-btn {
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+      color: #ffffff;
+      box-shadow: 0 8rpx 24rpx rgba(116, 185, 255, 0.3);
+      
+      &:hover {
+        transform: translateY(-8rpx) scale(1.02);
+        box-shadow: 0 12rpx 32rpx rgba(116, 185, 255, 0.5);
+        background: linear-gradient(135deg, #0984e3, #74b9ff);
+        
+        &::before {
+          left: 100%;
+        }
+      }
+      
+      &:active {
+        transform: translateY(-2rpx) scale(0.98);
+      }
+    }
+    
+    &.secondary-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #74b9ff;
+      border: 2rpx solid #74b9ff;
+      
+      &:hover {
+        background: rgba(116, 185, 255, 0.1);
+        transform: translateY(-6rpx) scale(1.02);
+        box-shadow: 0 8rpx 24rpx rgba(116, 185, 255, 0.2);
+        
+        &::before {
+          left: 100%;
+        }
+      }
+      
+      &:active {
+        transform: translateY(-1rpx);
+      }
+    }
+  }
+}
+
+.tips-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+  animation: slideInUp 0.8s ease-out 0.4s both;
+  opacity: 0;
+  transform: translateY(30rpx);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+  width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 4s ease-in-out infinite;
+  }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2rpx);
+  }
+  
+  .tips-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 20rpx;
+    text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .tips-list {
+    .tip-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15rpx;
+      transition: all 0.3s ease;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      &:hover {
+        transform: translateX(5rpx);
+      }
+      
+      .tip-icon {
+        font-size: 24rpx;
+        margin-right: 10rpx;
+        animation: pulse 2s infinite;
+        transition: all 0.3s ease;
+      }
+      
+      .tip-text {
+        font-size: 24rpx;
+        color: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+      }
+    }
+  }
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5rpx);
+  animation: fadeIn 0.3s ease-out;
+  
+  .loading-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20rpx;
+    padding: 40rpx;
+  text-align: center;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
+    animation: slideInUp 0.3s ease-out;
+    
+    .loading-spinner {
+      width: 60rpx;
+      height: 60rpx;
+      border: 4rpx solid rgba(116, 185, 255, 0.3);
+      border-top: 4rpx solid #74b9ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20rpx;
+    }
+    
+    .loading-text {
+      font-size: 28rpx;
+      color: #333333;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* New styles for appointment-flow.vue */
+.page-header {
+  text-align: center;
+  padding: 80rpx 40rpx 40rpx;
+  color: #ffffff;
+  position: relative;
+  z-index: 10;
+  animation: slideInDown 0.8s ease-out;
+
+  .header-icon {
+    font-size: 100rpx;
+    margin-bottom: 20rpx;
+    animation: bounce 2s infinite;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .header-title {
+    font-size: 56rpx;
+    font-weight: bold;
+    margin-bottom: 10rpx;
+    text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .header-desc {
+  font-size: 28rpx;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+}
+
+.step-panel {
+  padding: 0 40rpx;
+  margin-top: 40rpx;
+  position: relative;
+  z-index: 10;
+  animation: slideInUp 0.8s ease-out 0.2s both;
+  opacity: 0;
+  transform: translateY(30rpx);
+}
+
+.step-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.1), rgba(9, 132, 227, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  /* 流动治愈感背景 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(116, 185, 255, 0.1) 0%, transparent 70%);
+    animation: flow 15s linear infinite;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-8rpx) scale(1.02);
+    box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.98);
+    
+    &::before {
+      left: 100%;
+    }
+    
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+  margin-bottom: 30rpx;
+    padding-bottom: 20rpx;
+    border-bottom: 1rpx solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    .card-icon {
+      font-size: 60rpx;
+      margin-right: 20rpx;
+      color: #0984e3;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .card-title {
+      font-size: 36rpx;
+  font-weight: bold;
+      color: #333333;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        color: #0984e3;
+      }
+    }
+
+    .card-desc {
+      font-size: 24rpx;
+      color: #666666;
+      margin-top: 5rpx;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .hospital-selection, .package-selection {
+  display: flex;
+    flex-direction: column;
+    gap: 20rpx;
+    margin-bottom: 30rpx;
+  }
+
+  .hospital-item, .package-item {
+    display: flex;
+  align-items: center;
+    justify-content: space-between;
+    padding: 25rpx 20rpx;
+    border-radius: 16rpx;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1rpx solid rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(116, 185, 255, 0.2), transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-4rpx) scale(1.02);
+      box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &.active {
+      background: rgba(116, 185, 255, 0.1);
+      border: 2rpx solid #0984e3;
+      box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
+      transform: translateY(-2rpx);
+    }
+
+    .hospital-info, .package-header {
+  flex: 1;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+
+    .hospital-name, .package-name {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333333;
+      margin-bottom: 8rpx;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        color: #0984e3;
+      }
+    }
+
+    .hospital-address, .package-desc {
+      font-size: 24rpx;
+      color: #666666;
+  line-height: 1.4;
+      transition: all 0.3s ease;
+    }
+
+    .package-price {
+      display: flex;
+      align-items: baseline;
+      margin-top: 10rpx;
+      transition: all 0.3s ease;
+
+      .price-symbol {
+        font-size: 28rpx;
+  color: #ff5a5f;
+  font-weight: bold;
+        transition: all 0.3s ease;
+}
+
+      .price-value {
+        font-size: 36rpx;
+  font-weight: bold;
+        color: #ff5a5f;
+        margin: 0 5rpx;
+        transition: all 0.3s ease;
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2rpx;
+          left: 0;
+          width: 0;
+          height: 2rpx;
+          background: linear-gradient(90deg, #ff5a5f, #ff6b6b);
+          transition: width 0.3s ease;
+        }
+        
+        &:hover::after {
+          width: 100%;
+        }
+      }
+
+      .price-original {
+        font-size: 24rpx;
+        color: #999999;
+        text-decoration: line-through;
+        transition: all 0.3s ease;
+      }
+    }
+
+    .package-tags {
+      display: flex;
+      gap: 10rpx;
+      margin-top: 10rpx;
+
+      .package-tag {
+        font-size: 22rpx;
+        color: #0984e3;
+        background: rgba(9, 132, 227, 0.1);
+        padding: 6rpx 12rpx;
+        border-radius: 8rpx;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.1);
+          background: rgba(9, 132, 227, 0.2);
+        }
+      }
+    }
+
+    .package-check, .hospital-check {
+      font-size: 40rpx;
+      color: #0984e3;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+  }
+
+  .next-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 90rpx;
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: #ffffff;
+    font-size: 32rpx;
+  font-weight: bold;
+    border-radius: 45rpx;
+    border: none;
+    box-shadow: 0 8rpx 24rpx rgba(116, 185, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    &:hover {
+      transform: translateY(-6rpx) scale(1.02);
+      box-shadow: 0 12rpx 32rpx rgba(116, 185, 255, 0.5);
+      background: linear-gradient(135deg, #0984e3, #74b9ff);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+
+    &:active {
+      transform: translateY(-2rpx) scale(0.98);
+    }
+
+    &:disabled {
+      background: #ccc;
+      color: #888;
+      cursor: not-allowed;
+      box-shadow: none;
+      
+      &:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
+
+    .btn-icon {
+      font-size: 40rpx;
+      margin-right: 10rpx;
+      transition: all 0.3s ease;
+    }
+  }
+}
+
 .step-indicator {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  margin: 40rpx 0 30rpx 0;
-}
-.step {
-  font-size: 28rpx;
-  color: #999;
-  font-weight: bold;
-  margin: 0 10rpx;
-}
-.step.active {
-  color: #1296db;
-}
-.step-arrow {
-  margin: 0 10rpx;
-  color: #ccc;
-}
-.step-panel {
-  background: #fff;
-  border-radius: 16rpx;
-  margin: 0 30rpx 30rpx 30rpx;
-  padding: 40rpx 30rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
-}
-.step-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #1296db;
-  margin-bottom: 30rpx;
-}
+  margin-top: 40rpx;
+  padding: 0 40rpx;
+  position: relative;
+  z-index: 10;
+  animation: slideInDown 0.8s ease-out 0.1s both;
+  opacity: 0;
+  transform: translateY(-20rpx);
 
-.member-info {
-  background: #e6f7ff;
-  border: 1rpx solid #91d5ff;
-  border-radius: 8rpx;
-  padding: 20rpx;
-  margin-bottom: 30rpx;
-  text-align: center;
-}
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1rpx;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: -1;
+  }
 
-.member-label {
-  font-size: 28rpx;
-  color: #1296db;
+  .step {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &.active {
+      .step-circle {
+        background: linear-gradient(135deg, #0984e3, #74b9ff);
+        border: 1rpx solid #0984e3;
+        box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.2);
+      }
+      .step-number {
+        color: #ffffff;
+      }
+      .step-check {
+        color: #ffffff;
+      }
+      .step-label {
+        color: #ffffff;
+  font-weight: bold;
+      }
+      .step-arrow {
+        color: #ffffff;
+      }
+    }
+
+    &.completed {
+      .step-circle {
+        background: #0984e3;
+        border: 1rpx solid #0984e3;
+        box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.2);
+      }
+      .step-number {
+        color: #ffffff;
+      }
+      .step-check {
+        color: #ffffff;
+      }
+      .step-label {
+        color: #ffffff;
   font-weight: bold;
 }
-.picker-box {
-  background: #f5f5f5;
-  border-radius: 10rpx;
-  padding: 20rpx;
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 30rpx;
-}
-.form-item {
+      .step-arrow {
+        color: #ffffff;
+      }
+    }
+
+    .step-circle {
+      width: 60rpx;
+      height: 60rpx;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
-  margin-bottom: 30rpx;
+      justify-content: center;
+      border: 2rpx solid rgba(255, 255, 255, 0.3);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10rpx);
+
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .step-number {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333333;
+      transition: all 0.3s ease;
+    }
+
+    .step-check {
+      font-size: 36rpx;
+      color: #0984e3;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .step-label {
+      font-size: 28rpx;
+      color: rgba(255, 255, 255, 0.9);
+  margin-top: 10rpx;
+      text-align: center;
+      text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .step-arrow {
+      font-size: 40rpx;
+      color: rgba(255, 255, 255, 0.8);
+      opacity: 0.7;
+      margin: 0 20rpx;
+      transition: all 0.3s ease;
+      text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+      
+      &:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+  }
 }
-.label {
-  width: 120rpx;
-  font-size: 26rpx;
-  color: #333;
+
+.form-section {
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.8s ease-out 0.3s both;
+  opacity: 0;
+  transform: translateY(30rpx);
+
+  .form-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25rpx;
+    position: relative;
+    width: 100%;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+  font-size: 28rpx;
+      color: #333333;
+      font-weight: bold;
+      min-width: 120rpx;
+      margin-right: 20rpx;
+      flex-shrink: 0;
+    }
+
+    .form-input, .form-textarea {
+      flex: 1;
+      height: 80rpx;
+      padding: 0 20rpx;
+      font-size: 28rpx;
+      color: #333333;
+      border: 1rpx solid #e0e0e0;
+      border-radius: 12rpx;
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 15rpx rgba(9, 132, 227, 0.3);
+        background: #ffffff;
+        transform: translateY(-2rpx);
+      }
+    }
+
+    .form-textarea {
+      height: 150rpx;
+      padding-top: 15rpx;
+      resize: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+    }
+
+    .picker-display {
+      display: flex;
+      align-items: center;
+      height: 80rpx;
+      padding: 0 20rpx;
+      font-size: 28rpx;
+      color: #333333;
+      border: 1rpx solid #e0e0e0;
+      border-radius: 12rpx;
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+
+      &:hover {
+        border-color: #0984e3;
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-2rpx);
+      }
+
+      &:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 15rpx rgba(9, 132, 227, 0.3);
+        background: #ffffff;
+        transform: translateY(-2rpx);
+      }
+
+      .picker-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        
+        &.placeholder {
+          color: #999999;
+        }
+      }
+
+      .picker-icon {
+        font-size: 36rpx;
+        margin-left: 10rpx;
+        flex-shrink: 0;
+      }
+    }
+
+        .gender-selection {
+      display: flex;
+      gap: 20rpx;
+      margin-top: 10rpx;
+    }
+
+    .gender-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80rpx;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1rpx solid #e0e0e0;
+      border-radius: 12rpx;
+      font-size: 28rpx;
+      color: #333333;
+      transition: all 0.3s ease;
+      padding: 0 10rpx;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: #0984e3;
+        transform: translateY(-2rpx);
+      }
+      
+      &.active {
+        background: rgba(116, 185, 255, 0.1);
+        border: 2rpx solid #0984e3;
+        box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
+        color: #0984e3;
+        font-weight: bold;
+      }
+      
+      .gender-icon {
+        font-size: 36rpx;
+        margin-right: 10rpx;
+        transition: all 0.3s ease;
+      }
+      
+      .gender-text {
+        font-size: 28rpx;
+        color: #333333;
+        transition: all 0.3s ease;
+      }
+    }
+    
+
+  }
 }
-.input {
-  flex: 1;
-  height: 60rpx;
-  border-radius: 30rpx;
+
+.confirm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed rgba(0, 0, 0, 0.1);
+
+  .info-card {
+    background: #f9f9f9;
+    border-radius: 16rpx;
+    padding: 25rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f0f0f0;
+      transform: translateY(-2rpx);
+    }
+
+    .info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+      padding-bottom: 10rpx;
+      border-bottom: 1rpx dashed rgba(0, 0, 0, 0.1);
+
+      .info-icon {
+        font-size: 40rpx;
+        color: #0984e3;
+        margin-right: 10rpx;
+      }
+
+      .info-title {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333333;
+      }
+    }
+
+    .info-content {
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10rpx;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .info-label {
+  font-size: 28rpx;
+          color: #666666;
+        }
+
+        .info-value {
+          font-size: 28rpx;
+          color: #333333;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .price-card {
+    background: #f9f9f9;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 16rpx;
+    padding: 25rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f0f0f0;
+      transform: translateY(-2rpx);
+    }
+
+    .info-row {
+      .info-label {
+        color: #666666;
+      }
+      .info-value {
+        color: #0984e3;
+        font-weight: bold;
+      }
+      .price-original {
+        color: #999999;
+      }
+      .price-discount {
+        color: #0984e3;
+        font-weight: bold;
+      }
+      .total-row {
+        .info-label {
+          color: #666666;
+        }
+        .info-value {
+          color: #0984e3;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+
+.payment-section {
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed rgba(0, 0, 0, 0.1);
+
+  .payment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15rpx;
+    padding-bottom: 10rpx;
+    border-bottom: 1rpx dashed rgba(0, 0, 0, 0.1);
+
+    .payment-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333333;
+    }
+  }
+
+  .payment-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15rpx;
+    justify-content: space-around;
+  }
+
+  .payment-method {
+    display: flex;
+    align-items: center;
+    width: 30%; /* Adjust as needed for 3 columns */
+    padding: 15rpx 10rpx;
   background: #f5f5f5;
-  border: none;
-  font-size: 26rpx;
-  padding: 0 20rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 12rpx;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #e0e0e0;
+      transform: translateY(-2rpx);
+    }
+
+    &.active {
+      background: #e0f7fa;
+      border: 1rpx solid #0984e3;
+      box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.2);
+    }
+
+    .method-icon {
+      font-size: 40rpx;
+      margin-right: 10rpx;
+      color: #0984e3;
+    }
+
+    .method-name {
+      font-size: 28rpx;
+      color: #333333;
+  font-weight: bold;
+    }
+
+    .method-check {
+      font-size: 40rpx;
+      color: #0984e3;
+      opacity: 0.7;
+      margin-left: 10rpx;
+    }
+  }
 }
-.next-btn, .pay-btn, .back-btn {
+
+.pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 90rpx;
-  line-height: 90rpx;
-  background: #1296db;
-  color: #fff;
-  font-size: 30rpx;
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: bold;
   border-radius: 45rpx;
   border: none;
-  margin-top: 20rpx;
-}
-.pay-btn {
-  background: #ff5a5f;
-}
-.success-icon {
-  font-size: 80rpx;
-  color: #52c41a;
-  text-align: center;
-  margin-bottom: 30rpx;
-}
-.success-text {
-  font-size: 32rpx;
-  color: #1296db;
-  text-align: center;
-  margin-bottom: 30rpx;
-}
-.confirm-info {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5rpx) scale(1.02);
+    box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.5);
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+  }
+
+  &:active {
+    transform: translateY(-2rpx) scale(0.98);
+  }
+
+  &:disabled {
+    background: #ccc;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-icon {
+    font-size: 40rpx;
+    margin-right: 10rpx;
+  }
 }
 
-.info-section {
-  margin-bottom: 30rpx;
-  padding: 20rpx;
-  background: #f8f9fa;
-  border-radius: 10rpx;
-  border-left: 4rpx solid #1296db;
-}
-
-.section-title {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: #1296db;
-  margin-bottom: 15rpx;
-  padding-bottom: 10rpx;
-  border-bottom: 1rpx solid #e9ecef;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10rpx;
-  padding: 8rpx 0;
-}
-
-.info-item .label {
-  color: #666;
-  font-size: 26rpx;
-  min-width: 120rpx;
-}
-
-.info-item .value {
-  color: #333;
-  font-size: 26rpx;
-  text-align: right;
-  flex: 1;
-  word-break: break-all;
-  line-height: 1.4;
-}
-
-.info-item .price {
-  color: #ff5a5f;
-  font-weight: bold;
-}
-
-.info-item .discount-price {
-  color: #52c41a;
-  font-weight: bold;
-}
-
-.info-item .discount {
-  color: #52c41a;
-  font-weight: bold;
-}
-
-.info-item.total {
-  border-top: 1rpx solid #e9ecef;
-  padding-top: 15rpx;
-  margin-top: 15rpx;
-}
-
-.info-item.total .label {
-  font-weight: bold;
-  color: #333;
-}
-
-.info-item.total .total-price {
-  color: #ff5a5f;
-  font-size: 32rpx;
-  font-weight: bold;
-}
-.pay-btn-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10rpx;
-}
-.pay-btn {
-  background: #ff5a5f;
-  width: 80%;
-  margin: 0 auto;
-}
-.pay-method-box {
-  margin-top: 30rpx;
-  padding: 20rpx;
-  background: #f5f5f5;
-  border-radius: 10rpx;
-}
-.pay-method-title {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 20rpx;
-}
-.pay-method-list {
-  display: flex;
-  flex-direction: column;
-}
-.pay-method-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15rpx;
-}
-.pay-method-item text {
-  margin-left: 20rpx;
-  font-size: 28rpx;
-  color: #333;
-}
-.order-info {
-  margin-top: 30rpx;
-  padding: 20rpx;
-  background: #f5f5f5;
-  border-radius: 10rpx;
-  text-align: center;
-}
-.qrcode {
-  width: 200rpx;
-  height: 200rpx;
-  margin: 20rpx auto;
-}
-.success-tips {
-  font-size: 24rpx;
-  color: #666;
-  margin-top: 10rpx;
-}
-.total-price {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #ff5a5f;
-  margin-top: 20rpx;
-  text-align: right;
-}
-.price {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #ff5a5f;
-}
 .pay-modal-mask {
   position: fixed;
-  left: 0; right: 0; top: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 9999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.pay-modal {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 40rpx 30rpx;
-  width: 500rpx;
-  box-shadow: 0 2rpx 20rpx rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.pay-modal-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  margin-bottom: 20rpx;
-  text-align: center;
+  z-index: 9999;
+  backdrop-filter: blur(5rpx);
+  animation: fadeIn 0.3s ease-out;
 }
 
-.pay-amount {
-  font-size: 28rpx;
-  color: #ff5a5f;
-  font-weight: bold;
+.pay-modal {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  width: 80%;
+  max-width: 500rpx;
   text-align: center;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.2);
+  animation: slideInUp 0.3s ease-out;
+  position: relative;
+
+  .modal-header {
+  display: flex;
+    justify-content: space-between;
+  align-items: center;
   margin-bottom: 20rpx;
+    padding-bottom: 15rpx;
+    border-bottom: 1rpx solid #eee;
+
+    .modal-title {
+      font-size: 36rpx;
+      font-weight: bold;
+      color: #333333;
+    }
+
+    .modal-close {
+      font-size: 40rpx;
+      color: #999999;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #0984e3;
+      }
+    }
+  }
+
+  .modal-content {
+    margin-bottom: 20rpx;
+    padding-bottom: 20rpx;
+    border-bottom: 1rpx dashed #eee;
+
+.pay-amount {
+      font-size: 36rpx;
+  font-weight: bold;
+      color: #0984e3;
+      margin-bottom: 15rpx;
+    }
+
+    .qrcode {
+      width: 200rpx;
+      height: 200rpx;
+      margin: 0 auto 15rpx;
+      border-radius: 10rpx;
+      overflow: hidden;
+      border: 1rpx solid #e0e0e0;
 }
 
 .pay-tips {
   font-size: 24rpx;
-  color: #666;
-  text-align: center;
-  margin: 20rpx 0;
-}
+      color: #666666;
+      line-height: 1.5;
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-around;
+    gap: 20rpx;
+  }
+
+  .pay-confirm-btn, .pay-cancel-btn {
+    flex: 1;
+    height: 80rpx;
+    border-radius: 40rpx;
+    font-size: 32rpx;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-3rpx);
+      box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(-1rpx);
+    }
+  }
+
 .pay-confirm-btn {
-  background: #1296db;
-  color: #fff;
-  border-radius: 8rpx;
-  margin-top: 30rpx;
-  width: 100%;
-}
+    background: linear-gradient(135deg, #0984e3, #74b9ff);
+    color: #ffffff;
+    box-shadow: 0 6rpx 15rpx rgba(9, 132, 227, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+    }
+  }
+
 .pay-cancel-btn {
-  background: #eee;
-  color: #333;
-  border-radius: 8rpx;
-  margin-top: 20rpx;
+    background: #f5f5f5;
+    color: #333333;
+    border: 1rpx solid #e0e0e0;
+
+    &:hover {
+      background: #e0e0e0;
+      border-color: #ccc;
+    }
+  }
+}
+
+.success-panel {
+  padding: 0 40rpx;
+  margin-top: 40rpx;
+  position: relative;
+  z-index: 10;
+  animation: slideInUp 0.8s ease-out 0.4s both;
+  opacity: 0;
+  transform: translateY(30rpx);
+}
+
+.success-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  text-align: center;
+  animation: slideInUp 0.8s ease-out;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
   width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  
+  &:hover {
+    transform: translateY(-2rpx);
+    box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.98);
+  }
+  
+  /* 流动治愈感背景 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(116, 185, 255, 0.1) 0%, transparent 70%);
+    animation: flow 15s linear infinite;
+    pointer-events: none;
+  }
+  
+  .success-icon {
+    font-size: 120rpx;
+    color: #00b894;
+    margin-bottom: 30rpx;
+    animation: success 1s ease-out;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 4rpx 8rpx rgba(0, 184, 148, 0.3));
+    }
+  }
+  
+  .success-title {
+    font-size: 44rpx;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 20rpx;
+    transition: all 0.3s ease;
+  }
+  
+  .success-desc {
+    font-size: 28rpx;
+    color: #666666;
+    line-height: 1.5;
+    margin-bottom: 40rpx;
+    transition: all 0.3s ease;
+  }
+  
+  .success-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15rpx;
+    margin-bottom: 30rpx;
+    padding-bottom: 20rpx;
+    border-bottom: 1rpx dashed #eee;
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 28rpx;
+      color: #333333;
+
+      .info-label {
+        font-weight: bold;
+      }
+
+      .info-value {
+        font-weight: bold;
+        color: #0984e3;
+      }
+    }
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 90rpx;
+    background: #f5f5f5;
+    color: #333333;
+    font-size: 32rpx;
+    font-weight: bold;
+    border-radius: 45rpx;
+    border: 1rpx solid #e0e0e0;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: #e0e0e0;
+      transform: translateY(-2rpx);
+    }
+
+    &:active {
+      transform: translateY(-1rpx);
+    }
+
+    .btn-icon {
+      font-size: 40rpx;
+      margin-right: 10rpx;
+    }
+  }
+}
+
+.appointment-flow-content {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 </style> 

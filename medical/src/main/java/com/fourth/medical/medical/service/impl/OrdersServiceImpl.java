@@ -169,7 +169,19 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setTimeSlot(dto.getAppointmentTime()); // 设置时间段
         orders.setOrderNumber(generateOrderNumber());
         orders.setPrice(setmeal.getPrice());
+        orders.setAmount(setmeal.getPrice()); // 设置订单金额
         orders.setStatus(1); // 1-待支付
+        
+        // 处理检查项ID列表
+        String checkitemIds = null;
+        if (dto.getCheckitemIds() != null && !dto.getCheckitemIds().isEmpty()) {
+            // 如果前端传入了自定义的检查项ID列表
+            checkitemIds = dto.getCheckitemIds();
+        } else if (setmeal.getCheckitemIds() != null && !setmeal.getCheckitemIds().isEmpty()) {
+            // 否则使用套餐中的检查项ID列表
+            checkitemIds = setmeal.getCheckitemIds();
+        }
+        orders.setCheckitemIds(checkitemIds);
         
         // 保存订单
         boolean saveResult = save(orders);
@@ -177,7 +189,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new BusinessException("创建预约失败");
         }
         
-        log.info("创建预约成功，订单ID: {}, 用户ID: {}", orders.getId(), appLoginVo.getUserId());
+        log.info("创建预约成功，订单ID: {}, 用户ID: {}, 检查项IDs: {}", 
+            orders.getId(), appLoginVo.getUserId(), checkitemIds);
         
         // 查询并返回创建的订单
         return ordersMapper.getAppOrdersById(orders.getId());
