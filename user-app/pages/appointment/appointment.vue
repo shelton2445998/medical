@@ -119,6 +119,7 @@
 				<view class="process-list">
 					<view class="process-item">
 						<view class="process-icon">
+							<text class="process-icon-text">🏥</text>
 							<text class="process-number">1</text>
 						</view>
 						<text class="process-name">选择医院</text>
@@ -128,6 +129,7 @@
 					</view>
 					<view class="process-item">
 						<view class="process-icon">
+							<text class="process-icon-text">📋</text>
 							<text class="process-number">2</text>
 						</view>
 						<text class="process-name">选择套餐</text>
@@ -137,6 +139,7 @@
 					</view>
 					<view class="process-item">
 						<view class="process-icon">
+							<text class="process-icon-text">✏️</text>
 							<text class="process-number">3</text>
 						</view>
 						<text class="process-name">填写信息</text>
@@ -146,6 +149,7 @@
 					</view>
 					<view class="process-item">
 						<view class="process-icon">
+							<text class="process-icon-text">💳</text>
 							<text class="process-number">4</text>
 						</view>
 						<text class="process-name">支付预约</text>
@@ -229,7 +233,7 @@ export default {
 			try {
 				const result = await get(hospitalApi.getRecommendHospitals);
 				if (result && result.data) {
-					this.hospitalList = result.data.map((hospital, index) => {
+					this.hospitalList = result.data.slice(0, 3).map((hospital, index) => {
 						const defaultImages = [
 							'/static/images/hospital1.jpg',
 							'/static/images/hospital2.jpg',
@@ -283,12 +287,38 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .content {
-	position: relative;
+	background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
 	min-height: 100vh;
-	background-color: #f0f2f5;
-	overflow-x: hidden;
+	padding-top: 0;
+	padding-bottom: 40rpx;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+		animation: flow 20s linear infinite;
+		pointer-events: none;
+	}
+	
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+		animation: shimmer 8s ease-in-out infinite;
+		pointer-events: none;
+	}
 }
 
 .floating-shapes {
@@ -297,87 +327,121 @@ export default {
 	left: 0;
 	width: 100%;
 	height: 100%;
+	pointer-events: none;
 	z-index: -1;
-	
+
 	.shape {
 		position: absolute;
-		background-color: #0984e3;
+		background: rgba(255, 255, 255, 0.1);
 		border-radius: 50%;
-		opacity: 0.1;
-	}
-	
-	.shape-1 {
-		width: 100px;
-		height: 100px;
-		top: 10%;
-		left: 10%;
-	}
-	
-	.shape-2 {
-		width: 150px;
-		height: 150px;
-		bottom: 20%;
-		right: 20%;
-	}
-	
-	.shape-3 {
-		width: 200px;
-		height: 200px;
-		top: 50%;
-		left: 30%;
-	}
-	
-	.shape-4 {
-		width: 120px;
-		height: 120px;
-		bottom: 10%;
-		right: 50%;
+		filter: blur(50px);
+		animation: float 15s infinite ease-in-out;
+		transition: all 0.3s ease;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: -10%;
+			left: -10%;
+			width: 120%;
+			height: 120%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+			border-radius: 50%;
+			animation: pulse 3s ease-in-out infinite;
+		}
+
+		&.shape-1 {
+			width: 100px;
+			height: 100px;
+			top: 10%;
+			left: 10%;
+			animation-delay: -2s;
+		}
+		&.shape-2 {
+			width: 150px;
+			height: 150px;
+			top: 70%;
+			left: 30%;
+			animation-delay: -5s;
+		}
+		&.shape-3 {
+			width: 120px;
+			height: 120px;
+			top: 20%;
+			right: 20%;
+			animation-delay: -8s;
+		}
+		&.shape-4 {
+			width: 180px;
+			height: 180px;
+			bottom: 10%;
+			right: 50%;
+			animation-delay: -10s;
+		}
 	}
 }
 
 .main-content {
 	padding: 20rpx 40rpx 0 40rpx;
+	position: relative;
+	z-index: 1;
 }
 
 .page-header {
 	text-align: center;
-	padding: 40rpx 0;
+	margin-bottom: 20rpx;
+	animation: fadeInDown 0.8s ease-out;
 	
 	.header-icon {
-		font-size: 100rpx;
-		color: #0984e3;
+		font-size: 40rpx;
 		margin-bottom: 10rpx;
+		animation: bounce 2s infinite;
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: scale(1.2);
+		}
 	}
 	
 	.header-title {
-		font-size: 48rpx;
+		font-size: 22rpx;
 		font-weight: bold;
-		color: #333333;
-		margin-bottom: 10rpx;
+		color: #ffffff;
+		margin-bottom: 8rpx;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+		transition: all 0.3s ease;
 	}
 	
 	.header-desc {
-		font-size: 28rpx;
-		color: #666666;
+		font-size: 14rpx;
+		color: rgba(255, 255, 255, 0.8);
+		transition: all 0.3s ease;
 	}
 }
 
 .search-section {
-	margin-top: 30rpx;
-	margin-bottom: 20rpx;
+	margin-bottom: 30rpx;
+	animation: fadeInUp 0.8s ease-out 0.1s both;
 	
 	.search-box {
 		display: flex;
 		align-items: center;
 		height: 80rpx;
-		background-color: #ffffff;
+		background: rgba(255, 255, 255, 0.95);
 		border-radius: 40rpx;
 		padding: 0 30rpx;
-		box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.08);
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: translateY(-2rpx);
+			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+		}
 		
 		.search-icon {
 			font-size: 40rpx;
-			color: #999999;
+			color: #0984e3;
 			margin-right: 15rpx;
 		}
 		
@@ -396,13 +460,20 @@ export default {
 
 .banner-section {
 	margin-bottom: 30rpx;
+	animation: fadeInUp 0.8s ease-out 0.2s both;
 	
 	.banner-swiper {
 		width: 100%;
 		height: 350rpx;
-		border-radius: 20rpx;
+		border-radius: 24rpx;
 		overflow: hidden;
-		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: translateY(-4rpx);
+			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+		}
 		
 		.banner-item {
 			position: relative;
@@ -422,8 +493,8 @@ export default {
 				width: 100%;
 				padding: 20rpx;
 				background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-				border-bottom-left-radius: 20rpx;
-				border-bottom-right-radius: 20rpx;
+				border-bottom-left-radius: 24rpx;
+				border-bottom-right-radius: 24rpx;
 				
 				.banner-title {
 					font-size: 36rpx;
@@ -444,17 +515,26 @@ export default {
 
 .quick-service {
 	margin-bottom: 30rpx;
-	background-color: #ffffff;
-	border-radius: 15rpx;
-	padding: 20rpx;
-	box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 24rpx;
+	padding: 40rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
+	transition: all 0.3s ease;
+	animation: fadeInUp 0.8s ease-out 0.3s both;
+	
+	&:hover {
+		transform: translateY(-4rpx);
+		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+	}
 	
 	.section-title {
 		font-size: 32rpx;
 		font-weight: bold;
 		color: #333333;
-		margin-bottom: 20rpx;
-		padding-left: 10rpx;
+		margin-bottom: 30rpx;
+		position: relative;
+		padding-left: 20rpx;
 		
 		&::before {
 			content: '';
@@ -464,7 +544,7 @@ export default {
 			transform: translateY(-50%);
 			width: 6rpx;
 			height: 30rpx;
-			background-color: #0984e3;
+			background: linear-gradient(135deg, #0984e3, #74b9ff);
 			border-radius: 3rpx;
 		}
 	}
@@ -479,7 +559,12 @@ export default {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 15rpx 0;
+		padding: 20rpx 0;
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: translateY(-4rpx);
+		}
 		
 		.service-icon {
 			width: 80rpx;
@@ -487,9 +572,16 @@ export default {
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			background-color: #e0f2fe;
+			background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
 			border-radius: 50%;
-			margin-bottom: 10rpx;
+			margin-bottom: 15rpx;
+			transition: all 0.3s ease;
+			box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
+			
+			&:hover {
+				transform: scale(1.1);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+			}
 			
 			.icon-symbol {
 				font-size: 40rpx;
@@ -501,22 +593,31 @@ export default {
 			font-size: 26rpx;
 			color: #333333;
 			text-align: center;
+			font-weight: 500;
 		}
 	}
 }
 
 .section {
 	margin-bottom: 30rpx;
-	background-color: #ffffff;
-	border-radius: 15rpx;
-	padding: 20rpx;
-	box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 24rpx;
+	padding: 40rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
+	transition: all 0.3s ease;
+	animation: fadeInUp 0.8s ease-out 0.4s both;
+	
+	&:hover {
+		transform: translateY(-4rpx);
+		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+	}
 	
 	.section-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 20rpx;
+		margin-bottom: 30rpx;
 		
 		.section-title {
 			font-size: 32rpx;
@@ -533,7 +634,7 @@ export default {
 				transform: translateY(-50%);
 				width: 6rpx;
 				height: 30rpx;
-				background-color: #0984e3;
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
 				border-radius: 3rpx;
 			}
 		}
@@ -542,7 +643,12 @@ export default {
 			display: flex;
 			align-items: center;
 			font-size: 26rpx;
-			color: #999999;
+			color: #0984e3;
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: translateX(4rpx);
+			}
 			
 			.more-icon {
 				font-size: 24rpx;
@@ -555,18 +661,30 @@ export default {
 .hospital-list {
 	.hospital-item {
 		display: flex;
-		margin-bottom: 30rpx;
+		margin-bottom: 20rpx;
+		transition: all 0.3s ease;
 		
 		&:last-child {
 			margin-bottom: 0;
 		}
 		
+		&:hover {
+			transform: translateX(8rpx);
+		}
+		
 		.hospital-image {
-			width: 180rpx;
-			height: 140rpx;
-			border-radius: 10rpx;
-			margin-right: 20rpx;
+			width: 120rpx;
+			height: 90rpx;
+			border-radius: 12rpx;
+			margin-right: 15rpx;
 			overflow: hidden;
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: scale(1.05);
+				box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+			}
 			
 			image {
 				width: 100%;
@@ -582,43 +700,53 @@ export default {
 			justify-content: space-between;
 			
 			.hospital-name {
-				font-size: 30rpx;
+				font-size: 26rpx;
 				font-weight: bold;
 				color: #333333;
-				margin-bottom: 10rpx;
+				margin-bottom: 8rpx;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 			
 			.hospital-tags {
 				display: flex;
 				flex-wrap: wrap;
-				margin-bottom: 10rpx;
+				margin-bottom: 8rpx;
 				
 				.tag {
-					font-size: 22rpx;
+					font-size: 20rpx;
 					color: #0984e3;
-					background-color: rgba(9, 132, 227, 0.1);
-					padding: 4rpx 12rpx;
-					border-radius: 6rpx;
-					margin-right: 10rpx;
-					margin-bottom: 10rpx;
+					background: rgba(9, 132, 227, 0.1);
+					padding: 4rpx 8rpx;
+					border-radius: 8rpx;
+					margin-right: 8rpx;
+					margin-bottom: 6rpx;
+					transition: all 0.3s ease;
+					
+					&:hover {
+						background: rgba(9, 132, 227, 0.2);
+						transform: scale(1.05);
+					}
 				}
 			}
 			
 			.hospital-address {
 				display: flex;
 				align-items: center;
-				font-size: 24rpx;
-				color: #999999;
+				font-size: 22rpx;
+				color: #666666;
 				
 				.address-icon {
-					font-size: 24rpx;
-					margin-right: 6rpx;
+					font-size: 20rpx;
+					margin-right: 4rpx;
 				}
 				
 				.address-text {
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
+					max-width: 200rpx;
 				}
 			}
 		}
@@ -639,12 +767,19 @@ export default {
 	.package-item {
 		flex: 0 0 300rpx;
 		margin-right: 20rpx;
-		border-radius: 10rpx;
+		border-radius: 16rpx;
 		overflow: hidden;
-		box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		background: #ffffff;
+		transition: all 0.3s ease;
 		
 		&:last-child {
 			margin-right: 0;
+		}
+		
+		&:hover {
+			transform: translateY(-8rpx);
+			box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
 		}
 		
 		.package-image {
@@ -659,7 +794,7 @@ export default {
 		}
 		
 		.package-info {
-			padding: 15rpx;
+			padding: 20rpx;
 			
 			.package-name {
 				font-size: 28rpx;
@@ -674,7 +809,7 @@ export default {
 			.package-desc {
 				font-size: 24rpx;
 				color: #666666;
-				margin-bottom: 10rpx;
+				margin-bottom: 15rpx;
 				height: 68rpx;
 				display: -webkit-box;
 				-webkit-box-orient: vertical;
@@ -714,36 +849,56 @@ export default {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		transition: all 0.3s ease;
+		
+		&:hover {
+			transform: translateY(-4rpx);
+		}
 		
 		.process-icon {
 			position: relative;
-			width: 80rpx;
-			height: 80rpx;
+			width: 70rpx;
+			height: 70rpx;
 			margin-bottom: 15rpx;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			background-color: #e0f2fe;
+			background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
 			border-radius: 50%;
+			box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: scale(1.1);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+			}
+			
+			.process-icon-text {
+				font-size: 28rpx;
+				color: #0984e3;
+			}
 			
 			.process-number {
 				position: absolute;
-				top: -10rpx;
-				right: -10rpx;
-				width: 36rpx;
-				height: 36rpx;
-				line-height: 36rpx;
+				top: -8rpx;
+				right: -8rpx;
+				width: 28rpx;
+				height: 28rpx;
+				line-height: 28rpx;
 				text-align: center;
-				background-color: #0984e3;
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
 				color: #ffffff;
-				font-size: 22rpx;
+				font-size: 18rpx;
 				border-radius: 50%;
+				box-shadow: 0 2rpx 8rpx rgba(9, 132, 227, 0.3);
 			}
 		}
 		
 		.process-name {
 			font-size: 24rpx;
 			color: #333333;
+			font-weight: 500;
+			text-align: center;
 		}
 	}
 	
@@ -751,7 +906,7 @@ export default {
 		color: #cccccc;
 		
 		.arrow-icon {
-			font-size: 24rpx;
+			font-size: 20rpx;
 		}
 	}
 }
@@ -762,19 +917,25 @@ export default {
 	.notice-item {
 		display: flex;
 		align-items: flex-start;
-		margin-bottom: 15rpx;
+		margin-bottom: 20rpx;
+		transition: all 0.3s ease;
 		
 		&:last-child {
 			margin-bottom: 0;
+		}
+		
+		&:hover {
+			transform: translateX(8rpx);
 		}
 		
 		.notice-dot {
 			width: 12rpx;
 			height: 12rpx;
 			border-radius: 50%;
-			background-color: #0984e3;
+			background: linear-gradient(135deg, #0984e3, #74b9ff);
 			margin-right: 15rpx;
 			margin-top: 12rpx;
+			box-shadow: 0 2rpx 8rpx rgba(9, 132, 227, 0.3);
 		}
 		
 		.notice-text {
@@ -792,14 +953,16 @@ export default {
 	right: 0;
 	bottom: 100rpx;
 	padding: 20rpx;
-	background-color: #ffffff;
-	box-shadow: 0 -4rpx 15rpx rgba(0, 0, 0, 0.08);
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10rpx);
+	box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.1);
 	z-index: 999;
+	animation: fadeInUp 0.8s ease-out 0.5s both;
 	
 	.bottom-btn {
 		height: 90rpx;
 		line-height: 90rpx;
-		background: linear-gradient(to right, #0984e3, #00b894);
+		background: linear-gradient(135deg, #0984e3, #74b9ff);
 		color: #ffffff;
 		font-size: 32rpx;
 		font-weight: bold;
@@ -807,9 +970,16 @@ export default {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+		transition: all 0.3s ease;
 		
 		&::after {
 			border: none;
+		}
+		
+		&:hover {
+			transform: translateY(-4rpx);
+			box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.4);
 		}
 		
 		.btn-icon {
@@ -820,6 +990,96 @@ export default {
 		.btn-text {
 			font-size: 32rpx;
 		}
+	}
+}
+
+// 动画定义
+@keyframes float {
+	0% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+	25% {
+		transform: translateY(-20px) translateX(20px) scale(1.1);
+		opacity: 0.9;
+	}
+	50% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+	75% {
+		transform: translateY(20px) translateX(-20px) scale(1.1);
+		opacity: 0.9;
+	}
+	100% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+}
+
+@keyframes flow {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes shimmer {
+	0%, 100% {
+		opacity: 0.3;
+		transform: translateX(-100%);
+	}
+	50% {
+		opacity: 0.6;
+		transform: translateX(100%);
+	}
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30rpx);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30rpx);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes bounce {
+	0%, 20%, 50%, 80%, 100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-10rpx);
+	}
+	60% {
+		transform: translateY(-5rpx);
 	}
 }
 </style> 

@@ -188,7 +188,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 throw new BusinessException("套餐不存在");
             }
             orders.setSetmealId(dto.getSetmealId());
-            orders.setPrice(setmeal.getPrice());
+        orders.setPrice(setmeal.getPrice());
             orders.setAmount(setmeal.getPrice());
             
             // 使用套餐中的检查项ID列表
@@ -238,35 +238,53 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 验证token并获取用户信息
         AppLoginVo appLoginVo = validateTokenAndGetUser(token);
         
-        // 查询订单
+        // 获取订单详情
         Orders orders = getById(id);
         if (orders == null) {
             throw new BusinessException("预约订单不存在");
         }
         
-        // 验证订单所属
+        // 验证订单所属用户
         if (!orders.getUserId().equals(appLoginVo.getUserId())) {
             throw new BusinessException("无权操作此订单");
         }
         
-        // 检查订单状态
-        if (orders.getStatus() == 0) { // 0表示已取消
-            throw new BusinessException("订单已取消");
-        }
-        
-        if (orders.getStatus() == 2 || orders.getStatus() == 3) { // 2表示已支付，3表示已完成
-            throw new BusinessException("订单已完成，无法取消");
-        }
-        
-        // 更新订单状态为取消
-        orders.setStatus(0); // 0表示已取消
+        // 更新订单状态为已取消
+        orders.setStatus(0); // 0-已取消
         orders.setCancelTime(new Date());
         
         boolean result = updateById(orders);
-        if (result) {
-            log.info("取消预约成功，订单ID: {}, 用户ID: {}", id, appLoginVo.getUserId());
+        log.info("取消App预约结果：{}", result);
+        return result;
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean confirmPayment(Long id, String token) {
+        log.info("确认支付，id: {}, token: {}", id, token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
+        
+        // 获取订单详情
+        Orders orders = getById(id);
+        if (orders == null) {
+            throw new BusinessException("预约订单不存在");
         }
         
+        // 验证订单所属用户
+        if (!orders.getUserId().equals(appLoginVo.getUserId())) {
+            throw new BusinessException("无权操作此订单");
+        }
+        
+        // 更新订单状态为已支付
+        orders.setStatus(2); // 2-已支付
+        orders.setPayTime(new Date());
+        orders.setPayType(1); // 1-支付宝（默认）
+        orders.setTransactionId("PAY" + System.currentTimeMillis()); // 生成交易号
+        
+        boolean result = updateById(orders);
+        log.info("确认支付结果：{}", result);
         return result;
     }
     

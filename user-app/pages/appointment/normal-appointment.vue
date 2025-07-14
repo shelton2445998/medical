@@ -191,7 +191,7 @@
           :disabled="!isFormValid"
         >
           <text class="btn-icon">✅</text>
-          <text>提交预约</text>
+          <text>点击支付</text>
         </button>
       </view>
       
@@ -721,31 +721,23 @@ export default {
         // 存储定制套餐信息
         uni.setStorageSync('customPackage', JSON.stringify(customPackage));
         
-        // 调用预约API
-        const result = await post(appointmentApi.createAppointment, appointmentData);
+        // 不调用API，只存储数据，让支付页面统一处理
+        uni.showToast({ 
+          title: '信息已保存，即将跳转支付页面', 
+          icon: 'success',
+          duration: 1500
+        });
         
-        console.log('预约API响应:', result);
+        // 清除选中的检查项
+        this.selectedCheckitems = [];
+        this.totalPrice = 0;
         
-        if (result && result.code === 200) {
-          uni.showToast({ 
-            title: '预约成功！', 
-            icon: 'success',
-            duration: 2000
+        // 直接跳转到支付页面
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/appointment/appointment-flow'
           });
-          
-          // 清除选中的检查项
-          this.selectedCheckitems = [];
-          this.totalPrice = 0;
-          
-          // 预约成功后跳转到支付页面
-          setTimeout(() => {
-            uni.navigateTo({
-              url: '/pages/appointment/appointment-flow'
-            });
-          }, 2000);
-        } else {
-          throw new Error(result.msg || '预约失败');
-        }
+        }, 1500);
         
       } catch (error) {
         console.error('预约失败:', error);

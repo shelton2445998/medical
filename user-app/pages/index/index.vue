@@ -1,103 +1,133 @@
 <template>
 	<view class="content">
-		<!-- 顶部搜索栏 -->
-		<view class="search-container">
-			<view class="search-box">
-				<text class="iconfont icon-search"></text>
-				<input type="text" placeholder="搜索医院、体检套餐" v-model="searchKeyword" @input="searchHospitals" />
-			</view>
+		<!-- 动态背景装饰 -->
+		<view class="floating-shapes">
+			<view class="shape shape-1"></view>
+			<view class="shape shape-2"></view>
+			<view class="shape shape-3"></view>
+			<view class="shape shape-4"></view>
 		</view>
-
-		<!-- 轮播图 -->
-		<swiper class="banner-swiper" circular indicator-dots autoplay interval="3000" duration="500" indicator-active-color="#1296db">
-			<swiper-item v-for="(item, index) in bannerList" :key="index">
-				<image :src="item.image" mode="aspectFill" class="banner-image" @click="navigateTo(item.url)"></image>
-			</swiper-item>
-		</swiper>
-
-		<!-- 快捷服务 -->
-		<view class="quick-service">
-			<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
-				<image :src="item.icon" mode="aspectFit" class="service-icon"></image>
-				<text class="service-name">{{item.name}}</text>
-			</view>
-		</view>
-
-		<!-- 推荐医院 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">推荐医院</text>
-				<view class="more" @click="navigateTo('/pages/hospital/hospital')">
-					<text>更多</text>
-					<text class="iconfont icon-right"></text>
+		
+		<view class="main-content">
+			
+			<!-- 顶部搜索栏 -->
+			<view class="search-section">
+				<view class="search-box">
+					<text class="search-icon">🔍</text>
+					<input type="text" placeholder="搜索医院、体检套餐" v-model="searchKeyword" @input="searchHospitals" />
 				</view>
 			</view>
-			<view class="hospital-list">
-				<view class="hospital-item" v-for="(item, index) in hospitalList" :key="index" @click="selectHospital(item)">
-					<image :src="item.image || '/static/images/hospital1.jpg'" mode="aspectFill" class="hospital-image"></image>
-					<view class="hospital-info">
-						<text class="hospital-name">{{item.name}}</text>
-						<view class="hospital-tags">
-							<text class="tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">{{tag}}</text>
+
+			<!-- 轮播图 -->
+			<view class="banner-section">
+				<swiper class="banner-swiper" circular indicator-dots autoplay interval="3000" duration="500" indicator-active-color="#0984e3">
+					<swiper-item v-for="(item, index) in bannerList" :key="index">
+						<view class="banner-item" @click="navigateTo(item.url)">
+							<image :src="item.image" mode="aspectFill" class="banner-image"></image>
+							<view class="banner-overlay">
+								<text class="banner-title">健康体检</text>
+								<text class="banner-desc">专业医疗团队为您服务</text>
+							</view>
 						</view>
-						<view class="hospital-address">
-							<text class="iconfont icon-location"></text>
-							<text class="address-text">{{item.address}}</text>
+					</swiper-item>
+				</swiper>
+			</view>
+
+			<!-- 快捷服务 -->
+			<view class="quick-service">
+				<view class="section-title">快捷服务</view>
+				<view class="service-grid">
+					<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
+						<view class="service-icon">
+							<image :src="item.icon" mode="aspectFit" class="service-icon-img"></image>
+						</view>
+						<text class="service-name">{{item.name}}</text>
+					</view>
+				</view>
+			</view>
+
+			<!-- 推荐医院 -->
+			<view class="section">
+				<view class="section-header">
+					<text class="section-title">推荐医院</text>
+					<view class="more" @click="navigateTo('/pages/hospital/hospital')">
+						<text>更多</text>
+						<text class="more-icon">→</text>
+					</view>
+				</view>
+				<view class="hospital-list">
+					<view class="hospital-item" v-for="(item, index) in hospitalList.slice(0, 3)" :key="index" @click="selectHospital(item)">
+						<view class="hospital-image">
+							<image :src="item.image || '/static/images/hospital1.jpg'" mode="aspectFill"></image>
+						</view>
+						<view class="hospital-info">
+							<text class="hospital-name">{{item.name}}</text>
+							<view class="hospital-tags">
+								<text class="tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">{{tag}}</text>
+							</view>
+							<view class="hospital-address">
+								<text class="address-icon">📍</text>
+								<text class="address-text">{{item.address}}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<!-- 加载状态 -->
+				<view class="loading-container" v-if="hospitalLoading">
+					<text class="loading-text">加载中...</text>
+				</view>
+				<!-- 空状态 -->
+				<view class="empty-container" v-if="!hospitalLoading && hospitalList.length === 0">
+					<text class="empty-text">暂无推荐医院</text>
+				</view>
+			</view>
+
+			<!-- 推荐套餐 -->
+			<view class="section">
+				<view class="section-header">
+					<text class="section-title">热门套餐</text>
+					<view class="more" @click="navigateTo('/pages/package/package')">
+						<text>更多</text>
+						<text class="more-icon">→</text>
+					</view>
+				</view>
+				<view class="package-list">
+					<view class="package-item" v-for="(item, index) in recommendPackages" :key="index" @click="selectPackage(item)">
+						<view class="package-image">
+							<image :src="item.image" mode="aspectFill"></image>
+						</view>
+						<view class="package-info">
+							<text class="package-name">{{item.name}}</text>
+							<text class="package-desc">{{item.description}}</text>
+							<view class="package-price-box">
+								<text class="package-price">¥{{item.price}}</text>
+								<text class="package-original-price" v-if="item.originalPrice">¥{{item.originalPrice}}</text>
+							</view>
 						</view>
 					</view>
 				</view>
 			</view>
-			<!-- 加载状态 -->
-			<view class="loading-container" v-if="hospitalLoading">
-				<text class="loading-text">加载中...</text>
-			</view>
-			<!-- 空状态 -->
-			<view class="empty-container" v-if="!hospitalLoading && hospitalList.length === 0">
-				<text class="empty-text">暂无推荐医院</text>
-			</view>
-		</view>
 
-		<!-- 推荐套餐 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">热门套餐</text>
-				<view class="more" @click="navigateTo('/pages/package/package')">
-					<text>更多</text>
-					<text class="iconfont icon-right"></text>
-				</view>
-			</view>
-			<view class="package-list">
-				<view class="package-item" v-for="(item, index) in recommendPackages" :key="index" @click="selectPackage(item)">
-					<image :src="item.image" mode="aspectFill" class="package-image"></image>
-					<view class="package-info">
-						<text class="package-name">{{item.name}}</text>
-						<text class="package-desc">{{item.description}}</text>
-						<view class="package-price-box">
-							<text class="package-price">¥{{item.price}}</text>
-							<text class="package-original-price" v-if="item.originalPrice">¥{{item.originalPrice}}</text>
-						</view>
+			<!-- 健康资讯 -->
+			<view class="section">
+				<view class="section-header">
+					<text class="section-title">健康资讯</text>
+					<view class="more" @click="navigateTo('/pages/news/news')">
+						<text>更多</text>
+						<text class="more-icon">→</text>
 					</view>
 				</view>
-			</view>
-		</view>
-
-		<!-- 健康资讯 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">健康资讯</text>
-				<view class="more" @click="navigateTo('/pages/news/news')">
-					<text>更多</text>
-					<text class="iconfont icon-right"></text>
-				</view>
-			</view>
-			<view class="news-list">
-				<view class="news-item" v-for="(item, index) in newsList" :key="index" @click="viewNews(item)">
-					<image :src="item.image" mode="aspectFill" class="news-image"></image>
-					<view class="news-info">
-						<text class="news-title">{{item.title}}</text>
-						<view class="news-meta">
-							<text class="news-source">{{item.source}}</text>
-							<text class="news-time">{{item.time}}</text>
+				<view class="news-list">
+					<view class="news-item" v-for="(item, index) in newsList" :key="index" @click="viewNews(item)">
+						<view class="news-image">
+							<image :src="item.image" mode="aspectFill"></image>
+						</view>
+						<view class="news-info">
+							<text class="news-title">{{item.title}}</text>
+							<view class="news-meta">
+								<text class="news-source">{{item.source}}</text>
+								<text class="news-time">{{item.time}}</text>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -394,91 +424,341 @@
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	.content {
-		padding-bottom: 30rpx;
+		background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
+		min-height: 100vh;
+		padding-top: 0;
+		padding-bottom: 40rpx;
+		position: relative;
+		overflow: hidden;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+			animation: flow 20s linear infinite;
+			pointer-events: none;
+		}
+		
+		&::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+			animation: shimmer 8s ease-in-out infinite;
+			pointer-events: none;
+		}
 	}
 
-	.search-container {
-		padding: 20rpx 30rpx;
-		background-color: #1296db;
+	.floating-shapes {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		z-index: -1;
 
+		.shape {
+			position: absolute;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 50%;
+			filter: blur(50px);
+			animation: float 15s infinite ease-in-out;
+			transition: all 0.3s ease;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				top: -10%;
+				left: -10%;
+				width: 120%;
+				height: 120%;
+				background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+				border-radius: 50%;
+				animation: pulse 3s ease-in-out infinite;
+			}
+
+			&.shape-1 {
+				width: 100px;
+				height: 100px;
+				top: 10%;
+				left: 10%;
+				animation-delay: -2s;
+			}
+			&.shape-2 {
+				width: 150px;
+				height: 150px;
+				top: 70%;
+				left: 30%;
+				animation-delay: -5s;
+			}
+			&.shape-3 {
+				width: 120px;
+				height: 120px;
+				top: 20%;
+				right: 20%;
+				animation-delay: -8s;
+			}
+			&.shape-4 {
+				width: 180px;
+				height: 180px;
+				bottom: 10%;
+				right: 50%;
+				animation-delay: -10s;
+			}
+		}
+	}
+
+	.main-content {
+		padding: 20rpx 40rpx 0 40rpx;
+		position: relative;
+		z-index: 1;
+	}
+
+	.page-header {
+		text-align: center;
+		margin-bottom: 20rpx;
+		animation: fadeInDown 0.8s ease-out;
+		
+		.header-icon {
+			font-size: 40rpx;
+			margin-bottom: 10rpx;
+			animation: bounce 2s infinite;
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: scale(1.2);
+			}
+		}
+		
+		.header-title {
+			font-size: 22rpx;
+			font-weight: bold;
+			color: #ffffff;
+			margin-bottom: 8rpx;
+			text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+			transition: all 0.3s ease;
+		}
+		
+		.header-desc {
+			font-size: 14rpx;
+			color: rgba(255, 255, 255, 0.8);
+			transition: all 0.3s ease;
+		}
+	}
+
+	.search-section {
+		margin-bottom: 30rpx;
+		animation: fadeInUp 0.8s ease-out 0.1s both;
+		
 		.search-box {
 			display: flex;
 			align-items: center;
-			height: 70rpx;
-			background-color: #ffffff;
-			border-radius: 35rpx;
+			height: 80rpx;
+			background: rgba(255, 255, 255, 0.95);
+			border-radius: 40rpx;
 			padding: 0 30rpx;
-
-			.iconfont {
-				font-size: 36rpx;
-				color: #999999;
-				margin-right: 10rpx;
+			box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+			backdrop-filter: blur(10rpx);
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: translateY(-2rpx);
+				box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
 			}
-
+			
+			.search-icon {
+				font-size: 40rpx;
+				color: #0984e3;
+				margin-right: 15rpx;
+			}
+			
 			input {
 				flex: 1;
-				height: 70rpx;
-				font-size: 28rpx;
-			}
-		}
-	}
-
-	.banner-swiper {
-		width: 100%;
-		height: 300rpx;
-
-		.banner-image {
-			width: 100%;
-			height: 100%;
-			border-radius: 0 0 20rpx 20rpx;
-		}
-	}
-
-	.quick-service {
-		display: flex;
-		padding: 30rpx 20rpx;
-		background-color: #ffffff;
-		margin-bottom: 20rpx;
-
-		.service-item {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-
-			.service-icon {
-				width: 100rpx;
-				height: 100rpx;
-				margin-bottom: 15rpx;
-			}
-
-			.service-name {
-				font-size: 26rpx;
+				height: 100%;
+				font-size: 32rpx;
 				color: #333333;
 			}
 		}
 	}
 
-	.section {
-		margin-bottom: 20rpx;
-		background-color: #ffffff;
-		padding: 20rpx 30rpx;
+	.banner-section {
+		margin-bottom: 30rpx;
+		animation: fadeInUp 0.8s ease-out 0.2s both;
+		
+		.banner-swiper {
+			width: 100%;
+			height: 350rpx;
+			border-radius: 24rpx;
+			overflow: hidden;
+			box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: translateY(-4rpx);
+				box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+			}
+			
+			.banner-item {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				
+				.banner-image {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+				
+				.banner-overlay {
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					width: 100%;
+					padding: 20rpx;
+					background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+					border-bottom-left-radius: 24rpx;
+					border-bottom-right-radius: 24rpx;
+					
+					.banner-title {
+						font-size: 36rpx;
+						font-weight: bold;
+						color: #ffffff;
+						margin-bottom: 5rpx;
+					}
+					
+					.banner-desc {
+						font-size: 24rpx;
+						color: #ffffff;
+						opacity: 0.9;
+					}
+				}
+			}
+		}
+	}
 
+	.quick-service {
+		margin-bottom: 30rpx;
+		background: rgba(255, 255, 255, 0.95);
+		border-radius: 24rpx;
+		padding: 40rpx;
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
+		transition: all 0.3s ease;
+		animation: fadeInUp 0.8s ease-out 0.3s both;
+		
+		&:hover {
+			transform: translateY(-4rpx);
+			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+		}
+		
+		.section-title {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333333;
+			margin-bottom: 30rpx;
+			position: relative;
+			padding-left: 20rpx;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 6rpx;
+				height: 30rpx;
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
+				border-radius: 3rpx;
+			}
+		}
+		
+		.service-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(150rpx, 1fr));
+			gap: 20rpx;
+		}
+		
+		.service-item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 20rpx 0;
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: translateY(-4rpx);
+			}
+			
+			.service-icon {
+				width: 80rpx;
+				height: 80rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
+				border-radius: 50%;
+				margin-bottom: 15rpx;
+				transition: all 0.3s ease;
+				box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
+				
+				&:hover {
+					transform: scale(1.1);
+					box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+				}
+				
+				.service-icon-img {
+					width: 50rpx;
+					height: 50rpx;
+				}
+			}
+			
+			.service-name {
+				font-size: 26rpx;
+				color: #333333;
+				text-align: center;
+				font-weight: 500;
+			}
+		}
+	}
+
+	.section {
+		margin-bottom: 30rpx;
+		background: rgba(255, 255, 255, 0.95);
+		border-radius: 24rpx;
+		padding: 40rpx;
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
+		transition: all 0.3s ease;
+		animation: fadeInUp 0.8s ease-out 0.4s both;
+		
+		&:hover {
+			transform: translateY(-4rpx);
+			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+		}
+		
 		.section-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 20rpx;
-
+			margin-bottom: 30rpx;
+			
 			.section-title {
 				font-size: 32rpx;
 				font-weight: bold;
 				color: #333333;
 				position: relative;
 				padding-left: 20rpx;
-
+				
 				&::before {
 					content: '';
 					position: absolute;
@@ -487,18 +767,23 @@
 					transform: translateY(-50%);
 					width: 6rpx;
 					height: 30rpx;
-					background-color: #1296db;
+					background: linear-gradient(135deg, #0984e3, #74b9ff);
 					border-radius: 3rpx;
 				}
 			}
-
+			
 			.more {
 				display: flex;
 				align-items: center;
 				font-size: 26rpx;
-				color: #999999;
-
-				.iconfont {
+				color: #0984e3;
+				transition: all 0.3s ease;
+				
+				&:hover {
+					transform: translateX(4rpx);
+				}
+				
+				.more-icon {
 					font-size: 24rpx;
 					margin-left: 5rpx;
 				}
@@ -509,63 +794,92 @@
 	.hospital-list {
 		.hospital-item {
 			display: flex;
-			margin-bottom: 30rpx;
-
+			margin-bottom: 20rpx;
+			transition: all 0.3s ease;
+			
 			&:last-child {
 				margin-bottom: 0;
 			}
-
-			.hospital-image {
-				width: 180rpx;
-				height: 140rpx;
-				border-radius: 10rpx;
-				margin-right: 20rpx;
+			
+			&:hover {
+				transform: translateX(8rpx);
 			}
-
+			
+			.hospital-image {
+				width: 120rpx;
+				height: 90rpx;
+				border-radius: 12rpx;
+				margin-right: 15rpx;
+				overflow: hidden;
+				box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+				transition: all 0.3s ease;
+				
+				&:hover {
+					transform: scale(1.05);
+					box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+				}
+				
+				image {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+			}
+			
 			.hospital-info {
 				flex: 1;
 				display: flex;
 				flex-direction: column;
 				justify-content: space-between;
-
+				
 				.hospital-name {
-					font-size: 30rpx;
+					font-size: 26rpx;
 					font-weight: bold;
 					color: #333333;
-					margin-bottom: 10rpx;
+					margin-bottom: 8rpx;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
 				}
-
+				
 				.hospital-tags {
 					display: flex;
 					flex-wrap: wrap;
-					margin-bottom: 10rpx;
-
+					margin-bottom: 8rpx;
+					
 					.tag {
-						font-size: 22rpx;
-						color: #1296db;
-						background-color: rgba(18, 150, 219, 0.1);
-						padding: 4rpx 12rpx;
-						border-radius: 6rpx;
-						margin-right: 10rpx;
-						margin-bottom: 10rpx;
+						font-size: 20rpx;
+						color: #0984e3;
+						background: rgba(9, 132, 227, 0.1);
+						padding: 4rpx 8rpx;
+						border-radius: 8rpx;
+						margin-right: 8rpx;
+						margin-bottom: 6rpx;
+						transition: all 0.3s ease;
+						
+						&:hover {
+							background: rgba(9, 132, 227, 0.2);
+							transform: scale(1.05);
+						}
 					}
 				}
-
+				
 				.hospital-address {
 					display: flex;
 					align-items: center;
-					font-size: 24rpx;
-					color: #999999;
-
-					.iconfont {
-						font-size: 24rpx;
-						margin-right: 6rpx;
+					font-size: 22rpx;
+					color: #666666;
+					
+					.address-icon {
+						font-size: 20rpx;
+						margin-right: 4rpx;
 					}
-
+					
 					.address-text {
 						white-space: nowrap;
 						overflow: hidden;
 						text-overflow: ellipsis;
+						max-width: 200rpx;
 					}
 				}
 			}
@@ -602,32 +916,45 @@
 		display: flex;
 		flex-wrap: nowrap;
 		overflow-x: scroll;
-		margin: 0 -30rpx;
-		padding: 0 30rpx;
-
+		margin: 0 -20rpx;
+		padding: 0 20rpx;
+		
 		&::-webkit-scrollbar {
 			display: none;
 		}
-
+		
 		.package-item {
 			flex: 0 0 300rpx;
 			margin-right: 20rpx;
-			border-radius: 10rpx;
+			border-radius: 16rpx;
 			overflow: hidden;
-			box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+			background: #ffffff;
+			transition: all 0.3s ease;
+			
 			&:last-child {
 				margin-right: 0;
 			}
-
+			
+			&:hover {
+				transform: translateY(-8rpx);
+				box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+			}
+			
 			.package-image {
 				width: 100%;
 				height: 180rpx;
+				
+				image {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
 			}
-
+			
 			.package-info {
-				padding: 15rpx;
-
+				padding: 20rpx;
+				
 				.package-name {
 					font-size: 28rpx;
 					font-weight: bold;
@@ -637,11 +964,11 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 				}
-
+				
 				.package-desc {
 					font-size: 24rpx;
 					color: #666666;
-					margin-bottom: 10rpx;
+					margin-bottom: 15rpx;
 					height: 68rpx;
 					display: -webkit-box;
 					-webkit-box-orient: vertical;
@@ -649,18 +976,18 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 				}
-
+				
 				.package-price-box {
 					display: flex;
 					align-items: baseline;
-
+					
 					.package-price {
 						font-size: 32rpx;
 						font-weight: bold;
 						color: #ff5a5f;
 						margin-right: 10rpx;
 					}
-
+					
 					.package-original-price {
 						font-size: 24rpx;
 						color: #999999;
@@ -674,27 +1001,46 @@
 	.news-list {
 		.news-item {
 			display: flex;
-			margin-bottom: 30rpx;
-
+			margin-bottom: 20rpx;
+			transition: all 0.3s ease;
+			
 			&:last-child {
 				margin-bottom: 0;
 			}
-
-			.news-image {
-				width: 200rpx;
-				height: 140rpx;
-				border-radius: 10rpx;
-				margin-right: 20rpx;
+			
+			&:hover {
+				transform: translateX(8rpx);
 			}
-
+			
+			.news-image {
+				width: 120rpx;
+				height: 90rpx;
+				border-radius: 12rpx;
+				margin-right: 15rpx;
+				overflow: hidden;
+				box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+				transition: all 0.3s ease;
+				
+				&:hover {
+					transform: scale(1.05);
+					box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+				}
+				
+				image {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+			}
+			
 			.news-info {
 				flex: 1;
 				display: flex;
 				flex-direction: column;
 				justify-content: space-between;
-
+				
 				.news-title {
-					font-size: 28rpx;
+					font-size: 26rpx;
 					color: #333333;
 					line-height: 1.5;
 					display: -webkit-box;
@@ -702,19 +1048,110 @@
 					-webkit-line-clamp: 2;
 					overflow: hidden;
 					text-overflow: ellipsis;
+					margin-bottom: 10rpx;
 				}
-
+				
 				.news-meta {
 					display: flex;
 					justify-content: space-between;
-					font-size: 24rpx;
+					font-size: 22rpx;
 					color: #999999;
-
+					
 					.news-source {
-						color: #1296db;
+						color: #0984e3;
 					}
 				}
 			}
+		}
+	}
+
+	// 动画定义
+	@keyframes float {
+		0% {
+			transform: translateY(0) translateX(0) scale(1);
+			opacity: 0.8;
+		}
+		25% {
+			transform: translateY(-20px) translateX(20px) scale(1.1);
+			opacity: 0.9;
+		}
+		50% {
+			transform: translateY(0) translateX(0) scale(1);
+			opacity: 0.8;
+		}
+		75% {
+			transform: translateY(20px) translateX(-20px) scale(1.1);
+			opacity: 0.9;
+		}
+		100% {
+			transform: translateY(0) translateX(0) scale(1);
+			opacity: 0.8;
+		}
+	}
+
+	@keyframes flow {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	@keyframes shimmer {
+		0%, 100% {
+			opacity: 0.3;
+			transform: translateX(-100%);
+		}
+		50% {
+			opacity: 0.6;
+			transform: translateX(100%);
+		}
+	}
+
+	@keyframes fadeInDown {
+		from {
+			opacity: 0;
+			transform: translateY(-30rpx);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(30rpx);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes pulse {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	@keyframes bounce {
+		0%, 20%, 50%, 80%, 100% {
+			transform: translateY(0);
+		}
+		40% {
+			transform: translateY(-10rpx);
+		}
+		60% {
+			transform: translateY(-5rpx);
 		}
 	}
 </style>

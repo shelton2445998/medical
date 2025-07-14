@@ -42,6 +42,8 @@ export const appointmentApi = {
   getAppointmentDetail: (id) => `${API_BASE_URL}/app/appointment/detail/${id}`,
   // 取消预约
   cancelAppointment: (id) => `${API_BASE_URL}/app/appointment/cancel/${id}`,
+  // 确认支付
+  confirmPayment: (id) => `${API_BASE_URL}/app/appointment/confirmPayment/${id}`,
   // 获取医生列表
   getDoctorList: `${API_BASE_URL}/app/doctor/list`,
 };

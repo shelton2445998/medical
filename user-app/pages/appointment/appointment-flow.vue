@@ -128,12 +128,25 @@
           
       <view class="form-item">
             <text class="form-label">患者性别</text>
-        <picker :range="genderOptions" @change="onGenderChange">
+            <picker :range="genderOptions" @change="onGenderChange">
               <view class="picker-display">
                 <text class="picker-text" :class="{ 'placeholder': !patientGender }">
                   {{ patientGender || '请选择性别' }}
                 </text>
                 <text class="picker-icon">👥</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 医院选择 -->
+      <view class="form-item">
+        <text class="form-label">选择医院</text>
+        <picker :range="hospitalList" range-key="name" @change="onHospitalChange">
+          <view class="picker-display">
+            <text class="picker-text" :class="{ 'placeholder': !selectedHospital }">
+              {{ selectedHospital ? selectedHospital.name : '请选择医院' }}
+            </text>
+            <text class="picker-icon">🏥</text>
           </view>
         </picker>
       </view>
@@ -171,38 +184,38 @@
           </view>
         </picker>
       </view>
-          
+
       <view class="form-item">
+            <text class="form-label">患者年龄</text>
+            <input 
+              class="form-input" 
+              v-model="patientAge" 
+              placeholder="请输入患者年龄"
+              placeholder-class="input-placeholder"
+              type="number" 
+              maxlength="3" 
+            />
+      </view>
+
+          <view class="form-item">
+            <text class="form-label">患者手机号</text>
+            <input 
+              class="form-input" 
+              v-model="patientPhone" 
+              placeholder="请输入患者手机号"
+              placeholder-class="input-placeholder"
+              type="number" 
+              maxlength="11" 
+            />
+          </view>
+          
+          <view class="form-item">
             <text class="form-label">备注</text>
             <textarea class="form-textarea" v-model="remark" placeholder="可填写特殊需求或备注" />
-      </view>
-
-      <view class="form-item">
-        <text class="form-label">患者年龄</text>
-        <input 
-          class="form-input" 
-          v-model="patientAge" 
-          placeholder="请输入患者年龄"
-          placeholder-class="input-placeholder"
-          type="number" 
-          maxlength="3" 
-        />
-      </view>
-
-      <view class="form-item">
-        <text class="form-label">患者手机号</text>
-        <input 
-          class="form-input" 
-          v-model="patientPhone" 
-          placeholder="请输入患者手机号"
-          placeholder-class="input-placeholder"
-          type="number" 
-          maxlength="11" 
-        />
-      </view>
           </view>
+        </view>
         
-        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !patientGender">
+        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !patientGender || !selectedHospital">
           <text class="btn-icon">→</text>
           <text class="btn-text">下一步</text>
         </button>
@@ -411,7 +424,8 @@
 </template>
 
 <script>
-import { appointmentApi } from '@/utils/api.js';
+import { appointmentApi, hospitalApi } from '@/utils/api.js';
+import { post, get } from '@/utils/request.js';
 
 export default {
   data() {
@@ -496,7 +510,8 @@ export default {
       patientAge: '',
       patientGender: '',
       patientPhone: '',
-      genderOptions: ['男', '女']
+      genderOptions: ['男', '女'],
+      hospitalList: []
     }
   },
   computed: {
@@ -565,8 +580,8 @@ export default {
           address: this.selectedPackage.hospitalAddress
         };
       }
-      // 预填一些基本信息
-      this.name = this.memberName || '用户';
+      // 预填一些基本信息，使用定制套餐中的患者姓名
+      this.name = this.selectedPackage.patientName || this.memberName || '用户';
       this.gender = '男'; // 默认性别
       this.selectedDate = this.getNextAvailableDate(); // 设置默认日期
       this.selectedTime = '上午(08:00-12:00)'; // 默认时间段
@@ -577,6 +592,9 @@ export default {
     
     // 初始化医生列表
     this.initDoctorList();
+    
+    // 获取医院列表
+    this.getHospitalList();
     
     // 获取用户预约列表
     this.getAppointmentList();
@@ -686,10 +704,10 @@ export default {
         appointmentTime: this.selectedTime, // 预约时间段
         remark: this.remark || '', // 备注信息
         checkitemIds: this.selectedPackage ? (this.selectedPackage.checkitemIds || '') : '', // 检查项ID列表
-        patientName: this.name, // 患者姓名（使用原有的name字段）
-        patientAge: parseInt(this.patientAge) || 0, // 患者年龄
-        patientGender: this.convertGenderToNumber(this.patientGender || this.gender), // 患者性别（转换为数字：0=女，1=男）
-        patientPhone: this.patientPhone || '' // 患者手机号
+        patientName: this.selectedPackage && this.selectedPackage.patientName ? this.selectedPackage.patientName : this.name, // 优先使用定制套餐中的患者姓名
+        patientAge: this.selectedPackage && this.selectedPackage.patientAge ? this.selectedPackage.patientAge : (parseInt(this.patientAge) || 0), // 优先使用定制套餐中的患者年龄
+        patientGender: this.selectedPackage && this.selectedPackage.patientGender ? this.selectedPackage.patientGender : this.convertGenderToNumber(this.patientGender || this.gender), // 优先使用定制套餐中的患者性别
+        patientPhone: this.selectedPackage && this.selectedPackage.patientPhone ? this.selectedPackage.patientPhone : (this.patientPhone || '') // 优先使用定制套餐中的患者手机号
       };
       
       console.log('预约订单数据：', orderData);
@@ -712,15 +730,30 @@ export default {
         success: (res) => {
           console.log('预约接口响应：', res);
           if (res.statusCode === 200 && res.data.code === 200) {
-            // 预约成功
+            // 预约成功，现在调用支付确认接口
+            const orderId = res.data.data.id;
+            console.log('预约成功，订单ID:', orderId);
+            
+            // 调用支付确认接口
+            uni.request({
+              url: appointmentApi.confirmPayment(orderId),
+              method: 'PUT',
+              header: {
+                'Content-Type': 'application/json',
+                'Authorization': token || ''
+              },
+              success: (payRes) => {
+                console.log('支付确认接口响应：', payRes);
+                if (payRes.statusCode === 200 && payRes.data.code === 200) {
+                  // 支付确认成功
             uni.hideLoading();
             this.orderNo = res.data.data.orderNumber || 'YY' + Date.now();
             this.step = 5;
             
-            // 清除存储的医院、套餐和定制套餐信息
+                  // 清除存储的医院、套餐和定制套餐信息
             uni.removeStorageSync('selectedHospital');
             uni.removeStorageSync('selectedPackage');
-            uni.removeStorageSync('customPackage');
+                  uni.removeStorageSync('customPackage');
             
             // 显示成功提示
             uni.showToast({
@@ -733,6 +766,26 @@ export default {
             setTimeout(() => {
               uni.reLaunch({ url: '/pages/index/index' });
             }, 2000);
+                } else {
+                  // 支付确认失败
+                  uni.hideLoading();
+                  uni.showToast({
+                    title: payRes.data.msg || '支付确认失败，请重试',
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }
+              },
+              fail: (payErr) => {
+                console.error('支付确认接口调用失败：', payErr);
+                uni.hideLoading();
+                uni.showToast({
+                  title: '支付确认失败，请重试',
+                  icon: 'none',
+                  duration: 2000
+                });
+              }
+            });
           } else {
             // 预约失败
             uni.hideLoading();
@@ -920,6 +973,92 @@ export default {
       } else {
         // 默认返回1（男）
         return 1;
+      }
+    },
+    onHospitalChange(e) {
+      const index = e.detail.value;
+      this.selectedHospital = this.hospitalList[index];
+      // 选择医院后获取该医院的医生列表
+      this.getDoctorList(this.selectedHospital.id);
+    },
+    // 获取医院列表
+    async getHospitalList() {
+      try {
+        uni.showLoading({ title: '加载医院列表...' });
+        
+        // 检查是否有token
+        const token = uni.getStorageSync('TOKEN_KEY');
+        if (!token) {
+          uni.hideLoading();
+          uni.showToast({
+            title: '请先登录',
+            icon: 'none',
+            duration: 2000
+          });
+          // 跳转到登录页
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+          return;
+        }
+        
+        // 使用后端AppHospitalController的接口
+        const result = await get(hospitalApi.getHospitalList, {
+          pageNum: 1,
+          pageSize: 100
+        });
+        
+        console.log('医院列表API响应:', result);
+        console.log('医院数据详情:', result.data);
+        
+        if (result && result.data) {
+          // 检查是否是分页数据结构
+          if (result.data.records && Array.isArray(result.data.records)) {
+            this.hospitalList = result.data.records;
+            console.log('从records字段获取医院数据:', this.hospitalList);
+          } else if (result.data.list && Array.isArray(result.data.list)) {
+            this.hospitalList = result.data.list;
+            console.log('从list字段获取医院数据:', this.hospitalList);
+          } else if (Array.isArray(result.data)) {
+            this.hospitalList = result.data;
+            console.log('从data直接获取医院数据:', this.hospitalList);
+          } else {
+            // 如果不是数组，尝试获取data中的其他可能字段
+            console.log('医院数据结构:', JSON.stringify(result.data, null, 2));
+            this.hospitalList = [];
+          }
+          console.log('获取医院列表成功:', this.hospitalList);
+        } else {
+          console.error('获取医院列表失败:', result);
+          // 使用测试数据
+          this.hospitalList = [
+            { id: 2001, name: '北京协和医院', address: '北京市东城区东单帅府园1号' },
+            { id: 2002, name: '上海交通大学医学院附属瑞金医院', address: '上海市黄浦区瑞金二路197号' },
+            { id: 2003, name: '中山大学附属第一医院', address: '广州市越秀区中山二路1号' },
+            { id: 2004, name: '四川大学华西医院', address: '成都市武侯区国学巷37号' }
+          ];
+          uni.showToast({
+            title: '使用测试医院数据',
+            icon: 'none',
+            duration: 2000
+          });
+        }
+      } catch (error) {
+        console.error('获取医院列表异常:', error);
+        // 使用测试数据
+        this.hospitalList = [
+          { id: 2001, name: '北京协和医院', address: '北京市东城区东单帅府园1号' },
+          { id: 2002, name: '上海交通大学医学院附属瑞金医院', address: '上海市黄浦区瑞金二路197号' },
+          { id: 2003, name: '中山大学附属第一医院', address: '广州市越秀区中山二路1号' },
+          { id: 2004, name: '四川大学华西医院', address: '成都市武侯区国学巷37号' }
+        ];
+        uni.showToast({
+          title: '使用测试医院数据',
+          icon: 'none',
+          duration: 2000
+        });
+      } finally {
+        uni.hideLoading();
       }
     }
   }
