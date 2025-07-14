@@ -5,10 +5,9 @@ import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.dto.ReportDto;
 import com.fourth.medical.medical.entity.Report;
 import com.fourth.medical.medical.query.ReportQuery;
-import com.fourth.medical.medical.vo.ReportVo;
 import com.fourth.medical.medical.query.AppReportQuery;
+import com.fourth.medical.medical.vo.ReportVo;
 import com.fourth.medical.medical.vo.AppReportVo;
-
 
 /**
  * 体检报告总 服务接口
@@ -67,18 +66,30 @@ public interface ReportService extends IService<Report> {
      * App体检报告总详情
      *
      * @param id
+     * @param token 用户令牌
      * @return
      * @throws Exception
      */
-    AppReportVo getAppReportById(Long id);
+    AppReportVo getAppReportById(Long id, String token);
 
     /**
      * App体检报告总分页列表
      *
      * @param query
+     * @param token 用户令牌
      * @return
      * @throws Exception
      */
-    Paging<AppReportVo> getAppReportPage(AppReportQuery query);
-
+    Paging<AppReportVo> getAppReportPage(AppReportQuery query, String token);
+    
+    /**
+     * 为订单创建体检报告
+     *
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @param checkitemIds 检查项ID列表，以逗号分隔
+     * @param doctorId 医生ID
+     * @return 报告ID
+     */
+    Long createReportForOrder(Long orderId, Long userId, String checkitemIds, Long doctorId);
 }

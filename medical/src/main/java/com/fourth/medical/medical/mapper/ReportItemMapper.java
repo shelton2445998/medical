@@ -1,6 +1,8 @@
 package com.fourth.medical.medical.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.entity.ReportItem;
 import com.fourth.medical.medical.query.ReportItemQuery;
 import com.fourth.medical.medical.vo.ReportItemVo;
@@ -8,6 +10,7 @@ import com.fourth.medical.medical.query.AppReportItemQuery;
 import com.fourth.medical.medical.vo.AppReportItemVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -26,15 +29,16 @@ public interface ReportItemMapper extends BaseMapper<ReportItem> {
      * @param id
      * @return
      */
-    ReportItemVo getReportItemById(Long id);
+    ReportItemVo getReportItemById(@Param("id") Long id);
 
     /**
      * 体检报告检查项信息分页列表
      *
+     * @param page
      * @param query
      * @return
      */
-    List<ReportItemVo> getReportItemPage(ReportItemQuery query);
+    Paging<ReportItemVo> getReportItemPage(IPage page, @Param("query") ReportItemQuery query);
 
     /**
      * App体检报告检查项信息详情
@@ -59,4 +63,14 @@ public interface ReportItemMapper extends BaseMapper<ReportItem> {
      * @return
      */
     List<ReportItemVo> getReportItemsByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 更新report表中的report_item_ids字段
+     *
+     * @param reportId 报告ID
+     * @param reportItemIds 报告项ID列表字符串
+     * @return 受影响的行数
+     */
+    @Update("UPDATE report SET report_item_ids = #{reportItemIds}, update_time = NOW() WHERE id = #{reportId}")
+    int updateReportItemIds(@Param("reportId") Long reportId, @Param("reportItemIds") String reportItemIds);
 }

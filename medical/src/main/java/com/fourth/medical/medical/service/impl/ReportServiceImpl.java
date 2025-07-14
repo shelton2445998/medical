@@ -1,27 +1,23 @@
 package com.fourth.medical.medical.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fourth.medical.framework.exception.BusinessException;
-import com.fourth.medical.framework.page.OrderByItem;
-import com.fourth.medical.framework.page.OrderMapping;
+import com.fourth.medical.common.exception.BusinessException;
 import com.fourth.medical.framework.page.Paging;
+import com.fourth.medical.framework.page.PageUtil;
 import com.fourth.medical.medical.dto.ReportDto;
 import com.fourth.medical.medical.entity.Report;
 import com.fourth.medical.medical.mapper.ReportMapper;
+import com.fourth.medical.medical.query.AppReportQuery;
 import com.fourth.medical.medical.query.ReportQuery;
 import com.fourth.medical.medical.service.ReportService;
-import com.fourth.medical.medical.vo.ReportVo;
-import com.fourth.medical.medical.query.AppReportQuery;
 import com.fourth.medical.medical.vo.AppReportVo;
-import com.fourth.medical.util.PagingUtil;
+import com.fourth.medical.medical.vo.ReportVo;
+import com.fourth.medical.auth.util.TokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
-import java.util.List;
 
 /**
  * 体检报告总 服务实现类
@@ -33,22 +29,18 @@ import java.util.List;
 @Service
 public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> implements ReportService {
 
-    @Autowired
-    private ReportMapper reportMapper;
-
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean addReport(ReportDto dto) {
+        log.info("添加体检报告总：{}", dto);
         Report report = new Report();
         BeanUtils.copyProperties(dto, report);
         return save(report);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateReport(ReportDto dto) {
-        Long id = dto.getId();
-        Report report = getById(id);
+        log.info("修改体检报告总：{}", dto);
+        Report report = getById(dto.getId());
         if (report == null) {
             throw new BusinessException("体检报告总不存在");
         }
@@ -56,40 +48,105 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
         return updateById(report);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteReport(Long id) {
+        log.info("删除体检报告总：{}", id);
+        if (id == null) {
+            throw new BusinessException("ID不能为空");
+        }
         return removeById(id);
     }
 
     @Override
     public ReportVo getReportById(Long id) {
-        return reportMapper.getReportById(id);
+        log.info("获取体检报告总详情：{}", id);
+        if (id == null) {
+            throw new BusinessException("ID不能为空");
+        }
+        return baseMapper.getReportById(id);
     }
 
     @Override
     public Paging<ReportVo> getReportPage(ReportQuery query) {
-        OrderMapping orderMapping = new OrderMapping();
-        orderMapping.put("createTime", "create_time");
-        PagingUtil.handlePage(query, orderMapping, OrderByItem.desc("id"));
-        List<ReportVo> list = reportMapper.getReportPage(query);
-        Paging<ReportVo> paging = new Paging<>(list);
-        return paging;
+        log.info("获取体检报告总分页列表：{}", query);
+        return baseMapper.getReportPage(PageUtil.buildPage(query), query);
     }
 
     @Override
-    public AppReportVo getAppReportById(Long id) {
-        return reportMapper.getAppReportById(id);
+    public AppReportVo getAppReportById(Long id, String token) {
+        log.info("获取App体检报告总详情：{}", id);
+        if (id == null) {
+            throw new BusinessException("ID不能为空");
+        }
+        
+        // 从token中获取用户ID
+        Long userId = TokenUtil.getUserId(token);
+        if (userId == null) {
+            throw new BusinessException("无效的用户Token");
+        }
+        
+        // 查询报告
+        AppReportVo appReportVo = baseMapper.getAppReportById(id);
+        if (appReportVo == null) {
+            throw new BusinessException("体检报告不存在");
+        }
+        
+        // 检查报告是否属于该用户
+        if (!userId.equals(appReportVo.getUserId())) {
+            throw new BusinessException("无权限查看该体检报告");
+        }
+        
+        return appReportVo;
     }
 
     @Override
-    public Paging<AppReportVo> getAppReportPage(AppReportQuery query) {
-        OrderMapping orderMapping = new OrderMapping();
-        orderMapping.put("createTime", "create_time");
-        PagingUtil.handlePage(query, orderMapping, OrderByItem.desc("id"));
-        List<AppReportVo> list = reportMapper.getAppReportPage(query);
-        Paging<AppReportVo> paging = new Paging<>(list);
-        return paging;
+    public Paging<AppReportVo> getAppReportPage(AppReportQuery query, String token) {
+        log.info("获取App体检报告总分页列表：{}", query);
+        
+        // 从token中获取用户ID
+        Long userId = TokenUtil.getUserId(token);
+        if (userId == null) {
+            throw new BusinessException("无效的用户Token");
+        }
+        
+        // 设置查询条件，只查询当前用户的报告
+        query.setUserId(userId);
+        
+        return baseMapper.getAppReportPage(PageUtil.buildPage(query), query);
     }
-
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createReportForOrder(Long orderId, Long userId, String checkitemIds, Long doctorId) {
+        log.info("创建体检报告，订单ID：{}，用户ID：{}，检查项：{}，医生ID：{}", orderId, userId, checkitemIds, doctorId);
+        
+        try {
+            // 先检查是否已经存在该订单的报告
+            Report existingReport = baseMapper.selectOne(
+                    new LambdaQueryWrapper<Report>()
+                            .eq(Report::getOrderId, orderId));
+            
+            if (existingReport != null) {
+                log.info("订单已存在报告，报告ID：{}", existingReport.getId());
+                return existingReport.getId();
+            }
+            
+            // 创建新的报告
+            Report report = new Report();
+            report.setOrderId(orderId);
+            report.setUserId(userId);
+            report.setCheckitemIds(checkitemIds);
+            report.setDoctorId(doctorId);
+            report.setStatus(0);  // 未完成状态
+            
+            // 插入数据库
+            baseMapper.insert(report);
+            log.info("成功创建体检报告，报告ID：{}", report.getId());
+            
+            return report.getId();
+        } catch (Exception e) {
+            log.error("创建体检报告失败", e);
+            throw new BusinessException("创建体检报告失败");
+        }
+    }
 }

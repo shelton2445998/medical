@@ -9,14 +9,15 @@ import com.fourth.medical.medical.vo.DoctorScheduleVo;
 import com.fourth.medical.medical.query.AppDoctorScheduleQuery;
 import com.fourth.medical.medical.vo.AppDoctorScheduleVo;
 
+import java.util.Date;
 import java.util.List;
 
 
 /**
- * 医生排班 服务接口
+ * 医生排班服务接口
  *
  * @author fourth
- * @since 2025-07-09
+ * @since 2025-07-14
  */
 public interface DoctorScheduleService extends IService<DoctorSchedule> {
 
@@ -92,4 +93,14 @@ public interface DoctorScheduleService extends IService<DoctorSchedule> {
      */
     Paging<AppDoctorScheduleVo> getAppDoctorSchedulePage(AppDoctorScheduleQuery query);
 
+    /**
+     * 根据订单信息和检查项目分配医生
+     *
+     * @param orderId 订单ID
+     * @param hospitalId 医院ID
+     * @param appointmentDate 预约日期
+     * @param checkitemIds 检查项ID列表
+     * @return 分配的医生ID，如果没有合适的医生则返回null
+     */
+    Long assignDoctorForOrder(Long orderId, Long hospitalId, Date appointmentDate, String checkitemIds);
 }

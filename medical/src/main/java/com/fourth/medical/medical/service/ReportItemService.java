@@ -91,4 +91,16 @@ public interface ReportItemService extends IService<ReportItem> {
      * @throws Exception
      */
     List<ReportItemVo> getReportItemsByUserId(Long userId);
+
+    /**
+     * 为体检报告创建检查项记录
+     *
+     * @param reportId 报告ID
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @param checkitemIds 检查项ID列表，以逗号分隔
+     * @param doctorId 医生ID
+     * @return 创建的检查项ID列表
+     */
+    List<Long> createReportItemsForReport(Long reportId, Long orderId, Long userId, String checkitemIds, Long doctorId);
 }
