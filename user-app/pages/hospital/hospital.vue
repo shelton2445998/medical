@@ -240,14 +240,14 @@
 				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
 				
 				// 构建跳转URL，包含家庭成员信息
-				let packageUrl = '/pages/package/package';
+				let selectUrl = '/pages/appointment/appointment-select';
 				if (this.memberId && this.memberName) {
-					packageUrl += `?memberId=${this.memberId}&memberName=${this.memberName}`;
+					selectUrl += `?memberId=${this.memberId}&memberName=${this.memberName}`;
 				}
 				
-				// 跳转到套餐选择页面
+				// 跳转到预约方式选择页面
 				uni.navigateTo({
-					url: packageUrl
+					url: selectUrl
 				});
 			},
 			// 拨打电话

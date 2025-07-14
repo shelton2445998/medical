@@ -82,23 +82,25 @@ export default {
 
 <style scoped>
 .normal-appointment-content {
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
   min-height: 100vh;
   padding-bottom: 40rpx;
 }
 .header {
   font-size: 36rpx;
   font-weight: bold;
-  color: #1296db;
+  color: #ffffff;
   text-align: center;
   padding: 40rpx 0 30rpx 0;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
 }
 .form-group {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 16rpx;
   margin: 0 30rpx 30rpx 30rpx;
   padding: 24rpx 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
 }
 .form-item {
   display: flex;
@@ -112,7 +114,7 @@ export default {
 }
 .value {
   font-size: 26rpx;
-  color: #1296db;
+  color: #0984e3;
 }
 .input {
   flex: 1;
@@ -130,10 +132,11 @@ export default {
   width: 100%;
   height: 90rpx;
   line-height: 90rpx;
-  background: #1296db;
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
   color: #fff;
   font-size: 30rpx;
   border-radius: 45rpx;
   border: none;
+  box-shadow: 0 4rpx 12rpx rgba(116, 185, 255, 0.3);
 }
 </style> 

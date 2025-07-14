@@ -173,18 +173,22 @@
 
 <style lang="scss">
 .content {
-	background-color: #f5f5f5;
+	background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
 	min-height: 100vh;
+	padding-bottom: 40rpx;
 }
 
 
 
 .package-tabs {
 	display: flex;
-	background-color: #ffffff;
+	background-color: rgba(255, 255, 255, 0.95);
 	padding: 0 20rpx;
+	margin: 20rpx;
 	margin-bottom: 20rpx;
-	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+	border-radius: 16rpx;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
 	
 	.tab-item {
 		flex: 1;
@@ -197,20 +201,20 @@
 		position: relative;
 		
 		&.active {
-			color: #1296db;
+			color: #0984e3;
 			font-weight: bold;
 			
-			&::after {
-				content: '';
-				position: absolute;
-				left: 50%;
-				bottom: 0;
-				transform: translateX(-50%);
-				width: 60rpx;
-				height: 4rpx;
-				background-color: #1296db;
-				border-radius: 2rpx;
-			}
+					&::after {
+			content: '';
+			position: absolute;
+			left: 50%;
+			bottom: 0;
+			transform: translateX(-50%);
+			width: 60rpx;
+			height: 4rpx;
+			background-color: #0984e3;
+			border-radius: 2rpx;
+		}
 		}
 	}
 }
@@ -219,11 +223,12 @@
 	padding: 0 20rpx;
 	
 	.package-item {
-		background-color: #ffffff;
-		border-radius: 10rpx;
+		background-color: rgba(255, 255, 255, 0.95);
+		border-radius: 16rpx;
 		margin-bottom: 20rpx;
 		padding: 30rpx;
-		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
 		transition: all 0.3s;
 		&:active {
 			transform: scale(0.98);
@@ -243,8 +248,8 @@
 			
 			.package-tag {
 				font-size: 22rpx;
-				color: #1296db;
-				background-color: rgba(18, 150, 219, 0.1);
+				color: #0984e3;
+				background-color: rgba(9, 132, 227, 0.1);
 				padding: 4rpx 10rpx;
 				border-radius: 6rpx;
 			}
@@ -334,7 +339,7 @@
 			.detail-btn {
 				font-size: 24rpx;
 				color: #ffffff;
-				background-color: #1296db;
+				background: linear-gradient(135deg, #74b9ff, #0984e3);
 				border: none;
 				border-radius: 30rpx;
 				padding: 0 30rpx;

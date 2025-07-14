@@ -34,7 +34,9 @@
 		{
 			"path": "pages/appointment/appointment-select",
 			"style": {
-				"navigationBarTitleText": "预约方式选择"
+				"navigationBarTitleText": "预约方式",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
 			}
 		},
 		{
@@ -46,7 +48,9 @@
 		{
 			"path": "pages/appointment/normal-appointment",
 			"style": {
-				"navigationBarTitleText": "普通项目预约"
+				"navigationBarTitleText": "普通项目预约",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
 			}
 		},
 		{
@@ -58,7 +62,9 @@
 		{
 			"path": "pages/package/package",
 			"style": {
-				"navigationBarTitleText": "选择体检套餐"
+				"navigationBarTitleText": "选择体检套餐",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
 			}
 		},
 		{
