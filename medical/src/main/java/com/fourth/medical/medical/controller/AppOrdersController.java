@@ -8,11 +8,14 @@ import com.fourth.medical.medical.service.OrdersService;
 import com.fourth.medical.medical.service.ReportService;
 import com.fourth.medical.medical.service.ReportItemService;
 import com.fourth.medical.medical.service.DoctorScheduleService;
+import com.fourth.medical.medical.service.SetmealService;
 import com.fourth.medical.medical.vo.AppOrdersVo;
+import com.fourth.medical.medical.vo.SetmealVo;
 import com.fourth.medical.auth.util.TokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +45,9 @@ public class AppOrdersController {
     
     @Autowired
     private DoctorScheduleService doctorScheduleService;
+    
+    @Autowired
+    private SetmealService setmealService;
 
     /**
      * 创建体检预约
@@ -64,20 +70,29 @@ public class AppOrdersController {
         
         // 根据订单信息创建体检报告
         if (result != null && result.getId() != null) {
+            // 获取套餐信息，从中获取检查项ID列表
+            String checkitemIds = null;
+            if (result.getSetmealId() != null) {
+                SetmealVo setmealVo = setmealService.getSetmealById(result.getSetmealId());
+                if (setmealVo != null) {
+                    checkitemIds = setmealVo.getCheckitemIds();
+                }
+            }
+            
             // 如果订单创建成功且有检查项目，则创建对应的report和report_item
-            if (result.getCheckitemIds() != null && !result.getCheckitemIds().isEmpty()) {
+            if (StringUtils.isNotBlank(checkitemIds)) {
                 // 分配医生 - 根据科室和当天值班情况分配医生
                 Long doctorId = doctorScheduleService.assignDoctorForOrder(
                         result.getId(), 
                         result.getHospitalId(), 
                         result.getAppointmentDate(), 
-                        result.getCheckitemIds());
+                        checkitemIds);
                 
                 // 创建report记录
                 Long reportId = reportService.createReportForOrder(
                         result.getId(),
                         result.getUserId(), 
-                        result.getCheckitemIds(),
+                        checkitemIds,
                         doctorId);
                 
                 // 创建report_item记录
@@ -86,7 +101,7 @@ public class AppOrdersController {
                             reportId, 
                             result.getId(), 
                             result.getUserId(), 
-                            result.getCheckitemIds(), 
+                            checkitemIds, 
                             doctorId);
                 }
             }

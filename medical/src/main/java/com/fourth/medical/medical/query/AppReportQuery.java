@@ -1,6 +1,6 @@
 package com.fourth.medical.medical.query;
 
-import com.fourth.medical.framework.query.BasePageQuery;
+import com.fourth.medical.framework.page.BasePageQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

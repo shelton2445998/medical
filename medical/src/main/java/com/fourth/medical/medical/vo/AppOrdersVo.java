@@ -63,6 +63,9 @@ public class AppOrdersVo implements Serializable {
 
     @Schema(description = "支付交易号")
     private String transactionId;
+    
+    @Schema(description = "检查项ID列表，多个ID用逗号分隔")
+    private String checkitemIds;
 
     // 关联查询字段
     @Schema(description = "用户名")

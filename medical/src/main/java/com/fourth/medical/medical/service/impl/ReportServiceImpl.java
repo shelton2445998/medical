@@ -2,9 +2,8 @@ package com.fourth.medical.medical.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fourth.medical.common.exception.BusinessException;
+import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.Paging;
-import com.fourth.medical.framework.page.PageUtil;
 import com.fourth.medical.medical.dto.ReportDto;
 import com.fourth.medical.medical.entity.Report;
 import com.fourth.medical.medical.mapper.ReportMapper;
@@ -13,7 +12,10 @@ import com.fourth.medical.medical.query.ReportQuery;
 import com.fourth.medical.medical.service.ReportService;
 import com.fourth.medical.medical.vo.AppReportVo;
 import com.fourth.medical.medical.vo.ReportVo;
+import com.fourth.medical.auth.util.AppLoginUtil;
+import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.auth.util.TokenUtil;
+import com.fourth.medical.util.PageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -79,11 +81,12 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
             throw new BusinessException("ID不能为空");
         }
         
-        // 从token中获取用户ID
-        Long userId = TokenUtil.getUserId(token);
-        if (userId == null) {
+        // 正确的方式：先用token获取到LoginVo，再获取用户信息
+        AppLoginVo appLoginVo = AppLoginUtil.getLoginVo(token);
+        if (appLoginVo == null) {
             throw new BusinessException("无效的用户Token");
         }
+        Long userId = appLoginVo.getUserId();
         
         // 查询报告
         AppReportVo appReportVo = baseMapper.getAppReportById(id);
@@ -103,11 +106,12 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
     public Paging<AppReportVo> getAppReportPage(AppReportQuery query, String token) {
         log.info("获取App体检报告总分页列表：{}", query);
         
-        // 从token中获取用户ID
-        Long userId = TokenUtil.getUserId(token);
-        if (userId == null) {
+        // 正确的方式：先用token获取到LoginVo，再获取用户信息
+        AppLoginVo appLoginVo = AppLoginUtil.getLoginVo(token);
+        if (appLoginVo == null) {
             throw new BusinessException("无效的用户Token");
         }
+        Long userId = appLoginVo.getUserId();
         
         // 设置查询条件，只查询当前用户的报告
         query.setUserId(userId);

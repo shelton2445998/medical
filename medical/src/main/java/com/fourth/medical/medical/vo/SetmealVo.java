@@ -36,6 +36,9 @@ public class SetmealVo implements Serializable {
 
     @Schema(description = "描述")
     private String description;
+    
+    @Schema(description = "检查项ID列表，多个ID用逗号分隔")
+    private String checkitemIds;
 
     @Schema(description = "状态 0:下架，1:上架")
     private Boolean status;

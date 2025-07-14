@@ -17,8 +17,7 @@
         WHERE r.id = #{id}
     </select>
 
-    <select id="getReportItemPage" parameterType="com.fourth.medical.medical.query.ReportItemQuery"
-            resultType="com.fourth.medical.medical.vo.ReportItemVo">
+    <select id="getReportItemPage" resultType="com.fourth.medical.medical.vo.ReportItemVo">
         SELECT r.*,
                o.user_id AS userId,
                u.nickname AS userName,
@@ -31,17 +30,17 @@
         LEFT JOIN doctor d ON r.doctor_id = d.id
         LEFT JOIN checkitem i ON r.item_id = i.id
         <where>
-            <if test="doctorId != null">
-                AND r.doctor_id = #{doctorId}
+            <if test="query != null and query.doctorId != null">
+                AND r.doctor_id = #{query.doctorId}
             </if>
-            <if test="orderId != null">
-                AND r.order_id = #{orderId}
+            <if test="query != null and query.orderId != null">
+                AND r.order_id = #{query.orderId}
             </if>
-            <if test="reportStatus != null">
-                AND r.report_status = #{reportStatus}
+            <if test="query != null and query.reportStatus != null">
+                AND r.report_status = #{query.reportStatus}
             </if>
-            <if test="patientKeyword != null and patientKeyword != ''">
-                AND (u.nickname LIKE CONCAT('%', #{patientKeyword}, '%') OR u.phone LIKE CONCAT('%', #{patientKeyword}, '%'))
+            <if test="query != null and query.patientKeyword != null and query.patientKeyword != ''">
+                AND (u.nickname LIKE CONCAT('%', #{query.patientKeyword}, '%') OR u.phone LIKE CONCAT('%', #{query.patientKeyword}, '%'))
             </if>
         </where>
         ORDER BY r.create_time DESC
@@ -62,8 +61,7 @@
         WHERE r.id = #{id}
     </select>
 
-    <select id="getAppReportItemPage" parameterType="com.fourth.medical.medical.query.AppReportItemQuery"
-            resultType="com.fourth.medical.medical.vo.AppReportItemVo">
+    <select id="getAppReportItemPage" resultType="com.fourth.medical.medical.vo.AppReportItemVo">
         SELECT r.*,
                o.user_id AS userId,
                u.nickname AS userName,
@@ -76,11 +74,11 @@
         LEFT JOIN doctor d ON r.doctor_id = d.id
         LEFT JOIN checkitem i ON r.item_id = i.id
         <where>
-            <if test="userId != null">
-                AND o.user_id = #{userId}
+            <if test="query != null and query.userId != null">
+                AND o.user_id = #{query.userId}
             </if>
-            <if test="reportStatus != null">
-                AND r.report_status = #{reportStatus}
+            <if test="query != null and query.reportStatus != null">
+                AND r.report_status = #{query.reportStatus}
             </if>
         </where>
         ORDER BY r.create_time DESC

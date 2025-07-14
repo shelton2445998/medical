@@ -1,12 +1,15 @@
 package com.fourth.medical.medical.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.entity.Report;
 import com.fourth.medical.medical.query.ReportQuery;
 import com.fourth.medical.medical.vo.ReportVo;
 import com.fourth.medical.medical.query.AppReportQuery;
 import com.fourth.medical.medical.vo.AppReportVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -30,10 +33,11 @@ public interface ReportMapper extends BaseMapper<Report> {
     /**
      * 体检报告总分页列表
      *
-     * @param query
+     * @param page 分页参数
+     * @param query 查询条件
      * @return
      */
-    List<ReportVo> getReportPage(ReportQuery query);
+    Paging<ReportVo> getReportPage(IPage page, @Param("query") ReportQuery query);
 
     /**
      * App体检报告总详情
@@ -46,9 +50,10 @@ public interface ReportMapper extends BaseMapper<Report> {
     /**
      * App体检报告总分页列表
      *
-     * @param query
+     * @param page 分页参数
+     * @param query 查询条件
      * @return
      */
-    List<AppReportVo> getAppReportPage(AppReportQuery query);
+    Paging<AppReportVo> getAppReportPage(IPage page, @Param("query") AppReportQuery query);
 
 }
