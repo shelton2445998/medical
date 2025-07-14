@@ -54,6 +54,11 @@ const accountLogin = async function(account, password) {
 
 // 获取token
 const getToken = function() {
+  // 优先获取uniIdToken，如果没有则获取TOKEN_KEY
+  const uniIdToken = uni.getStorageSync('uniIdToken');
+  if (uniIdToken) {
+    return uniIdToken;
+  }
   return uni.getStorageSync(TOKEN_KEY);
 }
 

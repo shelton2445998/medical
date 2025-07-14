@@ -188,6 +188,12 @@
 			"style": {
 				"navigationBarTitleText": "成员健康档案"
 			}
+		},
+		{
+			"path": "pages/appointment-detail/appointment-detail",
+			"style": {
+				"navigationBarTitleText": "预约详情"
+			}
 		}
 	],
 	"tabBar": {

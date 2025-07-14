@@ -47,14 +47,7 @@
           </view>
         </picker>
       </view>
-      <view class="form-item">
-        <text class="label">手机号：</text>
-        <input class="input" v-model="phone" placeholder="请输入手机号" type="number" maxlength="11" />
-      </view>
-      <view class="form-item">
-        <text class="label">身份证号：</text>
-        <input class="input" v-model="idCard" placeholder="请输入身份证号" maxlength="18" />
-      </view>
+
       <view class="form-item">
         <text class="label">预约日期：</text>
         <picker mode="date" @change="onDateChange">
@@ -83,7 +76,7 @@
         <text class="label">备注：</text>
         <input class="input" v-model="remark" placeholder="可填写特殊需求或备注" />
       </view>
-      <button class="next-btn" @click="nextStep" :disabled="!name || !phone || !selectedDate || !gender || !idCard || !selectedDoctor">下一步</button>
+      <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !gender || !selectedDoctor">下一步</button>
     </view>
 
     <!-- Step 4: 支付预约 -->
@@ -147,14 +140,6 @@
           <view class="info-item">
             <text class="label">性别：</text>
             <text class="value">{{ gender }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">手机号：</text>
-            <text class="value">{{ phone }}</text>
-          </view>
-          <view class="info-item">
-            <text class="label">身份证号：</text>
-            <text class="value">{{ idCard }}</text>
           </view>
         </view>
         
@@ -307,8 +292,6 @@ export default {
       selectedPackage: null,
       name: '',
       gender: '',
-      phone: '',
-      idCard: '',
       selectedDate: '',
       remark: '',
       payMethods: [

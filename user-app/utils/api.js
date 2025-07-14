@@ -1,14 +1,15 @@
 // API 配置文件
 // 注意：如果服务器无法访问，请检查以下地址：
-// 1. http://39.104.57.236:8888/api (推荐)
-// 2. http://localhost:8888/api (本地开发)
-// 3. http://39.104.57.236:6379 (Redis端口，不用于HTTP)
+// 1. http://localhost:8888/api (本地开发，推荐)
+// 2. http://39.104.57.236:8888/api (远程服务器)
 
-// 环境配置
-const isDev = process.env.NODE_ENV === 'development';
-const API_BASE_URL = isDev 
-  ? 'http://localhost:8888/api'  // 开发环境使用本地地址
-  : 'http://39.104.57.236:8888/api';  // 生产环境使用服务器地址
+// 环境配置 - 统一使用本地地址进行测试
+const API_BASE_URL = 'http://localhost:8888/api';
+
+// 如果本地服务器无法访问，可以手动切换到远程地址
+// const API_BASE_URL = 'http://39.104.57.236:8888/api';
+
+console.log('API配置 - 基础URL:', API_BASE_URL);
 
 // 医院相关接口
 export const hospitalApi = {
@@ -63,6 +64,8 @@ export const userApi = {
   register: `${API_BASE_URL}/user/register`,
   // 获取用户信息
   getUserInfo: `${API_BASE_URL}/user/info`,
+  // 获取登录用户信息
+  getLoginUserInfo: `${API_BASE_URL}/app/getLoginUserInfo`,
 };
 
 export default {
