@@ -127,25 +127,15 @@
       </view>
           
       <view class="form-item">
-            <text class="form-label">性别</text>
-            <view class="gender-selection">
-              <view 
-                class="gender-option" 
-                :class="{active: gender === '男'}"
-                @click="selectGender('男')"
-              >
-                <text class="gender-icon">👨</text>
-                <text class="gender-text">男</text>
+            <text class="form-label">患者性别</text>
+        <picker :range="genderOptions" @change="onGenderChange">
+              <view class="picker-display">
+                <text class="picker-text" :class="{ 'placeholder': !patientGender }">
+                  {{ patientGender || '请选择性别' }}
+                </text>
+                <text class="picker-icon">👥</text>
           </view>
-              <view 
-                class="gender-option" 
-                :class="{active: gender === '女'}"
-                @click="selectGender('女')"
-              >
-                <text class="gender-icon">👩</text>
-                <text class="gender-text">女</text>
-              </view>
-            </view>
+        </picker>
       </view>
 
       <view class="form-item">
@@ -160,39 +150,63 @@
           
       <view class="form-item">
             <text class="form-label">预约时间</text>
-            <picker :range="timeSlots" @change="onTimeChange">
+        <picker :range="timeSlots" @change="onTimeChange">
               <view class="picker-display">
                 <text class="picker-text" :class="{ 'placeholder': !selectedTime }">
                   {{ selectedTime || '请选择预约时间' }}
                 </text>
                 <text class="picker-icon">⏰</text>
-              </view>
-            </picker>
           </view>
+        </picker>
+      </view>
           
       <view class="form-item">
             <text class="form-label">选择医生</text>
-            <picker :range="doctorList" range-key="name" @change="onDoctorChange">
+        <picker :range="doctorList" range-key="name" @change="onDoctorChange">
               <view class="picker-display">
                 <text class="picker-text" :class="{ 'placeholder': !selectedDoctor }">
                   {{ selectedDoctor ? `${selectedDoctor.name} (${selectedDoctor.title})` : '张医生 (主任医师)' }}
                 </text>
                 <text class="picker-icon">👨‍⚕️</text>
-              </view>
-            </picker>
           </view>
+        </picker>
+      </view>
           
       <view class="form-item">
             <text class="form-label">备注</text>
             <textarea class="form-textarea" v-model="remark" placeholder="可填写特殊需求或备注" />
       </view>
-        </view>
+
+      <view class="form-item">
+        <text class="form-label">患者年龄</text>
+        <input 
+          class="form-input" 
+          v-model="patientAge" 
+          placeholder="请输入患者年龄"
+          placeholder-class="input-placeholder"
+          type="number" 
+          maxlength="3" 
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">患者手机号</text>
+        <input 
+          class="form-input" 
+          v-model="patientPhone" 
+          placeholder="请输入患者手机号"
+          placeholder-class="input-placeholder"
+          type="number" 
+          maxlength="11" 
+        />
+      </view>
+          </view>
         
-        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !gender">
+        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !patientGender">
           <text class="btn-icon">→</text>
           <text class="btn-text">下一步</text>
         </button>
-      </view>
+          </view>
     </view>
 
     <!-- Step 4: 支付预约 -->
@@ -222,29 +236,29 @@
           </view>
           </view>
           </view>
-          
+        
           <!-- 套餐信息 -->
           <view class="info-card">
             <view class="info-header">
               <text class="info-icon">📋</text>
-              <text class="info-title">套餐信息</text>
+              <text class="info-title">{{ selectedPackage && selectedPackage.id ? '套餐信息' : '定制套餐信息' }}</text>
           </view>
             <view class="info-content">
               <view class="info-row">
-                <text class="info-label">套餐名称</text>
+                <text class="info-label">{{ selectedPackage && selectedPackage.id ? '套餐名称' : '套餐名称' }}</text>
                 <text class="info-value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
           </view>
-              <view class="info-row">
+              <view class="info-row" v-if="selectedPackage && selectedPackage.type">
                 <text class="info-label">套餐类型</text>
-                <text class="info-value">{{ selectedPackage ? getPackageTypeName(selectedPackage.type) : '暂无类型信息' }}</text>
+                <text class="info-value">{{ getPackageTypeName(selectedPackage.type) }}</text>
           </view>
-              <view class="info-row">
+              <view class="info-row" v-if="selectedPackage && selectedPackage.suitableCrowd">
                 <text class="info-label">适用人群</text>
-                <text class="info-value">{{ selectedPackage ? selectedPackage.suitableCrowd : '暂无适用人群信息' }}</text>
+                <text class="info-value">{{ selectedPackage.suitableCrowd }}</text>
           </view>
               <view class="info-row">
                 <text class="info-label">检查项目</text>
-                <text class="info-value">{{ selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : '暂无检查项目信息' }}</text>
+                <text class="info-value">{{ selectedPackage && selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : (selectedPackage && selectedPackage.checkitemIds ? '已选择' + selectedPackage.checkitemIds.split(',').length + '个检查项目' : '暂无检查项目信息') }}</text>
               </view>
           </view>
         </view>
@@ -259,10 +273,11 @@
               <view class="info-row">
                 <text class="info-label">姓名</text>
                 <text class="info-value">{{ name }}</text>
-              </view>
+          </view>
+              <!-- 只去除性别重复，其他展示项全部保留 -->
               <view class="info-row">
                 <text class="info-label">性别</text>
-                <text class="info-value">{{ gender }}</text>
+                <text class="info-value">{{ patientGender === '男' || patientGender === 1 ? '男' : '女' }}</text>
               </view>
           </view>
         </view>
@@ -289,7 +304,7 @@
               <view class="info-row" v-if="remark">
                 <text class="info-label">备注</text>
                 <text class="info-value">{{ remark }}</text>
-              </view>
+          </view>
           </view>
         </view>
         
@@ -300,9 +315,9 @@
               <text class="info-title">费用信息</text>
           </view>
             <view class="info-content">
-              <view class="info-row">
+              <view class="info-row" v-if="selectedPackage && selectedPackage.price && selectedPackage.id">
                 <text class="info-label">套餐原价</text>
-                <text class="info-value price-original">¥{{ selectedPackage ? selectedPackage.price : 0 }}</text>
+                <text class="info-value price-original">¥{{ selectedPackage.price }}</text>
           </view>
               <view class="info-row" v-if="selectedPackage && selectedPackage.discountPrice">
                 <text class="info-label">优惠价格</text>
@@ -477,13 +492,23 @@ export default {
         '晚上(19:00-21:00)'
       ],
       doctorList: [],
-      selectedDoctor: null
+      selectedDoctor: null,
+      patientAge: '',
+      patientGender: '',
+      patientPhone: '',
+      genderOptions: ['男', '女']
     }
   },
   computed: {
     totalPrice() {
       if (!this.selectedPackage) return 0;
-      // 优先使用优惠价格，如果没有则使用原价减去优惠金额
+      
+      // 如果是普通项目预约（没有套餐ID），直接使用price字段
+      if (!this.selectedPackage.id) {
+        return this.selectedPackage.price ? this.selectedPackage.price.toFixed(2) : '0.00';
+      }
+      
+      // 套餐预约：优先使用优惠价格，如果没有则使用原价减去优惠金额
       const finalPrice = this.selectedPackage.discountPrice || (this.selectedPackage.price - this.discount);
       return finalPrice.toFixed(2);
     }
@@ -500,6 +525,7 @@ export default {
     // 检查是否有已选择的医院和套餐
     const selectedHospital = uni.getStorageSync('selectedHospital');
     const selectedPackage = uni.getStorageSync('selectedPackage');
+    const customPackage = uni.getStorageSync('customPackage'); // 检查是否有定制套餐
     
     if (selectedHospital && selectedPackage) {
       // 如果已有选择的医院和套餐，直接跳到填写信息步骤
@@ -528,6 +554,25 @@ export default {
       if (this.memberName) {
         this.name = this.memberName;
       }
+    } else if (customPackage) {
+      // 如果有定制套餐信息（从普通项目预约进入），设置定制套餐并直接跳到支付步骤
+      this.selectedPackage = JSON.parse(customPackage);
+      // 从定制套餐信息中获取医院信息
+      if (this.selectedPackage && this.selectedPackage.hospitalId) {
+        this.selectedHospital = {
+          id: this.selectedPackage.hospitalId,
+          name: this.selectedPackage.hospitalName,
+          address: this.selectedPackage.hospitalAddress
+        };
+      }
+      // 预填一些基本信息
+      this.name = this.memberName || '用户';
+      this.gender = '男'; // 默认性别
+      this.selectedDate = this.getNextAvailableDate(); // 设置默认日期
+      this.selectedTime = '上午(08:00-12:00)'; // 默认时间段
+      this.selectedDoctor = { id: 3001, name: '张医生', title: '主任医师', department: '内科' }; // 默认医生
+      
+      this.step = 4; // 直接跳到支付步骤
     }
     
     // 初始化医生列表
@@ -594,15 +639,6 @@ export default {
     },
     pay() {
       // 验证必需字段
-      if (!this.selectedPackage || !this.selectedPackage.id) {
-        uni.showToast({
-          title: '请选择体检套餐',
-          icon: 'none',
-          duration: 2000
-        });
-        return;
-      }
-      
       if (!this.selectedHospital || !this.selectedHospital.id) {
         uni.showToast({
           title: '请选择医院',
@@ -642,18 +678,24 @@ export default {
       
       // 构建App预约订单数据，对应后端AppOrdersDto结构
       const orderData = {
-        setmealId: this.selectedPackage.id, // 套餐ID
+        setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID，普通项目预约时为null
         hospitalId: this.selectedHospital.id, // 医院ID
         doctorId: this.selectedDoctor ? this.selectedDoctor.id : 3001, // 医生ID，默认3001
         familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
         appointmentDate: this.selectedDate, // 预约日期
         appointmentTime: this.selectedTime, // 预约时间段
-        remark: this.remark || '' // 备注信息
+        remark: this.remark || '', // 备注信息
+        checkitemIds: this.selectedPackage ? (this.selectedPackage.checkitemIds || '') : '', // 检查项ID列表
+        patientName: this.name, // 患者姓名（使用原有的name字段）
+        patientAge: parseInt(this.patientAge) || 0, // 患者年龄
+        patientGender: this.convertGenderToNumber(this.patientGender || this.gender), // 患者性别（转换为数字：0=女，1=男）
+        patientPhone: this.patientPhone || '' // 患者手机号
       };
       
       console.log('预约订单数据：', orderData);
       console.log('selectedDoctor:', this.selectedDoctor);
       console.log('selectedDoctor.id:', this.selectedDoctor ? this.selectedDoctor.id : 'null');
+      console.log('套餐检查项目ID列表:', this.selectedPackage ? this.selectedPackage.checkitemIds : '无套餐');
       
       // 获取token
       const token = uni.getStorageSync('uniIdToken');
@@ -675,9 +717,10 @@ export default {
             this.orderNo = res.data.data.orderNumber || 'YY' + Date.now();
             this.step = 5;
             
-            // 清除存储的医院和套餐信息
+            // 清除存储的医院、套餐和定制套餐信息
             uni.removeStorageSync('selectedHospital');
             uni.removeStorageSync('selectedPackage');
+            uni.removeStorageSync('customPackage');
             
             // 显示成功提示
             uni.showToast({
@@ -716,6 +759,16 @@ export default {
       uni.removeStorageSync('selectedHospital');
       uni.removeStorageSync('selectedPackage');
       uni.reLaunch({ url: '/pages/index/index' });
+    },
+    
+    // 获取下一个可用日期（明天）
+    getNextAvailableDate() {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const year = tomorrow.getFullYear();
+      const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const day = String(tomorrow.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     },
     
     // 获取医生列表（根据医院ID获取对应医生）
@@ -853,6 +906,21 @@ export default {
           }
         }
       });
+    },
+    onGenderChange(e) {
+      this.patientGender = this.genderOptions[e.detail.value];
+    },
+    
+    // 将性别字符串转换为数字
+    convertGenderToNumber(gender) {
+      if (gender === '男' || gender === 'male' || gender === 1) {
+        return 1;
+      } else if (gender === '女' || gender === 'female' || gender === 0) {
+        return 0;
+      } else {
+        // 默认返回1（男）
+        return 1;
+      }
     }
   }
 }
@@ -941,7 +1009,7 @@ export default {
       top: 20%;
       right: 20%;
       animation-delay: -8s;
-    }
+}
     &.shape-4 {
       width: 180px;
       height: 180px;
@@ -964,7 +1032,7 @@ export default {
   50% {
     transform: translateY(0) translateX(0) scale(1);
     opacity: 0.8;
-  }
+}
   75% {
     transform: translateY(20px) translateX(-20px) scale(1.1);
     opacity: 0.9;
@@ -1032,7 +1100,7 @@ export default {
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% {
     transform: translateY(0);
-  }
+}
   40% {
     transform: translateY(-10rpx);
   }
@@ -1056,7 +1124,7 @@ export default {
   from {
     opacity: 0;
     transform: translateY(30rpx);
-  }
+}
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1079,7 +1147,7 @@ export default {
 }
 
 .main-content {
-  padding: 40rpx 40rpx 0 40rpx;
+  padding: 20rpx 40rpx 0 40rpx;
   width: 100%;
   box-sizing: border-box;
 }
@@ -1181,7 +1249,7 @@ export default {
       
       &:hover {
         transform: translateX(5rpx);
-      }
+}
       
       .info-label {
         font-size: 28rpx;
@@ -1197,7 +1265,7 @@ export default {
         
         &:hover {
           color: #0984e3;
-        }
+}
       }
     }
   }
@@ -1251,7 +1319,7 @@ export default {
       
       &:active {
         transform: translateY(-2rpx) scale(0.98);
-      }
+}
     }
     
     &.secondary-btn {
@@ -1544,7 +1612,7 @@ export default {
       margin-top: 5rpx;
       transition: all 0.3s ease;
     }
-  }
+}
 
   .hospital-selection, .package-selection {
   display: flex;
@@ -1575,7 +1643,7 @@ export default {
       height: 100%;
       background: linear-gradient(90deg, transparent, rgba(116, 185, 255, 0.2), transparent);
       transition: left 0.6s ease;
-    }
+}
 
     &:hover {
       background: rgba(255, 255, 255, 0.95);
@@ -1618,7 +1686,7 @@ export default {
       color: #666666;
   line-height: 1.4;
       transition: all 0.3s ease;
-    }
+}
 
     .package-price {
       display: flex;
@@ -1655,7 +1723,7 @@ export default {
         &:hover::after {
           width: 100%;
         }
-      }
+}
 
       .price-original {
         font-size: 24rpx;
@@ -1782,7 +1850,7 @@ export default {
     height: 1rpx;
     background: rgba(255, 255, 255, 0.3);
     z-index: -1;
-  }
+}
 
   .step {
     display: flex;
@@ -1807,7 +1875,7 @@ export default {
       }
       .step-arrow {
         color: #ffffff;
-      }
+}
     }
 
     &.completed {
@@ -1889,7 +1957,7 @@ export default {
       &:hover {
         opacity: 1;
         transform: scale(1.1);
-      }
+}
     }
   }
 }
@@ -2203,13 +2271,13 @@ export default {
     &:hover {
       background: #e0e0e0;
       transform: translateY(-2rpx);
-    }
+}
 
     &.active {
       background: #e0f7fa;
       border: 1rpx solid #0984e3;
       box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.2);
-    }
+}
 
     .method-icon {
       font-size: 40rpx;
@@ -2256,7 +2324,7 @@ export default {
 
   &:active {
     transform: translateY(-2rpx) scale(0.98);
-  }
+}
 
   &:disabled {
     background: #ccc;
@@ -2374,7 +2442,7 @@ export default {
 
     &:active {
       transform: translateY(-1rpx);
-    }
+}
   }
 
 .pay-confirm-btn {
@@ -2384,7 +2452,7 @@ export default {
 
     &:hover {
       background: linear-gradient(135deg, #74b9ff, #0984e3);
-    }
+}
   }
 
 .pay-cancel-btn {

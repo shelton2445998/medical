@@ -46,12 +46,26 @@ export const appointmentApi = {
   getDoctorList: `${API_BASE_URL}/app/doctor/list`,
 };
 
+// 检查项相关接口
+export const checkitemApi = {
+  // 获取检查项列表
+  getCheckitemList: `${API_BASE_URL}/app/checkitem/getAppCheckitemPage`,
+  // 获取检查项详情
+  getCheckitemDetail: (id) => `${API_BASE_URL}/app/checkitem/getAppCheckitem/${id}`,
+  // 获取检查项明细列表
+  getCheckitemDetailList: `${API_BASE_URL}/app/checkitemDetail/getAppCheckitemDetailPage`,
+};
+
 // 报告相关接口
 export const reportApi = {
   // 获取报告列表
   getReportList: `${API_BASE_URL}/report/list`,
   // 获取报告详情
   getReportDetail: (id) => `${API_BASE_URL}/report/detail/${id}`,
+  // 获取App报告检查项信息
+  getAppReportItem: (id) => `${API_BASE_URL}/app/reportItem/getAppReportItem/${id}`,
+  // 获取App报告检查项信息分页列表
+  getAppReportItemPage: `${API_BASE_URL}/app/reportItem/getAppReportItemPage`,
 };
 
 // 用户相关接口
@@ -72,6 +86,7 @@ export default {
   hospitalApi,
   packageApi,
   appointmentApi,
+  checkitemApi,
   reportApi,
   userApi,
 }; 

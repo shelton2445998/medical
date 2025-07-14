@@ -336,7 +336,7 @@ export default {
 }
 
 .main-content {
-	padding: 20rpx;
+	padding: 20rpx 40rpx 0 40rpx;
 }
 
 .page-header {

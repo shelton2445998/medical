@@ -1,111 +1,133 @@
 <template>
 	<view class="content">
-		<!-- 套餐封面图 -->
-		<image class="package-banner" src="/static/images/package1.jpg" mode="aspectFill"></image>
+		<!-- 动态背景装饰 -->
+		<view class="floating-shapes">
+			<view class="shape shape-1"></view>
+			<view class="shape shape-2"></view>
+			<view class="shape shape-3"></view>
+			<view class="shape shape-4"></view>
+		</view>
 		
-		<!-- 套餐基本信息 -->
-		<view class="package-info">
-			<view class="package-name">{{packageInfo.name}}</view>
-			<view class="package-price-box">
-				<view class="price-left">
-					<text class="package-price">¥{{packageInfo.price}}</text>
-					<text class="package-original-price" v-if="packageInfo.originalPrice">¥{{packageInfo.originalPrice}}</text>
+		<view class="main-content">
+		<!-- 套餐封面图 -->
+			<view class="package-banner-section">
+		<image class="package-banner" src="/static/images/package1.jpg" mode="aspectFill"></image>
+				<view class="banner-overlay">
+					<view class="banner-content">
+						<text class="banner-title">{{packageInfo.name}}</text>
+						<view class="banner-price">
+							<text class="price-symbol">¥</text>
+							<text class="price-value">{{packageInfo.price}}</text>
+							<text class="price-original" v-if="packageInfo.originalPrice">¥{{packageInfo.originalPrice}}</text>
 				</view>
-				<text class="package-discount" v-if="packageInfo.originalPrice">{{discount}}折</text>
+					</view>
+				</view>
+			</view>
+			
+			<!-- 套餐基本信息卡片 -->
+			<view class="package-info-card">
+				<view class="card-header">
+					<view class="header-icon">🏥</view>
+					<view class="header-title">套餐信息</view>
 			</view>
 			<view class="package-tags">
 				<text class="tag" v-for="(tag, index) in packageInfo.tags" :key="index">{{tag}}</text>
 			</view>
+				<view class="package-desc">
+					<text class="desc-text">{{packageInfo.description}}</text>
+				</view>
 		</view>
 		
-		<!-- 医院信息 -->
-		<view class="hospital-info" @click="navigateTo(`/pages/hospital-detail/hospital-detail?id=${packageInfo.hospitalId}`)">
+			<!-- 医院信息卡片 -->
+			<view class="hospital-card" @click="navigateTo(`/pages/hospital-detail/hospital-detail?id=${packageInfo.hospitalId}`)">
+				<view class="card-header">
+					<view class="header-icon">🏥</view>
+					<view class="header-title">体检医院</view>
+				</view>
+				<view class="hospital-content">
 			<image class="hospital-image" :src="packageInfo.hospitalImage" mode="aspectFill"></image>
 			<view class="hospital-detail">
 				<text class="hospital-name">{{packageInfo.hospitalName}}</text>
 				<view class="hospital-address">
-					<text class="iconfont icon-location">&#xe60e;</text>
+							<text class="address-icon">📍</text>
 					<text class="address-text">{{packageInfo.hospitalAddress}}</text>
 				</view>
 			</view>
-			<text class="iconfont icon-right">&#xe65f;</text>
-		</view>
-		
-		<!-- 套餐详情 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">套餐详情</text>
-			</view>
-			<view class="package-desc">
-				<text class="desc-text">{{packageInfo.description}}</text>
+					<text class="arrow-icon">→</text>
 			</view>
 		</view>
 		
-		<!-- 检查项目 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">检查项目</text>
-				<text class="item-count">共{{packageInfo.items && packageInfo.items.length ? packageInfo.items.length : 0}}项</text>
+			<!-- 检查项目卡片 -->
+			<view class="checkitems-card">
+				<view class="card-header">
+					<view class="header-icon">🔬</view>
+					<view class="header-title">检查项目</view>
+					<view class="header-count">共{{checkItems && checkItems.length ? checkItems.length : 0}}项</view>
 			</view>
-			<view class="item-list">
-				<view class="item-category" v-for="(category, categoryIndex) in categoryItems || []" :key="categoryIndex">
+				<view class="checkitems-content">
+					<view class="category-section" v-for="(category, categoryIndex) in categoryItems || []" :key="categoryIndex">
 					<view class="category-header">
 						<text class="category-name">{{category.name}}</text>
 						<text class="category-count">{{category.items && category.items.length ? category.items.length : 0}}项</text>
 					</view>
-					<view class="category-items">
-						<view class="item" v-for="(item, itemIndex) in (category.items || [])" :key="itemIndex">
+						<view class="items-list">
+							<view class="item-item" v-for="(item, itemIndex) in (category.items || [])" :key="itemIndex">
+								<view class="item-icon">🔍</view>
+								<view class="item-info">
 							<text class="item-name">{{item.name}}</text>
 							<text class="item-desc">{{item.desc}}</text>
+								</view>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		
-		<!-- 适用人群 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">适用人群</text>
+			<!-- 适用人群卡片 -->
+			<view class="suitable-card">
+				<view class="card-header">
+					<view class="header-icon">👥</view>
+					<view class="header-title">适用人群</view>
 			</view>
-			<view class="suitable-people">
-				<text class="people-text">{{packageInfo.suitablePeople}}</text>
+				<view class="suitable-content">
+					<text class="suitable-text">{{packageInfo.suitablePeople}}</text>
 			</view>
 		</view>
 		
-		<!-- 预约须知 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">预约须知</text>
+			<!-- 预约须知卡片 -->
+			<view class="notice-card">
+				<view class="card-header">
+					<view class="header-icon">📋</view>
+					<view class="header-title">预约须知</view>
 			</view>
-			<view class="notice-list">
+				<view class="notice-content">
 				<view class="notice-item" v-for="(item, index) in packageInfo.notices" :key="index">
-					<text class="notice-dot"></text>
+						<text class="notice-dot">•</text>
 					<text class="notice-text">{{item}}</text>
 				</view>
 			</view>
 		</view>
 		
-		<!-- 用户评价 -->
-		<view class="section">
-			<view class="section-header">
-				<text class="section-title">用户评价</text>
-				<view class="more" @click="navigateTo(`/pages/reviews/reviews?packageId=${packageInfo.id}`)">
+			<!-- 用户评价卡片 -->
+			<view class="reviews-card">
+				<view class="card-header">
+					<view class="header-icon">⭐</view>
+					<view class="header-title">用户评价</view>
+					<view class="more-btn" @click="navigateTo(`/pages/reviews/reviews?packageId=${packageInfo.id}`)">
 					<text>更多</text>
-					<text class="iconfont icon-right">&#xe65f;</text>
+						<text class="arrow-icon">→</text>
 				</view>
 			</view>
-			<view class="review-list" v-if="packageInfo.reviews && packageInfo.reviews.length > 0">
+				<view class="reviews-content" v-if="packageInfo.reviews && packageInfo.reviews.length > 0">
 				<view class="review-item" v-for="(item, index) in packageInfo.reviews" :key="index">
 					<view class="reviewer-info">
-						<image class="reviewer-avatar" :src="item.avatar" mode="aspectFill"></image>
 						<view class="reviewer-detail">
 							<text class="reviewer-name">{{item.name}}</text>
 							<text class="review-time">{{item.time}}</text>
 						</view>
 						<view class="review-rating">
-							<text class="iconfont icon-star-fill" v-for="n in item.rating" :key="n"></text>
-							<text class="iconfont icon-star" v-for="n in 5-item.rating" :key="n+5"></text>
+								<text class="star" v-for="n in item.rating" :key="n">⭐</text>
+								<text class="star-empty" v-for="n in 5-item.rating" :key="n+5">☆</text>
 						</view>
 					</view>
 					<text class="review-content">{{item.content}}</text>
@@ -113,15 +135,20 @@
 			</view>
 			<view class="empty-reviews" v-else>
 				<text class="empty-text">暂无评价</text>
+				</view>
 			</view>
 		</view>
 		
 		<!-- 底部按钮 -->
-		<view class="bottom-btn-container">
-			<view class="btn-group">
-				<button class="btn-consult" @click="consult">在线咨询</button>
-				<button class="btn-appointment" @click="makeAppointment">立即预约</button>
-			</view>
+		<view class="bottom-actions">
+			<button class="action-btn consult-btn" @click="consult">
+				<text class="btn-icon">💬</text>
+				<text class="btn-text">在线咨询</text>
+			</button>
+			<button class="action-btn appointment-btn" @click="makeAppointment">
+				<text class="btn-icon">📅</text>
+				<text class="btn-text">立即预约</text>
+			</button>
 		</view>
 	</view>
 </template>
@@ -129,6 +156,7 @@
 <script>
 	import { get, post } from '@/utils/request.js';
 	import { packageApi } from '@/utils/api.js';
+	import { checkitemApi } from '@/utils/api.js'; // 新增导入
 	export default {
 		data() {
 			return {
@@ -409,7 +437,8 @@
 							{ id: 2, name: '李先生', avatar: '/static/images/avatar1.jpg', time: '2023-07-09', rating: 4, content: '体检体验不错，报告解读很细致。' }
 						]
 					}
-				}
+				},
+				checkItems: [] // 存储从后端获取的检查项目详细信息
 			}
 		},
 		computed: {
@@ -423,15 +452,22 @@
 			// 按类别分组的检查项目
 			categoryItems() {
 				const categories = {};
-				if (this.packageInfo.items && Array.isArray(this.packageInfo.items)) {
-					this.packageInfo.items.forEach(item => {
-						if (!categories[item.category]) {
-							categories[item.category] = {
-								name: item.category,
+				if (this.checkItems && Array.isArray(this.checkItems)) {
+					this.checkItems.forEach(item => {
+						// 根据department_id或其他字段确定类别
+						const category = this.getCategoryByDepartmentId(item.departmentId) || '其他检查';
+						if (!categories[category]) {
+							categories[category] = {
+								name: category,
 								items: []
 							};
 						}
-						categories[item.category].items.push(item);
+						categories[category].items.push({
+							name: item.name,
+							desc: item.description || '暂无描述',
+							price: item.price,
+							id: item.id
+						});
 					});
 				}
 				return Object.values(categories);
@@ -440,36 +476,43 @@
 		async onLoad(options) {
 			if (options && options.id) {
 				try {
+					console.log('开始加载套餐详情，ID:', options.id);
 					// 直接调用套餐详情接口
 					const result = await post(packageApi.getSetmealDetail(options.id));
+					console.log('套餐详情API响应:', result);
+					
 					if (result && result.data) {
+						console.log('套餐详情数据:', result.data);
+						console.log('checkItems字段:', result.data.checkItems);
+						
 						// 解析JSON字段
-						let items = [];
 						let notices = [];
 						let reviews = [];
 						
-						if (result.data.checkItems) {
+						if (result.data.appointmentNotice) {
 							try {
-								items = JSON.parse(result.data.checkItems);
-							} catch (e) {
-								console.log('解析检查项目失败:', e);
-							}
-						}
-						
-						if (result.data.appointmentNotices) {
-							try {
-								notices = JSON.parse(result.data.appointmentNotices);
+								notices = JSON.parse(result.data.appointmentNotice);
+								console.log('解析预约须知成功:', notices);
 							} catch (e) {
 								console.log('解析预约须知失败:', e);
+								// 如果JSON解析失败，尝试作为普通字符串处理
+								if (typeof result.data.appointmentNotice === 'string') {
+									notices = [result.data.appointmentNotice];
 							}
+							}
+						} else {
+							console.log('后端返回的appointmentNotice字段为空');
 						}
 						
 						if (result.data.userReviews) {
 							try {
 								reviews = JSON.parse(result.data.userReviews);
+								console.log('解析用户评价成功:', reviews);
 							} catch (e) {
 								console.log('解析用户评价失败:', e);
 							}
+						} else {
+							console.log('后端返回的userReviews字段为空');
 						}
 						
 						this.packageInfo = {
@@ -484,10 +527,18 @@
 							hospitalImage: result.data.hospitalImage || '/static/images/hospital1.jpg',
 							description: result.data.description || '',
 							suitablePeople: result.data.suitableCrowd || '',
-							items: items,
+							checkItems: result.data.checkItems || '', // 保存检查项目ID字符串
 							notices: notices,
 							reviews: reviews
 						};
+						
+						console.log('设置packageInfo后的checkItems:', this.packageInfo.checkItems);
+						
+						// 获取检查项目详细信息
+						await this.loadCheckItems();
+						
+						// 检查是否有已选择的医院信息
+						this.checkSelectedHospital();
 					}
 				} catch (e) {
 					console.error('加载套餐详情失败:', e);
@@ -495,7 +546,112 @@
 				}
 			}
 		},
+		onShow() {
+			// 页面显示时重新检查医院信息
+			this.checkSelectedHospital();
+		},
 		methods: {
+			// 检查已选择的医院信息
+			checkSelectedHospital() {
+				const selectedHospital = uni.getStorageSync('selectedHospital');
+				
+				if (selectedHospital) {
+					try {
+						const hospitalInfo = JSON.parse(selectedHospital);
+						console.log('发现已选择的医院信息:', hospitalInfo);
+						
+						// 更新套餐信息中的医院信息
+						this.packageInfo.hospitalId = hospitalInfo.id;
+						this.packageInfo.hospitalName = hospitalInfo.name;
+						this.packageInfo.hospitalAddress = hospitalInfo.address;
+						this.packageInfo.hospitalImage = hospitalInfo.image;
+						
+						console.log('更新后的套餐医院信息:', {
+							hospitalId: this.packageInfo.hospitalId,
+							hospitalName: this.packageInfo.hospitalName,
+							hospitalAddress: this.packageInfo.hospitalAddress,
+							hospitalImage: this.packageInfo.hospitalImage
+						});
+					} catch (e) {
+						console.error('解析已选择的医院信息失败:', e);
+					}
+				} else {
+					console.log('没有发现已选择的医院信息');
+				}
+			},
+			// 根据科室ID获取类别名称
+			getCategoryByDepartmentId(departmentId) {
+				const categoryMap = {
+					2005: '心电检查',
+					2006: '影像检查', 
+					2007: '血液检查',
+					2008: '尿液检查',
+					2009: '一般检查',
+					2010: '专项检查',
+					2011: '心脑血管',
+					2012: '骨密度',
+					2013: '听力',
+					2014: '视力',
+					2015: '微量元素',
+					2016: '心脏检查',
+					2017: '基因检测'
+				};
+				return categoryMap[departmentId] || '其他检查';
+			},
+			
+			// 加载检查项目详细信息
+			async loadCheckItems() {
+				try {
+					console.log('开始加载检查项目，packageInfo:', this.packageInfo);
+					
+					if (!this.packageInfo.checkItems) {
+						console.log('套餐没有检查项目，checkItems字段为空');
+						return;
+					}
+					
+					console.log('原始checkItems字段:', this.packageInfo.checkItems);
+					
+					// 解析检查项目ID列表
+					const checkItemIds = this.packageInfo.checkItems.split(',').map(id => id.trim()).filter(id => id);
+					
+					console.log('解析后的检查项目ID列表:', checkItemIds);
+					
+					if (checkItemIds.length === 0) {
+						console.log('没有有效的检查项目ID');
+						return;
+					}
+					
+					console.log('开始获取检查项目详情，共', checkItemIds.length, '个项目');
+					
+					// 逐个获取检查项目详情
+					const checkItems = [];
+					for (const id of checkItemIds) {
+						try {
+							console.log('正在获取检查项目ID:', id);
+							const result = await post(checkitemApi.getCheckitemDetail(id));
+							console.log('检查项目', id, '的API响应:', result);
+							
+							if (result && result.data) {
+								checkItems.push(result.data);
+								console.log('成功添加检查项目:', result.data);
+							} else {
+								console.log('检查项目', id, '返回数据为空');
+							}
+						} catch (error) {
+							console.error(`获取检查项目${id}详情失败:`, error);
+						}
+					}
+					
+					this.checkItems = checkItems;
+					console.log('最终获取到的检查项目数组:', this.checkItems);
+					console.log('检查项目总数:', this.checkItems.length);
+					
+				} catch (error) {
+					console.error('加载检查项目失败:', error);
+					uni.showToast({ title: '加载检查项目失败', icon: 'none' });
+				}
+			},
+			
 			async loadPackageDetail(id) {
 				try {
 					const res = await uni.request({
@@ -511,6 +667,50 @@
 			},
 			// 立即预约
 			makeAppointment() {
+				// 检查是否已选择医院
+				const selectedHospital = uni.getStorageSync('selectedHospital');
+				
+				if (!selectedHospital) {
+					// 没有选择医院，提示用户并跳转到医院选择页面
+					uni.showModal({
+						title: '提示',
+						content: '请先选择体检医院',
+						confirmText: '去选择',
+						cancelText: '取消',
+						success: (res) => {
+							if (res.confirm) {
+								// 跳转到医院选择页面
+								uni.navigateTo({
+									url: '/pages/hospital/hospital'
+								});
+							}
+						}
+					});
+					return;
+				}
+				
+				// 解析选择的医院信息
+				let hospitalInfo;
+				try {
+					hospitalInfo = JSON.parse(selectedHospital);
+				} catch (e) {
+					console.error('解析医院信息失败:', e);
+					uni.showToast({
+						title: '医院信息解析失败',
+						icon: 'none'
+					});
+					return;
+				}
+				
+				// 更新套餐信息中的医院信息
+				this.packageInfo.hospitalId = hospitalInfo.id;
+				this.packageInfo.hospitalName = hospitalInfo.name;
+				this.packageInfo.hospitalAddress = hospitalInfo.address;
+				this.packageInfo.hospitalImage = hospitalInfo.image;
+				
+				console.log('选择的医院信息:', hospitalInfo);
+				console.log('更新后的套餐信息:', this.packageInfo);
+				
 				// 存储选择的套餐信息
 				uni.setStorageSync('selectedPackage', JSON.stringify(this.packageInfo));
 				
@@ -531,94 +731,259 @@
 
 <style lang="scss">
 .content {
+	background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
+	min-height: 100vh;
 	padding-bottom: 120rpx;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+		animation: flow 20s linear infinite;
+		pointer-events: none;
+	}
 }
+
+/* 动态背景装饰 */
+.floating-shapes {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 1;
+	
+	.shape {
+		position: absolute;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.1);
+		animation: float 6s ease-in-out infinite;
+		
+		&.shape-1 {
+			width: 80rpx;
+			height: 80rpx;
+			top: 10%;
+			left: 10%;
+			animation-delay: 0s;
+		}
+		
+		&.shape-2 {
+			width: 120rpx;
+			height: 120rpx;
+			top: 20%;
+			right: 15%;
+			animation-delay: 2s;
+		}
+		
+		&.shape-3 {
+			width: 60rpx;
+			height: 60rpx;
+			bottom: 30%;
+			left: 20%;
+			animation-delay: 4s;
+		}
+		
+		&.shape-4 {
+			width: 100rpx;
+			height: 100rpx;
+			bottom: 20%;
+			right: 10%;
+			animation-delay: 1s;
+		}
+	}
+}
+
+.main-content {
+	position: relative;
+	z-index: 2;
+	padding: 20rpx 40rpx 0 40rpx;
+}
+
+/* 套餐横幅 */
+.package-banner-section {
+	position: relative;
+	margin: 20rpx 0;
+	border-radius: 24rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
 
 .package-banner {
 	width: 100%;
 	height: 400rpx;
+		display: block;
 }
 
-.package-info {
-	background-color: #ffffff;
-	padding: 30rpx;
+	.banner-overlay {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+		padding: 40rpx 30rpx;
 	
-	.package-name {
+		.banner-content {
+			.banner-title {
 		font-size: 36rpx;
 		font-weight: bold;
-		color: #333333;
-		margin-bottom: 20rpx;
-	}
-	
-	.package-price-box {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 20rpx;
-		
-		.price-left {
+				color: #ffffff;
+				margin-bottom: 15rpx;
+				text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+			}
+			
+			.banner-price {
 			display: flex;
 			align-items: baseline;
-		}
+				gap: 10rpx;
 		
-		.package-price {
-			font-size: 40rpx;
+				.price-symbol {
+					font-size: 32rpx;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				
+				.price-value {
+					font-size: 48rpx;
 			font-weight: bold;
-			color: #ff5a5f;
-			margin-right: 15rpx;
+					color: #ffffff;
 		}
 		
-		.package-original-price {
+				.price-original {
 			font-size: 28rpx;
-			color: #999999;
+					color: rgba(255, 255, 255, 0.8);
 			text-decoration: line-through;
-			margin-right: 15rpx;
-		}
-		
-		.package-discount {
-			font-size: 24rpx;
-			color: #ffffff;
-			background-color: #ff5a5f;
-			padding: 6rpx 12rpx;
-			border-radius: 20rpx;
+				}
+			}
 		}
 	}
+}
+
+/* 卡片通用样式 */
+.package-info-card,
+.hospital-card,
+.checkitems-card,
+.suitable-card,
+.notice-card,
+.reviews-card {
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 24rpx;
+	margin: 20rpx 0;
+	padding: 30rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
+	animation: slideInUp 0.6s ease-out;
+	transition: all 0.3s ease;
 	
+	&:hover {
+		transform: translateY(-4rpx);
+		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+	}
+	
+	.card-header {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
+		
+		.header-icon {
+			font-size: 32rpx;
+			margin-right: 15rpx;
+		}
+		
+		.header-title {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333333;
+			flex: 1;
+		}
+		
+		.header-count {
+			font-size: 24rpx;
+			color: #0984e3;
+			background: rgba(9, 132, 227, 0.1);
+			padding: 8rpx 16rpx;
+			border-radius: 20rpx;
+		}
+		
+		.more-btn {
+			display: flex;
+			align-items: center;
+			font-size: 26rpx;
+			color: #0984e3;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			
+			&:hover {
+				transform: translateX(5rpx);
+			}
+			
+			.arrow-icon {
+				margin-left: 8rpx;
+				font-size: 24rpx;
+			}
+		}
+	}
+}
+
+/* 套餐信息卡片 */
+.package-info-card {
 	.package-tags {
 		display: flex;
 		flex-wrap: wrap;
+		gap: 10rpx;
+		margin-bottom: 20rpx;
 		
 		.tag {
-			font-size: 22rpx;
-			color: #1296db;
-			background-color: rgba(18, 150, 219, 0.1);
-			padding: 4rpx 12rpx;
-			border-radius: 6rpx;
-			margin-right: 10rpx;
-			margin-bottom: 10rpx;
+			font-size: 24rpx;
+			color: #0984e3;
+			background: rgba(9, 132, 227, 0.1);
+			padding: 8rpx 16rpx;
+			border-radius: 20rpx;
+			border: 2rpx solid rgba(9, 132, 227, 0.2);
+			transition: all 0.3s ease;
+			
+			&:hover {
+				background: rgba(9, 132, 227, 0.2);
+				border-color: rgba(9, 132, 227, 0.4);
+				transform: translateY(-2rpx);
+			}
+		}
+	}
+	
+	.package-desc {
+		.desc-text {
+			font-size: 28rpx;
+			color: #666666;
+			line-height: 1.6;
 		}
 	}
 }
 
-.hospital-info {
+/* 医院信息卡片 */
+.hospital-card {
+	.hospital-content {
 	display: flex;
 	align-items: center;
-	background-color: #ffffff;
-	padding: 20rpx 30rpx;
-	margin-top: 20rpx;
+		padding: 20rpx 0;
 	
 	.hospital-image {
-		width: 100rpx;
-		height: 100rpx;
-		border-radius: 10rpx;
+			width: 120rpx;
+			height: 120rpx;
+			border-radius: 16rpx;
 		margin-right: 20rpx;
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 	}
 	
 	.hospital-detail {
 		flex: 1;
 		
 		.hospital-name {
-			font-size: 30rpx;
+				font-size: 32rpx;
 			font-weight: bold;
 			color: #333333;
 			margin-bottom: 10rpx;
@@ -627,19 +992,20 @@
 		.hospital-address {
 			display: flex;
 			align-items: center;
-			font-size: 24rpx;
-			color: #999999;
+				font-size: 26rpx;
+				color: #666666;
 			
-			.iconfont {
+				.address-icon {
+					margin-right: 8rpx;
 				font-size: 24rpx;
-				margin-right: 6rpx;
+				}
+			}
 			}
 			
-			.address-text {
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
+		.arrow-icon {
+			font-size: 32rpx;
+			color: #0984e3;
+			font-weight: bold;
 		}
 	}
 	
@@ -761,15 +1127,176 @@
 	}
 }
 
-.suitable-people {
-	.people-text {
-		font-size: 28rpx;
-		color: #666666;
-		line-height: 1.6;
+
+
+/* 底部按钮 */
+.bottom-actions {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10rpx);
+	padding: 20rpx 30rpx;
+	box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.1);
+	z-index: 100;
+	
+	.action-btn {
+		width: 100%;
+		height: 100rpx;
+		border: none;
+		border-radius: 50rpx;
+		font-size: 32rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		margin-bottom: 15rpx;
+		
+		&:last-child {
+			margin-bottom: 0;
+		}
+		
+		.btn-icon {
+			font-size: 36rpx;
+			margin-right: 10rpx;
+			transition: all 0.3s ease;
+		}
+		
+		.btn-text {
+			font-size: 32rpx;
+			transition: all 0.3s ease;
+		}
+		
+		&::after {
+			border: none;
+		}
+		
+		&.consult-btn {
+			background: rgba(116, 185, 255, 0.1);
+			color: #0984e3;
+			border: 2rpx solid rgba(9, 132, 227, 0.3);
+			
+			&:hover {
+				background: rgba(116, 185, 255, 0.2);
+				border-color: rgba(9, 132, 227, 0.5);
+				transform: translateY(-2rpx);
+			}
+		}
+		
+		&.appointment-btn {
+			background: linear-gradient(135deg, #74b9ff, #0984e3);
+			color: #ffffff;
+			box-shadow: 0 8rpx 24rpx rgba(116, 185, 255, 0.3);
+			
+			&:hover {
+				transform: translateY(-4rpx);
+				box-shadow: 0 12rpx 32rpx rgba(116, 185, 255, 0.5);
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
+			}
+		}
 	}
 }
 
-.notice-list {
+/* 检查项目卡片 */
+.checkitems-card {
+	.checkitems-content {
+		.category-section {
+			margin-bottom: 30rpx;
+			
+			&:last-child {
+				margin-bottom: 0;
+			}
+			
+			.category-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 15rpx 0;
+				border-bottom: 1rpx solid #f0f0f0;
+				margin-bottom: 20rpx;
+				
+				.category-name {
+					font-size: 30rpx;
+					font-weight: bold;
+					color: #333333;
+				}
+				
+				.category-count {
+					font-size: 24rpx;
+					color: #0984e3;
+					background: rgba(9, 132, 227, 0.1);
+					padding: 6rpx 12rpx;
+					border-radius: 15rpx;
+				}
+			}
+			
+			.items-list {
+				.item-item {
+					display: flex;
+					align-items: flex-start;
+					padding: 15rpx 0;
+					border-bottom: 1rpx dashed #f0f0f0;
+					transition: all 0.3s ease;
+					
+					&:last-child {
+						border-bottom: none;
+					}
+					
+					&:hover {
+						background: rgba(9, 132, 227, 0.05);
+						border-radius: 12rpx;
+						padding: 15rpx 10rpx;
+						margin: 0 -10rpx;
+					}
+					
+					.item-icon {
+						font-size: 24rpx;
+						color: #0984e3;
+						margin-right: 15rpx;
+						margin-top: 4rpx;
+						transition: all 0.3s ease;
+					}
+					
+					.item-info {
+						flex: 1;
+						
+						.item-name {
+							font-size: 28rpx;
+							color: #333333;
+							margin-bottom: 8rpx;
+							font-weight: 500;
+							display: block;
+						}
+						
+						.item-desc {
+							font-size: 24rpx;
+							color: #666666;
+							line-height: 1.4;
+							display: block;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/* 适用人群卡片 */
+.suitable-card {
+	.suitable-content {
+		.suitable-text {
+		font-size: 28rpx;
+		color: #666666;
+		line-height: 1.6;
+		}
+	}
+}
+
+/* 预约须知卡片 */
+.notice-card {
+	.notice-content {
 	.notice-item {
 		display: flex;
 		align-items: flex-start;
@@ -783,9 +1310,10 @@
 			width: 12rpx;
 			height: 12rpx;
 			border-radius: 50%;
-			background-color: #1296db;
+				background-color: #0984e3;
 			margin-right: 15rpx;
 			margin-top: 12rpx;
+				flex-shrink: 0;
 		}
 		
 		.notice-text {
@@ -793,11 +1321,14 @@
 			font-size: 26rpx;
 			color: #666666;
 			line-height: 1.6;
+			}
 		}
 	}
 }
 
-.review-list {
+/* 用户评价卡片 */
+.reviews-card {
+	.reviews-content {
 	.review-item {
 		margin-bottom: 30rpx;
 		
@@ -808,14 +1339,8 @@
 		.reviewer-info {
 			display: flex;
 			align-items: center;
+				justify-content: space-between;
 			margin-bottom: 15rpx;
-			
-			.reviewer-avatar {
-				width: 60rpx;
-				height: 60rpx;
-				border-radius: 50%;
-				margin-right: 15rpx;
-			}
 			
 			.reviewer-detail {
 				flex: 1;
@@ -824,26 +1349,27 @@
 					font-size: 28rpx;
 					color: #333333;
 					margin-bottom: 5rpx;
+						display: block;
 				}
 				
 				.review-time {
 					font-size: 22rpx;
 					color: #999999;
+						display: block;
 				}
 			}
 			
 			.review-rating {
-				.iconfont {
+					.star {
 					font-size: 24rpx;
-					margin-left: 2rpx;
-					
-					&.icon-star-fill {
 						color: #ff9500;
+						margin-left: 2rpx;
 					}
 					
-					&.icon-star {
+					.star-empty {
+						font-size: 24rpx;
 						color: #dddddd;
-					}
+						margin-left: 2rpx;
 				}
 			}
 		}
@@ -865,48 +1391,49 @@
 		color: #999999;
 	}
 }
+}
 
-.bottom-btn-container {
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	padding: 20rpx;
-	background-color: #ffffff;
-	box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-	
-	.btn-group {
-		display: flex;
-		
-		.btn-consult {
-			width: 240rpx;
-			height: 90rpx;
-			line-height: 90rpx;
-			background-color: #ffffff;
-			color: #1296db;
-			font-size: 30rpx;
-			border-radius: 45rpx;
-			border: 1px solid #1296db;
-			margin-right: 20rpx;
-			
-			&::after {
-				border: none;
+/* 动画关键帧 */
+@keyframes float {
+	0% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+	25% {
+		transform: translateY(-10px) translateX(10px) scale(1.05);
+		opacity: 0.9;
+	}
+	50% {
+		transform: translateY(5px) translateX(-5px) scale(1.02);
+		opacity: 1;
+	}
+	75% {
+		transform: translateY(-5px) translateX(5px) scale(1.03);
+		opacity: 0.9;
+	}
+	100% {
+		transform: translateY(0) translateX(0) scale(1);
+		opacity: 0.8;
+	}
+}
+
+@keyframes flow {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
 			}
 		}
 		
-		.btn-appointment {
-			flex: 1;
-			height: 90rpx;
-			line-height: 90rpx;
-			background-color: #1296db;
-			color: #ffffff;
-			font-size: 30rpx;
-			border-radius: 45rpx;
-			
-			&::after {
-				border: none;
-			}
-		}
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30rpx);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }
 </style>

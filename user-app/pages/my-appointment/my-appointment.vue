@@ -10,39 +10,39 @@
 		
 		<view class="main-content">
 			<!-- 页面头部 -->
-			<view class="page-header">
+		<view class="page-header">
 				<view class="header-icon">📋</view>
 				<view class="header-title">我的预约</view>
 				<view class="header-desc">查看和管理您的体检预约</view>
 			</view>
-			
+		
 			<!-- 预约状态选项卡 -->
-			<view class="status-tabs">
-				<view 
-					class="tab-item" 
-					v-for="(item, index) in statusList" 
-					:key="index"
-					:class="{active: currentStatus === item.id}"
-					@click="switchStatus(item.id)"
-				>
+		<view class="status-tabs">
+			<view 
+				class="tab-item" 
+				v-for="(item, index) in statusList" 
+				:key="index"
+				:class="{active: currentStatus === item.id}"
+				@click="switchStatus(item.id)"
+			>
 					<text class="tab-icon">{{item.icon}}</text>
 					<text class="tab-text">{{item.name}}</text>
 					<view class="tab-count" v-if="getStatusCount(item.id) > 0">{{getStatusCount(item.id)}}</view>
-				</view>
 			</view>
-			
-			<!-- 预约列表 -->
-			<view class="appointment-list" v-if="filteredAppointments.length > 0">
-				<view class="appointment-item" v-for="(item, index) in filteredAppointments" :key="index" @click="viewDetail(item)">
-					<view class="appointment-header">
+		</view>
+		
+		<!-- 预约列表 -->
+		<view class="appointment-list" v-if="filteredAppointments.length > 0">
+			<view class="appointment-item" v-for="(item, index) in filteredAppointments" :key="index" @click="viewDetail(item)">
+				<view class="appointment-header">
 						<view class="hospital-info">
 							<text class="hospital-icon">🏥</text>
 							<text class="hospital-name">{{item.hospitalName || '体检医院'}}</text>
-						</view>
+				</view>
 						<view class="status-badge" :class="'status-' + item.status">
 							<text class="status-icon">{{getStatusIcon(item.status)}}</text>
 							<text class="status-text">{{getStatusName(item.status)}}</text>
-						</view>
+					</view>
 					</view>
 					
 					<view class="appointment-content">
@@ -50,52 +50,52 @@
 							<view class="info-item">
 								<text class="info-label">预约时间</text>
 								<text class="info-value">{{formatDate(item.appointmentDate)}} {{item.timeSlot || '上午'}}</text>
-							</view>
+					</view>
 							<view class="info-item">
 								<text class="info-label">订单号</text>
 								<text class="info-value">{{item.orderNumber || 'N/A'}}</text>
-							</view>
+					</view>
 							<view class="info-item" v-if="item.price">
 								<text class="info-label">套餐价格</text>
-								<text class="info-value price">¥{{item.price}}</text>
-							</view>
+						<text class="info-value price">¥{{item.price}}</text>
+					</view>
 							<view class="info-item" v-if="item.amount">
 								<text class="info-label">订单金额</text>
 								<text class="info-value price">¥{{item.amount}}</text>
 							</view>
-						</view>
+				</view>
 						
-						<view class="appointment-actions">
-							<button 
+				<view class="appointment-actions">
+					<button 
 								class="action-btn cancel-btn" 
-								v-if="item.status === 1" 
-								@click.stop="cancelAppointment(item)"
+						v-if="item.status === 1" 
+						@click.stop="cancelAppointment(item)"
 							>
 								<text class="btn-icon">❌</text>
 								<text class="btn-text">取消预约</text>
 							</button>
-							<button 
+					<button 
 								class="action-btn report-btn" 
-								v-if="item.status === 2 || item.status === 3" 
-								@click.stop="viewReport(item)"
+						v-if="item.status === 2 || item.status === 3" 
+						@click.stop="viewReport(item)"
 							>
 								<text class="btn-icon">📊</text>
 								<text class="btn-text">查看报告</text>
 							</button>
-							<button 
+					<button 
 								class="action-btn detail-btn" 
-								@click.stop="viewDetail(item)"
+						@click.stop="viewDetail(item)"
 							>
 								<text class="btn-icon">👁️</text>
 								<text class="btn-text">查看详情</text>
 							</button>
 						</view>
-					</view>
 				</view>
 			</view>
-			
-			<!-- 空状态 -->
-			<view class="empty-state" v-else>
+		</view>
+		
+		<!-- 空状态 -->
+		<view class="empty-state" v-else>
 				<view class="empty-icon">📋</view>
 				<text class="empty-title">暂无预约记录</text>
 				<text class="empty-desc">您还没有任何体检预约，快来预约一次专业的体检吧</text>
@@ -242,32 +242,32 @@ export default {
 							
 							// 使用API函数调用
 							cancelAppointment(appointment.id).then(res => {
-								console.log('取消预约响应：', res);
+									console.log('取消预约响应：', res);
 								if (res && res.code === 200) {
-									// 更新本地数据
-									const index = this.appointments.findIndex(item => item.id === appointment.id);
-									if (index !== -1) {
+										// 更新本地数据
+										const index = this.appointments.findIndex(item => item.id === appointment.id);
+										if (index !== -1) {
 										this.appointments[index].status = 0; // 0表示已取消
-										// 重新筛选
-										this.switchStatus(this.currentStatus);
-									}
-									
-									uni.showToast({
-										title: '取消预约成功',
-										icon: 'success'
-									});
-								} else {
-									uni.showToast({
+											// 重新筛选
+											this.switchStatus(this.currentStatus);
+										}
+										
+										uni.showToast({
+											title: '取消预约成功',
+											icon: 'success'
+										});
+									} else {
+										uni.showToast({
 										title: res.msg || '取消预约失败',
+											icon: 'none'
+										});
+									}
+							}).catch(err => {
+									console.error('取消预约失败：', err);
+									uni.showToast({
+										title: '网络错误，请重试',
 										icon: 'none'
 									});
-								}
-							}).catch(err => {
-								console.error('取消预约失败：', err);
-								uni.showToast({
-									title: '网络错误，请重试',
-									icon: 'none'
-								});
 							});
 						}
 					}
@@ -363,7 +363,7 @@ export default {
 }
 
 .main-content {
-	padding: 20rpx;
+	padding: 20rpx 40rpx 0 40rpx;
 }
 
 .page-header {
@@ -483,12 +483,12 @@ export default {
 					color: #1296db;
 					margin-right: 10rpx;
 				}
-				
-				.hospital-name {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #333333;
-				}
+			
+			.hospital-name {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
+			}
 			}
 			
 			.status-badge {

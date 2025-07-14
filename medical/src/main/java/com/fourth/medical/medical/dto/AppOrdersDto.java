@@ -21,7 +21,6 @@ public class AppOrdersDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "套餐ID")
-    @NotNull(message = "套餐ID不能为空")
     private Long setmealId;
 
     @Schema(description = "医院ID")
@@ -49,5 +48,17 @@ public class AppOrdersDto implements Serializable {
     
     @Schema(description = "检查项ID列表，多个ID用逗号分隔")
     private String checkitemIds;
+
+    @Schema(description = "患者姓名")
+    private String patientName;
+
+    @Schema(description = "患者年龄")
+    private Integer patientAge;
+
+    @Schema(description = "患者性别 0:女，1:男")
+    private Integer patientGender;
+
+    @Schema(description = "患者手机号")
+    private String patientPhone;
 
 } 

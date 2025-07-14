@@ -97,11 +97,11 @@
         <view class="tip-item">
           <text class="tip-icon">💡</text>
           <text class="tip-text">首次预约建议选择套餐，检查更全面</text>
-        </view>
+    </view>
         <view class="tip-item">
           <text class="tip-icon">⏰</text>
           <text class="tip-text">预约成功后请按时到院体检</text>
-        </view>
+</view>
       </view>
     </view>
   </view>
@@ -235,7 +235,7 @@ export default {
       bottom: 10%;
       right: 50%;
       animation-delay: -10s;
-    }
+}
   }
 }
 
@@ -290,7 +290,7 @@ export default {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
+}
 }
 
 @keyframes pulse {
@@ -329,18 +329,18 @@ export default {
 }
 
 .main-content {
-  padding: 40rpx 40rpx 0 40rpx;
+  padding: 20rpx 40rpx 0 40rpx;
 }
 
 .welcome-section {
   text-align: center;
-  margin-bottom: 60rpx;
-  padding: 40rpx 0;
+  margin-bottom: 20rpx;
+  padding: 15rpx 0;
   animation: fadeInDown 1s ease-out;
   
   .welcome-icon {
-    font-size: 80rpx;
-    margin-bottom: 20rpx;
+    font-size: 50rpx;
+    margin-bottom: 10rpx;
     filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.2));
     animation: bounce 2s infinite;
     transition: all 0.3s ease;
@@ -351,30 +351,30 @@ export default {
   }
   
   .welcome-title {
-    font-size: 44rpx;
+    font-size: 32rpx;
     font-weight: bold;
     color: #ffffff;
-    margin-bottom: 16rpx;
+    margin-bottom: 8rpx;
     text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
   }
   
   .welcome-desc {
-    font-size: 28rpx;
+    font-size: 22rpx;
     color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
   }
 }
 
 .select-list {
-  margin-bottom: 60rpx;
+  margin-bottom: 30rpx;
 }
 
 .select-card {
   background: #ffffff;
-  border-radius: 24rpx;
-  margin-bottom: 40rpx;
-  padding: 40rpx;
+  border-radius: 20rpx;
+  margin-bottom: 25rpx;
+  padding: 25rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
@@ -462,24 +462,24 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30rpx;
+    margin-bottom: 20rpx;
     transition: all 0.3s ease;
     
     .card-icon {
-      width: 80rpx;
-      height: 80rpx;
-      border-radius: 20rpx;
-      display: flex;
-      align-items: center;
+      width: 60rpx;
+      height: 60rpx;
+      border-radius: 15rpx;
+  display: flex;
+  align-items: center;
       justify-content: center;
-      font-size: 40rpx;
+      font-size: 30rpx;
       transition: all 0.3s ease;
       
       &.normal-icon {
         background: linear-gradient(135deg, #74b9ff, #0984e3);
         color: #ffffff;
         box-shadow: 0 4rpx 12rpx rgba(116, 185, 255, 0.3);
-      }
+}
       
       &.package-icon {
         background: linear-gradient(135deg, #74b9ff, #0984e3);
@@ -489,9 +489,9 @@ export default {
     }
     
     .card-badge {
-      padding: 8rpx 20rpx;
-      border-radius: 20rpx;
-      font-size: 22rpx;
+      padding: 6rpx 16rpx;
+      border-radius: 15rpx;
+      font-size: 20rpx;
       font-weight: bold;
       color: #ffffff;
       background: linear-gradient(135deg, #74b9ff, #0984e3);
@@ -508,18 +508,18 @@ export default {
     transition: all 0.3s ease;
     
     .card-title {
-      font-size: 36rpx;
-      font-weight: bold;
+      font-size: 32rpx;
+  font-weight: bold;
       color: #333333;
-      margin-bottom: 16rpx;
+      margin-bottom: 12rpx;
       transition: all 0.3s ease;
     }
     
     .card-desc {
-      font-size: 28rpx;
+      font-size: 24rpx;
       color: #666666;
-      margin-bottom: 30rpx;
-      line-height: 1.5;
+      margin-bottom: 20rpx;
+      line-height: 1.4;
       transition: all 0.3s ease;
     }
     
@@ -529,7 +529,7 @@ export default {
       .feature-item {
         display: flex;
         align-items: center;
-        margin-bottom: 12rpx;
+  margin-bottom: 8rpx;
         transition: all 0.3s ease;
         
         &:hover {
@@ -538,14 +538,14 @@ export default {
         
         .feature-dot {
           color: #74b9ff;
-          font-size: 24rpx;
-          margin-right: 12rpx;
+          font-size: 20rpx;
+          margin-right: 10rpx;
           font-weight: bold;
           transition: all 0.3s ease;
         }
         
         text {
-          font-size: 26rpx;
+          font-size: 22rpx;
           color: #666666;
           transition: all 0.3s ease;
         }
@@ -555,13 +555,13 @@ export default {
   
   .card-arrow {
     position: absolute;
-    right: 40rpx;
+    right: 25rpx;
     top: 50%;
     transform: translateY(-50%);
     transition: all 0.3s ease;
     
     .arrow-icon {
-      font-size: 40rpx;
+      font-size: 32rpx;
       color: #74b9ff;
       font-weight: bold;
       transition: all 0.3s ease;
@@ -570,16 +570,16 @@ export default {
   
   // 添加按钮样式
   .card-button {
-    margin-top: 30rpx;
-    padding: 20rpx 0;
+    margin-top: 20rpx;
+    padding: 15rpx 0;
     border-top: 1rpx solid #f0f0f0;
     transition: all 0.3s ease;
     
     .action-btn {
       width: 100%;
-      height: 80rpx;
-      border-radius: 40rpx;
-      font-size: 28rpx;
+      height: 70rpx;
+      border-radius: 35rpx;
+      font-size: 26rpx;
       font-weight: bold;
       border: none;
       transition: all 0.3s ease;
@@ -646,7 +646,7 @@ export default {
   .tip-item {
     display: flex;
     align-items: center;
-    margin-bottom: 15rpx;
+    margin-bottom: 12rpx;
     transition: all 0.3s ease;
     
     &:last-child {
@@ -659,14 +659,14 @@ export default {
     
     .tip-icon {
       font-size: 24rpx;
-      margin-right: 10rpx;
-      animation: pulse 2s infinite;
+      margin-right: 12rpx;
+      filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.2));
       transition: all 0.3s ease;
     }
     
     .tip-text {
-      font-size: 24rpx;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: 22rpx;
+      color: rgba(255, 255, 255, 0.8);
       transition: all 0.3s ease;
     }
   }
@@ -689,7 +689,7 @@ export default {
       .card-features {
         .feature-item {
           text {
-            font-size: 24rpx;
+  font-size: 24rpx;
           }
         }
       }
