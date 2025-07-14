@@ -30,20 +30,36 @@
 				</view>
 				<view class="appointment-info">
 					<view class="info-row">
-						<text class="info-label">体检套餐：</text>
-						<text class="info-value">{{item.packageName}}</text>
+						<text class="info-label">订单ID：</text>
+						<text class="info-value">{{item.id}}</text>
+					</view>
+					<view class="info-row">
+						<text class="info-label">套餐ID：</text>
+						<text class="info-value">{{item.setmealId}}</text>
+					</view>
+					<view class="info-row">
+						<text class="info-label">医院ID：</text>
+						<text class="info-value">{{item.hospitalId}}</text>
+					</view>
+					<view class="info-row">
+						<text class="info-label">医生ID：</text>
+						<text class="info-value">{{item.doctorId}}</text>
 					</view>
 					<view class="info-row">
 						<text class="info-label">预约时间：</text>
-						<text class="info-value">{{item.appointmentDate}} {{item.appointmentTime}}</text>
+						<text class="info-value">{{formatDate(item.appointmentDate)}} {{item.timeSlot}}</text>
 					</view>
 					<view class="info-row">
-						<text class="info-label">预约人：</text>
-						<text class="info-value">{{item.personName}}</text>
+						<text class="info-label">订单号：</text>
+						<text class="info-value">{{item.orderNumber}}</text>
 					</view>
-					<view class="info-row">
-						<text class="info-label">预约号：</text>
-						<text class="info-value">{{item.appointmentNo}}</text>
+					<view class="info-row" v-if="item.price">
+						<text class="info-label">套餐价格：</text>
+						<text class="info-value price">¥{{item.price}}</text>
+					</view>
+					<view class="info-row" v-if="item.amount">
+						<text class="info-label">订单金额：</text>
+						<text class="info-value price">¥{{item.amount}}</text>
 					</view>
 				</view>
 				<view class="appointment-actions">
@@ -54,12 +70,11 @@
 					>取消预约</button>
 					<button 
 						class="action-btn" 
-						v-if="item.status === 2" 
+						v-if="item.status === 2 || item.status === 3" 
 						@click.stop="viewReport(item)"
 					>查看报告</button>
 					<button 
 						class="action-btn primary" 
-						v-if="item.status === 1" 
 						@click.stop="viewDetail(item)"
 					>查看详情</button>
 				</view>
@@ -76,63 +91,88 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				currentStatus: 0, // 0表示全部
-				statusList: [
-					{ id: 0, name: '全部' },
-					{ id: 1, name: '待体检' },
-					{ id: 2, name: '已完成' },
-					{ id: 3, name: '已取消' }
-				],
-				appointments: [
-					{
-						id: 1,
-						hospitalName: '沈阳市云医院-和平分院',
-						packageName: '基础体检套餐',
-						appointmentDate: '2023-07-15',
-						appointmentTime: '上午 9:00-10:00',
-						personName: '张三',
-						appointmentNo: 'A20230715001',
-						status: 1 // 1-待体检，2-已完成，3-已取消
-					},
-					{
-						id: 2,
-						hospitalName: '沈阳市云医院-沈河分院',
-						packageName: '高级体检套餐',
-						appointmentDate: '2023-06-20',
-						appointmentTime: '上午 10:00-11:00',
-						personName: '张三',
-						appointmentNo: 'A20230620002',
-						status: 2
-					},
-					{
-						id: 3,
-						hospitalName: '沈阳市云医院-和平分院',
-						packageName: '男性健康套餐',
-						appointmentDate: '2023-05-10',
-						appointmentTime: '下午 14:00-15:00',
-						personName: '张三',
-						appointmentNo: 'A20230510003',
-						status: 3
-					}
-				],
-				filteredAppointments: []
-			}
-		},
+import { appointmentApi } from '@/utils/api.js';
+import { cancelAppointment } from '@/api/appointment.js';
+
+export default {
+	data() {
+		return {
+			currentStatus: 0, // 0表示全部
+			statusList: [
+				{ id: 0, name: '全部' },
+				{ id: 1, name: '待支付' },
+				{ id: 2, name: '已支付' },
+				{ id: 3, name: '已完成' }
+			],
+			appointments: [],
+			filteredAppointments: [],
+			loading: false
+		}
+	},
 		onLoad() {
-			// 初始化显示所有预约
-			this.filteredAppointments = this.appointments;
-			
 			// 获取预约列表数据
+			this.getAppointmentList();
+		},
+		
+		onShow() {
+			// 页面显示时刷新数据
 			this.getAppointmentList();
 		},
 		methods: {
 			// 获取预约列表
 			getAppointmentList() {
-				// 这里可以替换为实际的API调用
-				console.log('获取预约列表');
+				if (this.loading) return;
+				
+				this.loading = true;
+				
+				// 获取token
+				const token = uni.getStorageSync('uniIdToken');
+				console.log('获取到的token:', token);
+				
+				if (!token) {
+					uni.showToast({
+						title: '请先登录',
+						icon: 'none'
+					});
+					return;
+				}
+				
+				uni.request({
+					url: appointmentApi.getAppointmentList,
+					method: 'GET',
+					header: {
+						'Authorization': token || ''
+					},
+					success: (res) => {
+						console.log('获取预约列表响应：', res);
+						console.log('响应数据结构：', res.data);
+						
+						if (res.statusCode === 200 && res.data.code === 200) {
+							// 修复：后端返回的是Paging对象，数据在list字段中
+							this.appointments = res.data.data.list || [];
+							console.log('预约列表数据：', this.appointments);
+							console.log('预约列表长度：', this.appointments.length);
+							// 初始化显示所有预约
+							this.switchStatus(this.currentStatus);
+						} else {
+							console.error('获取预约列表失败：', res.data);
+							uni.showToast({
+								title: res.data.msg || '获取预约列表失败',
+								icon: 'none'
+							});
+						}
+					},
+					fail: (err) => {
+						console.error('获取预约列表失败：', err);
+						uni.showToast({
+							title: '网络错误，请检查网络连接',
+							icon: 'none'
+						});
+					},
+					complete: () => {
+						this.loading = false;
+					}
+				});
 			},
 			// 切换状态
 			switchStatus(statusId) {
@@ -164,24 +204,38 @@
 					content: '确定要取消此次预约吗？',
 					success: (res) => {
 						if (res.confirm) {
-							// 这里可以替换为实际的API调用
-							console.log('取消预约', appointment.id);
+							// 获取token
+							const token = uni.getStorageSync('uniIdToken');
 							
-							// 模拟取消成功
-							setTimeout(() => {
-								// 更新状态
-								const index = this.appointments.findIndex(item => item.id === appointment.id);
-								if (index !== -1) {
-									this.appointments[index].status = 3;
-									// 重新筛选
-									this.switchStatus(this.currentStatus);
+							// 使用API函数调用
+							cancelAppointment(appointment.id).then(res => {
+								console.log('取消预约响应：', res);
+								if (res && res.code === 200) {
+									// 更新本地数据
+									const index = this.appointments.findIndex(item => item.id === appointment.id);
+									if (index !== -1) {
+										this.appointments[index].status = 0; // 0表示已取消
+										// 重新筛选
+										this.switchStatus(this.currentStatus);
+									}
+									
+									uni.showToast({
+										title: '取消预约成功',
+										icon: 'success'
+									});
+								} else {
+									uni.showToast({
+										title: res.msg || '取消预约失败',
+										icon: 'none'
+									});
 								}
-								
+							}).catch(err => {
+								console.error('取消预约失败：', err);
 								uni.showToast({
-									title: '取消预约成功',
-									icon: 'success'
+									title: '网络错误，请重试',
+									icon: 'none'
 								});
-							}, 1000);
+							});
 						}
 					}
 				});
@@ -198,6 +252,15 @@
 					url: '/pages/appointment/appointment'
 				});
 			},
+			// 格式化日期
+			formatDate(dateStr) {
+				if (!dateStr) return '';
+				const date = new Date(dateStr);
+				return date.getFullYear() + '-' + 
+					String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+					String(date.getDate()).padStart(2, '0');
+			},
+			
 			// 返回上一页
 			goBack() {
 				uni.navigateBack();
@@ -313,6 +376,11 @@
 				padding: 4rpx 16rpx;
 				border-radius: 20rpx;
 				
+				&.status-0 {
+					color: #ff9800;
+					background-color: rgba(255, 152, 0, 0.1);
+				}
+				
 				&.status-1 {
 					color: #1296db;
 					background-color: rgba(18, 150, 219, 0.1);
@@ -324,6 +392,11 @@
 				}
 				
 				&.status-3 {
+					color: #42b983;
+					background-color: rgba(66, 185, 131, 0.1);
+				}
+				
+				&.status-4 {
 					color: #999999;
 					background-color: rgba(153, 153, 153, 0.1);
 				}
@@ -346,6 +419,11 @@
 				.info-value {
 					flex: 1;
 					color: #333333;
+					
+					&.price {
+						color: #ff6b35;
+						font-weight: bold;
+					}
 				}
 			}
 		}

@@ -22,6 +22,9 @@ public class AppOrdersVo implements Serializable {
     @Schema(description = "主键")
     private Long id;
 
+    @Schema(description = "订单编号")
+    private String orderNumber;
+
     @Schema(description = "用户ID")
     private Long userId;
 
@@ -43,17 +46,39 @@ public class AppOrdersVo implements Serializable {
     @Schema(description = "状态 0:已取消，1:待支付，2:已支付，3:已完成")
     private Integer status;
 
+    @Schema(description = "套餐价格")
+    private BigDecimal price;
+
     @Schema(description = "订单金额")
     private BigDecimal amount;
 
     @Schema(description = "支付时间")
     private Date payTime;
 
+    @Schema(description = "取消时间")
+    private Date cancelTime;
+
     @Schema(description = "支付方式 1:支付宝，2:微信")
     private Integer payType;
 
     @Schema(description = "支付交易号")
     private String transactionId;
+
+    // 关联查询字段
+    @Schema(description = "用户名")
+    private String userName;
+
+    @Schema(description = "用户电话")
+    private String userPhone;
+
+    @Schema(description = "套餐名称")
+    private String setmealName;
+
+    @Schema(description = "医院名称")
+    private String hospitalName;
+
+    @Schema(description = "医生姓名")
+    private String doctorName;
 
     @Schema(description = "创建人ID")
     private Long createId;

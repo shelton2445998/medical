@@ -105,24 +105,44 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new BusinessException("无权查看此订单");
         }
         
+        log.info("获取预约详情成功 - 订单ID: {}, 用户ID: {}, 状态: {}, 订单号: {}", 
+            appOrdersVo.getId(), appOrdersVo.getUserId(), appOrdersVo.getStatus(), appOrdersVo.getOrderNumber());
+        
         return appOrdersVo;
     }
 
     @Override
     public Paging<AppOrdersVo> getAppOrdersPage(AppOrdersQuery query, String token) {
-        log.info("获取App预约列表，token: {}", token);
+        log.info("=== 开始获取App预约列表 ===");
+        log.info("输入参数 - token: {}", token);
+        log.info("输入参数 - query: {}", query);
         
         // 验证token并获取用户信息
         AppLoginVo appLoginVo = validateTokenAndGetUser(token);
+        log.info("从token解析出的用户信息 - userId: {}, username: {}", appLoginVo.getUserId(), appLoginVo.getUsername());
         
         // 设置查询条件，只查询当前用户的订单
         query.setUserId(appLoginVo.getUserId());
+        log.info("设置查询条件 - userId: {}", query.getUserId());
         
         OrderMapping orderMapping = new OrderMapping();
         orderMapping.put("createTime", "create_time");
         PagingUtil.handlePage(query, orderMapping, OrderByItem.desc("id"));
+        log.info("分页参数 - pageNum: {}, pageSize: {}", query.getPageNum(), query.getPageSize());
+        
         List<AppOrdersVo> list = ordersMapper.getAppOrdersPage(query);
+        log.info("数据库查询结果 - 返回记录数: {}", list.size());
+        
+        // 打印查询到的订单详情
+        for (int i = 0; i < list.size(); i++) {
+            AppOrdersVo order = list.get(i);
+            log.info("订单[{}] - id: {}, userId: {}, setmealId: {}, hospitalId: {}, doctorId: {}, status: {}", 
+                i + 1, order.getId(), order.getUserId(), order.getSetmealId(), 
+                order.getHospitalId(), order.getDoctorId(), order.getStatus());
+        }
+        
         Paging<AppOrdersVo> paging = new Paging<>(list);
+        log.info("=== 获取App预约列表完成，返回记录数: {} ===", list.size());
         return paging;
     }
     
@@ -149,7 +169,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setTimeSlot(dto.getAppointmentTime()); // 设置时间段
         orders.setOrderNumber(generateOrderNumber());
         orders.setPrice(setmeal.getPrice());
-        orders.setStatus(0); // 0-待支付
+        orders.setStatus(1); // 1-待支付
         
         // 保存订单
         boolean saveResult = save(orders);
@@ -183,16 +203,16 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         
         // 检查订单状态
-        if (orders.getStatus() == 4) { // 假设4表示已取消
+        if (orders.getStatus() == 0) { // 0表示已取消
             throw new BusinessException("订单已取消");
         }
         
-        if (orders.getStatus() == 2 || orders.getStatus() == 3) { // 假设2表示已完成，3表示已检查
+        if (orders.getStatus() == 2 || orders.getStatus() == 3) { // 2表示已支付，3表示已完成
             throw new BusinessException("订单已完成，无法取消");
         }
         
         // 更新订单状态为取消
-        orders.setStatus(4); // 假设4表示已取消
+        orders.setStatus(0); // 0表示已取消
         orders.setCancelTime(new Date());
         
         boolean result = updateById(orders);
@@ -210,16 +230,25 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
      * @return
      */
     private AppLoginVo validateTokenAndGetUser(String token) {
+        log.info("=== 开始验证token ===");
+        log.info("输入token: {}", token);
+        
         if (StringUtils.isBlank(token)) {
+            log.error("token为空，抛出异常");
             throw new BusinessException("请先登录");
         }
         
+        log.info("调用AppLoginUtil.getLoginVo(token)");
         AppLoginVo appLoginVo = AppLoginUtil.getLoginVo(token);
+        log.info("AppLoginUtil.getLoginVo()返回结果: {}", appLoginVo);
+        
         if (appLoginVo == null) {
+            log.error("AppLoginUtil.getLoginVo()返回null，抛出异常");
             throw new BusinessException("登录已过期，请重新登录");
         }
         
-        log.info("验证token成功，用户ID: {}, 用户名: {}", appLoginVo.getUserId(), appLoginVo.getUsername());
+        log.info("验证token成功 - 用户ID: {}, 用户名: {}", appLoginVo.getUserId(), appLoginVo.getUsername());
+        log.info("=== token验证完成 ===");
         return appLoginVo;
     }
     

@@ -20,3 +20,6 @@ create index family_user_index
 
 INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (11001, 5001, '张小明', 1, '110101201005121234', '13900001234', '子', 5001, '2025-07-10 10:20:00', null, '2025-07-10 10:20:00');
 INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (11002, 5002, '李大妈', 0, '110101196508231245', '13900005678', '母', 5002, '2025-07-10 11:30:00', null, '2025-07-10 11:30:00');
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6001, 5001, '张三', 1, '110101199003033456', '13800003333', '父亲', 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6002, 5001, '李四', 0, '110101199004044567', '13800004444', '母亲', 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6003, 5002, '王五', 1, '110101199005055678', '13800005555', '丈夫', 5002, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');

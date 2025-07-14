@@ -40,3 +40,4 @@ export function getReportDetail(id) {
     params: { id }
   })
 }
+

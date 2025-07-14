@@ -111,10 +111,10 @@
 			return {
 				userInfo: {
 					avatar: '/static/img/logo.png',
-					id: '1001',
-					appointmentCount: 5,
-					reportCount: 3,
-					favoriteCount: 2
+					id: '',
+					appointmentCount: 0,
+					reportCount: 0,
+					favoriteCount: 0
 				},
 				serviceList: [
 					{
@@ -189,8 +189,53 @@
 			...mapMutations(['logout']),
 			// 获取用户信息
 			getUserInfo() {
-				// 这里可以替换为实际的API调用
-				console.log('获取用户信息');
+				// 获取token
+				const token = uni.getStorageSync('uniIdToken');
+				
+				if (!token) {
+					console.log('未找到token，无法获取用户信息');
+					return;
+				}
+				
+				// 使用API配置中的地址
+				const API_BASE_URL = process.env.NODE_ENV === 'development' 
+					? 'http://localhost:8888/api' 
+					: 'http://39.104.57.236:8888/api';
+				
+				uni.request({
+					url: `${API_BASE_URL}/app/getLoginUserInfo`,
+					method: 'POST',
+					header: {
+						'Authorization': token,
+						'Content-Type': 'application/json'
+					},
+					success: (res) => {
+						console.log('获取用户信息响应：', res);
+						if (res.statusCode === 200 && res.data.code === 200) {
+							const userData = res.data.data;
+							this.userInfo.id = userData.userId;
+							this.userInfo.avatar = userData.head || '/static/img/logo.png';
+							// 可以设置其他用户信息
+							console.log('用户信息更新成功：', this.userInfo);
+						} else {
+							console.error('获取用户信息失败：', res.data);
+							// 如果服务器返回错误，显示提示
+							uni.showToast({
+								title: '获取用户信息失败',
+								icon: 'none'
+							});
+						}
+					},
+					fail: (err) => {
+						console.error('获取用户信息网络错误：', err);
+						// 网络错误时显示提示
+						uni.showToast({
+							title: '网络连接失败，请检查服务器状态',
+							icon: 'none',
+							duration: 3000
+						});
+					}
+				});
 			},
 			// 页面跳转
 			navigateTo(url) {
