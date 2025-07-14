@@ -35,3 +35,6 @@ create index order_setmeal_index
 create index order_user_index
     on orders (user_id);
 
+INSERT INTO medical.orders (id, user_id, setmeal_id, hospital_id, doctor_id, appointment_date, time_slot, status, amount, create_id, create_time, update_id, update_time) VALUES (7001, 5001, 4001, 1001, 3001, '2025-07-15', '上午', 1, 200.00, 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.orders (id, user_id, setmeal_id, hospital_id, doctor_id, appointment_date, time_slot, status, amount, create_id, create_time, update_id, update_time) VALUES (7002, 5001, 4002, 1001, 3002, '2025-07-16', '下午', 1, 300.00, 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.orders (id, user_id, setmeal_id, hospital_id, doctor_id, appointment_date, time_slot, status, amount, create_id, create_time, update_id, update_time) VALUES (7003, 5002, 4003, 1002, 3003, '2025-07-17', '上午', 1, 250.00, 5002, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');

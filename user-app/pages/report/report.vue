@@ -62,39 +62,98 @@
 </template>
 
 <script>
-	import { getCurrentUserReports } from '@/api/report';
+	import { getCurrentUserReportItemPage } from '@/api/report';
+	import { getLoginUserInfo } from '@/api/user';
 	
 	export default {
 		data() {
 			return {
 				reportList: [],
 				loading: false,
-				error: null
+				error: null,
+				userInfo: null // 存储用户信息
 			}
 		},
 		onLoad() {
-			// 获取报告列表
-			this.getReportList();
+			// 先获取用户信息，然后再获取报告列表
+			this.getUserInfo().then(() => {
+				this.getReportList();
+			}).catch(error => {
+				console.error('初始化数据失败:', error);
+				// 即使获取用户信息失败，也尝试获取报告列表
+				this.getReportList();
+			});
 		},
 		methods: {
+			// 获取用户信息
+			async getUserInfo() {
+				return new Promise(async (resolve, reject) => {
+					try {
+						const res = await getLoginUserInfo();
+						console.log('用户信息:', res);
+						
+						if (res && res.success && res.data) {
+							this.userInfo = res.data;
+							console.log('获取到的用户信息:', this.userInfo);
+							resolve(this.userInfo);
+						} else {
+							console.error('获取用户信息失败:', res);
+							uni.showToast({
+								title: '获取用户信息失败',
+								icon: 'none'
+							});
+							reject(new Error('获取用户信息失败'));
+						}
+					} catch (error) {
+						console.error('获取用户信息出错:', error);
+						uni.showToast({
+							title: '获取用户信息失败',
+							icon: 'none'
+						});
+						reject(error);
+					}
+				});
+			},
+			
 			// 获取报告列表
 			async getReportList() {
 				this.loading = true;
 				this.error = null;
 				
 				try {
-					const res = await getCurrentUserReports();
-					this.reportList = res.map(item => ({
-						id: item.id,
-						packageName: item.packageName || '未命名套餐',
-						reportDate: item.reportDate || '',
-						hospitalName: item.hospitalName || '',
-						personName: item.personName || '',
-						examDate: item.examDate || '',
-						abnormalCount: item.abnormalCount || 0,
-						totalCount: item.totalCount || 0,
-						adviceCount: item.adviceCount || 0
-					}));
+					// 添加查询参数，包含分页信息和用户ID（如果有）
+					const query = {
+						pageNum: 1,
+						pageSize: 10
+					};
+					
+					// 如果已经获取到用户信息，添加用户ID到查询参数
+					if (this.userInfo && this.userInfo.id) {
+						query.userId = this.userInfo.id;
+					}
+					
+					const res = await getCurrentUserReportItemPage(query);
+					console.log('API返回数据:', res);
+					
+					// 根据API实际返回的数据结构处理
+					if (res && res.success && res.data && res.data.list && Array.isArray(res.data.list)) {
+						// 使用res.data.list作为数据源
+						this.reportList = res.data.list.map(item => ({
+							id: item.id,
+							packageName: item.packageName || '未命名套餐',
+							reportDate: item.createTime || '',
+							hospitalName: item.hospitalName || '',
+							personName: item.personName || '',
+							examDate: item.examDate || '',
+							abnormalCount: item.abnormalCount || 0,
+							totalCount: item.totalCount || 0,
+							adviceCount: item.adviceCount || 0
+						}));
+					} else {
+						// 如果返回的数据结构不符合预期
+						this.reportList = [];
+						console.error('API返回的数据结构不符合预期:', res);
+					}
 				} catch (error) {
 					console.error('获取报告列表失败:', error);
 					this.error = error;

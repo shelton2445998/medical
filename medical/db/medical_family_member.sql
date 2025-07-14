@@ -18,3 +18,6 @@ create table family_member
 create index family_user_index
     on family_member (user_id);
 
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6001, 5001, '张三', 1, '110101199003033456', '13800003333', '父亲', 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6002, 5001, '李四', 0, '110101199004044567', '13800004444', '母亲', 5001, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
+INSERT INTO medical.family_member (id, user_id, name, gender, id_card, mobile, relation, create_id, create_time, update_id, update_time) VALUES (6003, 5002, '王五', 1, '110101199005055678', '13800005555', '丈夫', 5002, '2025-07-09 09:47:35', null, '2025-07-09 09:47:35');
