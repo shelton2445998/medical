@@ -239,7 +239,13 @@
 				layoutMode: 2,
 			}
 		},
+		// 页面标题配置
 		onLoad() {
+			// 设置页面标题
+			uni.setNavigationBarTitle({
+				title: '杏林春暖·健康预约'
+			});
+			
 			// 页面加载时获取推荐医院
 			this.getRecommendHospitals();
 			this.getRecommendPackages();
@@ -282,14 +288,14 @@
 					this.hospitalList = [
 						{
 							id: 1,
-							name: '沈阳市云医院-和平分院',
+							name: '华夏健康体检中心-总院',
 							image: '/static/images/hospital1.jpg',
 							tags: ['三甲', '综合医院'],
 							address: '沈阳市和平区南京南街61号'
 						},
 						{
 							id: 2,
-							name: '沈阳市云医院-沈河分院',
+							name: '华夏健康体检中心-分院',
 							image: '/static/images/hospital2.jpg',
 							tags: ['三甲', '综合医院'],
 							address: '沈阳市沈河区北站路33号'
@@ -411,7 +417,10 @@
 			},
 			async getRecommendPackages() {
 				try {
+					console.log('开始获取推荐套餐...');
 					const result = await get(packageApi.getRecommendPackages);
+					console.log('推荐套餐接口返回结果:', result);
+					
 					if (result && result.data) {
 						this.recommendPackages = result.data.map((item, index) => ({
 							id: item.id,
@@ -421,11 +430,42 @@
 							tags: item.tags || [],
 							image: `/static/images/package${(index % 4) + 1}.jpg`
 						}));
+						console.log('处理后的推荐套餐数据:', this.recommendPackages);
+					} else if (Array.isArray(result)) {
+						// 如果直接返回数组
+						this.recommendPackages = result.map((item, index) => ({
+							id: item.id,
+							name: item.name,
+							price: item.price || 0,
+							description: item.description || '',
+							tags: item.tags || [],
+							image: `/static/images/package${(index % 4) + 1}.jpg`
+						}));
+						console.log('处理后的推荐套餐数据:', this.recommendPackages);
 					} else {
+						console.log('接口返回数据格式异常:', result);
 						this.recommendPackages = [];
 					}
 				} catch (e) {
+					console.error('获取推荐套餐失败:', e);
 					this.recommendPackages = [];
+					// 使用测试数据
+					this.recommendPackages = [
+						{
+							id: 4001,
+							name: '基础体检套餐',
+							price: 269,
+							description: '包含常规体检项目，适合一般健康检查',
+							image: '/static/images/package1.jpg'
+						},
+						{
+							id: 4002,
+							name: '高级体检套餐',
+							price: 599,
+							description: '包含基础套餐及更多专项检查，适合中老年人',
+							image: '/static/images/package2.jpg'
+						}
+					];
 				}
 			},
 			// 切换布局模式

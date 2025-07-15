@@ -34,7 +34,7 @@ public class AppSetmealVo implements Serializable {
     @Schema(description = "折扣价")
     private BigDecimal discountPrice;
 
-    @Schema(description = "描述")
+    @Schema(description = "描述（包含套餐介绍、适用人群、预约须知、用户评价，用分隔符分隔）")
     private String description;
 
     @Schema(description = "检查项ID列表，多个ID用逗号分隔")
@@ -55,4 +55,48 @@ public class AppSetmealVo implements Serializable {
     @Schema(description = "修改时间")
     private Date updateTime;
 
+    /**
+     * 解析描述字段，获取套餐介绍
+     * 描述字段格式：套餐介绍|适用人群|预约须知|用户评价
+     */
+    public String getPackageDescription() {
+        if (description == null || description.isEmpty()) {
+            return "";
+        }
+        String[] parts = description.split("\\|");
+        return parts.length > 0 ? parts[0] : "";
+    }
+
+    /**
+     * 解析描述字段，获取适用人群
+     */
+    public String getSuitableCrowd() {
+        if (description == null || description.isEmpty()) {
+            return "";
+        }
+        String[] parts = description.split("\\|");
+        return parts.length > 1 ? parts[1] : "";
+    }
+
+    /**
+     * 解析描述字段，获取预约须知
+     */
+    public String getAppointmentNotice() {
+        if (description == null || description.isEmpty()) {
+            return "";
+        }
+        String[] parts = description.split("\\|");
+        return parts.length > 2 ? parts[2] : "";
+    }
+
+    /**
+     * 解析描述字段，获取用户评价
+     */
+    public String getUserReviews() {
+        if (description == null || description.isEmpty()) {
+            return "";
+        }
+        String[] parts = description.split("\\|");
+        return parts.length > 3 ? parts[3] : "";
+    }
 }

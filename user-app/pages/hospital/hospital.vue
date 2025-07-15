@@ -268,7 +268,6 @@
 						try {
 							const packageInfo = JSON.parse(currentPackage);
 							// 更新套餐的医院信息
-							packageInfo.hospitalId = hospital.id;
 							packageInfo.hospitalName = hospital.name;
 							packageInfo.hospitalAddress = hospital.address;
 							packageInfo.hospitalImage = hospital.image;

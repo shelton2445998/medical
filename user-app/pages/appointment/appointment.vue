@@ -1,13 +1,5 @@
 <template>
 	<view class="content">
-		<!-- 动态背景装饰 -->
-		<view class="floating-shapes">
-			<view class="shape shape-1"></view>
-			<view class="shape shape-2"></view>
-			<view class="shape shape-3"></view>
-			<view class="shape shape-4"></view>
-		</view>
-		
 		<view class="main-content">
 			<!-- 页面头部 -->
 			<view class="page-header">
@@ -321,66 +313,6 @@ export default {
 	}
 }
 
-.floating-shapes {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-	z-index: -1;
-
-	.shape {
-		position: absolute;
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 50%;
-		filter: blur(50px);
-		animation: float 15s infinite ease-in-out;
-		transition: all 0.3s ease;
-		
-		&::before {
-			content: '';
-			position: absolute;
-			top: -10%;
-			left: -10%;
-			width: 120%;
-			height: 120%;
-			background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-			border-radius: 50%;
-			animation: pulse 3s ease-in-out infinite;
-		}
-
-		&.shape-1 {
-			width: 100px;
-			height: 100px;
-			top: 10%;
-			left: 10%;
-			animation-delay: -2s;
-		}
-		&.shape-2 {
-			width: 150px;
-			height: 150px;
-			top: 70%;
-			left: 30%;
-			animation-delay: -5s;
-		}
-		&.shape-3 {
-			width: 120px;
-			height: 120px;
-			top: 20%;
-			right: 20%;
-			animation-delay: -8s;
-		}
-		&.shape-4 {
-			width: 180px;
-			height: 180px;
-			bottom: 10%;
-			right: 50%;
-			animation-delay: -10s;
-		}
-	}
-}
-
 .main-content {
 	padding: 20rpx 40rpx 0 40rpx;
 	position: relative;
@@ -612,12 +544,10 @@ export default {
 			margin-bottom: 15rpx;
 			transition: all 0.3s ease;
 			box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
-			animation: gentlePulse 3s ease-in-out infinite;
 			
 			&:hover {
 				transform: scale(1.1);
 				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
-				animation: none;
 			}
 			
 			.icon-symbol {
@@ -668,9 +598,6 @@ export default {
 		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
 	}
 	
-	// 静置时的呼吸动画
-	animation: gentleBreathing 4s ease-in-out infinite, cardGlow 6s ease-in-out infinite;
-	
 	.section-header {
 		display: flex;
 		justify-content: space-between;
@@ -694,7 +621,6 @@ export default {
 				height: 30rpx;
 				background: linear-gradient(135deg, #0984e3, #74b9ff);
 				border-radius: 3rpx;
-				animation: gentlePulse 3s ease-in-out infinite;
 			}
 		}
 		
@@ -739,7 +665,6 @@ export default {
 			height: 100%;
 			background: linear-gradient(135deg, #0984e3, #74b9ff);
 			border-radius: 2rpx;
-			animation: gentlePulse 3s ease-in-out infinite, borderGlow 4s ease-in-out infinite;
 			box-shadow: 0 0 8rpx rgba(9, 132, 227, 0.3);
 		}
 		
@@ -1125,29 +1050,6 @@ export default {
 }
 
 // 动画定义
-@keyframes float {
-	0% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-	25% {
-		transform: translateY(-20px) translateX(20px) scale(1.1);
-		opacity: 0.9;
-	}
-	50% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-	75% {
-		transform: translateY(20px) translateX(-20px) scale(1.1);
-		opacity: 0.9;
-	}
-	100% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-}
-
 @keyframes flow {
 	0% {
 		transform: rotate(0deg);
@@ -1190,18 +1092,6 @@ export default {
 	}
 }
 
-@keyframes pulse {
-	0% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.05);
-	}
-	100% {
-		transform: scale(1);
-	}
-}
-
 @keyframes bounce {
 	0%, 20%, 50%, 80%, 100% {
 		transform: translateY(0);
@@ -1214,33 +1104,6 @@ export default {
 	}
 }
 
-@keyframes gentleBreathing {
-	0%, 100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.01);
-	}
-}
-
-@keyframes cardGlow {
-	0%, 100% {
-		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-	}
-	50% {
-		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
-	}
-}
-
-@keyframes gentlePulse {
-	0%, 100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.02);
-	}
-}
-
 @keyframes gentleFlow {
 	0% {
 		transform: translate(0, 0);
@@ -1250,15 +1113,6 @@ export default {
 	}
 	100% {
 		transform: translate(0, 0);
-	}
-}
-
-@keyframes borderGlow {
-	0%, 100% {
-		box-shadow: 0 0 10rpx rgba(9, 132, 227, 0.5);
-	}
-	50% {
-		box-shadow: 0 0 15rpx rgba(9, 132, 227, 0.7);
 	}
 }
 </style> 

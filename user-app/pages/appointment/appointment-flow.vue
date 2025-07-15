@@ -89,7 +89,7 @@
             <text class="package-desc">{{pkg.description}}</text>
             <view class="package-tags">
               <text class="package-tag">{{getPackageTypeName(pkg.type)}}</text>
-              <text class="package-tag">{{pkg.suitableCrowd}}</text>
+              <!-- 移除适用人群标签，详情请查看套餐详情页 -->
             </view>
             <view class="package-check">
               <text class="check-icon" v-if="selectedPackage && selectedPackage.id === pkg.id">✓</text>
