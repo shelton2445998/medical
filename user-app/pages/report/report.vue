@@ -58,11 +58,70 @@
 			<text class="empty-text">暂无体检报告</text>
 			<button class="make-appointment-btn" @click="makeAppointment">立即预约体检</button>
 		</view>
+		
+		<!-- 报告详情弹窗 -->
+		<view class="report-detail-modal" v-if="reportDetail" @click="closeReportDetail">
+			<view class="modal-content" @click.stop>
+				<view class="modal-header">
+					<text class="modal-title">体检报告详情</text>
+					<text class="modal-close" @click="closeReportDetail">×</text>
+				</view>
+				<view class="modal-body">
+					<view class="detail-section">
+						<view class="detail-item">
+							<text class="detail-label">报告ID：</text>
+							<text class="detail-value">{{reportDetail.id}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">订单ID：</text>
+							<text class="detail-value">{{reportDetail.orderId}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">用户ID：</text>
+							<text class="detail-value">{{reportDetail.userId}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">状态：</text>
+							<text class="detail-value" :class="{'status-completed': reportDetail.status === 1, 'status-pending': reportDetail.status === 0}">
+								{{reportDetail.status === 1 ? '已完成' : '未完成'}}
+							</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">医生ID：</text>
+							<text class="detail-value">{{reportDetail.doctorId}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">报告日期：</text>
+							<text class="detail-value">{{formatDate(reportDetail.reportDate)}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">创建时间：</text>
+							<text class="detail-value">{{formatDateTime(reportDetail.createTime)}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">总结论：</text>
+							<text class="detail-value">{{reportDetail.conclusion || '暂无结论'}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">检查项ID：</text>
+							<text class="detail-value">{{reportDetail.checkitemIds || '无'}}</text>
+						</view>
+						<view class="detail-item">
+							<text class="detail-label">报告项ID：</text>
+							<text class="detail-value">{{reportDetail.reportItemIds || '无'}}</text>
+						</view>
+					</view>
+				</view>
+				<view class="modal-footer">
+					<button class="modal-btn" @click="closeReportDetail">关闭</button>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
-	import { getCurrentUserReportItemPage } from '@/api/report';
+	import { getCurrentUserReportItemPage, getAppReportById } from '@/api/report';
 	import { getLoginUserInfo } from '@/api/user';
 	
 	export default {
@@ -71,7 +130,8 @@
 				reportList: [],
 				loading: false,
 				error: null,
-				userInfo: null // 存储用户信息
+				userInfo: null, // 存储用户信息
+				reportDetail: null // 存储报告详情
 			}
 		},
 		onLoad() {
@@ -165,12 +225,38 @@
 					this.loading = false;
 				}
 			},
-			// 查看报告
-			viewReport(report) {
-				uni.navigateTo({
-					url: `/pages/report-detail/report-detail?id=${report.id}`
-				});
+			
+			// 查看报告详情
+			async viewReport(report) {
+				try {
+					uni.showLoading({
+						title: '加载中...'
+					});
+					
+					// 调用 getAppReportById 接口获取报告详情
+					const res = await getAppReportById(report.id);
+					console.log('报告详情数据:', res);
+					
+					if (res && res.success && res.data) {
+						this.reportDetail = res.data;
+						// 直接显示模态框，不需要额外调用
+					} else {
+						uni.showToast({
+							title: '获取报告详情失败',
+							icon: 'none'
+						});
+					}
+				} catch (error) {
+					console.error('获取报告详情失败:', error);
+					uni.showToast({
+						title: '获取报告详情失败',
+						icon: 'none'
+					});
+				} finally {
+					uni.hideLoading();
+				}
 			},
+			
 			// 分享报告
 			shareReport(report) {
 				uni.showToast({
@@ -198,6 +284,22 @@
 				uni.switchTab({
 					url: '/pages/appointment/appointment'
 				});
+			},
+			// 关闭报告详情弹窗
+			closeReportDetail() {
+				this.reportDetail = null;
+			},
+			// 格式化日期
+			formatDate(timestamp) {
+				if (!timestamp) return '';
+				const date = new Date(timestamp);
+				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+			},
+			// 格式化日期时间
+			formatDateTime(timestamp) {
+				if (!timestamp) return '';
+				const date = new Date(timestamp);
+				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 			}
 		}
 	}
@@ -383,6 +485,106 @@
 		&::after {
 			border: none;
 		}
+	}
+}
+
+/* 报告详情弹窗样式 */
+.report-detail-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.modal-content {
+	background-color: #ffffff;
+	border-radius: 20rpx;
+	width: 90%;
+	max-height: 80%;
+	display: flex;
+	flex-direction: column;
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 30rpx;
+	border-bottom: 1rpx solid #eeeeee;
+}
+
+.modal-title {
+	font-size: 36rpx;
+	font-weight: bold;
+	color: #333333;
+}
+
+.modal-close {
+	font-size: 48rpx;
+	color: #999999;
+}
+
+.modal-body {
+	padding: 30rpx;
+	overflow-y: auto;
+	max-height: 60%;
+}
+
+.detail-section {
+	margin-bottom: 20rpx;
+}
+
+.detail-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 28rpx;
+	color: #333333;
+	margin-bottom: 15rpx;
+}
+
+.detail-label {
+	font-weight: bold;
+	color: #666666;
+}
+
+.detail-value {
+	flex: 1;
+	text-align: right;
+	color: #333333;
+}
+
+.status-completed {
+	color: #1296db;
+}
+
+.status-pending {
+	color: #ff5a5f;
+}
+
+.modal-footer {
+	padding: 30rpx;
+	border-top: 1rpx solid #eeeeee;
+	text-align: right;
+}
+
+.modal-btn {
+	background-color: #1296db;
+	color: #ffffff;
+	font-size: 32rpx;
+	padding: 0 40rpx;
+	height: 80rpx;
+	line-height: 80rpx;
+	border-radius: 40rpx;
+	
+	&::after {
+		border: none;
 	}
 }
 </style> 
