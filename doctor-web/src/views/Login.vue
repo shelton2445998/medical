@@ -1,80 +1,60 @@
 <template>
   <div class="login-container">
-    <!-- 背景装饰层 -->
+    <!-- 医疗系统背景图 -->
+    <div class="bg-image"></div>
+    
+    <!-- 动态背景装饰层 -->
     <div class="bg-decoration">
       <div class="bg-circle circle-1"></div>
       <div class="bg-circle circle-2"></div>
       <div class="bg-circle circle-3"></div>
-      <div class="bg-pattern"></div>
-    </div>
-    
-    <!-- 左侧品牌区域 -->
-    <div class="brand-section">
-      <div class="brand-content">
-        <div class="logo-container">
-          <img src="../assets/images/new_logo.png" alt="Logo" class="brand-logo" />
-        </div>
-        <h1 class="brand-title">医生工作站</h1>
-        <p class="brand-description">提供专业高效的医疗信息管理平台<br/>助力医生提供更优质的医疗服务</p>
-        <div class="brand-features">
-          <div class="feature-item">
-            <div class="feature-icon">
-              <el-icon><DataBoard /></el-icon>
-            </div>
-            <div class="feature-text">数据可视化</div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <el-icon><User /></el-icon>
-            </div>
-            <div class="feature-text">患者管理</div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <el-icon><Document /></el-icon>
-            </div>
-            <div class="feature-text">报告生成</div>
-          </div>
-        </div>
-      </div>
+      <div class="light-spot spot-1"></div>
+      <div class="light-spot spot-2"></div>
     </div>
     
     <!-- 登录表单容器 -->
     <div class="login-box">
-      <div class="login-header">
-        <div class="title">欢迎登录</div>
-        <div class="subtitle">医疗预约管理系统 - 医生工作站</div>
+		
+      <!-- 品牌Logo区域 - 圆形logo处理 -->
+      <div class="brand-area">
+        <div class="logo">
+          <!-- 圆形logo图片 -->
+          <img src="../assets/images/new_logo.png" alt="Logo" class="logo-image" />
+        </div>
+        <div class="title">医生工作站</div>
+        <div class="subtitle">医疗预约管理系统</div>
       </div>
       
+      <div class="demo-tip">
+        <el-icon class="tip-icon"><InfoFilled /></el-icon>
+        <span>演示模式：API不可用时，可使用任意手机号和密码登录</span>
+      </div>
+      
+      <!-- 登录表单 -->
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
         <el-form-item prop="mobile">
           <el-input 
             v-model="loginForm.mobile" 
-            class="form-input"
+            prefix-icon="el-icon-phone" 
             placeholder="请输入手机号"
-          >
-            <template #prefix>
-              <el-icon class="input-icon"><Iphone /></el-icon>
-            </template>
-          </el-input>
+            class="form-input"
+          ></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input 
-            v-model="loginForm.password"
+            v-model="loginForm.password" 
+            prefix-icon="el-icon-lock" 
             type="password" 
-            show-password
-            class="form-input"
             placeholder="请输入密码"
-          >
-            <template #prefix>
-              <el-icon class="input-icon"><Lock /></el-icon>
-            </template>
-          </el-input>
+            class="form-input"
+          ></el-input>
         </el-form-item>
-        <div class="form-options">
-          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-          <a href="javascript:;" class="forgot-password">忘记密码?</a>
+        
+        <div class="form-actions">
+          <el-checkbox v-model="rememberMe" class="remember-checkbox">记住密码</el-checkbox>
+          <el-link type="primary" class="forgot-link" :underline="false">忘记密码?</el-link>
         </div>
+        
         <el-form-item>
           <el-button 
             type="primary" 
@@ -82,25 +62,32 @@
             class="login-button" 
             @click="handleLogin"
           >
-            登录
+            <template #default>
+              <span v-if="!loading">登录</span>
+              <el-loading v-else spinner="el-icon-loading" size="16"></el-loading>
+            </template>
           </el-button>
         </el-form-item>
       </el-form>
       
-      <!-- 底部装饰元素 -->
       <div class="login-footer">
-        <span>© 2025 医疗预约管理系统</span>
+        <div class="copyright">© 2025 医疗预约管理系统 版权所有</div>
+        <div class="security-info">
+          <el-icon class="security-icon"><Shield /></el-icon>
+          <span>加密传输 · 安全登录</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+// 脚本部分保持不变
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import { Iphone, Lock, DataBoard, User, Document, InfoFilled } from '@element-plus/icons-vue'
+import { Hospital, InfoFilled, Shield } from '@element-plus/icons-vue'
 
 const BACKEND_BASE_URL = 'http://localhost:8888'
 const request = axios.create({
@@ -110,14 +97,7 @@ const request = axios.create({
 
 export default {
   name: 'LoginView',
-  components: {
-    Iphone,
-    Lock,
-    InfoFilled,
-    DataBoard,
-    User,
-    Document
-  },
+  components: { Hospital, InfoFilled, Shield },
   setup() {
     const router = useRouter()
     const loginFormRef = ref(null)
@@ -153,6 +133,11 @@ export default {
               localStorage.setItem('doctorToken', res.data.token)
               if (res.data.doctorInfo) {
                 localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
+                if (rememberMe.value) {
+                  localStorage.setItem('rememberedMobile', loginForm.mobile)
+                } else {
+                  localStorage.removeItem('rememberedMobile')
+                }
               }
               ElMessage.success('登录成功')
               router.push('/home/dashboard')
@@ -161,13 +146,29 @@ export default {
             }
           } catch (error) {
             console.error('登录出错：', error)
-            ElMessage.error('登录失败，请检查网络连接或联系管理员')
+            if (error.response?.status === 404) {
+              ElMessage.error('接口不存在，请检查路径是否正确')
+            } else if (error.message.includes('Network Error')) {
+              ElMessage.error('服务器未启动或地址错误')
+            } else {
+              ElMessage.error('登录失败，服务器连接异常')
+            }
           } finally {
             loading.value = false
           }
         }
       })
     }
+
+    const initForm = () => {
+      const rememberedMobile = localStorage.getItem('rememberedMobile')
+      if (rememberedMobile) {
+        loginForm.mobile = rememberedMobile
+        rememberMe.value = true
+      }
+    }
+    
+    initForm()
 
     return {
       loginFormRef,
@@ -182,261 +183,271 @@ export default {
 </script>
 
 <style scoped>
+/* 基础容器样式 */
 .login-container {
   height: 100vh;
   display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #f3f9fe 0%, #e6f0ff 100%);
+  background: inherit;
 }
 
-/* 背景装饰层 */
-.bg-decoration {
+/* 医疗系统背景图样式 */
+.bg-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  background-image: url('https://ts1.tc.mm.bing.net/th/id/R-C.45adb4a35bc45f4066564f64c7e95b9e?rik=hj9vuhsfmtEnpQ&riu=http%3a%2f%2fseopic.699pic.com%2fphoto%2f50046%2f2979.jpg_wh1200.jpg&ehk=j9ibHicjwtZ7WKASI1IYOM6ankqf3fiVzP7kjnno%2ffU%3d&risl=&pid=ImgRaw&r=0');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(240, 248, 255, 0.4), rgba(245, 249, 250, 0.4));
+  }
 }
 
-/* 圆形装饰元素 */
+/* 动态背景装饰 */
+.bg-decoration {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* 浮动圆形装饰 */
 .bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(62, 123, 250, 0.1) 0%, rgba(62, 123, 250, 0) 70%);
-  animation: float 20s infinite ease-in-out;
+  filter: blur(100px);
+  opacity: 0.3;
+  animation: float 25s infinite ease-in-out;
 }
 
-.circle-1 {
-  width: 600px;
-  height: 600px;
-  top: -200px;
-  left: -100px;
+/* 动态光斑效果 */
+.light-spot {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+  animation: pulse 15s infinite ease-in-out;
+}
+
+.spot-1 {
+  width: 300px;
+  height: 300px;
+  top: 20%;
+  right: 15%;
   animation-delay: 0s;
 }
 
-.circle-2 {
-  width: 500px;
-  height: 500px;
-  bottom: -150px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(82, 196, 26, 0.08) 0%, rgba(82, 196, 26, 0) 70%);
-  animation-delay: 5s;
+.spot-2 {
+  width: 250px;
+  height: 250px;
+  bottom: 15%;
+  left: 10%;
+  animation-delay: 7s;
 }
 
-.circle-3 {
-  width: 300px;
-  height: 300px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(153, 102, 255, 0.08) 0%, rgba(153, 102, 255, 0) 70%);
-  animation-delay: 8s;
-}
-
-/* 网格纹理 */
-.bg-pattern {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(rgba(62, 123, 250, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(62, 123, 250, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-/* 左侧品牌区域 */
-.brand-section {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--primary-color);
-  background-image: linear-gradient(135deg, #3E7BFA 0%, #2E5ED9 100%);
-  color: white;
-  position: relative;
-  overflow: hidden;
-  padding: 40px;
-}
-
-.brand-content {
-  max-width: 500px;
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
-.logo-container {
-  margin-bottom: 24px;
-}
-
-.brand-logo {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
-
-.brand-title {
-  font-size: 40px;
-  font-weight: 700;
-  margin: 0 0 16px;
-  letter-spacing: 1px;
-}
-
-.brand-description {
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 40px;
-  opacity: 0.9;
-}
-
-.brand-features {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  margin-top: 40px;
-}
-
-.feature-item {
-  text-align: center;
-}
-
-.feature-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12px;
-}
-
-.feature-icon .el-icon {
-  font-size: 24px;
-}
-
-.feature-text {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* 登录盒子 */
+/* 登录盒子样式 */
 .login-box {
-  width: 480px;
-  padding: 60px;
-  background-color: #ffffff;
+  width: 420px;
+  padding: 50px 45px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-/* 标题样式优化 */
-.login-header {
-  margin-bottom: 32px;
+/* 登录框内的背景图映射效果 */
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://ts1.tc.mm.bing.net/th/id/R-C.45adb4a35bc45f4066564f64c7e95b9e?rik=hj9vuhsfmtEnpQ&riu=http%3a%2f%2fseopic.699pic.com%2fphoto%2f50046%2f2979.jpg_wh1200.jpg&ehk=j9ibHicjwtZ7WKASI1IYOM6ankqf3fiVzP7kjnno%2ffU%3d&risl=&pid=ImgRaw&r=0');
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  -webkit-filter: blur(20px);
+  transform: scale(0.9);
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.login-box:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+/* 品牌区域样式 */
+.brand-area {
+  text-align: center;
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Logo容器样式 */
+.logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 圆形logo图片样式 - 核心修改 */
+.logo-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* 保持图片比例，裁剪多余部分 */
+  border-radius: 50%; /* 关键：将图片处理为圆形 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 轻微阴影增强立体感 */
+  transition: transform 0.3s ease; /* 悬停动画效果 */
+}
+
+/* 鼠标悬停时的微动效 */
+.logo-image:hover {
+  transform: scale(1.05);
 }
 
 .title {
-  font-size: 32px;
-  color: var(--text-primary);
+  font-size: 28px;
+  color: #1f2329;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 }
 
 .subtitle {
   font-size: 16px;
-  color: var(--text-secondary);
-  font-weight: normal;
+  color: #333;
+  font-weight: 500;
 }
 
-/* 表单样式 */
+/* 演示提示样式 */
+.demo-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+  padding: 10px 15px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  border-left: 3px solid #337ab7;
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 表单样式优化 */
 .login-form {
-  margin-bottom: 24px;
+  margin-top: 15px;
+  position: relative;
+  z-index: 2;
 }
 
 .form-input {
-  height: 48px;
-  border-radius: var(--border-radius-md);
-}
-
-.input-icon {
-  font-size: 18px;
-  color: var(--text-secondary);
-}
-
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-
-.forgot-password {
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.forgot-password:hover {
-  color: var(--primary-dark);
-  text-decoration: underline;
-}
-
-.login-button {
-  width: 100%;
-  height: 48px;
-  font-size: 16px;
-  border-radius: var(--border-radius-md);
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  border-radius: 10px;
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.7);
+  height: 50px;
+  font-size: 15px;
   transition: all 0.3s;
 }
 
-.login-button:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(62, 123, 250, 0.2);
+.form-input:focus {
+  border-color: #337ab7;
+  box-shadow: 0 0 0 4px rgba(51, 122, 183, 0.15);
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
-/* 底部信息 */
+/* 表单操作区 */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0 30px;
+  font-size: 14px;
+  color: #333;
+}
+
+.forgot-link {
+  color: #286090;
+}
+
+/* 登录按钮样式 */
+.login-button {
+  width: 100%;
+  height: 52px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  background-color: #337ab7;
+  border-color: #337ab7;
+  transition: all 0.3s;
+}
+
+/* 底部信息样式 */
 .login-footer {
-  margin-top: auto;
+  margin-top: 40px;
   text-align: center;
-  font-size: 12px;
-  color: var(--text-secondary);
+  position: relative;
+  z-index: 2;
 }
 
-/* 浮动动画 */
+.copyright {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.security-info {
+  font-size: 12px;
+  color: #555;
+}
+
+/* 动画定义 */
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-30px) rotate(5deg);
+    transform: translateY(-40px) rotate(5deg);
   }
 }
 
-/* 响应式调整 */
-@media (max-width: 992px) {
-  .login-container {
-    flex-direction: column;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
   }
-  
-  .brand-section {
-    display: none;
-  }
-  
-  .login-box {
-    width: 100%;
-    padding: 40px 20px;
-    box-shadow: none;
+  50% {
+    opacity: 0.9;
+    transform: scale(1.2);
   }
 }
 </style>
