@@ -41,6 +41,12 @@
               </template>
             </el-table-column>
             <el-table-column prop="itemName" label="检查项目" />
+            <el-table-column label="状态" width="120">
+              <template #default="scope">
+                <el-tag type="warning" v-if="!scope.row.conclusion">待录入</el-tag>
+                <el-tag type="success" v-else>已完成</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="180">
               <template #default="scope">
                 <el-button 
@@ -252,7 +258,7 @@
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getReportList, getReportDetail, submitExaminationResults, generateReport } from '@/api/doctor'
+import { getReportList, getReportDetail, submitExaminationResults, generateReport, getPendingReports } from '@/api/doctor'
 
 export default {
   name: 'ExaminationReports',
@@ -290,17 +296,32 @@ export default {
         const params = {
           page: currentPage.value,
           pageSize: pageSize.value,
-          keyword: searchKeyword.value,
-          status: activeTab.value === 'pending' ? 0 : 1
+          keyword: searchKeyword.value
         }
         
-        const res = await getReportList(params)
+        // 根据activeTab决定请求哪个接口
+        let res;
         if (activeTab.value === 'pending') {
-          pendingReports.value = res.data.list
+          // 待处理报告使用专门的待处理报告接口
+          res = await getPendingReports();
         } else {
-          completedReports.value = res.data.list
+          // 已完成报告使用普通报告列表接口
+          res = await getReportList({
+            ...params,
+            hasConclusion: true
+          });
         }
-        totalRecords.value = res.data.total || res.data.list.length // 使用返回的total或数据长度
+        
+        if (res.code === 200) {
+          if (activeTab.value === 'pending') {
+            pendingReports.value = res.data.records || [];
+          } else {
+            completedReports.value = res.data.records || [];
+          }
+          totalRecords.value = res.data.total || 0;
+        } else {
+          ElMessage.error(res.msg || '获取报告列表失败');
+        }
       } catch (error) {
         console.error('获取报告列表失败', error)
         ElMessage.error('获取报告列表失败')
@@ -342,6 +363,8 @@ export default {
       try {
         const res = await getReportDetail(row.id)
         reportItems.value = res.data.checkItems || []
+        // 确保显示结论
+        currentReport.value.conclusion = res.data.conclusion || '无结论'
         reportDetailDialogVisible.value = true
       } catch (error) {
         console.error('获取报告详情失败', error)
@@ -355,6 +378,11 @@ export default {
     
     const handleSaveResults = async () => {
       try {
+        if (!checkItems.value.some(item => item.details && item.details.some(detail => detail.value))) {
+          ElMessage.warning('请先填写检查结果')
+          return
+        }
+        
         const data = {
           reportId: currentReport.value.id,
           checkItems: checkItems.value.map(item => ({
@@ -380,6 +408,16 @@ export default {
     
     const handleGenerateReport = async () => {
       try {
+        if (!conclusion.value) {
+          ElMessage.warning('请填写体检结论')
+          return
+        }
+        
+        if (!checkItems.value.some(item => item.details && item.details.some(detail => detail.value))) {
+          ElMessage.warning('请填写检查结果')
+          return
+        }
+        
         const data = {
           reportId: currentReport.value.id,
           checkItems: checkItems.value.map(item => ({

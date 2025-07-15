@@ -89,6 +89,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { getDoctorDashboard } from '@/api/doctor'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'DashboardView',
@@ -126,7 +127,16 @@ export default {
         }
       } catch (error) {
         console.error('获取仪表盘数据失败:', error)
-        // 可以添加错误提示
+        ElMessage.error('获取仪表盘数据失败，请检查网络或登录状态')
+        
+        // 如果是401错误，可能是token失效，跳转到登录页
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          localStorage.removeItem('doctorToken')
+          localStorage.removeItem('doctorInfo')
+          setTimeout(() => {
+            router.push('/login')
+          }, 1500)
+        }
       } finally {
         loading.value = false
       }
@@ -138,9 +148,6 @@ export default {
 
     // 每5分钟自动刷新数据
     onMounted(() => {
-      fetchDashboardData()
-      const refreshInterval = setInterval(fetchDashboardData, 5 * 60 * 1000)
-      
       // 获取登录医生的姓名
       const doctorInfoStr = localStorage.getItem('doctorInfo')
       if (doctorInfoStr) {
@@ -153,6 +160,12 @@ export default {
           console.error('解析医生信息失败', e)
         }
       }
+      
+      // 加载仪表盘数据
+      fetchDashboardData()
+      
+      // 设置自动刷新
+      const refreshInterval = setInterval(fetchDashboardData, 5 * 60 * 1000)
       
       // 组件卸载时清除定时器
       return () => clearInterval(refreshInterval)
@@ -402,5 +415,4 @@ export default {
     }
   }
 }
-</style>
 </style>

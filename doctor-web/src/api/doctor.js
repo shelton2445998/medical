@@ -189,6 +189,14 @@ export function getReportList(params) {
   })
 }
 
+// 获取待处理报告列表
+export function getPendingReports() {
+  return request({
+    url: '/doctor/report/pending',
+    method: 'get'
+  })
+}
+
 // 获取报告详情
 export function getReportDetail(id) {
   return request({

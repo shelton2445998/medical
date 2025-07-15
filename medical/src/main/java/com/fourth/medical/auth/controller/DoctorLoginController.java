@@ -186,10 +186,24 @@ public class DoctorLoginController {
         log.info("获取医生仪表盘数据");
         
         // 获取当前登录医生ID
-        LoginVo loginVo = LoginUtil.getLoginUserInfo();
-        if (loginVo == null) {
-            log.error("获取登录医生信息失败，请先登录");
-            return ApiResult.fail("请先登录");
+        LoginVo loginVo = null;
+        try {
+            // 从Token获取登录信息
+            String token = TokenUtil.getToken();
+            if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+                log.error("获取登录医生信息失败，请先登录");
+                return ApiResult.fail("请先登录");
+            }
+            
+            // 从Redis中获取登录信息
+            loginVo = LoginUtil.getLoginVo(token);
+            if (loginVo == null) {
+                log.error("获取登录医生信息失败，请先登录");
+                return ApiResult.fail("请先登录");
+            }
+        } catch (Exception e) {
+            log.error("获取登录医生信息失败", e);
+            return ApiResult.fail("获取登录信息失败：" + e.getMessage());
         }
         
         Long doctorId = loginVo.getUserId();

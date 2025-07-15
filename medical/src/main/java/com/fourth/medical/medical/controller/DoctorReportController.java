@@ -393,4 +393,40 @@ public class DoctorReportController {
             return ApiResult.fail("部分检查项明细更新失败");
         }
     }
+
+    /**
+     * 获取医生待处理报告列表
+     * 待处理报告定义为conclusion字段为空的报告
+     *
+     * @return 待处理报告列表
+     */
+    @GetMapping("/doctor/report/pending")
+    @Operation(summary = "获取待处理报告列表")
+    public ApiResult getPendingReports() {
+        log.info("开始获取医生待处理报告列表");
+        try {
+            // 获取当前登录医生ID
+            String token = TokenUtil.getToken();
+            if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+                log.error("获取登录医生信息失败，请先登录");
+                return ApiResult.fail("请先登录");
+            }
+            
+            // 从Redis中获取登录信息
+            LoginVo loginVo = LoginUtil.getLoginVo(token);
+            if (loginVo == null) {
+                log.error("获取登录医生信息失败，请先登录");
+                return ApiResult.fail("请先登录");
+            }
+            
+            Long doctorId = loginVo.getUserId();
+            log.info("获取医生[{}]待处理报告列表", doctorId);
+            
+            // 获取待处理报告列表
+            return reportItemService.getPendingReportsByDoctorId(doctorId);
+        } catch (Exception e) {
+            log.error("获取医生待处理报告列表失败", e);
+            return ApiResult.fail("获取待处理报告失败：" + e.getMessage());
+        }
+    }
 } 

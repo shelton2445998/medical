@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.fourth.medical.framework.response.ApiResult;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * 体检报告检查项信息 服务实现类
@@ -91,6 +94,50 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
     @Override
     public AppReportItemVo getAppReportItemById(Long id) {
         return reportItemMapper.getAppReportItemById(id);
+    }
+    
+    @Override
+    public ApiResult getPendingReportsByDoctorId(Long doctorId) {
+        log.info("获取医生[{}]待处理报告列表", doctorId);
+        try {
+            // 查询条件：待处理报告定义为conclusion为空的报告
+            LambdaQueryWrapper<ReportItem> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(ReportItem::getDoctorId, doctorId)
+                   .and(w -> w.isNull(ReportItem::getConclusion)
+                           .or()
+                           .eq(ReportItem::getConclusion, ""))
+                   .orderByDesc(ReportItem::getCreateTime); // 按创建时间降序排序
+            
+            // 分页查询
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<ReportItem> page = 
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 50); // 默认查询第一页，每页50条
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<ReportItem> reportPage = page(page, wrapper);
+            
+            // 转换为VO
+            List<ReportItemVo> reportItemVos = reportPage.getRecords().stream()
+                .map(item -> {
+                    ReportItemVo vo = reportItemMapper.getReportItemById(item.getId());
+                    if (vo == null) {
+                        vo = new ReportItemVo();
+                        BeanUtils.copyProperties(item, vo);
+                    }
+                    return vo;
+                })
+                .collect(Collectors.toList());
+            
+            // 封装返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("records", reportItemVos);
+            result.put("total", reportPage.getTotal());
+            result.put("pages", reportPage.getPages());
+            result.put("current", reportPage.getCurrent());
+            result.put("size", reportPage.getSize());
+            
+            return ApiResult.success(result);
+        } catch (Exception e) {
+            log.error("获取医生待处理报告列表出错", e);
+            return ApiResult.fail("获取待处理报告列表失败：" + e.getMessage());
+        }
     }
 
     @Override

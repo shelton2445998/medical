@@ -2,19 +2,15 @@ package com.fourth.medical.medical.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fourth.medical.common.enums.AppointmentStatusEnum;
-import com.fourth.medical.common.exception.BusinessException;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.OrderByItem;
 import com.fourth.medical.framework.page.OrderMapping;
 import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.dto.DoctorScheduleDto;
-import com.fourth.medical.medical.entity.CheckitemDetail;
-import com.fourth.medical.medical.entity.Doctor;
+
 import com.fourth.medical.medical.entity.DoctorSchedule;
 import com.fourth.medical.medical.entity.Orders;
-import com.fourth.medical.medical.entity.Report;
-import com.fourth.medical.medical.mapper.DoctorMapper;
+
 import com.fourth.medical.medical.mapper.DoctorScheduleMapper;
 import com.fourth.medical.medical.mapper.OrdersMapper;
 import com.fourth.medical.medical.query.DoctorScheduleQuery;
@@ -192,10 +188,10 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
             // 查询今天是否有排班
             LambdaQueryWrapper<DoctorSchedule> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(DoctorSchedule::getDoctorId, doctorId)
-                   .ge(DoctorSchedule::getScheduleDate, todayDate)
-                   .lt(DoctorSchedule::getScheduleDate, tomorrowDate);
+                   .ge(DoctorSchedule::getWorkDate, todayDate)
+                   .lt(DoctorSchedule::getWorkDate, tomorrowDate);
             
-            Integer count = doctorScheduleMapper.selectCount(wrapper);
+            Integer count = Math.toIntExact(doctorScheduleMapper.selectCount(wrapper));
             return count != null && count > 0;
         } catch (Exception e) {
             log.error("检查医生今日是否有排班出错", e);
@@ -224,8 +220,8 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
                    .ge(Orders::getAppointmentDate, todayStart)
                    .lt(Orders::getAppointmentDate, tomorrowStart);
             
-            Integer count = ordersMapper.selectCount(wrapper);
-            return count != null ? count : 0;
+            Long count = ordersMapper.selectCount(wrapper);
+            return count != null ? count.intValue() : 0;
         } catch (Exception e) {
             log.error("获取医生今日预约数量出错", e);
             return 0;
@@ -254,8 +250,8 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
                    .ge(Orders::getAppointmentDate, weekStart)
                    .lt(Orders::getAppointmentDate, nextWeekStart);
             
-            Integer count = ordersMapper.selectCount(wrapper);
-            return count != null ? count : 0;
+            Long count = ordersMapper.selectCount(wrapper);
+            return count != null ? count.intValue() : 0;
         } catch (Exception e) {
             log.error("获取医生本周预约数量出错", e);
             return 0;

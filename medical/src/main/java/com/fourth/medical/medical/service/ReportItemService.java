@@ -1,6 +1,7 @@
 package com.fourth.medical.medical.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fourth.medical.framework.response.ApiResult;
 import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.dto.ReportItemDto;
 import com.fourth.medical.medical.entity.ReportItem;
@@ -112,4 +113,13 @@ public interface ReportItemService extends IService<ReportItem> {
      * @return 是否更新成功
      */
     boolean updateReportItemDoctor(Long reportItemId, Long doctorId);
+
+    /**
+     * 获取医生待处理报告列表
+     * 待处理报告定义为conclusion字段为空的报告
+     *
+     * @param doctorId 医生ID
+     * @return 待处理报告列表
+     */
+    ApiResult getPendingReportsByDoctorId(Long doctorId);
 }
