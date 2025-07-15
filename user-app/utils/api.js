@@ -82,6 +82,8 @@ export const userApi = {
   getUserInfo: `${API_BASE_URL}/user/info`,
   // 获取登录用户信息
   getLoginUserInfo: `${API_BASE_URL}/app/getLoginUserInfo`,
+  // 更新用户个人信息（使用User表接口）
+  updateUserProfile: `${API_BASE_URL}/app/updateUserProfile`,
 };
 
 // AI聊天相关接口

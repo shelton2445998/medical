@@ -30,6 +30,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
+import com.fourth.medical.user.dto.AppUserUpdateProfileDto;
 
 /**
  * 用户信息 服务实现类
@@ -185,6 +186,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         wrapper.set(User::getNickname, dto.getNickname());
         wrapper.eq(User::getId, userId);
         return update(new User(), wrapper);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean updateAppUserProfile(AppUserUpdateProfileDto dto) {
+        Long userId = AppLoginUtil.getUserId();
+        User user = getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户信息不存在");
+        }
+        
+        // 只更新非空字段
+        if (dto.getNickname() != null) {
+            user.setNickname(dto.getNickname());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getHead() != null) {
+            user.setHead(dto.getHead());
+        }
+        if (dto.getOpenid() != null) {
+            user.setOpenid(dto.getOpenid());
+        }
+        if (dto.getRemark() != null) {
+            user.setRemark(dto.getRemark());
+        }
+        if (dto.getGender() != null) {
+            user.setGender(dto.getGender());
+        }
+        if (dto.getIdCard() != null) {
+            user.setIdCard(dto.getIdCard());
+        }
+        if (dto.getIntroduction() != null) {
+            user.setIntroduction(dto.getIntroduction());
+        }
+        
+        return updateById(user);
     }
 
 }

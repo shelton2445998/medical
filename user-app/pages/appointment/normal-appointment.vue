@@ -104,6 +104,14 @@
           </button>
         </view> -->
         
+        <!-- 患者信息提示 -->
+        <view class="form-item" v-if="userInfoLoaded">
+          <view class="info-tip">
+            <text class="tip-icon">💡</text>
+            <text class="tip-text">已从个人中心自动填充您的信息，可继续修改</text>
+          </view>
+        </view>
+        
         <!-- 姓名 -->
         <view class="form-item">
           <view class="form-label">
@@ -278,6 +286,7 @@
 <script>
 import { checkitemApi, appointmentApi, hospitalApi } from '@/utils/api.js';
 import { get, post } from '@/utils/request.js';
+import { userApi } from '@/utils/api.js'; // 导入用户API
 
 export default {
   data() {
@@ -298,6 +307,7 @@ export default {
       // showCustomPackage: false, // 是否显示定制套餐界面
       // customPackageName: '', // 定制套餐名称
       // customPackageDescription: '' // 定制套餐描述
+      userInfoLoaded: false // 用户信息是否已加载
     }
   },
   computed: {
@@ -315,12 +325,79 @@ export default {
   onLoad() {
     this.getHospitalList();
     this.getCheckitemList();
+    // 加载用户信息用于自动填充
+    this.loadUserInfo();
   },
   onShow() {
     // 检查是否有已选择的医院信息
     this.checkSelectedHospital();
   },
   methods: {
+    // 加载用户信息用于自动填充
+    async loadUserInfo() {
+      try {
+        const response = await post(userApi.getLoginUserInfo);
+        if (response.code === 200 && response.data) {
+          // 自动填充用户信息到表单
+          this.autoFillUserInfo(response.data);
+          this.userInfoLoaded = true;
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+      }
+    },
+    
+    // 自动填充用户信息
+    autoFillUserInfo(userInfo) {
+      if (!userInfo) return;
+      
+      // 填充用户信息到表单（除了备注和个人简介）
+      if (userInfo.nickname) {
+        this.patientName = userInfo.nickname;
+      }
+      if (userInfo.phone) {
+        this.patientPhone = userInfo.phone;
+      }
+      if (userInfo.gender) {
+        this.patientGender = userInfo.gender;
+      }
+      if (userInfo.idCard) {
+        // 从身份证号计算年龄
+        const age = this.calculateAgeFromIdCard(userInfo.idCard);
+        if (age > 0) {
+          this.patientAge = age.toString();
+        }
+      }
+    },
+    
+    // 从身份证号计算年龄
+    calculateAgeFromIdCard(idCard) {
+      if (!idCard || idCard.length !== 18) return 0;
+      
+      try {
+        const birthYear = parseInt(idCard.substring(6, 10));
+        const birthMonth = parseInt(idCard.substring(10, 12));
+        const birthDay = parseInt(idCard.substring(12, 14));
+        
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
+        
+        let age = currentYear - birthYear;
+        
+        // 如果今年还没过生日，年龄减1
+        if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+          age--;
+        }
+        
+        return age > 0 ? age : 0;
+      } catch (error) {
+        console.error('计算年龄失败:', error);
+        return 0;
+      }
+    },
+    
     // 检查已选择的医院信息
     checkSelectedHospital() {
       const selectedHospital = uni.getStorageSync('selectedHospital');
@@ -1357,6 +1434,39 @@ export default {
       color: #0984e3;
       font-weight: bold;
     }
+  }
+}
+
+/* 用户信息提示样式 */
+.info-tip {
+  display: flex;
+  align-items: center;
+  background: rgba(116, 185, 255, 0.1);
+  border-radius: 12rpx;
+  padding: 15rpx 20rpx;
+  margin-bottom: 30rpx;
+  border: 2rpx solid rgba(116, 185, 255, 0.2);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(116, 185, 255, 0.15);
+    border-color: rgba(116, 185, 255, 0.3);
+    transform: translateX(5rpx);
+  }
+  
+  .tip-icon {
+    font-size: 28rpx;
+    margin-right: 10rpx;
+    color: #0984e3;
+    animation: pulse 2s infinite;
+    transition: all 0.3s ease;
+  }
+  
+  .tip-text {
+    font-size: 24rpx;
+    color: #333333;
+    font-weight: 500;
+    transition: all 0.3s ease;
   }
 }
 

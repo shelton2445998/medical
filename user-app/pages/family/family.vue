@@ -20,13 +20,13 @@
 					</view>
 				</view>
 				<view class="member-actions">
+					<button class="action-btn" @click.stop="viewProfile(member)">
+						<image src="/static/images/icons/icon-profile.png" mode="aspectFit" class="btn-icon"></image>
+						<text>个人信息</text>
+					</button>
 					<button class="action-btn" @click.stop="viewHealth(member)">
 						<image src="/static/images/icons/icon-health.png" mode="aspectFit" class="btn-icon"></image>
 						<text>健康档案</text>
-					</button>
-					<button class="action-btn" @click.stop="makeAppointment(member)">
-						<image src="/static/images/icons/icon-appointment.png" mode="aspectFit" class="btn-icon"></image>
-						<text>预约体检</text>
 					</button>
 				</view>
 			</view>
@@ -161,10 +161,10 @@
 					url: `/pages/member-health/member-health?memberId=${member.id}&memberName=${member.name}`
 				});
 			},
-			// 预约体检
-			makeAppointment(member) {
+			// 查看个人信息
+			viewProfile(member) {
 				uni.navigateTo({
-					url: `/pages/hospital/hospital?memberId=${member.id}&memberName=${member.name}`
+					url: `/pages/member-profile/member-profile?memberId=${member.id}&memberName=${member.name}`
 				});
 			},
 			// 获取状态文本

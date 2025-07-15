@@ -49,24 +49,28 @@
 			<!-- 医院信息卡片 -->
 			<view class="hospital-card" v-if="!loading && !error && packageInfo.hospitalName" @click="goToHospitalDetail">
 				<view class="card-header">
-					<view class="header-icon">🏥</view>
-					<view class="header-title">体检医院</view>
+					<view class="header-left">
+						<view class="header-icon">🏥</view>
+						<view class="header-title">体检医院</view>
+					</view>
+					<view class="header-right">
+						<button class="change-hospital-btn" @click.stop="selectHospital">更换医院</button>
+					</view>
 				</view>
 				<view class="hospital-content">
-			<image class="hospital-image" :src="packageInfo.hospitalImage || '/static/images/hospital1.jpg'" mode="aspectFill"></image>
-			<view class="hospital-detail">
-				<text class="hospital-name">{{packageInfo.hospitalName || '未指定医院'}}</text>
-				<view class="hospital-address">
+					<image class="hospital-image" :src="packageInfo.hospitalImage || '/static/images/hospital1.jpg'" mode="aspectFill"></image>
+					<view class="hospital-detail">
+						<text class="hospital-name">{{packageInfo.hospitalName || '未指定医院'}}</text>
+						<view class="hospital-address">
 							<text class="address-icon">📍</text>
-					<text class="address-text">{{packageInfo.hospitalAddress || '地址信息待完善'}}</text>
+							<text class="address-text">{{packageInfo.hospitalAddress || '地址信息待完善'}}</text>
+						</view>
+					</view>
+					<view class="hospital-arrow">
+						<text class="arrow-icon">→</text>
+					</view>
 				</view>
 			</view>
-					<view class="hospital-actions">
-						<button class="change-hospital-btn" @click.stop="selectHospital">更换医院</button>
-					<text class="arrow-icon">→</text>
-					</view>
-			</view>
-		</view>
 		
 		<!-- 医院信息为空时的提示 -->
 		<view class="hospital-empty-card" v-if="!loading && !error && !packageInfo.hospitalName">
@@ -1028,73 +1032,116 @@
 
 /* 医院信息卡片 */
 .hospital-card {
-	.hospital-content {
-	display: flex;
-	align-items: center;
-	 padding: 20rpx 0;
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 24rpx;
+	margin: 20rpx 0;
+	padding: 30rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(10rpx);
+	animation: slideInUp 0.6s ease-out;
+	transition: all 0.3s ease;
+	cursor: pointer;
 	
-	.hospital-image {
+	&:hover {
+		transform: translateY(-4rpx);
+		box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+	}
+	
+	.card-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+		
+		.header-left {
+			display: flex;
+			align-items: center;
+			
+			.header-icon {
+				font-size: 32rpx;
+				margin-right: 15rpx;
+			}
+			
+			.header-title {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
+			}
+		}
+		
+		.header-right {
+			.change-hospital-btn {
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
+				color: white;
+				border: none;
+				padding: 12rpx 20rpx;
+				border-radius: 20rpx;
+				font-size: 24rpx;
+				font-weight: 500;
+				transition: all 0.3s ease;
+				box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.3);
+				
+				&:hover {
+					transform: translateY(-2rpx);
+					box-shadow: 0 6rpx 20rpx rgba(9, 132, 227, 0.4);
+				}
+				
+				&:active {
+					transform: translateY(0);
+				}
+			}
+		}
+	}
+	
+	.hospital-content {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		
+		.hospital-image {
 			width: 120rpx;
 			height: 120rpx;
 			border-radius: 16rpx;
-		margin-right: 20rpx;
+			object-fit: cover;
 			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-	}
-	
-	.hospital-detail {
-		flex: 1;
-		
-		.hospital-name {
-				font-size: 32rpx;
-			font-weight: bold;
-			color: #333333;
-			margin-bottom: 10rpx;
 		}
 		
-		.hospital-address {
-			display: flex;
-			align-items: center;
-				font-size: 26rpx;
-				color: #666666;
+		.hospital-detail {
+			flex: 1;
 			
+			.hospital-name {
+				font-size: 28rpx;
+				font-weight: bold;
+				color: #333333;
+				margin-bottom: 10rpx;
+				display: block;
+			}
+			
+			.hospital-address {
+				display: flex;
+				align-items: center;
+				gap: 8rpx;
+				
 				.address-icon {
-					margin-right: 8rpx;
-				font-size: 24rpx;
+					font-size: 24rpx;
+					color: #666666;
+				}
+				
+				.address-text {
+					font-size: 24rpx;
+					color: #666666;
+					flex: 1;
 				}
 			}
-			}
-			
-		.hospital-actions {
-			display: flex;
-			align-items: center;
-			gap: 15rpx;
-			
-			.change-hospital-btn {
-				background: rgba(9, 132, 227, 0.1);
+		}
+		
+		.hospital-arrow {
+			.arrow-icon {
+				font-size: 32rpx;
 				color: #0984e3;
-				border: 1rpx solid rgba(9, 132, 227, 0.3);
-				border-radius: 20rpx;
-				padding: 8rpx 16rpx;
-				font-size: 24rpx;
 				transition: all 0.3s ease;
-				
-				&:hover {
-					background: rgba(9, 132, 227, 0.2);
-					border-color: rgba(9, 132, 227, 0.5);
-			}
-			}
-			
-		.arrow-icon {
-			font-size: 32rpx;
-			color: #0984e3;
-			font-weight: bold;
 			}
 		}
-	}
-	
-	.iconfont {
-		font-size: 24rpx;
-		color: #999999;
 	}
 }
 

@@ -236,7 +236,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
 }
 
 /* 聊天头部 */
@@ -329,7 +329,7 @@ export default {
 }
 
 .user-bubble {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%);
   color: #fff;
   border-bottom-right-radius: 8rpx;
 }
@@ -392,7 +392,7 @@ export default {
 
 .send-btn {
   padding: 16rpx 32rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%);
   border-radius: 24rpx;
   margin-left: 16rpx;
   transition: all 0.3s ease;

@@ -3,6 +3,7 @@ package com.fourth.medical.auth.service;
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
 import com.fourth.medical.auth.dto.AppRegisterDto;
+import com.fourth.medical.auth.dto.AppUserUpdateProfileDto;
 import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.auth.vo.LoginTokenVo;
 import com.fourth.medical.user.entity.User;
@@ -76,5 +77,14 @@ public interface AppLoginService {
      * @throws Exception
      */
     void logout();
+
+    /**
+     * 修改用户个人信息
+     *
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    boolean updateAppUserProfile(AppUserUpdateProfileDto dto);
 
 }
