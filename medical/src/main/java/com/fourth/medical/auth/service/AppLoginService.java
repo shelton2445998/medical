@@ -2,6 +2,7 @@ package com.fourth.medical.auth.service;
 
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
+import com.fourth.medical.auth.dto.AppRegisterDto;
 import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.auth.vo.LoginTokenVo;
 import com.fourth.medical.user.entity.User;
@@ -31,6 +32,15 @@ public interface AppLoginService {
      * @throws Exception
      */
     LoginTokenVo accountLogin(AppAccountLoginDto dto);
+
+    /**
+     * APP用户注册
+     *
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    LoginTokenVo register(AppRegisterDto dto);
 
     /**
      * APP登录

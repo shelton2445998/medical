@@ -27,3 +27,11 @@ file:
 logback-spring:
   # 日志文件目录
   path: logs
+
+# Kimi AI API配置
+kimi:
+  api:
+    # Kimi API密钥
+    key: sk-RxAMzBaS7LalBdbZJOKmzOfuzTNo0yZIli0EEgs44eUDTTrQ
+    # Kimi API地址 - 根据官方文档使用正确的端点
+    url: https://api.moonshot.cn/v1/chat/completions

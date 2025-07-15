@@ -153,8 +153,7 @@
 </template>
 
 <script>
-	import { reportApi } from '@/utils/api.js'
-	
+	import { getAppReportById } from '@/api/report';
 	export default {
 		data() {
 			return {
@@ -183,8 +182,33 @@
 			}
 		},
 		onLoad(options) {
+			console.log('report-detail页面收到的参数:', options);
 			if (options.id) {
 				this.reportId = options.id;
+				console.log('进入report-detail页面，orderId:', options.id);
+				// 接收并赋值传递的参数
+				if (options.personName) {
+					this.reportInfo.personName = decodeURIComponent(options.personName);
+				}
+				if (options.hospitalName) {
+					this.reportInfo.hospitalName = decodeURIComponent(options.hospitalName);
+				}
+				if (options.examDate) {
+					this.reportInfo.examDate = decodeURIComponent(options.examDate);
+				}
+				if (options.patientGender) {
+					let genderValue = decodeURIComponent(options.patientGender);
+					if (genderValue === '1') {
+						this.reportInfo.gender = '男';
+					} else if (genderValue === '0') {
+						this.reportInfo.gender = '女';
+					} else {
+						this.reportInfo.gender = genderValue;
+					}
+				}
+				if (options.patientAge) {
+					this.reportInfo.age = decodeURIComponent(options.patientAge);
+				}
 				// 获取报告详情
 				this.getReportDetail();
 			}
@@ -197,60 +221,35 @@
 			async getReportDetail() {
 				this.loading = true;
 				try {
-					// 获取报告检查项列表
-					const response = await uni.request({
-						url: reportApi.getAppReportItemPage,
-						method: 'POST',
-						data: {
-							pageNum: 1,
-							pageSize: 100,
-							orderId: this.reportId
-						}
-					});
-					
-					if (response.statusCode === 200 && response.data.code === 200) {
-						const reportItems = response.data.data.records || [];
-						this.examResults = reportItems.map(item => {
-							// 解析检查结论
-							let conclusion = null;
-							if (item.conclusion) {
-								try {
-									// 尝试解析JSON格式的结论
-									conclusion = JSON.parse(item.conclusion);
-								} catch (e) {
-									// 如果不是JSON格式，直接使用字符串
-									conclusion = item.conclusion;
-								}
-							}
-							
-							return {
-								id: item.id,
-								name: item.itemName || '检查项目',
-								value: item.value || '待检查',
-						unit: item.unit || '',
-						referenceRange: item.referenceRange || '',
-						description: item.description || '',
-								conclusion: conclusion,
-						advice: item.advice || '',
-								isAbnormal: item.isAbnormal || false,
-						expanded: false
-							};
-						});
-						
-						// 更新报告基本信息
-						this.updateReportInfo();
-					
-						// 初始化显示所有检查结果
-					this.filteredResults = this.examResults;
+					// 调用 /api/app/report/getAppReport/{id} 接口，id为orderId
+					const res = await getAppReportById(this.reportId);
+					console.log('getAppReportById返回:', res);
+					if (res && res.success && res.data) {
+						// 赋值到reportInfo
+						this.reportInfo.id = res.data.id;
+						this.reportInfo.orderId = res.data.orderId;
+						this.reportInfo.userId = res.data.userId;
+						this.reportInfo.checkitemIds = res.data.checkitemIds;
+						this.reportInfo.reportItemIds = res.data.reportItemIds;
+						this.reportInfo.status = res.data.status;
+						this.reportInfo.conclusion = res.data.conclusion;
+						this.reportInfo.doctorId = res.data.doctorId;
+						this.reportInfo.reportDate = res.data.reportDate;
+						this.reportInfo.createId = res.data.createId;
+						this.reportInfo.createTime = res.data.createTime;
+						this.reportInfo.updateId = res.data.updateId;
+						this.reportInfo.updateTime = res.data.updateTime;
 					} else {
-						throw new Error(response.data.msg || '获取报告详情失败');
+						uni.showToast({
+							title: '获取报告详情失败',
+							icon: 'none'
+						});
 					}
 				} catch (error) {
 					console.error('获取报告详情失败:', error);
 					uni.showToast({
-						title: error.message || '获取报告详情失败',
-						icon: 'none',
-						duration: 2000
+						title: '获取报告详情失败',
+						icon: 'none'
 					});
 				} finally {
 					this.loading = false;

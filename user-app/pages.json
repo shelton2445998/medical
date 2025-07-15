@@ -3,7 +3,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "沈阳云医院",
+				"navigationBarTitleText": "杏林春暖·健康预约",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white",
 				"enablePullDownRefresh": true
@@ -53,6 +53,14 @@
 			"path": "pages/appointment/appointment-flow",
 			"style": {
 				"navigationBarTitleText": "体检预约",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/payment/payment",
+			"style": {
+				"navigationBarTitleText": "订单支付",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white"
 			}

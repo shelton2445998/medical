@@ -3,6 +3,7 @@ package com.fourth.medical.auth.controller;
 import com.fourth.medical.auth.annotation.Login;
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
+import com.fourth.medical.auth.dto.AppRegisterDto;
 import com.fourth.medical.auth.service.AppLoginService;
 import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.auth.vo.LoginTokenVo;
@@ -71,6 +72,24 @@ public class AppLoginController {
     }
 
     /**
+     * APP用户注册
+     *
+     * @param appRegisterDto
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/register")
+    @Operation(summary = "APP用户注册")
+    public ApiResult<LoginTokenVo> register(@Valid @RequestBody AppRegisterDto appRegisterDto, HttpServletRequest request, HttpServletResponse response) {
+        LoginTokenVo loginTokenVo = appLoginService.register(appRegisterDto);
+        // 输出token到cookie
+        addCookie(loginTokenVo.getToken(), request, response);
+        return ApiResult.success(loginTokenVo);
+    }
+
+    /**
      * 获取APP登录用户信息
      *
      * @return
@@ -90,10 +109,10 @@ public class AppLoginController {
      * @return
      * @throws Exception
      */
-    @Login
     @PostMapping("/logout")
     @Operation(summary = "APP退出")
     public ApiResult<Boolean> logout(HttpServletRequest request, HttpServletResponse response) {
+        // 删除缓存
         appLoginService.logout();
         // 从cookie中删除token
         CookieUtil.deleteCookie(LoginConstant.APP_COOKIE_TOKEN_NAME, request, response);
@@ -101,17 +120,14 @@ public class AppLoginController {
     }
 
     /**
-     * 输出token到cookie
+     * 添加cookie
      *
      * @param token
      * @param request
      * @param response
      */
     private void addCookie(String token, HttpServletRequest request, HttpServletResponse response) {
-        boolean docRequest = HttpServletRequestUtil.isDocRequest(request);
-        if (docRequest) {
-            CookieUtil.addCookie(LoginConstant.APP_COOKIE_TOKEN_NAME, token, request, response);
-        }
+        CookieUtil.addCookie(LoginConstant.APP_COOKIE_TOKEN_NAME, token, request, response);
     }
 
 }

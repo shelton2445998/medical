@@ -663,7 +663,7 @@ export default {
       
       try {
         // 检查是否有token
-        const token = uni.getStorageSync('TOKEN_KEY');
+        const token = uni.getStorageSync('uniIdToken');
         if (!token) {
           uni.showToast({
             title: '请先登录',
@@ -721,23 +721,47 @@ export default {
         // 存储定制套餐信息
         uni.setStorageSync('customPackage', JSON.stringify(customPackage));
         
-        // 不调用API，只存储数据，让支付页面统一处理
-        uni.showToast({ 
-          title: '信息已保存，即将跳转支付页面', 
-          icon: 'success',
-          duration: 1500
+        // 调用后端API创建预约订单
+        uni.request({
+          url: appointmentApi.createAppointment,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/json',
+            'Authorization': token || ''
+          },
+          data: appointmentData,
+          success: (res) => {
+            console.log('创建预约订单响应:', res);
+            
+            if (res.statusCode === 200 && res.data.code === 200) {
+              // 创建成功，清除选中的检查项
+              this.selectedCheckitems = [];
+              this.totalPrice = 0;
+              
+              // 存储订单信息，供支付页面使用
+              uni.setStorageSync('currentOrder', JSON.stringify(res.data.data));
+              
+              uni.showToast({ 
+                title: '预约创建成功，即将跳转支付页面', 
+                icon: 'success',
+                duration: 1500
+              });
+              
+              // 跳转到支付页面
+              setTimeout(() => {
+                uni.navigateTo({
+                  url: '/pages/payment/payment'
+                });
+              }, 1500);
+            } else {
+              throw new Error(res.data.msg || '创建预约失败');
+            }
+          },
+          fail: (err) => {
+            console.error('创建预约订单失败:', err);
+            throw new Error('网络请求失败，请重试');
+          }
         });
-        
-        // 清除选中的检查项
-        this.selectedCheckitems = [];
-        this.totalPrice = 0;
-        
-        // 直接跳转到支付页面
-        setTimeout(() => {
-          uni.navigateTo({
-            url: '/pages/appointment/appointment-flow'
-          });
-        }, 1500);
         
       } catch (error) {
         console.error('预约失败:', error);
@@ -1055,7 +1079,6 @@ export default {
       &:focus {
         border-color: #74b9ff;
         box-shadow: 0 0 0 4rpx rgba(116, 185, 255, 0.1);
-        transform: translateY(-2rpx);
 }
       
       &:hover {

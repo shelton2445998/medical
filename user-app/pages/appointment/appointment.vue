@@ -1,13 +1,5 @@
 <template>
 	<view class="content">
-		<!-- 动态背景装饰 -->
-		<view class="floating-shapes">
-			<view class="shape shape-1"></view>
-			<view class="shape shape-2"></view>
-			<view class="shape shape-3"></view>
-			<view class="shape shape-4"></view>
-		</view>
-		
 		<view class="main-content">
 			<!-- 页面头部 -->
 			<view class="page-header">
@@ -321,66 +313,6 @@ export default {
 	}
 }
 
-.floating-shapes {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-	z-index: -1;
-
-	.shape {
-		position: absolute;
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 50%;
-		filter: blur(50px);
-		animation: float 15s infinite ease-in-out;
-		transition: all 0.3s ease;
-		
-		&::before {
-			content: '';
-			position: absolute;
-			top: -10%;
-			left: -10%;
-			width: 120%;
-			height: 120%;
-			background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-			border-radius: 50%;
-			animation: pulse 3s ease-in-out infinite;
-		}
-
-		&.shape-1 {
-			width: 100px;
-			height: 100px;
-			top: 10%;
-			left: 10%;
-			animation-delay: -2s;
-		}
-		&.shape-2 {
-			width: 150px;
-			height: 150px;
-			top: 70%;
-			left: 30%;
-			animation-delay: -5s;
-		}
-		&.shape-3 {
-			width: 120px;
-			height: 120px;
-			top: 20%;
-			right: 20%;
-			animation-delay: -8s;
-		}
-		&.shape-4 {
-			width: 180px;
-			height: 180px;
-			bottom: 10%;
-			right: 50%;
-			animation-delay: -10s;
-		}
-	}
-}
-
 .main-content {
 	padding: 20rpx 40rpx 0 40rpx;
 	position: relative;
@@ -522,6 +454,34 @@ export default {
 	backdrop-filter: blur(10rpx);
 	transition: all 0.3s ease;
 	animation: fadeInUp 0.8s ease-out 0.3s both;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: 
+			radial-gradient(circle at 10% 10%, rgba(9, 132, 227, 0.02) 0%, transparent 50%),
+			radial-gradient(circle at 90% 90%, rgba(116, 185, 255, 0.02) 0%, transparent 50%);
+		pointer-events: none;
+		animation: gentleFlow 10s ease-in-out infinite;
+	}
+	
+	&::after {
+		content: '';
+		position: absolute;
+		top: 20rpx;
+		right: 20rpx;
+		width: 60rpx;
+		height: 60rpx;
+		background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(116, 185, 255, 0.1));
+		border-radius: 50%;
+		animation: float 6s ease-in-out infinite;
+	}
 	
 	&:hover {
 		transform: translateY(-4rpx);
@@ -546,29 +506,36 @@ export default {
 			height: 30rpx;
 			background: linear-gradient(135deg, #0984e3, #74b9ff);
 			border-radius: 3rpx;
+			animation: gentlePulse 3s ease-in-out infinite;
 		}
 	}
 	
 	.service-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(150rpx, 1fr));
-		gap: 20rpx;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 30rpx;
+		transition: all 0.3s ease;
 	}
 	
 	.service-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 20rpx 0;
+		padding: 25rpx 15rpx;
 		transition: all 0.3s ease;
+		border-radius: 16rpx;
+		background: rgba(255, 255, 255, 0.8);
+		backdrop-filter: blur(5rpx);
 		
 		&:hover {
 			transform: translateY(-4rpx);
+			background: rgba(255, 255, 255, 0.95);
+			box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.15);
 		}
 		
 		.service-icon {
-			width: 80rpx;
-			height: 80rpx;
+			width: 90rpx;
+			height: 90rpx;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -585,28 +552,46 @@ export default {
 			
 			.icon-symbol {
 				font-size: 40rpx;
-				color: #0984e3;
 			}
 		}
 		
 		.service-name {
-			font-size: 26rpx;
+			font-size: 28rpx;
 			color: #333333;
 			text-align: center;
 			font-weight: 500;
+			line-height: 1.2;
 		}
 	}
 }
 
 .section {
 	margin-bottom: 30rpx;
-	background: rgba(255, 255, 255, 0.95);
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.9));
 	border-radius: 24rpx;
 	padding: 40rpx;
 	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
 	backdrop-filter: blur(10rpx);
 	transition: all 0.3s ease;
 	animation: fadeInUp 0.8s ease-out 0.4s both;
+	position: relative;
+	overflow: hidden;
+	
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: 
+			radial-gradient(circle at 20% 20%, rgba(9, 132, 227, 0.03) 0%, transparent 50%),
+			radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.03) 0%, transparent 50%),
+			linear-gradient(45deg, transparent 40%, rgba(9, 132, 227, 0.01) 50%, transparent 60%),
+			linear-gradient(-45deg, transparent 30%, rgba(116, 185, 255, 0.01) 40%, transparent 50%);
+		pointer-events: none;
+		animation: gentleFlow 8s ease-in-out infinite;
+	}
 	
 	&:hover {
 		transform: translateY(-4rpx);
@@ -661,29 +646,62 @@ export default {
 .hospital-list {
 	.hospital-item {
 		display: flex;
-		margin-bottom: 20rpx;
+		margin-bottom: 25rpx;
+		padding: 20rpx;
+		border-radius: 16rpx;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.8));
+		backdrop-filter: blur(10rpx);
+		border: 1rpx solid rgba(9, 132, 227, 0.1);
 		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 4rpx;
+			height: 100%;
+			background: linear-gradient(135deg, #0984e3, #74b9ff);
+			border-radius: 2rpx;
+			box-shadow: 0 0 8rpx rgba(9, 132, 227, 0.3);
+		}
 		
 		&:last-child {
 			margin-bottom: 0;
 		}
 		
 		&:hover {
-			transform: translateX(8rpx);
+			transform: translateX(8rpx) translateY(-2rpx);
+			box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.15);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
 		}
 		
 		.hospital-image {
 			width: 120rpx;
 			height: 90rpx;
 			border-radius: 12rpx;
-			margin-right: 15rpx;
+			margin-right: 20rpx;
 			overflow: hidden;
 			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 			transition: all 0.3s ease;
+			position: relative;
+			
+			&::after {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+				pointer-events: none;
+			}
 			
 			&:hover {
 				transform: scale(1.05);
-				box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
 			}
 			
 			image {
@@ -700,10 +718,10 @@ export default {
 			justify-content: space-between;
 			
 			.hospital-name {
-				font-size: 26rpx;
+				font-size: 28rpx;
 				font-weight: bold;
 				color: #333333;
-				margin-bottom: 8rpx;
+				margin-bottom: 10rpx;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
@@ -712,21 +730,23 @@ export default {
 			.hospital-tags {
 				display: flex;
 				flex-wrap: wrap;
-				margin-bottom: 8rpx;
+				margin-bottom: 10rpx;
 				
 				.tag {
 					font-size: 20rpx;
 					color: #0984e3;
-					background: rgba(9, 132, 227, 0.1);
-					padding: 4rpx 8rpx;
-					border-radius: 8rpx;
+					background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(116, 185, 255, 0.1));
+					padding: 6rpx 12rpx;
+					border-radius: 12rpx;
 					margin-right: 8rpx;
 					margin-bottom: 6rpx;
 					transition: all 0.3s ease;
+					border: 1rpx solid rgba(9, 132, 227, 0.2);
 					
 					&:hover {
-						background: rgba(9, 132, 227, 0.2);
+						background: linear-gradient(135deg, rgba(9, 132, 227, 0.2), rgba(116, 185, 255, 0.2));
 						transform: scale(1.05);
+						box-shadow: 0 2rpx 8rpx rgba(9, 132, 227, 0.2);
 					}
 				}
 			}
@@ -739,7 +759,8 @@ export default {
 				
 				.address-icon {
 					font-size: 20rpx;
-					margin-right: 4rpx;
+					margin-right: 6rpx;
+					color: #0984e3;
 				}
 				
 				.address-text {
@@ -765,68 +786,103 @@ export default {
 	}
 	
 	.package-item {
-		flex: 0 0 300rpx;
-		margin-right: 20rpx;
-		border-radius: 16rpx;
+		flex: 0 0 320rpx;
+		margin-right: 25rpx;
+		border-radius: 20rpx;
 		overflow: hidden;
-		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-		background: #ffffff;
-		transition: all 0.3s ease;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+		backdrop-filter: blur(10rpx);
+		border: 1rpx solid rgba(9, 132, 227, 0.1);
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		transition: all 0.4s ease;
+		position: relative;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4rpx;
+			background: linear-gradient(90deg, #0984e3, #74b9ff, #0984e3);
+			background-size: 200% 100%;
+			animation: shimmer 3s ease-in-out infinite;
+		}
 		
 		&:last-child {
 			margin-right: 0;
 		}
 		
 		&:hover {
-			transform: translateY(-8rpx);
-			box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+			transform: translateY(-12rpx) scale(1.02);
+			box-shadow: 0 16rpx 48rpx rgba(9, 132, 227, 0.2);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(240, 248, 255, 0.95));
 		}
 		
 		.package-image {
 			width: 100%;
-			height: 180rpx;
+			height: 200rpx;
+			position: relative;
+			overflow: hidden;
+			
+			&::after {
+				content: '';
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				height: 60rpx;
+				background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+			}
 			
 			image {
 				width: 100%;
 				height: 100%;
 				object-fit: cover;
+				transition: transform 0.4s ease;
+			}
+			
+			&:hover image {
+				transform: scale(1.1);
 			}
 		}
 		
 		.package-info {
-			padding: 20rpx;
+			padding: 25rpx;
+			position: relative;
 			
 			.package-name {
-				font-size: 28rpx;
+				font-size: 30rpx;
 				font-weight: bold;
 				color: #333333;
-				margin-bottom: 10rpx;
+				margin-bottom: 12rpx;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 			}
 			
 			.package-desc {
-				font-size: 24rpx;
+				font-size: 26rpx;
 				color: #666666;
-				margin-bottom: 15rpx;
-				height: 68rpx;
+				margin-bottom: 20rpx;
+				height: 72rpx;
 				display: -webkit-box;
 				-webkit-box-orient: vertical;
 				-webkit-line-clamp: 2;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				line-height: 1.4;
 			}
 			
 			.package-price-box {
 				display: flex;
 				align-items: baseline;
+				justify-content: space-between;
 				
 				.package-price {
-					font-size: 32rpx;
+					font-size: 36rpx;
 					font-weight: bold;
 					color: #ff5a5f;
-					margin-right: 10rpx;
 				}
 				
 				.package-original-price {
@@ -994,29 +1050,6 @@ export default {
 }
 
 // 动画定义
-@keyframes float {
-	0% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-	25% {
-		transform: translateY(-20px) translateX(20px) scale(1.1);
-		opacity: 0.9;
-	}
-	50% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-	75% {
-		transform: translateY(20px) translateX(-20px) scale(1.1);
-		opacity: 0.9;
-	}
-	100% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-}
-
 @keyframes flow {
 	0% {
 		transform: rotate(0deg);
@@ -1059,18 +1092,6 @@ export default {
 	}
 }
 
-@keyframes pulse {
-	0% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.05);
-	}
-	100% {
-		transform: scale(1);
-	}
-}
-
 @keyframes bounce {
 	0%, 20%, 50%, 80%, 100% {
 		transform: translateY(0);
@@ -1080,6 +1101,18 @@ export default {
 	}
 	60% {
 		transform: translateY(-5rpx);
+	}
+}
+
+@keyframes gentleFlow {
+	0% {
+		transform: translate(0, 0);
+	}
+	50% {
+		transform: translate(10px, 10px);
+	}
+	100% {
+		transform: translate(0, 0);
 	}
 }
 </style> 

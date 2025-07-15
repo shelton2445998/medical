@@ -89,7 +89,7 @@
             <text class="package-desc">{{pkg.description}}</text>
             <view class="package-tags">
               <text class="package-tag">{{getPackageTypeName(pkg.type)}}</text>
-              <text class="package-tag">{{pkg.suitableCrowd}}</text>
+              <!-- 移除适用人群标签，详情请查看套餐详情页 -->
             </view>
             <view class="package-check">
               <text class="check-icon" v-if="selectedPackage && selectedPackage.id === pkg.id">✓</text>
@@ -133,29 +133,18 @@
                 <text class="picker-text" :class="{ 'placeholder': !patientGender }">
                   {{ patientGender || '请选择性别' }}
                 </text>
-                <text class="picker-icon">👥</text>
+                <text class="picker-icon">👤</text>
           </view>
         </picker>
       </view>
-
-      <!-- 医院选择 -->
-      <view class="form-item">
-        <text class="form-label">选择医院</text>
-        <picker :range="hospitalList" range-key="name" @change="onHospitalChange">
-          <view class="picker-display">
-            <text class="picker-text" :class="{ 'placeholder': !selectedHospital }">
-              {{ selectedHospital ? selectedHospital.name : '请选择医院' }}
-            </text>
-            <text class="picker-icon">🏥</text>
-          </view>
-        </picker>
-      </view>
-
+          
       <view class="form-item">
             <text class="form-label">预约日期</text>
-            <picker mode="date" @change="onDateChange" class="date-picker">
+        <picker mode="date" @change="onDateChange">
               <view class="picker-display">
-                <text class="picker-text">{{ selectedDate || '点击选择日期' }}</text>
+                <text class="picker-text" :class="{ 'placeholder': !selectedDate }">
+                  {{ selectedDate || '请选择预约日期' }}
+                </text>
                 <text class="picker-icon">📅</text>
           </view>
         </picker>
@@ -207,195 +196,29 @@
               type="number" 
               maxlength="11" 
             />
-          </view>
-          
+      </view>
+
           <view class="form-item">
-            <text class="form-label">备注</text>
-            <textarea class="form-textarea" v-model="remark" placeholder="可填写特殊需求或备注" />
-          </view>
-        </view>
-        
-        <button class="next-btn" @click="nextStep" :disabled="!name || !selectedDate || !patientGender || !selectedHospital">
-          <text class="btn-icon">→</text>
-          <text class="btn-text">下一步</text>
-        </button>
-          </view>
-    </view>
-
-    <!-- Step 4: 支付预约 -->
-    <view v-else-if="step === 4" class="step-panel">
-      <view class="step-card">
-        <view class="card-header">
-          <view class="card-icon">💳</view>
-          <view class="card-title">确认支付</view>
-          <view class="card-desc">请确认预约信息并完成支付</view>
-          </view>
-        
-        <view class="confirm-section">
-          <!-- 医院信息 -->
-          <view class="info-card">
-            <view class="info-header">
-              <text class="info-icon">🏥</text>
-              <text class="info-title">医院信息</text>
-          </view>
-            <view class="info-content">
-              <view class="info-row">
-                <text class="info-label">医院名称</text>
-                <text class="info-value">{{ selectedHospital.name }}</text>
-        </view>
-              <view class="info-row">
-                <text class="info-label">医院地址</text>
-                <text class="info-value">{{ selectedHospital.address || '暂无地址信息' }}</text>
-          </view>
-          </view>
-          </view>
-        
-          <!-- 套餐信息 -->
-          <view class="info-card">
-            <view class="info-header">
-              <text class="info-icon">📋</text>
-              <text class="info-title">{{ selectedPackage && selectedPackage.id ? '套餐信息' : '定制套餐信息' }}</text>
-          </view>
-            <view class="info-content">
-              <view class="info-row">
-                <text class="info-label">{{ selectedPackage && selectedPackage.id ? '套餐名称' : '套餐名称' }}</text>
-                <text class="info-value">{{ selectedPackage ? selectedPackage.name : '暂无套餐信息' }}</text>
-          </view>
-              <view class="info-row" v-if="selectedPackage && selectedPackage.type">
-                <text class="info-label">套餐类型</text>
-                <text class="info-value">{{ getPackageTypeName(selectedPackage.type) }}</text>
-          </view>
-              <view class="info-row" v-if="selectedPackage && selectedPackage.suitableCrowd">
-                <text class="info-label">适用人群</text>
-                <text class="info-value">{{ selectedPackage.suitableCrowd }}</text>
-          </view>
-              <view class="info-row">
-                <text class="info-label">检查项目</text>
-                <text class="info-value">{{ selectedPackage && selectedPackage.checkItems ? selectedPackage.checkItems.join('、') : (selectedPackage && selectedPackage.checkitemIds ? '已选择' + selectedPackage.checkitemIds.split(',').length + '个检查项目' : '暂无检查项目信息') }}</text>
-              </view>
-          </view>
-        </view>
-        
-          <!-- 个人信息 -->
-          <view class="info-card">
-            <view class="info-header">
-              <text class="info-icon">👤</text>
-              <text class="info-title">个人信息</text>
-          </view>
-            <view class="info-content">
-              <view class="info-row">
-                <text class="info-label">姓名</text>
-                <text class="info-value">{{ name }}</text>
-          </view>
-              <!-- 只去除性别重复，其他展示项全部保留 -->
-              <view class="info-row">
-                <text class="info-label">性别</text>
-                <text class="info-value">{{ patientGender === '男' || patientGender === 1 ? '男' : '女' }}</text>
-              </view>
-          </view>
-        </view>
-        
-          <!-- 预约信息 -->
-          <view class="info-card">
-            <view class="info-header">
-              <text class="info-icon">📅</text>
-              <text class="info-title">预约信息</text>
-          </view>
-            <view class="info-content">
-              <view class="info-row">
-                <text class="info-label">预约日期</text>
-                <text class="info-value">{{ selectedDate }}</text>
-          </view>
-              <view class="info-row">
-                <text class="info-label">预约时间</text>
-                <text class="info-value">{{ selectedTime || '上午(08:00-12:00)' }}</text>
-          </view>
-              <view class="info-row">
-                <text class="info-label">选择医生</text>
-                <text class="info-value">{{ selectedDoctor ? selectedDoctor.name + ' (' + selectedDoctor.title + ')' : '张医生 (主任医师)' }}</text>
-              </view>
-              <view class="info-row" v-if="remark">
-                <text class="info-label">备注</text>
-                <text class="info-value">{{ remark }}</text>
-          </view>
-          </view>
-        </view>
-        
-          <!-- 费用信息 -->
-          <view class="info-card price-card">
-            <view class="info-header">
-              <text class="info-icon">💰</text>
-              <text class="info-title">费用信息</text>
-          </view>
-            <view class="info-content">
-              <view class="info-row" v-if="selectedPackage && selectedPackage.price && selectedPackage.id">
-                <text class="info-label">套餐原价</text>
-                <text class="info-value price-original">¥{{ selectedPackage.price }}</text>
-          </view>
-              <view class="info-row" v-if="selectedPackage && selectedPackage.discountPrice">
-                <text class="info-label">优惠价格</text>
-                <text class="info-value price-discount">¥{{ selectedPackage.discountPrice }}</text>
-          </view>
-              <view class="info-row total-row">
-                <text class="info-label">应付总额</text>
-                <text class="info-value total-price">¥{{ totalPrice }}</text>
-              </view>
-          </view>
-        </view>
+            <text class="form-label">备注信息</text>
+            <textarea 
+              class="form-textarea" 
+              v-model="remark" 
+              placeholder="请输入备注信息（可选）"
+              placeholder-class="input-placeholder"
+              maxlength="200"
+            />
       </view>
-      
-        <!-- 支付方式 -->
-        <view class="payment-section">
-          <view class="payment-header">
-            <text class="payment-title">选择支付方式</text>
-          </view>
-          <view class="payment-methods">
-            <view 
-              class="payment-method" 
-              v-for="(method, index) in payMethods" 
-              :key="index"
-              :class="{active: payMethod === method.value}"
-              @click="selectPayMethod(method.value)"
-            >
-              <view class="method-icon">
-                <text class="method-symbol">{{method.name === '微信支付' ? '💚' : method.name === '支付宝' ? '💙' : '🏥'}}</text>
-      </view>
-              <text class="method-name">{{method.name}}</text>
-              <view class="method-check">
-                <text class="check-icon" v-if="payMethod === method.value">✓</text>
-              </view>
-            </view>
-          </view>
-      </view>
+        </view>
         
-        <button class="pay-btn" @click="showPayModal" :disabled="!payMethod">
+        <button class="submit-btn" @click="createOrder">
           <text class="btn-icon">💳</text>
-          <text class="btn-text">立即支付 ¥{{ totalPrice }}</text>
+          <text class="btn-text">创建订单并支付</text>
         </button>
-      
-      <!-- 支付二维码弹窗 -->
-      <view v-if="showPay" class="pay-modal-mask" @click.self="closePayModal">
-        <view class="pay-modal">
-            <view class="modal-header">
-              <text class="modal-title">{{ getPayMethodName(payMethod) }}扫码支付</text>
-              <text class="modal-close" @click="closePayModal">✕</text>
-            </view>
-            <view class="modal-content">
-          <view class="pay-amount">支付金额：¥{{ totalPrice }}</view>
-          <image class="qrcode" src="/static/images/qrcode-demo.png" mode="aspectFit"></image>
-          <view class="pay-tips">请使用{{ getPayMethodName(payMethod) }}扫描二维码完成支付</view>
-            </view>
-            <view class="modal-actions">
-          <button class="pay-confirm-btn" @click="pay">已支付</button>
-          <button class="pay-cancel-btn" @click="closePayModal">取消</button>
-            </view>
-          </view>
-        </view>
       </view>
     </view>
 
-    <!-- Step 5: 预约成功 -->
-    <view v-else-if="step === 5" class="step-panel success-panel">
+    <!-- Step 4: 预约成功 -->
+    <view v-else-if="step === 4" class="step-panel">
       <view class="success-card">
         <view class="success-icon">✅</view>
         <view class="success-title">预约成功！</view>
@@ -431,7 +254,7 @@ export default {
   data() {
     return {
       step: 1,
-      stepLabels: ['选择医院', '选择套餐', '填写信息', '支付预约'],
+      stepLabels: ['选择医院', '选择套餐', '填写信息', '预约成功'],
       memberId: null,
       memberName: '',
       hospitalList: [
@@ -655,7 +478,7 @@ export default {
     closePayModal() {
       this.showPay = false;
     },
-    pay() {
+    createOrder() {
       // 验证必需字段
       if (!this.selectedHospital || !this.selectedHospital.id) {
         uni.showToast({
@@ -690,9 +513,8 @@ export default {
         return;
       }
       
-      // 显示支付中状态
-      this.showPay = false;
-      uni.showLoading({ title: '支付中...' });
+      // 显示加载状态
+      uni.showLoading({ title: '创建订单中...' });
       
       // 构建App预约订单数据，对应后端AppOrdersDto结构
       const orderData = {
@@ -718,7 +540,7 @@ export default {
       // 获取token
       const token = uni.getStorageSync('uniIdToken');
       
-      // 使用新的API配置调用后端App预约接口
+      // 调用后端App预约接口创建订单
       uni.request({
         url: appointmentApi.createAppointment,
         method: 'POST',
@@ -730,67 +552,36 @@ export default {
         success: (res) => {
           console.log('预约接口响应：', res);
           if (res.statusCode === 200 && res.data.code === 200) {
-            // 预约成功，现在调用支付确认接口
-            const orderId = res.data.data.id;
-            console.log('预约成功，订单ID:', orderId);
-            
-            // 调用支付确认接口
-            uni.request({
-              url: appointmentApi.confirmPayment(orderId),
-              method: 'PUT',
-              header: {
-                'Content-Type': 'application/json',
-                'Authorization': token || ''
-              },
-              success: (payRes) => {
-                console.log('支付确认接口响应：', payRes);
-                if (payRes.statusCode === 200 && payRes.data.code === 200) {
-                  // 支付确认成功
+            // 预约成功，创建订单
             uni.hideLoading();
-            this.orderNo = res.data.data.orderNumber || 'YY' + Date.now();
-            this.step = 5;
             
-                  // 清除存储的医院、套餐和定制套餐信息
+            // 存储订单信息，供支付页面使用
+            const orderInfo = res.data.data;
+            uni.setStorageSync('currentOrder', JSON.stringify(orderInfo));
+            
+            // 清除存储的医院、套餐和定制套餐信息
             uni.removeStorageSync('selectedHospital');
             uni.removeStorageSync('selectedPackage');
-                  uni.removeStorageSync('customPackage');
+            uni.removeStorageSync('customPackage');
             
             // 显示成功提示
             uni.showToast({
-              title: '预约成功！',
+              title: '订单创建成功，即将跳转支付页面',
               icon: 'success',
-              duration: 2000
+              duration: 1500
             });
             
-            // 支付成功后2秒自动返回首页
+            // 跳转到支付页面
             setTimeout(() => {
-              uni.reLaunch({ url: '/pages/index/index' });
-            }, 2000);
-                } else {
-                  // 支付确认失败
-                  uni.hideLoading();
-                  uni.showToast({
-                    title: payRes.data.msg || '支付确认失败，请重试',
-                    icon: 'none',
-                    duration: 2000
-                  });
-                }
-              },
-              fail: (payErr) => {
-                console.error('支付确认接口调用失败：', payErr);
-                uni.hideLoading();
-                uni.showToast({
-                  title: '支付确认失败，请重试',
-                  icon: 'none',
-                  duration: 2000
-                });
-              }
-            });
+              uni.navigateTo({
+                url: '/pages/payment/payment'
+              });
+            }, 1500);
           } else {
             // 预约失败
             uni.hideLoading();
             uni.showToast({
-              title: res.data.msg || '预约失败，请重试',
+              title: res.data.msg || '创建订单失败，请重试',
               icon: 'none',
               duration: 2000
             });

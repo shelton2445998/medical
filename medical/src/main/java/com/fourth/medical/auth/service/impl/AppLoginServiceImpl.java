@@ -2,6 +2,7 @@ package com.fourth.medical.auth.service.impl;
 
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
+import com.fourth.medical.auth.dto.AppRegisterDto;
 import com.fourth.medical.auth.service.AppLoginRedisService;
 import com.fourth.medical.auth.service.AppLoginService;
 import com.fourth.medical.auth.util.AppLoginUtil;
@@ -25,6 +26,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -95,6 +97,57 @@ public class AppLoginServiceImpl implements AppLoginService {
             throw new BusinessException("账号密码错误");
         }
         return login(user);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public LoginTokenVo register(AppRegisterDto dto) {
+        String username = dto.getUsername();
+        // 检查用户名是否已存在
+        User existUser = userService.getUserByUsername(username);
+        if (existUser != null) {
+            throw new BusinessException("用户名已存在");
+        }
+        
+        // 创建新用户
+        User user = new User();
+        user.setUsername(username);
+        // 设置默认昵称为用户名
+        user.setNickname(username);
+        
+        // 密码加密
+        String salt = PasswordUtil.generateSalt();
+        String encryptPassword = PasswordUtil.encrypt(dto.getPassword(), salt);
+        
+        user.setPassword(encryptPassword);
+        user.setSalt(salt);
+        user.setStatus(true); // 启用账号
+        user.setRegisterTime(new Date());
+        
+        // 设置注册IP信息
+        String requestIp = IpUtil.getRequestIp();
+        String ipAreaDesc = IpRegionUtil.getIpAreaDesc(requestIp);
+        user.setRegisterIp(requestIp);
+        user.setRegisterIpArea(ipAreaDesc);
+        
+        // 设置为用户角色
+        user.setUserRoleId(LoginConstant.APP_NORMAL_USER_ROLE);
+        
+        // 保存用户
+        boolean flag = userService.save(user);
+        if (!flag) {
+            throw new BusinessException("注册失败");
+        }
+        
+        // 生成token
+        String token = TokenUtil.generateAppToken(user.getId());
+        // 刷新登录信息
+        refreshLoginInfo(user, token, new Date());
+        
+        // 返回token
+        LoginTokenVo loginTokenVo = new LoginTokenVo();
+        loginTokenVo.setToken(token);
+        return loginTokenVo;
     }
 
     @Override

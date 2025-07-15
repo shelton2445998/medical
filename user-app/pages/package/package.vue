@@ -83,7 +83,7 @@
 							<text class="package-name">{{item.name}}</text>
 							<view class="package-tags">
 								<text class="package-tag">{{getTypeName(item.type)}}</text>
-								<text class="package-tag" v-if="item.suitableCrowd">{{item.suitableCrowd}}</text>
+								<!-- 移除适用人群标签，只在详情页显示 -->
 							</view>
 						</view>
 						<view class="package-price-section">
@@ -96,9 +96,9 @@
 						</view>
 					</view>
 					
-					<!-- 套餐描述 -->
+					<!-- 套餐描述 - 只显示基本信息 -->
 					<view class="package-desc">
-						<text>{{item.description}}</text>
+						<text>{{getPackageSummary(item)}}</text>
 					</view>
 					
 					<!-- 检查项目 -->
@@ -213,8 +213,9 @@
 								description: item.description || '',
 								checkitemIds: item.checkitemIds || '',
 								checkitemCount: checkitemCount,
-								suitableCrowd: item.suitableCrowd || '适合一般人群',
-								appointmentNotice: item.appointmentNotice || '请按医院要求准备',
+								// 移除详细信息，只在详情页显示
+								// suitableCrowd: item.suitableCrowd || '适合一般人群',
+								// appointmentNotice: item.appointmentNotice || '请按医院要求准备',
 								sold: item.sold || 0,
 								recommend: item.recommend || false,
 								popular: item.popular || false,
@@ -345,6 +346,24 @@
 			getDiscountText(item) {
 				const discount = (item.discountPrice / item.price * 10).toFixed(1);
 				return discount + '折';
+			},
+			// 获取套餐摘要
+			getPackageSummary(item) {
+				if (item.description) {
+					// 限制描述长度，提供简洁的摘要
+					const maxLength = 80;
+					if (item.description.length > maxLength) {
+						return item.description.substring(0, maxLength) + '...';
+					}
+					return item.description;
+				}
+				// 如果没有描述，根据套餐类型提供默认描述
+				const defaultDescriptions = {
+					1: '基础体检套餐，包含常规检查项目',
+					2: '高级体检套餐，包含深度筛查项目',
+					3: '专项体检套餐，针对特定人群设计'
+				};
+				return defaultDescriptions[item.type] || '体检套餐，详情请点击查看';
 			}
 		}
 	}

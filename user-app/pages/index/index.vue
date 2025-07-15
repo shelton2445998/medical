@@ -35,8 +35,14 @@
 
 			<!-- 快捷服务 -->
 			<view class="quick-service">
-				<view class="section-title">快捷服务</view>
-				<view class="service-grid">
+				<view class="service-header">
+					<text class="section-title">快捷服务</text>
+					<view class="layout-toggle" @click="toggleLayout">
+						<text class="toggle-text">{{ layoutMode === 2 ? '2列' : '4列' }}</text>
+						<text class="toggle-icon">🔄</text>
+					</view>
+				</view>
+				<view class="service-grid" :class="{ 'service-grid-four': layoutMode === 4 }">
 					<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
 						<view class="service-icon">
 							<image :src="item.icon" mode="aspectFit" class="service-icon-img"></image>
@@ -229,9 +235,17 @@
 					}
 				],
 				recommendPackages: [],
+				// 布局模式 (2 或 4)
+				layoutMode: 2,
 			}
 		},
+		// 页面标题配置
 		onLoad() {
+			// 设置页面标题
+			uni.setNavigationBarTitle({
+				title: '杏林春暖·健康预约'
+			});
+			
 			// 页面加载时获取推荐医院
 			this.getRecommendHospitals();
 			this.getRecommendPackages();
@@ -274,14 +288,14 @@
 					this.hospitalList = [
 						{
 							id: 1,
-							name: '沈阳市云医院-和平分院',
+							name: '华夏健康体检中心-总院',
 							image: '/static/images/hospital1.jpg',
 							tags: ['三甲', '综合医院'],
 							address: '沈阳市和平区南京南街61号'
 						},
 						{
 							id: 2,
-							name: '沈阳市云医院-沈河分院',
+							name: '华夏健康体检中心-分院',
 							image: '/static/images/hospital2.jpg',
 							tags: ['三甲', '综合医院'],
 							address: '沈阳市沈河区北站路33号'
@@ -403,7 +417,10 @@
 			},
 			async getRecommendPackages() {
 				try {
+					console.log('开始获取推荐套餐...');
 					const result = await get(packageApi.getRecommendPackages);
+					console.log('推荐套餐接口返回结果:', result);
+					
 					if (result && result.data) {
 						this.recommendPackages = result.data.map((item, index) => ({
 							id: item.id,
@@ -413,13 +430,48 @@
 							tags: item.tags || [],
 							image: `/static/images/package${(index % 4) + 1}.jpg`
 						}));
+						console.log('处理后的推荐套餐数据:', this.recommendPackages);
+					} else if (Array.isArray(result)) {
+						// 如果直接返回数组
+						this.recommendPackages = result.map((item, index) => ({
+							id: item.id,
+							name: item.name,
+							price: item.price || 0,
+							description: item.description || '',
+							tags: item.tags || [],
+							image: `/static/images/package${(index % 4) + 1}.jpg`
+						}));
+						console.log('处理后的推荐套餐数据:', this.recommendPackages);
 					} else {
+						console.log('接口返回数据格式异常:', result);
 						this.recommendPackages = [];
 					}
 				} catch (e) {
+					console.error('获取推荐套餐失败:', e);
 					this.recommendPackages = [];
+					// 使用测试数据
+					this.recommendPackages = [
+						{
+							id: 4001,
+							name: '基础体检套餐',
+							price: 269,
+							description: '包含常规体检项目，适合一般健康检查',
+							image: '/static/images/package1.jpg'
+						},
+						{
+							id: 4002,
+							name: '高级体检套餐',
+							price: 599,
+							description: '包含基础套餐及更多专项检查，适合中老年人',
+							image: '/static/images/package2.jpg'
+						}
+					];
 				}
 			},
+			// 切换布局模式
+			toggleLayout() {
+				this.layoutMode = this.layoutMode === 2 ? 4 : 2;
+			}
 		}
 	}
 </script>
@@ -655,98 +707,41 @@
 		backdrop-filter: blur(10rpx);
 		transition: all 0.3s ease;
 		animation: fadeInUp 0.8s ease-out 0.3s both;
+		position: relative;
+		overflow: hidden;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: 
+				radial-gradient(circle at 10% 10%, rgba(9, 132, 227, 0.02) 0%, transparent 50%),
+				radial-gradient(circle at 90% 90%, rgba(116, 185, 255, 0.02) 0%, transparent 50%);
+			pointer-events: none;
+			animation: gentleFlow 10s ease-in-out infinite;
+		}
+		
+		&::after {
+			content: '';
+			position: absolute;
+			top: 20rpx;
+			right: 20rpx;
+			width: 60rpx;
+			height: 60rpx;
+			background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(116, 185, 255, 0.1));
+			border-radius: 50%;
+			animation: float 6s ease-in-out infinite;
+		}
 		
 		&:hover {
 			transform: translateY(-4rpx);
 			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
 		}
 		
-		.section-title {
-			font-size: 32rpx;
-			font-weight: bold;
-			color: #333333;
-			margin-bottom: 30rpx;
-			position: relative;
-			padding-left: 20rpx;
-			
-			&::before {
-				content: '';
-				position: absolute;
-				left: 0;
-				top: 50%;
-				transform: translateY(-50%);
-				width: 6rpx;
-				height: 30rpx;
-				background: linear-gradient(135deg, #0984e3, #74b9ff);
-				border-radius: 3rpx;
-			}
-		}
-		
-		.service-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(150rpx, 1fr));
-			gap: 20rpx;
-		}
-		
-		.service-item {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			padding: 20rpx 0;
-			transition: all 0.3s ease;
-			
-			&:hover {
-				transform: translateY(-4rpx);
-			}
-			
-			.service-icon {
-				width: 80rpx;
-				height: 80rpx;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
-				border-radius: 50%;
-				margin-bottom: 15rpx;
-				transition: all 0.3s ease;
-				box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
-				
-				&:hover {
-					transform: scale(1.1);
-					box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
-				}
-				
-				.service-icon-img {
-					width: 50rpx;
-					height: 50rpx;
-				}
-			}
-			
-			.service-name {
-				font-size: 26rpx;
-				color: #333333;
-				text-align: center;
-				font-weight: 500;
-			}
-		}
-	}
-
-	.section {
-		margin-bottom: 30rpx;
-		background: rgba(255, 255, 255, 0.95);
-		border-radius: 24rpx;
-		padding: 40rpx;
-		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-		backdrop-filter: blur(10rpx);
-		transition: all 0.3s ease;
-		animation: fadeInUp 0.8s ease-out 0.4s both;
-		
-		&:hover {
-			transform: translateY(-4rpx);
-			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
-		}
-		
-		.section-header {
+		.service-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
@@ -772,6 +767,191 @@
 				}
 			}
 			
+			.layout-toggle {
+				display: flex;
+				align-items: center;
+				font-size: 26rpx;
+				color: #0984e3;
+				transition: all 0.3s ease;
+				padding: 8rpx 16rpx;
+				border-radius: 20rpx;
+				background: rgba(9, 132, 227, 0.1);
+				border: 1rpx solid rgba(9, 132, 227, 0.2);
+				
+				&:hover {
+					transform: translateX(4rpx);
+					background: rgba(9, 132, 227, 0.15);
+					box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.2);
+				}
+				
+				&:active {
+					transform: scale(0.95);
+				}
+				
+				.toggle-text {
+					margin-right: 8rpx;
+					font-weight: 500;
+				}
+				
+				.toggle-icon {
+					font-size: 24rpx;
+					transition: transform 0.3s ease;
+				}
+				
+				&:hover .toggle-icon {
+					transform: rotate(180deg);
+				}
+			}
+		}
+		
+		.service-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 30rpx;
+			transition: all 0.3s ease;
+		}
+		
+		/* 可选：每行4个的布局 */
+		.service-grid-four {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 15rpx;
+			
+			.service-item {
+				padding: 15rpx 10rpx;
+				
+				.service-icon {
+					width: 70rpx;
+					height: 70rpx;
+					margin-bottom: 10rpx;
+					
+					.service-icon-img {
+						width: 40rpx;
+						height: 40rpx;
+					}
+				}
+				
+				.service-name {
+					font-size: 24rpx;
+					line-height: 1.1;
+				}
+			}
+		}
+		
+		.service-item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 25rpx 15rpx;
+			transition: all 0.3s ease;
+			border-radius: 16rpx;
+			background: rgba(255, 255, 255, 0.8);
+			backdrop-filter: blur(5rpx);
+			
+			&:hover {
+				transform: translateY(-4rpx);
+				background: rgba(255, 255, 255, 0.95);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.15);
+			}
+			
+			.service-icon {
+				width: 90rpx;
+				height: 90rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
+				border-radius: 50%;
+				margin-bottom: 15rpx;
+				transition: all 0.3s ease;
+				box-shadow: 0 4rpx 16rpx rgba(9, 132, 227, 0.2);
+				animation: gentlePulse 3s ease-in-out infinite;
+				
+				&:hover {
+					transform: scale(1.1);
+					box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+					animation: none;
+				}
+				
+				.service-icon-img {
+					width: 55rpx;
+					height: 55rpx;
+				}
+			}
+			
+			.service-name {
+				font-size: 28rpx;
+				color: #333333;
+				text-align: center;
+				font-weight: 500;
+				line-height: 1.2;
+			}
+		}
+	}
+
+	.section {
+		margin-bottom: 30rpx;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.9));
+		border-radius: 24rpx;
+		padding: 40rpx;
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		backdrop-filter: blur(10rpx);
+		transition: all 0.3s ease;
+		animation: fadeInUp 0.8s ease-out 0.4s both;
+		position: relative;
+		overflow: hidden;
+		
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: 
+				radial-gradient(circle at 20% 20%, rgba(9, 132, 227, 0.03) 0%, transparent 50%),
+				radial-gradient(circle at 80% 80%, rgba(116, 185, 255, 0.03) 0%, transparent 50%),
+				linear-gradient(45deg, transparent 40%, rgba(9, 132, 227, 0.01) 50%, transparent 60%),
+				linear-gradient(-45deg, transparent 30%, rgba(116, 185, 255, 0.01) 40%, transparent 50%);
+			pointer-events: none;
+			animation: gentleFlow 8s ease-in-out infinite, gentleBreathing 6s ease-in-out infinite;
+		}
+		
+		&:hover {
+			transform: translateY(-4rpx);
+			box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+		}
+		
+		// 静置时的呼吸动画
+		animation: gentleBreathing 4s ease-in-out infinite, cardGlow 6s ease-in-out infinite;
+		
+		.section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 30rpx;
+			
+			.section-title {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
+				position: relative;
+				padding-left: 20rpx;
+				
+				&::before {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 6rpx;
+					height: 30rpx;
+					background: linear-gradient(135deg, #0984e3, #74b9ff);
+					border-radius: 3rpx;
+					animation: gentlePulse 3s ease-in-out infinite;
+				}
+			}
+			
 			.more {
 				display: flex;
 				align-items: center;
@@ -794,29 +974,63 @@
 	.hospital-list {
 		.hospital-item {
 			display: flex;
-			margin-bottom: 20rpx;
+			margin-bottom: 25rpx;
+			padding: 20rpx;
+			border-radius: 16rpx;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.8));
+			backdrop-filter: blur(10rpx);
+			border: 1rpx solid rgba(9, 132, 227, 0.1);
 			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 4rpx;
+				height: 100%;
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
+				border-radius: 2rpx;
+				animation: gentlePulse 3s ease-in-out infinite, borderGlow 4s ease-in-out infinite;
+				box-shadow: 0 0 8rpx rgba(9, 132, 227, 0.3);
+			}
 			
 			&:last-child {
 				margin-bottom: 0;
 			}
 			
 			&:hover {
-				transform: translateX(8rpx);
+				transform: translateX(8rpx) translateY(-2rpx);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.15);
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
 			}
 			
 			.hospital-image {
 				width: 120rpx;
 				height: 90rpx;
 				border-radius: 12rpx;
-				margin-right: 15rpx;
+				margin-right: 20rpx;
 				overflow: hidden;
 				box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 				transition: all 0.3s ease;
+				position: relative;
+				
+				&::after {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+					pointer-events: none;
+				}
 				
 				&:hover {
 					transform: scale(1.05);
-					box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+					box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
 				}
 				
 				image {
@@ -833,10 +1047,10 @@
 				justify-content: space-between;
 				
 				.hospital-name {
-					font-size: 26rpx;
+					font-size: 28rpx;
 					font-weight: bold;
 					color: #333333;
-					margin-bottom: 8rpx;
+					margin-bottom: 10rpx;
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
@@ -845,21 +1059,23 @@
 				.hospital-tags {
 					display: flex;
 					flex-wrap: wrap;
-					margin-bottom: 8rpx;
+					margin-bottom: 10rpx;
 					
 					.tag {
 						font-size: 20rpx;
 						color: #0984e3;
-						background: rgba(9, 132, 227, 0.1);
-						padding: 4rpx 8rpx;
-						border-radius: 8rpx;
+						background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(116, 185, 255, 0.1));
+						padding: 6rpx 12rpx;
+						border-radius: 12rpx;
 						margin-right: 8rpx;
 						margin-bottom: 6rpx;
 						transition: all 0.3s ease;
+						border: 1rpx solid rgba(9, 132, 227, 0.2);
 						
 						&:hover {
-							background: rgba(9, 132, 227, 0.2);
+							background: linear-gradient(135deg, rgba(9, 132, 227, 0.2), rgba(116, 185, 255, 0.2));
 							transform: scale(1.05);
+							box-shadow: 0 2rpx 8rpx rgba(9, 132, 227, 0.2);
 						}
 					}
 				}
@@ -872,7 +1088,8 @@
 					
 					.address-icon {
 						font-size: 20rpx;
-						margin-right: 4rpx;
+						margin-right: 6rpx;
+						color: #0984e3;
 					}
 					
 					.address-text {
@@ -924,68 +1141,103 @@
 		}
 		
 		.package-item {
-			flex: 0 0 300rpx;
-			margin-right: 20rpx;
-			border-radius: 16rpx;
+			flex: 0 0 320rpx;
+			margin-right: 25rpx;
+			border-radius: 20rpx;
 			overflow: hidden;
-			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-			background: #ffffff;
-			transition: all 0.3s ease;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+			backdrop-filter: blur(10rpx);
+			border: 1rpx solid rgba(9, 132, 227, 0.1);
+			box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+			transition: all 0.4s ease;
+			position: relative;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 4rpx;
+				background: linear-gradient(90deg, #0984e3, #74b9ff, #0984e3);
+				background-size: 200% 100%;
+				animation: shimmer 3s ease-in-out infinite;
+			}
 			
 			&:last-child {
 				margin-right: 0;
 			}
 			
 			&:hover {
-				transform: translateY(-8rpx);
-				box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+				transform: translateY(-12rpx) scale(1.02);
+				box-shadow: 0 16rpx 48rpx rgba(9, 132, 227, 0.2);
+				background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(240, 248, 255, 0.95));
 			}
 			
 			.package-image {
 				width: 100%;
-				height: 180rpx;
+				height: 200rpx;
+				position: relative;
+				overflow: hidden;
+				
+				&::after {
+					content: '';
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					height: 60rpx;
+					background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+				}
 				
 				image {
 					width: 100%;
 					height: 100%;
 					object-fit: cover;
+					transition: transform 0.4s ease;
+				}
+				
+				&:hover image {
+					transform: scale(1.1);
 				}
 			}
 			
 			.package-info {
-				padding: 20rpx;
+				padding: 25rpx;
+				position: relative;
 				
 				.package-name {
-					font-size: 28rpx;
+					font-size: 30rpx;
 					font-weight: bold;
 					color: #333333;
-					margin-bottom: 10rpx;
+					margin-bottom: 12rpx;
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
 				}
 				
 				.package-desc {
-					font-size: 24rpx;
+					font-size: 26rpx;
 					color: #666666;
-					margin-bottom: 15rpx;
-					height: 68rpx;
+					margin-bottom: 20rpx;
+					height: 72rpx;
 					display: -webkit-box;
 					-webkit-box-orient: vertical;
 					-webkit-line-clamp: 2;
 					overflow: hidden;
 					text-overflow: ellipsis;
+					line-height: 1.4;
 				}
 				
 				.package-price-box {
 					display: flex;
 					align-items: baseline;
+					justify-content: space-between;
 					
 					.package-price {
-						font-size: 32rpx;
+						font-size: 36rpx;
 						font-weight: bold;
 						color: #ff5a5f;
-						margin-right: 10rpx;
 					}
 					
 					.package-original-price {
@@ -1001,35 +1253,74 @@
 	.news-list {
 		.news-item {
 			display: flex;
-			margin-bottom: 20rpx;
+			margin-bottom: 25rpx;
+			padding: 20rpx;
+			border-radius: 16rpx;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.8));
+			backdrop-filter: blur(10rpx);
+			border: 1rpx solid rgba(9, 132, 227, 0.1);
 			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 4rpx;
+				height: 100%;
+				background: linear-gradient(135deg, #0984e3, #74b9ff);
+				border-radius: 2rpx;
+				animation: gentlePulse 3.5s ease-in-out infinite;
+				box-shadow: 0 0 8rpx rgba(9, 132, 227, 0.3);
+			}
 			
 			&:last-child {
 				margin-bottom: 0;
 			}
 			
 			&:hover {
-				transform: translateX(8rpx);
+				transform: translateX(8rpx) translateY(-2rpx);
+				box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.15);
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
 			}
 			
 			.news-image {
-				width: 120rpx;
-				height: 90rpx;
+				width: 140rpx;
+				height: 100rpx;
 				border-radius: 12rpx;
-				margin-right: 15rpx;
+				margin-right: 20rpx;
 				overflow: hidden;
 				box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 				transition: all 0.3s ease;
+				position: relative;
+				
+				&::after {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+					pointer-events: none;
+				}
 				
 				&:hover {
 					transform: scale(1.05);
-					box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+					box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
 				}
 				
 				image {
 					width: 100%;
 					height: 100%;
 					object-fit: cover;
+					transition: transform 0.3s ease;
+				}
+				
+				&:hover image {
+					transform: scale(1.1);
 				}
 			}
 			
@@ -1040,7 +1331,7 @@
 				justify-content: space-between;
 				
 				.news-title {
-					font-size: 26rpx;
+					font-size: 28rpx;
 					color: #333333;
 					line-height: 1.5;
 					display: -webkit-box;
@@ -1048,17 +1339,50 @@
 					-webkit-line-clamp: 2;
 					overflow: hidden;
 					text-overflow: ellipsis;
-					margin-bottom: 10rpx;
+					margin-bottom: 12rpx;
+					font-weight: 500;
+					position: relative;
+					
+					&::after {
+						content: '';
+						position: absolute;
+						bottom: -2rpx;
+						left: 0;
+						width: 0;
+						height: 2rpx;
+						background: linear-gradient(90deg, #0984e3, #74b9ff);
+						transition: width 0.3s ease;
+					}
+				}
+				
+				&:hover .news-title::after {
+					width: 100%;
 				}
 				
 				.news-meta {
 					display: flex;
 					justify-content: space-between;
+					align-items: center;
 					font-size: 22rpx;
 					color: #999999;
 					
 					.news-source {
 						color: #0984e3;
+						background: linear-gradient(135deg, rgba(9, 132, 227, 0.1), rgba(116, 185, 255, 0.1));
+						padding: 4rpx 8rpx;
+						border-radius: 8rpx;
+						font-weight: 500;
+						transition: all 0.3s ease;
+						
+						&:hover {
+							background: linear-gradient(135deg, rgba(9, 132, 227, 0.2), rgba(116, 185, 255, 0.2));
+							transform: scale(1.05);
+						}
+					}
+					
+					.news-time {
+						color: #666666;
+						font-size: 20rpx;
 					}
 				}
 			}
@@ -1109,17 +1433,6 @@
 		}
 	}
 
-	@keyframes fadeInDown {
-		from {
-			opacity: 0;
-			transform: translateY(-30rpx);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
 	@keyframes fadeInUp {
 		from {
 			opacity: 0;
@@ -1132,26 +1445,104 @@
 	}
 
 	@keyframes pulse {
-		0% {
+		0%, 100% {
 			transform: scale(1);
 		}
 		50% {
 			transform: scale(1.05);
 		}
-		100% {
+	}
+
+	@keyframes gentleBreathing {
+		0%, 100% {
 			transform: scale(1);
+			box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.9));
+		}
+		50% {
+			transform: scale(1.002);
+			box-shadow: 0 12rpx 40rpx rgba(9, 132, 227, 0.08);
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.95));
 		}
 	}
 
-	@keyframes bounce {
-		0%, 20%, 50%, 80%, 100% {
-			transform: translateY(0);
+	@keyframes gentlePulse {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 0.8;
 		}
-		40% {
-			transform: translateY(-10rpx);
+		50% {
+			transform: scale(1.02);
+			opacity: 1;
 		}
-		60% {
-			transform: translateY(-5rpx);
+	}
+
+	@keyframes gentleFlow {
+		0% {
+			transform: translate(0, 0);
+			opacity: 0.8;
 		}
+		50% {
+			transform: translate(10px, 10px);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(0, 0);
+			opacity: 0.8;
+		}
+	}
+
+	@keyframes cardGlow {
+		0%, 100% {
+			box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+		}
+		50% {
+			box-shadow: 0 8rpx 32rpx rgba(9, 132, 227, 0.15);
+		}
+	}
+
+	@keyframes borderGlow {
+		0%, 100% {
+			box-shadow: 0 0 8rpx rgba(9, 132, 227, 0.3);
+		}
+		50% {
+			box-shadow: 0 0 12rpx rgba(9, 132, 227, 0.5);
+		}
+	}
+
+	@keyframes slideInLeft {
+		from {
+			opacity: 0;
+			transform: translateX(-30rpx);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	// 为不同部分添加动画延迟
+	.hospital-list .hospital-item {
+		animation: slideInLeft 0.6s ease-out both;
+		
+		&:nth-child(1) { animation-delay: 0.1s; }
+		&:nth-child(2) { animation-delay: 0.2s; }
+		&:nth-child(3) { animation-delay: 0.3s; }
+	}
+
+	.package-list .package-item {
+		animation: fadeInUp 0.8s ease-out both;
+		
+		&:nth-child(1) { animation-delay: 0.1s; }
+		&:nth-child(2) { animation-delay: 0.2s; }
+		&:nth-child(3) { animation-delay: 0.3s; }
+	}
+
+	.news-list .news-item {
+		animation: slideInLeft 0.6s ease-out both;
+		
+		&:nth-child(1) { animation-delay: 0.1s; }
+		&:nth-child(2) { animation-delay: 0.2s; }
+		&:nth-child(3) { animation-delay: 0.3s; }
 	}
 </style>

@@ -54,6 +54,6 @@ public interface ReportMapper extends BaseMapper<Report> {
      * @param query 查询条件
      * @return
      */
-    Paging<AppReportVo> getAppReportPage(IPage page, @Param("query") AppReportQuery query);
+    IPage<AppReportVo> getAppReportPage(IPage<?> page, @Param("query") AppReportQuery query);
 
 }
