@@ -1,74 +1,118 @@
 <template>
   <div class="dashboard-container">
     <div class="header-section">
-      <h2 class="page-title">医生工作台</h2>
-      <div class="welcome-message">欢迎回来，{{ doctorName }}医生！今天是{{ currentDate }}</div>
+      <div class="welcome-section">
+        <h2 class="page-title">医生工作台</h2>
+        <div class="welcome-message">
+          欢迎回来，<span class="doctor-name">{{ doctorName }}</span>！今天是<span class="current-date">{{ currentDate }}</span>
+        </div>
+      </div>
+      <div class="date-time-section">
+        <div class="time">{{ currentTime }}</div>
+      </div>
     </div>
     
-    <!-- 状态卡片 -->
-    <el-row :gutter="20" class="status-row">
-      <!-- 左侧状态卡片 -->
-      <el-col :xs="24" :sm="12" :md="12" :lg="12">
-        <el-card class="status-card schedule-status" shadow="hover">
-          <div class="status-card-content">
-            <div class="status-card-icon">
-              <i :class="stats.hasTodaySchedule ? 'el-icon-check' : 'el-icon-close'"></i>
-            </div>
-            <div class="status-card-info">
-              <div class="status-card-title">今日排班状态</div>
-              <div :class="['status-card-value', stats.hasTodaySchedule ? 'text-success' : 'text-warning']">
-                {{ stats.hasTodaySchedule ? '今日有排班' : '今日无排班' }}
-              </div>
-            </div>
+    <!-- 摘要信息卡片 -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon" :class="{'active': stats.hasTodaySchedule}">
+          <el-icon><calendar /></el-icon>
+        </div>
+        <div class="summary-info">
+          <div class="summary-label">今日排班</div>
+          <div class="summary-value" :class="{'success': stats.hasTodaySchedule, 'warning': !stats.hasTodaySchedule}">
+            {{ stats.hasTodaySchedule ? '已排班' : '无排班' }}
           </div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon report-icon">
+          <el-icon><document /></el-icon>
+        </div>
+        <div class="summary-info">
+          <div class="summary-label">待处理报告</div>
+          <div class="summary-value">{{ stats.pendingReports || 0 }} <span class="summary-unit">份</span></div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon month-icon">
+          <el-icon><data-analysis /></el-icon>
+        </div>
+        <div class="summary-info">
+          <div class="summary-label">本月体检报告</div>
+          <div class="summary-value">{{ stats.monthReports || 0 }} <span class="summary-unit">份</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <el-row :gutter="24" class="main-content">
+      <el-col :xs="24" :sm="24" :md="16" :lg="16" class="left-section">
+        <!-- 最近体检报告 -->
+        <el-card shadow="hover" class="dash-card recent-reports-card">
+          <template #header>
+            <div class="card-header">
+              <span>最近体检报告</span>
+              <el-button text>查看全部</el-button>
+            </div>
+          </template>
+          <div v-if="recentReports.length === 0" class="empty-data">
+            <el-empty description="暂无最近的体检报告"></el-empty>
+          </div>
+          <el-table v-else :data="recentReports" style="width: 100%">
+            <el-table-column prop="patientName" label="患者姓名" width="120" />
+            <el-table-column prop="itemName" label="检查项目" />
+            <el-table-column prop="createTime" label="日期" width="180">
+              <template #default="scope">
+                {{ formatDate(scope.row.createTime) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.conclusion ? 'success' : 'warning'" size="small">
+                  {{ scope.row.conclusion ? '已完成' : '待处理' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
         </el-card>
       </el-col>
       
-      <!-- 右侧待处理报告卡片 -->
-      <el-col :xs="24" :sm="12" :md="12" :lg="12">
-        <el-card class="status-card pending-reports" shadow="hover">
-          <div class="status-card-content">
-            <div class="status-card-icon">
-              <i class="el-icon-document"></i>
-            </div>
-            <div class="status-card-info">
-              <div class="status-card-title">待处理报告</div>
-              <div class="status-card-value">{{ stats.pendingReports || 0 }} 份</div>
-              <el-button v-if="stats.pendingReports > 0" size="small" type="primary" @click="goToReports">
-                去处理
-              </el-button>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-    
-    <!-- 报告统计卡片 -->
-    <el-row :gutter="20" class="stat-row">
-      <el-col :xs="24" :sm="24" :md="24" :lg="24">
-        <el-card class="stat-card month-reports" shadow="hover">
-          <div class="stat-card-content">
-            <div class="stat-card-title">本月体检报告数</div>
-            <div class="stat-card-value">{{ stats.monthReports || 0 }}</div>
-            <div class="stat-card-time">最后更新: {{ lastUpdateTime }}</div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 系统通知 -->
-    <el-row :gutter="20">
-      <el-col :span="24">
-        <el-card class="notice-card" shadow="hover">
+      <el-col :xs="24" :sm="24" :md="8" :lg="8" class="right-section">
+        <!-- 今日工作卡片 -->
+        <el-card shadow="hover" class="dash-card today-work-card">
           <template #header>
-            <div class="notice-header">
-              <span>系统通知</span>
-              <el-button type="text">查看全部</el-button>
+            <div class="card-header">
+              <span>今日工作</span>
             </div>
           </template>
-          <div v-if="notices.length === 0" class="empty-notice">
-            <i class="el-icon-bell"></i>
-            <p>暂无通知</p>
+          <div class="work-timeline">
+            <div class="timeline-item" v-for="(item, index) in workItems" :key="index">
+              <div class="timeline-item-dot" :class="item.type"></div>
+              <div class="timeline-item-content">
+                <div class="timeline-item-title">{{ item.title }}</div>
+                <div class="timeline-item-time">{{ item.time }}</div>
+              </div>
+            </div>
+            
+            <div v-if="workItems.length === 0" class="empty-data">
+              <el-empty description="今日暂无安排"></el-empty>
+            </div>
+          </div>
+        </el-card>
+        
+        <!-- 系统通知卡片 -->
+        <el-card shadow="hover" class="dash-card notice-card">
+          <template #header>
+            <div class="card-header">
+              <span>系统通知</span>
+              <el-button text>全部</el-button>
+            </div>
+          </template>
+          <div v-if="notices.length === 0" class="empty-data">
+            <el-empty description="暂无系统通知"></el-empty>
           </div>
           <div v-else class="notice-list">
             <div v-for="(notice, index) in notices" :key="index" class="notice-item">
@@ -82,21 +126,31 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <div class="dashboard-footer">
+      <div class="update-info">数据最后更新：{{ lastUpdateTime }}</div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { getDoctorDashboard } from '@/api/doctor'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Calendar, Document, DataAnalysis } from '@element-plus/icons-vue'
 
 export default {
   name: 'DashboardView',
+  components: {
+    Calendar,
+    Document,
+    DataAnalysis
+  },
   setup() {
     const router = useRouter()
     const loading = ref(false)
-    const doctorName = ref('医生')
+    const doctorName = ref('')
     const lastUpdateTime = ref(new Date().toLocaleTimeString())
     const stats = ref({
       pendingReports: 0,
@@ -104,13 +158,67 @@ export default {
       monthReports: 0
     })
     
-    // 模拟通知数据
+    // 时钟
+    const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
+    const clockTimer = ref(null)
+    
+    // 模拟数据 - 在实际项目中这些应从API获取
+    const recentReports = ref([])
+    const workItems = ref([])
     const notices = ref([])
 
     const currentDate = computed(() => {
-      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
-      return new Date().toLocaleDateString('zh-CN', options)
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const weekdayMap = ['日', '一', '二', '三', '四', '五', '六'];
+      const weekday = weekdayMap[date.getDay()];
+      return `${year}年${month}月${day}日 星期${weekday}`;
     })
+
+    // 格式化日期
+    const formatDate = (dateString) => {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
+    }
+    
+    const padZero = (num) => {
+      return num < 10 ? `0${num}` : num;
+    }
+
+    // 从localStorage读取医生姓名
+    const readDoctorName = () => {
+      const doctorInfoStr = localStorage.getItem('doctorInfo')
+      console.log('Dashboard - 读取到的doctorInfo:', doctorInfoStr)
+      
+      if (doctorInfoStr) {
+        try {
+          const doctorInfo = JSON.parse(doctorInfoStr)
+          console.log('Dashboard - 解析后的doctorInfo:', doctorInfo)
+          
+          if (doctorInfo && doctorInfo.username) {
+            console.log('Dashboard - 设置医生姓名:', doctorInfo.username)
+            doctorName.value = doctorInfo.username
+          } else {
+            console.log('Dashboard - doctorInfo中无username字段，使用默认名称')
+            doctorName.value = '医生'
+          }
+        } catch (e) {
+          console.error('解析本地存储的医生信息失败', e)
+          doctorName.value = '医生'
+        }
+      } else {
+        console.log('Dashboard - localStorage中未找到doctorInfo')
+        doctorName.value = '医生'
+      }
+    }
+
+    // 更新时钟
+    const updateClock = () => {
+      currentTime.value = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    }
 
     const fetchDashboardData = async () => {
       loading.value = true
@@ -123,6 +231,12 @@ export default {
             hasTodaySchedule: res.data.hasTodaySchedule || false,
             monthReports: res.data.monthReports || 0
           }
+          
+          // 这里可以添加其他数据的处理
+          if (res.data.recentReports) {
+            recentReports.value = res.data.recentReports;
+          }
+          
           lastUpdateTime.value = new Date().toLocaleTimeString()
         }
       } catch (error) {
@@ -142,33 +256,50 @@ export default {
       }
     }
     
-    const goToReports = () => {
-      router.push('/reports/pending')
+    // 模拟一些示例数据 - 实际项目中应从API获取
+    const initMockData = () => {
+      // 模拟最近报告
+      recentReports.value = [
+        { id: 1, patientName: '张三', itemName: '常规体检', createTime: '2023-07-15 09:30:00', conclusion: '正常' },
+        { id: 2, patientName: '李四', itemName: '心电图检查', createTime: '2023-07-14 14:20:00', conclusion: '' }
+      ];
+      
+      // 模拟工作项目
+      workItems.value = [
+        { title: '上午门诊', time: '08:30 - 12:00', type: 'primary' },
+        { title: '例行会议', time: '13:30 - 14:30', type: 'warning' },
+        { title: '下午门诊', time: '15:00 - 17:30', type: 'success' }
+      ];
+      
+      // 模拟系统通知
+      notices.value = [
+        { title: '系统升级通知', content: '系统将于今晚22:00进行升级维护，预计1小时', time: '10:30' },
+        { title: '工作提醒', content: '您有3份待处理的体检报告', time: '昨天' }
+      ];
     }
 
-    // 每5分钟自动刷新数据
     onMounted(() => {
-      // 获取登录医生的姓名
-      const doctorInfoStr = localStorage.getItem('doctorInfo')
-      if (doctorInfoStr) {
-        try {
-          const doctorInfo = JSON.parse(doctorInfoStr)
-          if (doctorInfo && doctorInfo.username) {
-            doctorName.value = doctorInfo.username
-          }
-        } catch (e) {
-          console.error('解析医生信息失败', e)
-        }
-      }
+      // 读取医生姓名
+      readDoctorName()
       
       // 加载仪表盘数据
       fetchDashboardData()
+      
+      // 初始化模拟数据
+      initMockData()
+      
+      // 启动时钟
+      updateClock()
+      clockTimer.value = setInterval(updateClock, 60000) // 每分钟更新一次
       
       // 设置自动刷新
       const refreshInterval = setInterval(fetchDashboardData, 5 * 60 * 1000)
       
       // 组件卸载时清除定时器
-      return () => clearInterval(refreshInterval)
+      onUnmounted(() => {
+        clearInterval(clockTimer.value)
+        clearInterval(refreshInterval)
+      })
     })
 
     return {
@@ -176,9 +307,12 @@ export default {
       stats,
       doctorName,
       currentDate,
+      currentTime,
       lastUpdateTime,
-      goToReports,
-      notices
+      recentReports,
+      workItems,
+      notices,
+      formatDate
     }
   }
 }
@@ -187,157 +321,164 @@ export default {
 <style scoped lang="scss">
 .dashboard-container {
   padding: 24px;
-  background-color: #f5f7fa;
-  min-height: calc(100vh - 64px);
+  background-color: var(--background-color);
+  min-height: calc(100vh - 84px);
+  position: relative;
 }
 
 .header-section {
-  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
   
-  .page-title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: #303133;
-    line-height: 1.5;
-  }
-  
-  .welcome-message {
-    font-size: 14px;
-    color: #909399;
-    margin-top: 8px;
-  }
-}
-
-.status-row {
-  margin-bottom: 20px;
-  
-  .el-col {
-    margin-bottom: 20px;
-  }
-}
-
-.status-card {
-  height: 100px;
-  border-radius: 8px;
-  border: none;
-  
-  .status-card-content {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    
-    .status-card-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background-color: rgba(64, 158, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 20px;
-      
-      i {
-        font-size: 30px;
-        color: #409EFF;
-      }
+  .welcome-section {
+    .page-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
     }
     
-    .status-card-info {
-      flex: 1;
+    .welcome-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 8px;
       
-      .status-card-title {
-        font-size: 16px;
-        color: #909399;
-        margin-bottom: 10px;
-      }
-      
-      .status-card-value {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-      
-      .text-success {
-        color: #67C23A;
-      }
-      
-      .text-warning {
-        color: #E6A23C;
+      .doctor-name, .current-date {
+        font-weight: 500;
+        color: var(--primary-color);
       }
     }
   }
   
-  &.schedule-status .status-card-icon {
-    background-color: rgba(103, 194, 58, 0.1);
-    
-    i {
-      color: #67C23A;
-    }
-  }
-  
-  &.pending-reports .status-card-icon {
-    background-color: rgba(230, 162, 60, 0.1);
-    
-    i {
-      color: #E6A23C;
+  .date-time-section {
+    .time {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: linear-gradient(to right, var(--primary-color), #5B8EF9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
   }
 }
 
-.stat-row {
-  margin-bottom: 20px;
-  
-  .el-col {
-    margin-bottom: 20px;
-  }
+// 摘要卡片样式
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
-.stat-card {
-  height: 120px;
-  border-radius: 8px;
-  border: none;
+.summary-card {
+  flex: 1;
+  min-width: 220px;
+  background: #fff;
+  border-radius: var(--border-radius-md);
+  padding: 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  box-shadow: var(--box-shadow-light);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   
-  .stat-card-content {
-    text-align: center;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow);
+  }
+  
+  .summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(62, 123, 250, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
     
-    .stat-card-title {
-      font-size: 16px;
-      color: #909399;
-      margin-bottom: 12px;
+    i, svg {
+      font-size: 28px;
+      color: var(--primary-color);
     }
     
-    .stat-card-value {
-      font-size: 32px;
-      font-weight: bold;
-      margin-bottom: 8px;
-      line-height: 1;
+    &.active {
+      background: rgba(82, 196, 26, 0.1);
+      
+      i, svg {
+        color: var(--success-color);
+      }
     }
     
-    .stat-card-time {
-      font-size: 12px;
-      color: #c0c4cc;
+    &.report-icon {
+      background: rgba(250, 173, 20, 0.1);
+      
+      i, svg {
+        color: var(--warning-color);
+      }
+    }
+    
+    &.month-icon {
+      background: rgba(245, 34, 45, 0.1);
+      
+      i, svg {
+        color: var(--danger-color);
+      }
     }
   }
   
-  &.month-reports {
-    background: linear-gradient(135deg, #fff0f6, #ffffff);
-    border-left: 4px solid #F56C6C;
+  .summary-info {
+    .summary-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
     
-    .stat-card-value {
-      color: #F56C6C;
+    .summary-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      
+      .summary-unit {
+        font-size: 14px;
+        font-weight: normal;
+        color: var(--text-secondary);
+      }
+      
+      &.success {
+        color: var(--success-color);
+      }
+      
+      &.warning {
+        color: var(--warning-color);
+      }
     }
   }
 }
 
-.notice-card {
-  margin-bottom: 20px;
-  border-radius: 8px;
+// 主要内容区域样式
+.main-content {
+  margin-bottom: 24px;
+}
+
+.dash-card {
+  margin-bottom: 24px;
+  border-radius: var(--border-radius-md);
+  border: none;
+  overflow: hidden;
   
-  .notice-header {
+  :deep(.el-card__header) {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  :deep(.el-card__body) {
+    padding: 20px;
+  }
+  
+  .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -345,73 +486,154 @@ export default {
     span {
       font-size: 16px;
       font-weight: 600;
+      color: var(--text-primary);
     }
   }
+}
+
+.recent-reports-card {
+  height: 100%;
+  min-height: 400px;
+}
+
+// 工作时间线样式
+.work-timeline {
+  padding: 0 10px;
   
-  .empty-notice {
-    text-align: center;
-    padding: 30px 0;
-    color: #909399;
+  .timeline-item {
+    display: flex;
+    margin-bottom: 20px;
+    position: relative;
     
-    i {
-      font-size: 40px;
-      margin-bottom: 10px;
+    &:last-child {
+      margin-bottom: 0;
     }
-  }
-  
-  .notice-list {
-    .notice-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #EBEEF5;
+    
+    &:not(:last-child):before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 6px;
+      bottom: -20px;
+      width: 1px;
+      background: var(--border-color);
+    }
+    
+    .timeline-item-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      margin-right: 16px;
+      margin-top: 6px;
       
-      &:last-child {
-        border-bottom: none;
+      &.primary {
+        background: var(--primary-color);
       }
       
-      .notice-content {
-        .notice-title {
-          font-size: 14px;
-          color: #303133;
-          margin-bottom: 5px;
-        }
-        
-        .notice-desc {
-          font-size: 12px;
-          color: #909399;
-        }
+      &.success {
+        background: var(--success-color);
       }
       
-      .notice-time {
+      &.warning {
+        background: var(--warning-color);
+      }
+      
+      &.danger {
+        background: var(--danger-color);
+      }
+    }
+    
+    .timeline-item-content {
+      flex: 1;
+      
+      .timeline-item-title {
+        font-size: 14px;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+      
+      .timeline-item-time {
         font-size: 12px;
-        color: #C0C4CC;
+        color: var(--text-secondary);
       }
     }
   }
 }
 
-@media (max-width: 768px) {
-  .stat-card {
-    height: 100px;
+// 通知列表样式
+.notice-list {
+  .notice-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
     
-    .stat-card-value {
-      font-size: 28px;
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .notice-content {
+      flex: 1;
+      margin-right: 12px;
+      
+      .notice-title {
+        font-size: 14px;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+      }
+      
+      .notice-desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+    }
+    
+    .notice-time {
+      font-size: 12px;
+      color: var(--text-placeholder);
+      white-space: nowrap;
+    }
+  }
+}
+
+// 空数据样式
+.empty-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+// 页脚
+.dashboard-footer {
+  text-align: center;
+  margin-top: 24px;
+  
+  .update-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+}
+
+// 响应式布局
+@media (max-width: 768px) {
+  .summary-cards {
+    flex-direction: column;
+    
+    .summary-card {
+      min-width: 100%;
     }
   }
   
-  .status-card {
-    height: auto;
-    padding: 15px;
+  .header-section {
+    flex-direction: column;
+    align-items: flex-start;
     
-    .status-card-content {
-      flex-direction: column;
-      text-align: center;
-      
-      .status-card-icon {
-        margin-right: 0;
-        margin-bottom: 10px;
-      }
+    .date-time-section {
+      margin-top: 16px;
     }
   }
 }

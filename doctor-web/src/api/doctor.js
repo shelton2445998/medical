@@ -197,6 +197,14 @@ export function getPendingReports() {
   })
 }
 
+// 获取已完成报告列表
+export function getCompletedReports() {
+  return request({
+    url: '/doctor/report/completed',
+    method: 'get'
+  })
+}
+
 // 获取报告详情
 export function getReportDetail(id) {
   return request({

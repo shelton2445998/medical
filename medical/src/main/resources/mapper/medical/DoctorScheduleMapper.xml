@@ -90,5 +90,27 @@
         ORDER BY 
             appointmentCount ASC
     </select>
+    
+    <select id="getNearestAvailableDoctors" resultType="java.util.Map">
+        SELECT 
+            ds.doctor_id AS doctorId, 
+            ds.work_date AS workDate,
+            ABS(DATEDIFF(ds.work_date, #{referenceDate})) AS dateDiff
+        FROM 
+            doctor_schedule ds 
+        JOIN 
+            doctor d ON ds.doctor_id = d.id 
+        WHERE 
+            d.hospital_id = #{hospitalId}
+            AND ds.status = 1 
+            AND d.department_id IN 
+            <foreach collection="departmentIds" item="depId" open="(" separator="," close=")">
+                #{depId}
+            </foreach>
+        ORDER BY 
+            dateDiff ASC,
+            ds.work_date ASC
+        LIMIT 5
+    </select>
 
 </mapper>

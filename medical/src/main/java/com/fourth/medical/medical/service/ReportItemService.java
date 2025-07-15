@@ -122,4 +122,13 @@ public interface ReportItemService extends IService<ReportItem> {
      * @return 待处理报告列表
      */
     ApiResult getPendingReportsByDoctorId(Long doctorId);
+    
+    /**
+     * 获取医生已完成报告列表
+     * 已完成报告定义为conclusion字段不为空的报告
+     *
+     * @param doctorId 医生ID
+     * @return 已完成报告列表
+     */
+    ApiResult getCompletedReportsByDoctorId(Long doctorId);
 }

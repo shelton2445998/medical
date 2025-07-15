@@ -1,59 +1,60 @@
 <template>
-  <div class="profile-container">
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-card class="profile-card">
-          <div class="profile-header">
-            <div class="avatar-container">
-              <el-avatar :size="100" :src="doctorInfo.avatar">
-                {{ doctorInfo.name ? doctorInfo.name.charAt(0) : 'D' }}
-              </el-avatar>
-            </div>
-            <div class="upload-avatar">
-              <el-upload
-                class="avatar-uploader"
-                action="/api/doctor/upload-avatar"
-                :show-file-list="false"
-                :on-success="handleAvatarSuccess"
-                :before-upload="beforeAvatarUpload"
-              >
-                <el-button size="small">更换头像</el-button>
-              </el-upload>
-            </div>
-          </div>
-          
+  <div class="profile-container page-container">
+    <div class="page-header">
+      <h2 class="page-title">个人设置</h2>
+      <p class="page-subtitle">管理您的账户和个人信息</p>
+    </div>
+    
+    <el-row :gutter="24">
+      <el-col :xs="24" :sm="8" :md="8" :lg="8">
+        <el-card class="profile-card custom-card" shadow="hover">
           <div class="profile-info">
-            <h2>{{ doctorInfo.name || '未知' }}</h2>
-            <p>{{ doctorInfo.title || '医生' }}</p>
-            <p>{{ doctorInfo.hospitalName || '医院' }} · {{ doctorInfo.departmentName || '科室' }}</p>
+            <h2 class="doctor-name">{{ doctorInfo.name || '未知' }}</h2>
+            <p class="doctor-title">{{ doctorInfo.title || '医生' }}</p>
+            <div class="doctor-workplace">
+              <el-icon><OfficeBuilding /></el-icon>
+              <span>{{ doctorInfo.hospitalName || '医院' }}</span>
+            </div>
+            <div class="doctor-department">
+              <el-icon><House /></el-icon>
+              <span>{{ doctorInfo.departmentName || '科室' }}</span>
+            </div>
           </div>
           
-          <div class="quick-info">
-            <div class="info-item">
-              <span class="label">今日预约</span>
-              <span class="value">{{ todayAppointments }}</span>
+          <el-divider />
+          
+          <!-- <div class="stats-container">
+            <div class="stat-item">
+              <div class="stat-value">{{ todayAppointments }}</div>
+              <div class="stat-label">今日预约</div>
             </div>
-            <el-divider direction="vertical" />
-            <div class="info-item">
-              <span class="label">待完成报告</span>
-              <span class="value">{{ pendingReports }}</span>
+            <div class="stat-item">
+              <div class="stat-value">{{ pendingReports }}</div>
+              <div class="stat-label">待处理报告</div>
             </div>
-          </div>
+          </div> -->
         </el-card>
       </el-col>
       
-      <el-col :span="16">
-        <el-tabs v-model="activeTab">
+      <el-col :xs="24" :sm="16" :md="16" :lg="16">
+        <el-tabs v-model="activeTab" class="custom-tabs">
           <el-tab-pane label="个人资料" name="basic">
-            <el-card>
+            <el-card class="custom-card" shadow="hover">
+              <template #header>
+                <div class="card-header">
+                  <span>基本信息</span>
+                </div>
+              </template>
+              
               <el-form
                 ref="profileFormRef"
                 :model="profileForm"
                 :rules="profileRules"
                 label-width="100px"
+                class="profile-form"
               >
                 <el-form-item label="姓名" prop="name">
-                  <el-input v-model="profileForm.name" />
+                  <el-input v-model="profileForm.name" placeholder="请输入姓名" />
                 </el-form-item>
                 
                 <el-form-item label="性别" prop="gender">
@@ -64,11 +65,11 @@
                 </el-form-item>
                 
                 <el-form-item label="手机号" prop="mobile">
-                  <el-input v-model="profileForm.mobile" />
+                  <el-input v-model="profileForm.mobile" placeholder="请输入手机号" />
                 </el-form-item>
                 
                 <el-form-item label="邮箱" prop="email">
-                  <el-input v-model="profileForm.email" />
+                  <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
                 </el-form-item>
                 
                 <el-form-item label="所属医院">
@@ -80,7 +81,7 @@
                 </el-form-item>
                 
                 <el-form-item label="职称" prop="title">
-                  <el-input v-model="profileForm.title" />
+                  <el-input v-model="profileForm.title" placeholder="请输入职称" />
                 </el-form-item>
                 
                 <el-form-item label="简介" prop="introduction">
@@ -88,31 +89,43 @@
                     v-model="profileForm.introduction"
                     type="textarea"
                     rows="4"
+                    placeholder="请输入个人简介"
                   />
                 </el-form-item>
                 
                 <el-form-item>
-                  <el-button type="primary" @click="updateProfile">保存</el-button>
-                  <el-button type="info" @click="setMockData">加载测试数据</el-button>
-                  <el-button type="warning" @click="refreshDoctorInfo">刷新数据</el-button>
+                  <el-button type="primary" @click="updateProfile">
+                    <el-icon><Check /></el-icon>保存
+                  </el-button>
+                  <el-button @click="refreshDoctorInfo">
+                    <el-icon><Refresh /></el-icon>刷新
+                  </el-button>
                 </el-form-item>
               </el-form>
             </el-card>
           </el-tab-pane>
           
           <el-tab-pane label="修改密码" name="password">
-            <el-card>
+            <el-card class="custom-card" shadow="hover">
+              <template #header>
+                <div class="card-header">
+                  <span>密码安全</span>
+                </div>
+              </template>
+              
               <el-form
                 ref="passwordFormRef"
                 :model="passwordForm"
                 :rules="passwordRules"
                 label-width="100px"
+                class="password-form"
               >
                 <el-form-item label="原密码" prop="oldPassword">
                   <el-input
                     v-model="passwordForm.oldPassword"
                     type="password"
                     show-password
+                    placeholder="请输入原密码"
                   />
                 </el-form-item>
                 
@@ -121,6 +134,7 @@
                     v-model="passwordForm.newPassword"
                     type="password"
                     show-password
+                    placeholder="请输入新密码"
                   />
                 </el-form-item>
                 
@@ -129,40 +143,41 @@
                     v-model="passwordForm.confirmPassword"
                     type="password"
                     show-password
+                    placeholder="请确认新密码"
                   />
                 </el-form-item>
                 
                 <el-form-item>
-                  <el-button type="primary" @click="handleUpdatePassword">修改密码</el-button>
+                  <el-button type="primary" @click="handleUpdatePassword">
+                    <el-icon><Key /></el-icon>修改密码
+                  </el-button>
                 </el-form-item>
               </el-form>
             </el-card>
           </el-tab-pane>
         </el-tabs>
-        
-        <!-- 调试区域 -->
-        <el-button type="info" size="small" @click="showDebug = !showDebug" style="margin-top: 20px;">
-          {{ showDebug ? '隐藏调试信息' : '显示调试信息' }}
-        </el-button>
-        <el-card v-if="showDebug" style="margin-top: 10px;">
-          <h3>调试信息</h3>
-          <pre>{{ JSON.stringify(doctorInfo, null, 2) }}</pre>
-        </el-card>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getDoctorInfo, updateDoctorProfile, updatePassword } from '@/api/doctor'
+import { Check, Refresh, Key, OfficeBuilding, House } from '@element-plus/icons-vue'
 
 export default {
   name: 'Profile',
+  components: {
+    Check,
+    Refresh,
+    Key,
+    OfficeBuilding,
+    House
+  },
   setup() {
     const activeTab = ref('basic')
-    const showDebug = ref(false)
     const doctorInfo = ref({
       id: '',
       name: '',
@@ -172,8 +187,7 @@ export default {
       hospitalName: '',
       departmentName: '', 
       title: '',
-      introduction: '',
-      avatar: ''
+      introduction: ''
     })
     const profileFormRef = ref(null)
     const passwordFormRef = ref(null)
@@ -243,15 +257,14 @@ export default {
     const fetchDoctorInfo = async () => {
       try {
         const res = await getDoctorInfo()
-        console.log('获取到的医生信息原始数据:', res)
         
         if (res && res.data) {
           // 定义从医生角色编码获取医院和科室的函数
           const getDoctorHospitalAndDept = (roleCode) => {
             if (roleCode === 'doctor') {
               return {
-                hospitalName: '第一人民医院', // 临时硬编码，实际应从API获取
-                departmentName: '外科'        // 临时硬编码，实际应从API获取
+                hospitalName: '第一人民医院',
+                departmentName: '外科'
               }
             }
             return {
@@ -272,14 +285,11 @@ export default {
             email: res.data.email || '',
             hospitalName: hospitalName,
             departmentName: departmentName,
-            title: res.data.title || '医师', // 默认职称
+            title: res.data.title || '医师',
             introduction: res.data.introduction || '暂无简介',
-            avatar: res.data.head || '',
             todayAppointments: res.data.todayAppointments || 0,
             pendingReports: res.data.pendingReports || 0
           }
-          
-          console.log('映射后的医生信息:', doctorInfo.value)
           
           // 填充表单
           profileForm.name = doctorInfo.value.name
@@ -293,14 +303,11 @@ export default {
           todayAppointments.value = doctorInfo.value.todayAppointments
           pendingReports.value = doctorInfo.value.pendingReports
         } else {
-          console.error('API返回数据结构异常:', res)
-          ElMessage.warning('获取数据结构异常，将使用模拟数据')
-          setMockData()
+          ElMessage.warning('获取数据结构异常')
         }
       } catch (error) {
         console.error('获取医生信息失败', error)
         ElMessage.error('获取医生信息失败')
-        setMockData()
       }
     }
     
@@ -350,97 +357,26 @@ export default {
       })
     }
     
-    // 上传头像前的验证
-    const beforeAvatarUpload = (file) => {
-      const isJPG = file.type === 'image/jpeg'
-      const isPNG = file.type === 'image/png'
-      const isLt2M = file.size / 1024 / 1024 < 2
-      
-      if (!isJPG && !isPNG) {
-        ElMessage.error('头像只能是 JPG 或 PNG 格式!')
-      }
-      if (!isLt2M) {
-        ElMessage.error('头像大小不能超过 2MB!')
-      }
-      return (isJPG || isPNG) && isLt2M
+    // 刷新医生信息
+    const refreshDoctorInfo = () => {
+      ElMessage.info('正在刷新信息...')
+      fetchDoctorInfo().then(() => {
+        ElMessage.success('信息刷新成功')
+      }).catch(error => {
+        console.error('刷新信息失败', error)
+        ElMessage.error('刷新信息失败')
+      })
     }
     
-    // 头像上传成功回调
-    const handleAvatarSuccess = (res) => {
-      if (res.code === 200) {
-        doctorInfo.value.avatar = res.data
-        ElMessage.success('头像上传成功')
-        fetchDoctorInfo()
-      } else {
-        ElMessage.error(res.message || '头像上传失败')
-      }
-    }
-    
-    // 在模板中添加调试展示区域
     onMounted(() => {
-      // 显示已加载的提示信息
-      console.log('Profile页面已加载，初始doctorInfo:', doctorInfo.value)
-      ElMessage.info('个人设置页面已加载，正在获取数据...')
-      
       fetchDoctorInfo().catch(error => {
-        console.error('获取医生信息失败，使用模拟数据', error)
-        // 如果获取数据失败，使用模拟数据
-        setMockData()
+        console.error('获取医生信息失败', error)
+        ElMessage.error('获取医生信息失败')
       })
     })
     
-    // 调试函数：如果API返回数据不正确，使用模拟数据进行测试
-    const setMockData = () => {
-      // 设置全面的模拟数据
-      doctorInfo.value = {
-        id: "3002",
-        name: "李医生",
-        gender: 0,
-        mobile: "13900002222",
-        email: "li@medical.com",
-        hospitalName: "第一人民医院",
-        departmentName: "外科",
-        title: "副主任医师",
-        introduction: "外科专家，擅长微创手术",
-        avatar: "",
-        todayAppointments: 5,
-        pendingReports: 3
-      }
-      
-      console.log('使用模拟数据:', doctorInfo.value)
-      
-      // 填充表单
-      profileForm.name = doctorInfo.value.name
-      profileForm.gender = doctorInfo.value.gender
-      profileForm.mobile = doctorInfo.value.mobile
-      profileForm.email = doctorInfo.value.email
-      profileForm.title = doctorInfo.value.title
-      profileForm.introduction = doctorInfo.value.introduction
-      
-      // 设置统计指标
-      todayAppointments.value = doctorInfo.value.todayAppointments
-      pendingReports.value = doctorInfo.value.pendingReports
-      
-      // 强制更新视图
-      setTimeout(() => {
-        ElMessage.info('已加载模拟数据用于展示')
-      }, 100)
-    }
-
-    // 刷新医生信息
-    const refreshDoctorInfo = () => {
-      ElMessage.info('正在刷新医生信息...')
-      fetchDoctorInfo().then(() => {
-        ElMessage.success('医生信息刷新成功')
-      }).catch(error => {
-        console.error('刷新医生信息失败', error)
-        ElMessage.error('刷新医生信息失败')
-      })
-    }
-    
     return {
       activeTab,
-      showDebug,
       doctorInfo,
       profileForm,
       passwordForm,
@@ -450,76 +386,95 @@ export default {
       passwordRules,
       todayAppointments,
       pendingReports,
-
       updateProfile,
       handleUpdatePassword,
-      beforeAvatarUpload,
-      handleAvatarSuccess,
-      setMockData,
       refreshDoctorInfo
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .profile-container {
-  padding: 20px;
+  min-height: calc(100vh - 84px);
 }
 
 .profile-card {
   height: 100%;
+
+  .profile-info {
+    text-align: center;
+    padding: 20px 0;
+
+    .doctor-name {
+      margin: 0 0 10px;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .doctor-title {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin: 0 0 16px;
+    }
+
+    .doctor-workplace,
+    .doctor-department {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      color: var(--text-regular);
+      
+      .el-icon {
+        margin-right: 8px;
+        color: var(--primary-color);
+      }
+    }
+  }
 }
 
-.profile-header {
+.stats-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: space-around;
+  margin: 20px 0;
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+
+  .stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+}
+
+.custom-card {
+  margin-bottom: 24px;
+  
+  .card-header {
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.profile-form,
+.password-form {
   padding: 20px 0;
+  max-width: 500px;
 }
 
-.avatar-container {
-  margin-bottom: 10px;
-}
-
-.profile-info {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.profile-info h2 {
-  margin-bottom: 5px;
-  font-size: 20px;
-}
-
-.profile-info p {
-  color: #606266;
-  margin: 5px 0;
-}
-
-.quick-info {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-  padding: 10px 0;
-  border-top: 1px solid #ebeef5;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.info-item .label {
-  font-size: 14px;
-  color: #909399;
-}
-
-.info-item .value {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 5px;
+@media (max-width: 768px) {
+  .profile-card {
+    margin-bottom: 24px;
+  }
 }
 </style> 

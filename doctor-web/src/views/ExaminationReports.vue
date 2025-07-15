@@ -1,28 +1,51 @@
 <template>
   <div class="examination-reports-container">
     <div class="page-header">
-      <h2>体检报告管理</h2>
+      <div class="page-title-section">
+        <h2 class="page-title">体检报告管理</h2>
+        <p class="page-subtitle">管理患者的体检报告，录入检查结果并生成报告</p>
+      </div>
+      <div class="page-actions">
       <el-input
         v-model="searchKeyword"
         placeholder="搜索患者姓名/手机号"
-        style="width: 250px"
+          class="search-input"
+          clearable
         @input="handleSearch"
       >
         <template #prefix>
           <el-icon><Search /></el-icon>
         </template>
       </el-input>
+        <el-button type="primary" class="refresh-btn" @click="refreshData">
+          <el-icon><Refresh /></el-icon>刷新
+        </el-button>
+      </div>
     </div>
 
     <!-- 报告列表 -->
-    <el-card class="report-list-card">
-      <el-tabs v-model="activeTab">
+    <el-card class="report-list-card custom-card" shadow="hover">
+      <el-tabs v-model="activeTab" class="custom-tabs" @tab-change="handleTabChange">
         <el-tab-pane label="待录入报告" name="pending">
-          <el-table :data="pendingReports" style="width: 100%" v-loading="loading">
+          <div class="table-toolbar">
+            <div class="table-stats">
+              <el-tag effect="plain" type="warning">待处理: {{ pendingReports.length }}</el-tag>
+            </div>
+          </div>
+          
+          <el-table 
+            :data="pendingReports" 
+            style="width: 100%" 
+            v-loading="loading" 
+            border
+            stripe
+            highlight-current-row
+            class="custom-table"
+          >
             <el-table-column prop="id" label="报告ID" width="100" />
             <el-table-column label="患者姓名" width="120">
               <template #default="scope">
-                {{ scope.row.patientName || '未知' }}
+                <span class="patient-name">{{ scope.row.patientName || '未知' }}</span>
               </template>
             </el-table-column>
             <el-table-column label="性别" width="80">
@@ -40,31 +63,52 @@
                 {{ formatDate(scope.row.createTime) }}
               </template>
             </el-table-column>
-            <el-table-column prop="itemName" label="检查项目" />
+            <el-table-column prop="itemName" label="检查项目" show-overflow-tooltip />
             <el-table-column label="状态" width="120">
               <template #default="scope">
-                <el-tag type="warning" v-if="!scope.row.conclusion">待录入</el-tag>
-                <el-tag type="success" v-else>已完成</el-tag>
+                <el-tag type="warning" effect="dark" v-if="!scope.row.conclusion">待录入</el-tag>
+                <el-tag type="success" effect="dark" v-else>已完成</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="180">
+            <el-table-column label="操作" width="180" fixed="right">
               <template #default="scope">
                 <el-button 
                   type="primary" 
                   size="small" 
                   @click="handleEnterResults(scope.row)"
-                >录入结果</el-button>
+                  class="action-button"
+                >
+                  <el-icon><Edit /></el-icon>录入结果
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
+          
+          <div v-if="pendingReports.length === 0 && !loading" class="empty-data">
+            <el-empty description="暂无待处理的体检报告"></el-empty>
+          </div>
         </el-tab-pane>
 
         <el-tab-pane label="已完成报告" name="completed">
-          <el-table :data="completedReports" style="width: 100%" v-loading="loading">
+          <div class="table-toolbar">
+            <div class="table-stats">
+              <el-tag effect="plain" type="success">已完成: {{ completedReports.length }}</el-tag>
+            </div>
+          </div>
+          
+          <el-table 
+            :data="completedReports" 
+            style="width: 100%" 
+            v-loading="loading" 
+            border
+            stripe
+            highlight-current-row
+            class="custom-table"
+          >
             <el-table-column prop="id" label="报告ID" width="100" />
             <el-table-column label="患者姓名" width="120">
               <template #default="scope">
-                {{ scope.row.patientName || '未知' }}
+                <span class="patient-name">{{ scope.row.patientName || '未知' }}</span>
               </template>
             </el-table-column>
             <el-table-column label="性别" width="80">
@@ -87,22 +131,32 @@
                 {{ formatDate(scope.row.updateTime) }}
               </template>
             </el-table-column>
-            <el-table-column prop="itemName" label="检查项目" />
-            <el-table-column label="操作" width="220">
+            <el-table-column prop="itemName" label="检查项目" show-overflow-tooltip />
+            <el-table-column label="操作" width="220" fixed="right">
               <template #default="scope">
                 <el-button 
                   type="primary" 
                   size="small" 
                   @click="handleViewReport(scope.row)"
-                >查看详情</el-button>
+                  class="action-button"
+                >
+                  <el-icon><View /></el-icon>查看
+                </el-button>
                 <el-button 
                   type="warning" 
                   size="small" 
                   @click="handleEditReport(scope.row)"
-                >修改报告</el-button>
+                  class="action-button"
+                >
+                  <el-icon><EditPen /></el-icon>修改
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
+          
+          <div v-if="completedReports.length === 0 && !loading" class="empty-data">
+            <el-empty description="暂无已完成的体检报告"></el-empty>
+          </div>
         </el-tab-pane>
       </el-tabs>
 
@@ -114,6 +168,7 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50]"
+          background
           layout="total, sizes, prev, pager, next, jumper"
           :total="totalRecords"
           @size-change="handleSizeChange"
@@ -126,11 +181,16 @@
     <el-dialog
       v-model="resultDialogVisible"
       title="录入体检结果"
-      width="70%"
+      width="80%"
+      destroy-on-close
+      class="custom-dialog"
     >
-      <div v-if="currentReport">
-        <div class="patient-info">
-          <h3>患者信息</h3>
+      <div v-if="currentReport" class="dialog-content">
+        <div class="panel patient-info-panel">
+          <div class="panel-header">
+            <h3><el-icon><User /></el-icon>患者信息</h3>
+          </div>
+          <div class="panel-body">
           <el-descriptions :column="3" border>
             <el-descriptions-item label="姓名">{{ currentReport.patientName || '未知' }}</el-descriptions-item>
             <el-descriptions-item label="性别">{{ currentReport.patientGenderText || '未知' }}</el-descriptions-item>
@@ -138,11 +198,16 @@
             <el-descriptions-item label="手机号">{{ currentReport.patientPhone || currentReport.userPhone || '未知' }}</el-descriptions-item>
             <el-descriptions-item label="体检日期">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
           </el-descriptions>
+          </div>
         </div>
 
-        <div class="exam-items" v-for="item in checkItems" :key="item.id">
-          <h4>{{ item.name }}</h4>
-          <el-table :data="item.details" style="width: 100%">
+        <div class="exam-items-container">
+          <div class="panel exam-item-panel" v-for="item in checkItems" :key="item.id">
+            <div class="panel-header">
+              <h4><el-icon><CheckboxFilled /></el-icon>{{ item.name }}</h4>
+            </div>
+            <div class="panel-body">
+              <el-table :data="item.details" border stripe class="custom-table">
             <el-table-column prop="name" label="检查项目" width="180" />
             <el-table-column prop="normalValue" label="正常值" width="180" />
             <el-table-column prop="unit" label="单位" width="100" />
@@ -162,16 +227,23 @@
               </template>
             </el-table-column>
           </el-table>
+            </div>
+          </div>
         </div>
 
-        <div class="conclusion-section">
-          <h4>体检结论</h4>
+        <div class="panel conclusion-panel">
+          <div class="panel-header">
+            <h4><el-icon><Document /></el-icon>体检结论</h4>
+          </div>
+          <div class="panel-body">
           <el-input
             v-model="conclusion"
             type="textarea"
             rows="4"
             placeholder="请输入体检结论和医疗建议"
+              class="conclusion-input"
           />
+          </div>
         </div>
 
         <div class="auto-check-option">
@@ -179,10 +251,14 @@
         </div>
       </div>
       <template #footer>
-        <span>
+        <span class="dialog-footer">
           <el-button @click="resultDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSaveResults">保存结果</el-button>
-          <el-button type="success" @click="handleGenerateReport">生成报告</el-button>
+          <el-button type="primary" @click="handleSaveResults">
+            <el-icon><Check /></el-icon>保存结果
+          </el-button>
+          <el-button type="success" @click="handleGenerateReport">
+            <el-icon><Promotion /></el-icon>生成报告
+          </el-button>
         </span>
       </template>
     </el-dialog>
@@ -191,19 +267,23 @@
     <el-dialog
       v-model="reportDetailDialogVisible"
       title="体检报告详情"
-      width="70%"
+      width="80%"
+      class="custom-dialog report-detail-dialog"
     >
       <div v-if="currentReport" class="report-detail">
         <div class="report-header">
           <h2>体检报告单</h2>
           <div class="report-info">
-            <div>报告编号：{{ currentReport.id }}</div>
-            <div>生成日期：{{ currentReport.reportDate }}</div>
+            <div><strong>报告编号：</strong>{{ currentReport.id }}</div>
+            <div><strong>生成日期：</strong>{{ currentReport.reportDate }}</div>
           </div>
         </div>
         
-        <div class="patient-info">
-          <h3>个人信息</h3>
+        <div class="panel patient-info-panel">
+          <div class="panel-header">
+            <h3><el-icon><User /></el-icon>个人信息</h3>
+          </div>
+          <div class="panel-body">
           <el-descriptions :column="3" border>
             <el-descriptions-item label="姓名">{{ currentReport.patientName || '未知' }}</el-descriptions-item>
             <el-descriptions-item label="性别">{{ currentReport.patientGenderText || '未知' }}</el-descriptions-item>
@@ -211,43 +291,59 @@
             <el-descriptions-item label="手机号">{{ currentReport.patientPhone || currentReport.userPhone || '未知' }}</el-descriptions-item>
             <el-descriptions-item label="体检日期">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
           </el-descriptions>
+          </div>
         </div>
 
-        <div class="exam-results">
-          <h3>体检结果</h3>
+        <div class="panel exam-results-panel">
+          <div class="panel-header">
+            <h3><el-icon><Files /></el-icon>体检结果</h3>
+          </div>
+          <div class="panel-body">
           <div v-for="item in reportItems" :key="item.id" class="exam-item">
-            <h4>{{ item.name }}</h4>
-            <el-table :data="item.details" style="width: 100%">
+              <h4 class="exam-item-title">
+                <el-icon><CheckboxFilled /></el-icon>{{ item.name }}
+              </h4>
+              <el-table :data="item.details" class="custom-table" border stripe>
               <el-table-column prop="name" label="检查项目" width="180" />
               <el-table-column prop="value" label="检查结果" width="120" />
               <el-table-column prop="unit" label="单位" width="80" />
               <el-table-column prop="normalValue" label="参考范围" width="150" />
               <el-table-column label="结果" width="100">
                 <template #default="scope">
-                  <el-tag :type="scope.row.isAbnormal ? 'danger' : 'success'">
+                    <el-tag :type="scope.row.isAbnormal ? 'danger' : 'success'" effect="dark">
                     {{ scope.row.isAbnormal ? '异常' : '正常' }}
                   </el-tag>
                 </template>
               </el-table-column>
             </el-table>
+            </div>
           </div>
         </div>
 
-        <div class="report-conclusion">
-          <h3>体检结论</h3>
-          <el-card class="conclusion-card">
-            {{ currentReport.conclusion }}
+        <div class="panel conclusion-panel">
+          <div class="panel-header">
+            <h3><el-icon><Document /></el-icon>体检结论</h3>
+          </div>
+          <div class="panel-body">
+            <el-card class="conclusion-card" shadow="never">
+              <div class="conclusion-content">{{ currentReport.conclusion }}</div>
           </el-card>
+          </div>
         </div>
 
         <div class="doctor-signature">
-          <p>检查医生：{{ currentReport.doctorName }}</p>
+          <p>检查医生：<span class="doctor-name">{{ currentReport.doctorName }}</span></p>
         </div>
       </div>
       <template #footer>
-        <span>
+        <span class="dialog-footer">
           <el-button @click="reportDetailDialogVisible = false">关闭</el-button>
-          <el-button type="primary" @click="handlePrintReport">打印报告</el-button>
+          <el-button type="primary" @click="handlePrintReport">
+            <el-icon><Printer /></el-icon>打印报告
+          </el-button>
+          <el-button type="success" @click="handleDownloadReport">
+            <el-icon><Download /></el-icon>下载PDF
+          </el-button>
         </span>
       </template>
     </el-dialog>
@@ -256,14 +352,26 @@
 
 <script>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { Search, Refresh, Edit, View, EditPen, Check, Promotion, User, Document, Files, CheckboxFilled, Printer, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getReportList, getReportDetail, submitExaminationResults, generateReport, getPendingReports } from '@/api/doctor'
+import { getReportList, getReportDetail, submitExaminationResults, generateReport, getPendingReports, getCompletedReports } from '@/api/doctor'
 
 export default {
   name: 'ExaminationReports',
   components: {
-    Search
+    Search,
+    Refresh,
+    Edit,
+    View,
+    EditPen,
+    Check,
+    Promotion,
+    User,
+    Document,
+    Files,
+    CheckboxFilled,
+    Printer,
+    Download
   },
   setup() {
     const loading = ref(false)
@@ -305,11 +413,8 @@ export default {
           // 待处理报告使用专门的待处理报告接口
           res = await getPendingReports();
         } else {
-          // 已完成报告使用普通报告列表接口
-          res = await getReportList({
-            ...params,
-            hasConclusion: true
-          });
+          // 已完成报告使用专门的已完成报告接口
+          res = await getCompletedReports();
         }
         
         if (res.code === 200) {
@@ -479,8 +584,39 @@ export default {
     // 监听标签页变化
     watch(activeTab, () => {
       currentPage.value = 1
+      // 重置数据，避免ResizeObserver错误
+      if (activeTab.value === 'pending') {
+        completedReports.value = []
+      } else {
+        pendingReports.value = []
+      }
       fetchReportList()
     })
+    
+    // 刷新数据
+    const refreshData = () => {
+      if (activeTab.value === 'pending') {
+        fetchPendingReports();
+      } else {
+        fetchCompletedReports();
+      }
+      ElMessage.success('数据已刷新');
+    };
+    
+    // 处理选项卡变化
+    const handleTabChange = (tab) => {
+      if (tab === 'pending') {
+        fetchPendingReports();
+      } else {
+        fetchCompletedReports();
+      }
+    };
+    
+    // 下载PDF报告
+    const handleDownloadReport = () => {
+      ElMessage.success('报告下载中...');
+      // 实际实现根据后端API
+    };
     
     onMounted(() => {
       fetchReportList()
@@ -511,92 +647,281 @@ export default {
       handleEditReport,
       handleSaveResults,
       handleGenerateReport,
-      handlePrintReport
+      handlePrintReport,
+      refreshData,
+      handleTabChange,
+      handleDownloadReport
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .examination-reports-container {
-  padding: 20px;
+  padding: 24px;
+  min-height: calc(100vh - 84px);
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  
+  .page-title-section {
+    .page-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .page-subtitle {
+      margin: 8px 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  }
+  
+  .page-actions {
+    display: flex;
+    align-items: center;
+    
+    .search-input {
+      width: 250px;
+      margin-right: 16px;
+    }
+    
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      
+      .el-icon {
+        margin-right: 4px;
+      }
+    }
+  }
 }
 
 .report-list-card {
+  margin-bottom: 24px;
+  
+  .custom-tabs {
   margin-bottom: 20px;
+  }
+  
+  .table-toolbar {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .table-stats {
+      .el-tag {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .custom-table {
+    margin-bottom: 20px;
+    
+    .patient-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .action-button {
+      padding: 6px 12px;
+      
+      .el-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+.empty-data {
+  padding: 40px 0;
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-md);
 }
 
 .pagination-container {
-  margin-top: 20px;
   display: flex;
-  justify-content: space-between; /* Changed to space-between to align items */
-  align-items: center; /* Align items vertically */
-}
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
 
 .pagination-info {
   font-size: 14px;
-  color: #606266;
-  margin-right: 20px;
+    color: var(--text-secondary);
+  }
 }
 
-.patient-info {
-  margin-bottom: 20px;
+// 弹窗样式
+.custom-dialog {
+  :deep(.el-dialog__header) {
+    border-bottom: 1px solid var(--border-light);
+    padding: 20px;
+    margin: 0;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 24px;
+  }
+  
+  :deep(.el-dialog__footer) {
+    border-top: 1px solid var(--border-light);
+    padding: 16px 20px;
+  }
 }
 
-.exam-items {
-  margin-bottom: 20px;
+.dialog-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
-.conclusion-section {
-  margin: 20px 0;
+// 面板样式
+.panel {
+  background: #ffffff;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+  margin-bottom: 24px;
+  overflow: hidden;
+  
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    background-color: var(--background-light);
+    
+    h3, h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      
+      .el-icon {
+        margin-right: 8px;
+        color: var(--primary-color);
+      }
+    }
+  }
+  
+  .panel-body {
+    padding: 16px;
+  }
+}
+
+.exam-items-container {
+  margin-bottom: 24px;
+}
+
+.conclusion-input {
+  :deep(.el-textarea__inner) {
+    font-size: 14px;
+    min-height: 120px;
+  }
 }
 
 .auto-check-option {
-  margin: 10px 0;
+  margin-bottom: 16px;
 }
 
+// 报告详情样式
 .report-detail {
-  padding: 10px;
-}
-
-.report-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+  .report-header {
+    text-align: center;
+    margin-bottom: 24px;
+    
+    h2 {
+      font-size: 24px;
+      margin: 0 0 16px;
+      color: var(--primary-color);
 }
 
 .report-info {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 10px;
+      justify-content: center;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
 }
 
-.exam-item {
-  margin-bottom: 20px;
+  .exam-item-title {
+    margin: 16px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--border-light);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    
+    .el-icon {
+      margin-right: 8px;
+      color: var(--primary-color);
+    }
 }
 
 .conclusion-card {
-  padding: 10px;
+    background-color: #f9f9f9;
+    
+    .conclusion-content {
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
 }
 
 .doctor-signature {
-  margin-top: 30px;
   text-align: right;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border-light);
+    
+    p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      
+      .doctor-name {
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+    }
+  }
 }
 
-@media print {
-  .el-dialog__header,
-  .el-dialog__footer {
-    display: none;
+// 响应式样式
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .page-title-section {
+      margin-bottom: 16px;
+    }
+    
+    .page-actions {
+      width: 100%;
+      
+      .search-input {
+        flex: 1;
+      }
+    }
+  }
+  
+  .pagination-container {
+    flex-direction: column-reverse;
+    
+    .pagination-info {
+      margin-top: 16px;
+    }
   }
 }
 </style> 

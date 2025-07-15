@@ -8,30 +8,73 @@
       <div class="bg-pattern"></div>
     </div>
     
+    <!-- 左侧品牌区域 -->
+    <div class="brand-section">
+      <div class="brand-content">
+        <div class="logo-container">
+          <img src="../assets/images/new_logo.png" alt="Logo" class="brand-logo" />
+        </div>
+        <h1 class="brand-title">医生工作站</h1>
+        <p class="brand-description">提供专业高效的医疗信息管理平台<br/>助力医生提供更优质的医疗服务</p>
+        <div class="brand-features">
+          <div class="feature-item">
+            <div class="feature-icon">
+              <el-icon><DataBoard /></el-icon>
+            </div>
+            <div class="feature-text">数据可视化</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <el-icon><User /></el-icon>
+            </div>
+            <div class="feature-text">患者管理</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <el-icon><Document /></el-icon>
+            </div>
+            <div class="feature-text">报告生成</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- 登录表单容器 -->
     <div class="login-box">
-      <div class="title">医生工作站</div>
-      <div class="subtitle">医疗预约管理系统</div>
-      <div class="demo-tip">演示模式：API不可用时，可使用任意手机号和密码登录</div>
+      <div class="login-header">
+        <div class="title">欢迎登录</div>
+        <div class="subtitle">医疗预约管理系统 - 医生工作站</div>
+      </div>
       
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
         <el-form-item prop="mobile">
           <el-input 
             v-model="loginForm.mobile" 
-            prefix-icon="el-icon-phone" 
-            placeholder="请输入手机号"
             class="form-input"
-          ></el-input>
+            placeholder="请输入手机号"
+          >
+            <template #prefix>
+              <el-icon class="input-icon"><Iphone /></el-icon>
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input 
-            v-model="loginForm.password" 
-            prefix-icon="el-icon-lock" 
+            v-model="loginForm.password"
             type="password" 
-            placeholder="请输入密码"
+            show-password
             class="form-input"
-          ></el-input>
+            placeholder="请输入密码"
+          >
+            <template #prefix>
+              <el-icon class="input-icon"><Lock /></el-icon>
+            </template>
+          </el-input>
         </el-form-item>
+        <div class="form-options">
+          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
+          <a href="javascript:;" class="forgot-password">忘记密码?</a>
+        </div>
         <el-form-item>
           <el-button 
             type="primary" 
@@ -53,11 +96,11 @@
 </template>
 
 <script>
-// 原有脚本逻辑保持不变
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import { Iphone, Lock, DataBoard, User, Document } from '@element-plus/icons-vue'
 
 const BACKEND_BASE_URL = 'http://localhost:8888'
 const request = axios.create({
@@ -67,10 +110,19 @@ const request = axios.create({
 
 export default {
   name: 'LoginView',
+  components: {
+    Iphone,
+    Lock,
+    InfoFilled,
+    DataBoard,
+    User,
+    Document
+  },
   setup() {
     const router = useRouter()
     const loginFormRef = ref(null)
     const loading = ref(false)
+    const rememberMe = ref(false)
 
     const loginForm = reactive({
       mobile: '',
@@ -109,13 +161,7 @@ export default {
             }
           } catch (error) {
             console.error('登录出错：', error)
-            if (error.response?.status === 404) {
-              ElMessage.error('接口不存在，请检查路径是否正确')
-            } else if (error.message.includes('Network Error')) {
-              ElMessage.error('服务器未启动或地址错误')
-            } else {
-              ElMessage.error('登录失败，服务器连接异常')
-            }
+            ElMessage.error('登录失败，请检查网络连接或联系管理员')
           } finally {
             loading.value = false
           }
@@ -128,6 +174,7 @@ export default {
       loginForm,
       loginRules,
       loading,
+      rememberMe,
       handleLogin
     }
   }
@@ -138,12 +185,9 @@ export default {
 .login-container {
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
   position: relative;
   overflow: hidden;
-  /* 基础背景色 */
-  background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+  background: linear-gradient(135deg, #f3f9fe 0%, #e6f0ff 100%);
 }
 
 /* 背景装饰层 */
@@ -160,7 +204,7 @@ export default {
 .bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(64, 158, 255, 0.15) 0%, rgba(64, 158, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(62, 123, 250, 0.1) 0%, rgba(62, 123, 250, 0) 70%);
   animation: float 20s infinite ease-in-out;
 }
 
@@ -177,7 +221,7 @@ export default {
   height: 500px;
   bottom: -150px;
   right: -100px;
-  background: radial-gradient(circle, rgba(103, 194, 58, 0.1) 0%, rgba(103, 194, 58, 0) 70%);
+  background: radial-gradient(circle, rgba(82, 196, 26, 0.08) 0%, rgba(82, 196, 26, 0) 70%);
   animation-delay: 5s;
 }
 
@@ -187,7 +231,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(153, 102, 255, 0.1) 0%, rgba(153, 102, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(153, 102, 255, 0.08) 0%, rgba(153, 102, 255, 0) 70%);
   animation-delay: 8s;
 }
 
@@ -197,92 +241,176 @@ export default {
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(rgba(64, 158, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(64, 158, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(62, 123, 250, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(62, 123, 250, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
+}
+
+/* 左侧品牌区域 */
+.brand-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);
+  background-image: linear-gradient(135deg, #3E7BFA 0%, #2E5ED9 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  padding: 40px;
+}
+
+.brand-content {
+  max-width: 500px;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 24px;
+}
+
+.brand-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.brand-title {
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  letter-spacing: 1px;
+}
+
+.brand-description {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.brand-features {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.feature-item {
+  text-align: center;
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.feature-icon .el-icon {
+  font-size: 24px;
+}
+
+.feature-text {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* 登录盒子 */
 .login-box {
-  width: 420px;
-  padding: 45px;
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 480px;
+  padding: 60px;
+  background-color: #ffffff;
   position: relative;
   z-index: 1;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
 }
 
 /* 标题样式优化 */
+.login-header {
+  margin-bottom: 32px;
+}
+
 .title {
   font-size: 32px;
-  color: #337ab7;
+  color: var(--text-primary);
   font-weight: 700;
-  text-align: center;
   margin-bottom: 12px;
-  letter-spacing: 1px;
 }
 
 .subtitle {
-  font-size: 18px;
-  color: #666;
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 500;
-}
-
-.demo-tip {
-  font-size: 13px;
-  color: #666;
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 8px 12px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #409EFF;
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-weight: normal;
 }
 
 /* 表单样式 */
 .login-form {
-  margin-top: 25px;
+  margin-bottom: 24px;
 }
 
 .form-input {
-  border-radius: 8px;
-  border-color: #e5e6eb;
-  transition: all 0.3s;
+  height: 48px;
+  border-radius: var(--border-radius-md);
 }
 
-.form-input:focus {
-  border-color: #409EFF;
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+.input-icon {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.forgot-password {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-password:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 .login-button {
   width: 100%;
-  height: 45px;
+  height: 48px;
   font-size: 16px;
-  border-radius: 8px;
-  background-color: #337ab7;
-  border-color: #337ab7;
+  border-radius: var(--border-radius-md);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   transition: all 0.3s;
 }
 
 .login-button:hover {
-  background-color: #286090;
-  border-color: #286090;
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(51, 122, 183, 0.2);
+  box-shadow: 0 4px 12px rgba(62, 123, 250, 0.2);
 }
 
 /* 底部信息 */
 .login-footer {
-  margin-top: 30px;
+  margin-top: auto;
   text-align: center;
   font-size: 12px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
 /* 浮动动画 */
@@ -292,6 +420,23 @@ export default {
   }
   50% {
     transform: translateY(-30px) rotate(5deg);
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 992px) {
+  .login-container {
+    flex-direction: column;
+  }
+  
+  .brand-section {
+    display: none;
+  }
+  
+  .login-box {
+    width: 100%;
+    padding: 40px 20px;
+    box-shadow: none;
   }
 }
 </style>

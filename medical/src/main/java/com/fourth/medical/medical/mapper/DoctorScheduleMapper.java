@@ -94,6 +94,19 @@ public interface DoctorScheduleMapper extends BaseMapper<DoctorSchedule> {
             @Param("departmentIds") List<Long> departmentIds);
 
     /**
+     * 查询最近排班的医生列表（包括过去和未来的最近排班）
+     *
+     * @param hospitalId 医院ID
+     * @param referenceDate 参考日期
+     * @param departmentIds 科室ID列表
+     * @return 医生列表及其排班信息，按照与参考日期差值排序
+     */
+    List<Map<String, Object>> getNearestAvailableDoctors(
+            @Param("hospitalId") Long hospitalId,
+            @Param("referenceDate") Date referenceDate,
+            @Param("departmentIds") List<Long> departmentIds);
+
+    /**
      * 更新订单的医生ID
      *
      * @param orderId 订单ID

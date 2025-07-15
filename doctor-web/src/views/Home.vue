@@ -1,48 +1,50 @@
 <template>
   <div class="home-container">
     <el-container class="main-container">
-      <el-aside width="200px" class="aside">
+      <el-aside :width="sidebarCollapsed ? '64px' : '220px'" class="aside">
         <div class="logo">
           <img src="../assets/images/new_logo.png" alt="Logo" />
-          <span>医生工作站</span>
+          <span v-if="!sidebarCollapsed">医生工作站</span>
         </div>
         <el-menu 
           :default-active="activeMenu" 
-          router 
+          router
+          :collapse="sidebarCollapsed" 
           background-color="#304156" 
           text-color="#bfcbd9"
-          active-text-color="#409EFF">
+          active-text-color="#3E7BFA"
+          class="sidebar-menu">
           <el-menu-item index="/home/dashboard">
             <el-icon><icon-menu /></el-icon>
-            <span>工作台</span>
+            <template #title>工作台</template>
           </el-menu-item>
-          <el-menu-item index="/home/patients">
+          <!-- <el-menu-item index="/home/patients">
             <el-icon><user /></el-icon>
-            <span>患者管理</span>
-          </el-menu-item>
-          <el-menu-item index="/home/appointments">
+            <template #title>患者管理</template>
+          </el-menu-item> -->
+          <!-- <el-menu-item index="/home/appointments">
             <el-icon><calendar /></el-icon>
-            <span>预约管理</span>
-          </el-menu-item>
+            <template #title>预约管理</template>
+          </el-menu-item> -->
           <el-menu-item index="/home/examination-reports">
             <el-icon><document-checked /></el-icon>
-            <span>体检报告</span>
+            <template #title>体检报告</template>
           </el-menu-item>
-          <el-menu-item index="/home/medical-records">
+          <!-- <el-menu-item index="/home/medical-records">
             <el-icon><document /></el-icon>
-            <span>病历管理</span>
+            <template #title>病历管理</template>
           </el-menu-item>
           <el-menu-item index="/home/prescriptions">
             <el-icon><tickets /></el-icon>
-            <span>处方管理</span>
-          </el-menu-item>
+            <template #title>处方管理</template>
+          </el-menu-item> -->
           <el-menu-item index="/home/schedule">
             <el-icon><timer /></el-icon>
-            <span>排班管理</span>
+            <template #title>排班管理</template>
           </el-menu-item>
           <el-menu-item index="/home/profile">
             <el-icon><setting /></el-icon>
-            <span>个人设置</span>
+            <template #title>个人设置</template>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -50,20 +52,35 @@
       <el-container>
         <el-header class="header">
           <div class="header-left">
-            <el-icon class="menu-toggle" @click="toggleSidebar"><fold /></el-icon>
+            <el-icon class="menu-toggle" @click="toggleSidebar">
+              <component :is="sidebarCollapsed ? 'Expand' : 'Fold'" />
+            </el-icon>
           </div>
           <div class="header-right">
-            <el-button type="primary" size="small" @click="goToProfilePage" style="margin-right: 15px;">个人设置</el-button>
-            <el-dropdown trigger="click">
-              <span class="el-dropdown-link">
-                {{ doctorInfo.name || '医生' }}
+            <div class="header-actions">
+              <el-badge :value="3" :max="99" class="notification-badge" type="primary">
+                <el-icon class="header-icon"><bell /></el-icon>
+              </el-badge>
+              <el-icon class="header-icon ml-10"><message-box /></el-icon>
+            </div>
+            <el-divider direction="vertical" class="header-divider" />
+            <el-dropdown trigger="click" class="user-dropdown">
+              <div class="user-info">
+                <div class="user-avatar">{{ doctorInfo.name ? doctorInfo.name.charAt(0) : 'D' }}</div>
+                <span class="user-name">{{ doctorInfo.name }}</span>
                 <el-icon class="el-icon--right"><arrow-down /></el-icon>
-              </span>
+              </div>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="openPersonalInfo">个人信息</el-dropdown-item>
-                  <el-dropdown-item @click="openChangePassword">修改密码</el-dropdown-item>
-                  <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+                  <el-dropdown-item @click="openPersonalInfo">
+                    <el-icon><user /></el-icon>个人信息
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="openChangePassword">
+                    <el-icon><key /></el-icon>修改密码
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><switch-button /></el-icon>退出登录
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -78,15 +95,21 @@
     
     <!-- 个人信息对话框 -->
     <el-dialog v-model="personalInfoDialogVisible" title="个人信息" width="500px">
-      <el-form label-width="100px">
-        <el-form-item label="姓名">{{ doctorInfo.name }}</el-form-item>
-        <el-form-item label="工号">{{ doctorInfo.id || '-' }}</el-form-item>
-        <el-form-item label="医院">{{ doctorInfo.hospitalName || '-' }}</el-form-item>
-        <el-form-item label="科室">{{ doctorInfo.departmentName || '-' }}</el-form-item>
-        <el-form-item label="职称">{{ doctorInfo.title || '-' }}</el-form-item>
-        <el-form-item label="联系电话">{{ doctorInfo.mobile || '-' }}</el-form-item>
-        <el-form-item label="邮箱">{{ doctorInfo.email || '-' }}</el-form-item>
-      </el-form>
+      <div class="profile-dialog-content">
+        <div class="profile-header">
+          <div class="profile-avatar">{{ doctorInfo.name ? doctorInfo.name.charAt(0) : 'D' }}</div>
+          <h3 class="profile-name">{{ doctorInfo.name }}</h3>
+          <p class="profile-role">{{ doctorInfo.title || '医生' }}</p>
+        </div>
+        <el-divider />
+        <el-form label-width="100px">
+          <el-form-item label="工号">{{ doctorInfo.id || '-' }}</el-form-item>
+          <el-form-item label="医院">{{ doctorInfo.hospitalName || '-' }}</el-form-item>
+          <el-form-item label="科室">{{ doctorInfo.departmentName || '-' }}</el-form-item>
+          <el-form-item label="联系电话">{{ doctorInfo.mobile || '-' }}</el-form-item>
+          <el-form-item label="邮箱">{{ doctorInfo.email || '-' }}</el-form-item>
+        </el-form>
+      </div>
     </el-dialog>
     
     <!-- 修改密码对话框 -->
@@ -116,7 +139,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown, DocumentChecked, Timer, Setting } from '@element-plus/icons-vue'
+import { Menu as IconMenu, User, Calendar, Document, Tickets, Fold, ArrowDown, DocumentChecked, Timer, Setting, Bell, MessageBox, Key, SwitchButton, Expand } from '@element-plus/icons-vue'
 import store from '@/store'
 import { getDoctorInfo, doctorLogout, updatePassword } from '@/api/doctor'
 
@@ -132,7 +155,12 @@ export default {
     ArrowDown,
     DocumentChecked,
     Timer,
-    Setting
+    Setting,
+    Bell,
+    MessageBox,
+    Key,
+    SwitchButton,
+    Expand
   },
   setup() {
     const route = useRoute()
@@ -196,8 +224,34 @@ export default {
     const fetchDoctorInfo = async () => {
       try {
         const res = await getDoctorInfo()
+        console.log('Home - 获取医生信息响应:', res)
+        
         if (res.code === 200) {
-          Object.assign(doctorInfo, res.data)
+          console.log('Home - 医生原始数据:', res.data)
+          // 将原始数据映射到doctorInfo对象
+          Object.assign(doctorInfo, {
+            name: res.data.nickname,
+            id: res.data.userId,
+            hospitalName: res.data.hospitalName || '',
+            departmentName: res.data.departmentName || '',
+            title: res.data.roleName,
+            mobile: res.data.phone,
+            email: res.data.email
+          })
+          
+          // 将医生信息存储到localStorage中，供其他页面使用
+          const doctorInfoToStore = {
+            id: res.data.userId,
+            username: res.data.nickname,
+            hospitalName: res.data.hospitalName,
+            departmentName: res.data.departmentName,
+            title: res.data.roleName,
+            mobile: res.data.phone,
+            email: res.data.email
+          };
+          
+          console.log('Home - 即将存储的医生信息:', doctorInfoToStore)
+          localStorage.setItem('doctorInfo', JSON.stringify(doctorInfoToStore))
         }
       } catch (error) {
         console.error('获取医生信息失败：', error)
@@ -258,7 +312,8 @@ export default {
           console.error('退出登录失败：', error)
         } finally {
           // 无论成功失败，都清除本地存储并跳转到登录页
-          store.clearDoctor()
+          localStorage.removeItem('doctorToken')
+          localStorage.removeItem('doctorInfo')
           router.push('/')
           ElMessage.success('已安全退出系统')
         }
@@ -294,6 +349,7 @@ export default {
 .home-container {
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
 }
 
 .main-container {
@@ -302,8 +358,11 @@ export default {
 
 .aside {
   background-color: #304156;
-  transition: width 0.3s;
+  transition: width var(--transition-normal);
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .logo {
@@ -315,11 +374,19 @@ export default {
   font-size: 18px;
   font-weight: bold;
   background-color: #263445;
+  padding: 0 16px;
+  overflow: hidden;
+  transition: all var(--transition-normal);
 }
 
 .logo img {
   height: 32px;
   margin-right: 8px;
+  transition: margin var(--transition-normal);
+}
+
+.sidebar-menu {
+  border-right: none;
 }
 
 .header {
@@ -328,7 +395,9 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 5;
+  height: 60px !important;
 }
 
 .header-left {
@@ -339,6 +408,15 @@ export default {
 .menu-toggle {
   font-size: 20px;
   cursor: pointer;
+  color: #595959;
+  transition: color var(--transition-normal);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.menu-toggle:hover {
+  color: var(--primary-color);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .header-right {
@@ -346,15 +424,112 @@ export default {
   align-items: center;
 }
 
-.el-dropdown-link {
-  cursor: pointer;
+.header-actions {
   display: flex;
   align-items: center;
+}
+
+.header-icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: #595959;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all var(--transition-normal);
+}
+
+.header-icon:hover {
+  color: var(--primary-color);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.header-divider {
+  height: 24px;
+  margin: 0 16px;
+}
+
+.user-dropdown {
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color var(--transition-normal);
+}
+
+.user-info:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.user-name {
   font-size: 14px;
+  color: var(--text-regular);
+  margin-right: 4px;
 }
 
 .main {
   background-color: #f0f2f5;
-  padding: 20px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.notification-badge :deep(.el-badge__content) {
+  top: 6px;
+  right: 6px;
+}
+
+.profile-dialog-content {
+  padding: 16px 0;
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.profile-name {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.profile-role {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 </style>

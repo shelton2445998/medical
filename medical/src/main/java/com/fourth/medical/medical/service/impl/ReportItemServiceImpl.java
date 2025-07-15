@@ -270,4 +270,47 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
             throw new BusinessException("更新报告项医生ID失败");
         }
     }
+    
+    @Override
+    public ApiResult getCompletedReportsByDoctorId(Long doctorId) {
+        log.info("获取医生[{}]已完成报告列表", doctorId);
+        try {
+            // 查询条件：已完成报告定义为conclusion不为空且不为空字符串的报告
+            LambdaQueryWrapper<ReportItem> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(ReportItem::getDoctorId, doctorId)
+                   .isNotNull(ReportItem::getConclusion)
+                   .ne(ReportItem::getConclusion, "")
+                   .orderByDesc(ReportItem::getCreateTime); // 按创建时间降序排序
+            
+            // 分页查询
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<ReportItem> page = 
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 50); // 默认查询第一页，每页50条
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<ReportItem> reportPage = page(page, wrapper);
+            
+            // 转换为VO
+            List<ReportItemVo> reportItemVos = reportPage.getRecords().stream()
+                .map(item -> {
+                    ReportItemVo vo = reportItemMapper.getReportItemById(item.getId());
+                    if (vo == null) {
+                        vo = new ReportItemVo();
+                        BeanUtils.copyProperties(item, vo);
+                    }
+                    return vo;
+                })
+                .collect(Collectors.toList());
+            
+            // 封装返回结果，保持与待处理报告相同的格式
+            Map<String, Object> result = new HashMap<>();
+            result.put("records", reportItemVos);
+            result.put("total", reportPage.getTotal());
+            result.put("pages", reportPage.getPages());
+            result.put("current", reportPage.getCurrent());
+            result.put("size", reportPage.getSize());
+            
+            return ApiResult.success(result);
+        } catch (Exception e) {
+            log.error("获取医生已完成报告列表出错", e);
+            return ApiResult.fail("获取已完成报告列表失败：" + e.getMessage());
+        }
+    }
 }

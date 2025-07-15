@@ -147,8 +147,28 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
                     departmentIds);
             
             if (availableDoctors == null || availableDoctors.isEmpty()) {
-                log.warn("当天没有可用的值班医生");
-                return null;
+                log.warn("当天没有可用的值班医生，尝试寻找排班日期最近的医生");
+                
+                // 4. 尝试查找最近的排班医生
+                List<Map<String, Object>> nearestDoctors = baseMapper.getNearestAvailableDoctors(
+                        hospitalId,
+                        appointmentDate,
+                        departmentIds);
+                
+                if (nearestDoctors == null || nearestDoctors.isEmpty()) {
+                    log.warn("未找到任何可用的排班医生");
+                    return null;
+                }
+                
+                // 找出与预约日期相差最小的医生
+                Map<String, Object> nearestDoctor = nearestDoctors.get(0);
+                Long doctorId = (Long) nearestDoctor.get("doctorId");
+                log.info("找到最近的可用医生，医生ID：{}，排班日期：{}", doctorId, nearestDoctor.get("workDate"));
+                
+                // 更新订单中的医生ID
+                baseMapper.updateOrderDoctor(orderId, doctorId);
+                
+                return doctorId;
             }
             
             // 4. 找出当前预约人数最少的医生
@@ -191,7 +211,7 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
                    .ge(DoctorSchedule::getWorkDate, todayDate)
                    .lt(DoctorSchedule::getWorkDate, tomorrowDate);
             
-            Integer count = Math.toIntExact(doctorScheduleMapper.selectCount(wrapper));
+            Long count = doctorScheduleMapper.selectCount(wrapper);
             return count != null && count > 0;
         } catch (Exception e) {
             log.error("检查医生今日是否有排班出错", e);

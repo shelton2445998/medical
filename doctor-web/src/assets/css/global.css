@@ -1,58 +1,149 @@
 /* 全局样式 */
 :root {
-  --primary-color: #409EFF;
-  --success-color: #67C23A;
-  --warning-color: #E6A23C;
-  --danger-color: #F56C6C;
-  --info-color: #909399;
-  --text-primary: #303133;
-  --text-regular: #606266;
-  --text-secondary: #909399;
-  --border-color: #DCDFE6;
+  /* 主色调 */
+  --primary-color: #3E7BFA;
+  --primary-light: #EBF2FF;
+  --primary-dark: #2E5ED9;
+  
+  /* 功能色 */
+  --success-color: #52C41A;
+  --success-light: #EDF9E8;
+  --warning-color: #FAAD14;
+  --warning-light: #FFF8E8;
+  --danger-color: #F5222D;
+  --danger-light: #FFF1F0;
+  --info-color: #8C8C8C;
+  
+  /* 文字颜色 */
+  --text-primary: #262626;
+  --text-regular: #595959;
+  --text-secondary: #8C8C8C;
+  --text-placeholder: #BFBFBF;
+  
+  /* 边框和背景 */
+  --border-color: #E8E8E8;
+  --border-light: #F0F0F0;
   --background-color: #F5F7FA;
+  --background-light: #FAFAFA;
+  
+  /* 阴影 */
+  --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  
+  /* 尺寸 */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  /* 动画 */
+  --transition-fast: 0.2s;
+  --transition-normal: 0.3s;
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  line-height: 1.5;
 }
 
+/* 布局类 */
 .page-container {
-  padding: 20px;
+  padding: 24px;
+  height: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
 .page-title {
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: bold;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
 }
 
-.text-center {
-  text-align: center;
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
 }
 
+/* 卡片样式 */
+.custom-card {
+  border-radius: var(--border-radius-md);
+  border: none;
+  box-shadow: var(--box-shadow-light);
+  transition: box-shadow var(--transition-normal);
+}
+
+.custom-card:hover {
+  box-shadow: var(--box-shadow);
+}
+
+/* 辅助类 */
+.text-primary { color: var(--primary-color); }
+.text-success { color: var(--success-color); }
+.text-warning { color: var(--warning-color); }
+.text-danger { color: var(--danger-color); }
+.text-info { color: var(--info-color); }
+
+.bg-primary { background-color: var(--primary-light); }
+.bg-success { background-color: var(--success-light); }
+.bg-warning { background-color: var(--warning-light); }
+.bg-danger { background-color: var(--danger-light); }
+.bg-light { background-color: var(--background-light); }
+
+/* Flexbox 工具类 */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
 .flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cursor-pointer {
-  cursor: pointer;
+/* 间距类 */
+.m-0 { margin: 0; }
+.mt-10 { margin-top: 10px; }
+.mb-10 { margin-bottom: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-20 { margin-bottom: 20px; }
+.ml-10 { margin-left: 10px; }
+.mr-10 { margin-right: 10px; }
+.p-0 { padding: 0; }
+.p-10 { padding: 10px; }
+.p-20 { padding: 20px; }
+
+/* 文字工具类 */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.font-bold { font-weight: 600; }
+.font-normal { font-weight: normal; }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.full-height {
-  height: 100%;
-}
+/* 交互类 */
+.cursor-pointer { cursor: pointer; }
+.transition { transition: all var(--transition-normal); }
 
-.mb-10 {
-  margin-bottom: 10px;
-}
-
-.mb-20 {
-  margin-bottom: 20px;
-}
-
-.mt-20 {
-  margin-top: 20px;
-} 
+/* 其他工具类 */
+.full-height { height: 100%; }
+.rounded { border-radius: var(--border-radius-md); }
+.rounded-full { border-radius: 50%; }
+.border { border: 1px solid var(--border-color); }
+.shadow { box-shadow: var(--box-shadow-light); }
+.shadow-lg { box-shadow: var(--box-shadow); } 
