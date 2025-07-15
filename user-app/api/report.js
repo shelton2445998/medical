@@ -95,3 +95,15 @@ export function updateReportItemConclusion(reportItemId, conclusionJson) {
   })
 }
 
+/**
+ * 获取App体检报告总详情
+ * @param {String} id 报告ID
+ * @returns {Promise} 返回App体检报告总详情数据
+ */
+export function getAppReportById(id) {
+  return request({
+    url: `${API_BASE_URL}/app/report/getAppReport/${id}`,
+    method: 'post'
+  })
+}
+

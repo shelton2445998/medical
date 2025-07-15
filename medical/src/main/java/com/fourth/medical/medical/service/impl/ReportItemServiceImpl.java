@@ -3,6 +3,8 @@ package com.fourth.medical.medical.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.Paging;
+import com.fourth.medical.framework.page.OrderByItem;
+import com.fourth.medical.framework.page.OrderMapping;
 import com.fourth.medical.medical.dto.ReportItemDto;
 import com.fourth.medical.medical.entity.ReportItem;
 import com.fourth.medical.medical.mapper.ReportItemMapper;
@@ -12,6 +14,7 @@ import com.fourth.medical.medical.vo.ReportItemVo;
 import com.fourth.medical.medical.query.AppReportItemQuery;
 import com.fourth.medical.medical.vo.AppReportItemVo;
 import com.fourth.medical.util.PageUtil;
+import com.fourth.medical.util.PagingUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +95,12 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
 
     @Override
     public Paging<AppReportItemVo> getAppReportItemPage(AppReportItemQuery query) {
-        return reportItemMapper.getAppReportItemPage(PageUtil.buildPage(query), query);
+        OrderMapping orderMapping = new OrderMapping();
+        orderMapping.put("createTime", "create_time");
+        PagingUtil.handlePage(query, orderMapping, OrderByItem.desc("id"));
+        List<AppReportItemVo> list = reportItemMapper.getAppReportItemPage(query);
+        Paging<AppReportItemVo> paging = new Paging<>(list);
+        return paging;
     }
     
     @Override

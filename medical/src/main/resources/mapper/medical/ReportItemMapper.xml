@@ -137,9 +137,6 @@
             <if test="query != null and query.userId != null">
                 AND o.user_id = #{query.userId}
             </if>
-            <if test="query != null and query.reportStatus != null">
-                AND r.report_status = #{query.reportStatus}
-            </if>
         </where>
         ORDER BY r.create_time DESC
     </select>

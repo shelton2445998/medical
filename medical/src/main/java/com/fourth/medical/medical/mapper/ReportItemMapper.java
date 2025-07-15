@@ -60,11 +60,10 @@ public interface ReportItemMapper extends BaseMapper<ReportItem> {
     /**
      * App体检报告检查项信息分页列表
      *
-     * @param page 分页参数
      * @param query 查询条件
      * @return
      */
-    Paging<AppReportItemVo> getAppReportItemPage(IPage page, @Param("query") AppReportItemQuery query);
+    List<AppReportItemVo> getAppReportItemPage(@Param("query") AppReportItemQuery query);
     
     /**
      * 根据用户ID获取体检报告列表
