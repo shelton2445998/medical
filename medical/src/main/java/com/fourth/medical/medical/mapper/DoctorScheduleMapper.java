@@ -88,22 +88,6 @@ public interface DoctorScheduleMapper extends BaseMapper<DoctorSchedule> {
      * @param departmentIds 科室ID列表
      * @return 医生列表及其预约数量
      */
-    @Select("<script>" +
-            "SELECT ds.doctor_id as doctorId, " +
-            "COUNT(o.id) as appointmentCount " +
-            "FROM doctor_schedule ds " +
-            "LEFT JOIN doctor d ON ds.doctor_id = d.id " +
-            "LEFT JOIN orders o ON ds.doctor_id = o.doctor_id AND DATE(o.appointment_date) = DATE(#{scheduleDate}) " +
-            "WHERE ds.hospital_id = #{hospitalId} " +
-            "AND DATE(ds.schedule_date) = DATE(#{scheduleDate}) " +
-            "AND ds.status = 1 " +
-            "AND d.department_id IN " +
-            "<foreach collection='departmentIds' item='depId' open='(' separator=',' close=')'>" +
-            "#{depId}" +
-            "</foreach>" +
-            "GROUP BY ds.doctor_id " +
-            "ORDER BY appointmentCount ASC" +
-            "</script>")
     List<Map<String, Object>> getAvailableDoctorsForSchedule(
             @Param("hospitalId") Long hospitalId,
             @Param("scheduleDate") Date scheduleDate,

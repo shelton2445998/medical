@@ -21,6 +21,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 体检报告总 服务实现类
  *
@@ -126,11 +128,13 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
         
         try {
             // 先检查是否已经存在该订单的报告
-            Report existingReport = baseMapper.selectOne(
+            List<Report> existingReports = baseMapper.selectList(
                     new LambdaQueryWrapper<Report>()
                             .eq(Report::getOrderId, orderId));
             
-            if (existingReport != null) {
+            if (existingReports != null && !existingReports.isEmpty()) {
+                // 如果存在多个报告，取第一个
+                Report existingReport = existingReports.get(0);
                 log.info("订单已存在报告，报告ID：{}", existingReport.getId());
                 return existingReport.getId();
             }

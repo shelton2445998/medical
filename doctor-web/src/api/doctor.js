@@ -174,7 +174,7 @@ export function getPatientDetail(id) {
 // 录入体检结果
 export function submitExaminationResults(data) {
   return request({
-    url: '/doctor/appointment/result',
+    url: '/doctor/report/update',
     method: 'post',
     data
   })

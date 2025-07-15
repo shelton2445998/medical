@@ -39,6 +39,15 @@ public interface ReportItemMapper extends BaseMapper<ReportItem> {
      * @return
      */
     Paging<ReportItemVo> getReportItemPage(IPage page, @Param("query") ReportItemQuery query);
+    
+    /**
+     * 获取体检报告检查项信息列表（分页）
+     *
+     * @param page 分页参数
+     * @param query 查询条件
+     * @return 报告列表
+     */
+    List<ReportItemVo> getReportItemList(IPage page, @Param("query") ReportItemQuery query);
 
     /**
      * App体检报告检查项信息详情

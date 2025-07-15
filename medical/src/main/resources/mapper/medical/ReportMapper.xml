@@ -3,49 +3,93 @@
 <mapper namespace="com.fourth.medical.medical.mapper.ReportMapper">
 
     <select id="getReportById" resultType="com.fourth.medical.medical.vo.ReportVo">
-        select *
-        from report
-        where id = #{id}
+        SELECT r.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
+               d.name AS doctorName
+        FROM report r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        WHERE r.id = #{id}
     </select>
 
     <select id="getReportPage" resultType="com.fourth.medical.medical.vo.ReportVo">
-        select *
-        from report
+        SELECT r.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
+               d.name AS doctorName
+        FROM report r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
         <where>
             <if test="query != null and query.userId != null">
-                and user_id = #{query.userId}
+                AND r.user_id = #{query.userId}
             </if>
             <if test="query != null and query.orderId != null">
-                and order_id = #{query.orderId}
+                AND r.order_id = #{query.orderId}
             </if>
             <if test="query != null and query.status != null">
-                and status = #{query.status}
+                AND r.status = #{query.status}
             </if>
         </where>
-        order by create_time desc
+        ORDER BY r.create_time DESC
     </select>
 
     <select id="getAppReportById" resultType="com.fourth.medical.medical.vo.AppReportVo">
-        select *
-        from report
-        where id = #{id}
+        SELECT r.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
+               d.name AS doctorName
+        FROM report r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        WHERE r.id = #{id}
     </select>
 
     <select id="getAppReportPage" resultType="com.fourth.medical.medical.vo.AppReportVo">
-        select *
-        from report
+        SELECT r.*,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
+               d.name AS doctorName
+        FROM report r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
         <where>
             <if test="query != null and query.userId != null">
-                and user_id = #{query.userId}
+                AND r.user_id = #{query.userId}
             </if>
             <if test="query != null and query.orderId != null">
-                and order_id = #{query.orderId}
+                AND r.order_id = #{query.orderId}
             </if>
             <if test="query != null and query.status != null">
-                and status = #{query.status}
+                AND r.status = #{query.status}
             </if>
         </where>
-        order by create_time desc
+        ORDER BY r.create_time DESC
     </select>
 
 </mapper>

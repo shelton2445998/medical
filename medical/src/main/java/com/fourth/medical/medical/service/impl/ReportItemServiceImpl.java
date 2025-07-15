@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 /**
  * 体检报告检查项信息 服务实现类
@@ -73,7 +75,17 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
 
     @Override
     public Paging<ReportItemVo> getReportItemPage(ReportItemQuery query) {
-        return reportItemMapper.getReportItemPage(PageUtil.buildPage(query), query);
+        // 创建MyBatis-Plus分页对象
+        IPage<ReportItemVo> page = PageUtil.buildPage(query);
+        // 执行分页查询，获取结果列表
+        List<ReportItemVo> list = reportItemMapper.getReportItemList(page, query);
+        // 将结果封装到Paging对象中
+        Paging<ReportItemVo> paging = new Paging<>();
+        paging.setList(list);
+        paging.setTotal(page.getTotal());
+        paging.setPageIndex(query.getPageIndex());
+        paging.setPageSize(query.getPageSize());
+        return paging;
     }
 
     @Override
@@ -122,12 +134,14 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
                 Long itemId = Long.parseLong(itemIdStr.trim());
                 
                 // 检查是否已经存在该检查项的报告
-                ReportItem existingItem = baseMapper.selectOne(
+                List<ReportItem> existingItems = baseMapper.selectList(
                         new LambdaQueryWrapper<ReportItem>()
                                 .eq(ReportItem::getOrderId, orderId)
                                 .eq(ReportItem::getItemId, itemId));
                 
-                if (existingItem != null) {
+                if (existingItems != null && !existingItems.isEmpty()) {
+                    // 如果有多条记录，取第一条
+                    ReportItem existingItem = existingItems.get(0);
                     log.info("检查项报告已存在，ID：{}", existingItem.getId());
                     createdItemIds.add(existingItem.getId());
                     continue;
@@ -161,6 +175,52 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
         } catch (Exception e) {
             log.error("创建检查项报告失败", e);
             throw new BusinessException("创建检查项报告失败");
+        }
+    }
+    
+    /**
+     * 更新报告项的医生ID
+     *
+     * @param reportItemId 报告项ID
+     * @param doctorId 医生ID
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateReportItemDoctor(Long reportItemId, Long doctorId) {
+        log.info("更新报告项医生ID，报告项ID：{}，医生ID：{}", reportItemId, doctorId);
+        
+        try {
+            // 获取报告项
+            ReportItem reportItem = getById(reportItemId);
+            if (reportItem == null) {
+                log.error("报告项不存在，ID：{}", reportItemId);
+                return false;
+            }
+            
+            // 如果医生ID已经被设置且不为0，则不需要更新
+            if (reportItem.getDoctorId() != null && reportItem.getDoctorId() != 0) {
+                log.info("报告项已有负责医生，不需要更新，报告项ID：{}，当前医生ID：{}", 
+                        reportItemId, reportItem.getDoctorId());
+                return true;
+            }
+            
+            // 更新医生ID
+            LambdaUpdateWrapper<ReportItem> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(ReportItem::getId, reportItemId)
+                         .set(ReportItem::getDoctorId, doctorId);
+            
+            boolean result = update(updateWrapper);
+            if (result) {
+                log.info("成功更新报告项医生ID，报告项ID：{}，医生ID：{}", reportItemId, doctorId);
+            } else {
+                log.error("更新报告项医生ID失败，报告项ID：{}，医生ID：{}", reportItemId, doctorId);
+            }
+            
+            return result;
+        } catch (Exception e) {
+            log.error("更新报告项医生ID失败", e);
+            throw new BusinessException("更新报告项医生ID失败");
         }
     }
 }

@@ -21,6 +21,12 @@ public class ReportItemQuery extends BasePageQuery {
     @Schema(description = "医生ID")
     private Long doctorId;
     
+    @Schema(description = "部门ID")
+    private Long departmentId;
+    
+    @Schema(description = "是否包含doctorId为0的记录")
+    private Boolean includeZeroDoctorId;
+    
     @Schema(description = "订单ID")
     private Long orderId;
     

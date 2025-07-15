@@ -69,6 +69,8 @@ public class OrdersDto implements Serializable {
     private String checkitemIds;
 
     @Schema(description = "患者姓名")
+    @NotBlank(message = "患者姓名不能为空")
+    @Length(max = 50, message = "患者姓名长度超过限制")
     private String patientName;
 
     @Schema(description = "患者年龄")
@@ -77,7 +79,9 @@ public class OrdersDto implements Serializable {
     @Schema(description = "患者性别 0:女，1:男")
     private Integer patientGender;
 
-    @Schema(description = "患者手机号")
+    @Schema(description = "患者联系方式")
+    @NotBlank(message = "患者联系方式不能为空")
+    @Length(max = 20, message = "患者联系方式长度超过限制")
     private String patientPhone;
 
 }
