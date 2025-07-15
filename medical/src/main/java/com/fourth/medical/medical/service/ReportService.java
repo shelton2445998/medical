@@ -88,8 +88,7 @@ public interface ReportService extends IService<Report> {
      * @param orderId 订单ID
      * @param userId 用户ID
      * @param checkitemIds 检查项ID列表，以逗号分隔
-     * @param doctorId 医生ID
      * @return 报告ID
      */
-    Long createReportForOrder(Long orderId, Long userId, String checkitemIds, Long doctorId);
+    Long createReportForOrder(Long orderId, Long userId, String checkitemIds);
 }
