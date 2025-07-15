@@ -17,7 +17,7 @@ import java.util.List;
  * 医生排班服务接口
  *
  * @author fourth
- * @since 2025-07-14
+ * @since 2023-07-09
  */
 public interface DoctorScheduleService extends IService<DoctorSchedule> {
 
@@ -103,4 +103,28 @@ public interface DoctorScheduleService extends IService<DoctorSchedule> {
      * @return 分配的医生ID，如果没有合适的医生则返回null
      */
     Long assignDoctorForOrder(Long orderId, Long hospitalId, Date appointmentDate, String checkitemIds);
+
+    /**
+     * 检查医生今日是否有排班
+     *
+     * @param doctorId 医生ID
+     * @return 今日是否有排班
+     */
+    Boolean checkDoctorHasScheduleToday(Long doctorId);
+
+    /**
+     * 获取医生今日预约数量
+     *
+     * @param doctorId 医生ID
+     * @return 今日预约数量
+     */
+    Integer countTodayAppointmentsByDoctorId(Long doctorId);
+
+    /**
+     * 获取医生本周预约数量
+     *
+     * @param doctorId 医生ID
+     * @return 本周预约数量
+     */
+    Integer countWeekAppointmentsByDoctorId(Long doctorId);
 }

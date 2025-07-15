@@ -1,33 +1,44 @@
 package com.fourth.medical.medical.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fourth.medical.common.enums.AppointmentStatusEnum;
+import com.fourth.medical.common.exception.BusinessException;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.OrderByItem;
 import com.fourth.medical.framework.page.OrderMapping;
 import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.medical.dto.DoctorScheduleDto;
+import com.fourth.medical.medical.entity.CheckitemDetail;
+import com.fourth.medical.medical.entity.Doctor;
 import com.fourth.medical.medical.entity.DoctorSchedule;
+import com.fourth.medical.medical.entity.Orders;
+import com.fourth.medical.medical.entity.Report;
+import com.fourth.medical.medical.mapper.DoctorMapper;
 import com.fourth.medical.medical.mapper.DoctorScheduleMapper;
+import com.fourth.medical.medical.mapper.OrdersMapper;
 import com.fourth.medical.medical.query.DoctorScheduleQuery;
+import com.fourth.medical.medical.service.CheckitemDetailService;
 import com.fourth.medical.medical.service.DoctorScheduleService;
+import com.fourth.medical.medical.service.OrdersService;
+import com.fourth.medical.medical.service.ReportService;
 import com.fourth.medical.medical.vo.DoctorScheduleVo;
 import com.fourth.medical.medical.query.AppDoctorScheduleQuery;
 import com.fourth.medical.medical.vo.AppDoctorScheduleVo;
 import com.fourth.medical.util.PagingUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.util.List;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * 医生排班 服务实现类
@@ -41,6 +52,9 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
 
     @Autowired
     private DoctorScheduleMapper doctorScheduleMapper;
+    
+    @Autowired
+    private OrdersMapper ordersMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -164,4 +178,87 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
         }
     }
 
+    @Override
+    public Boolean checkDoctorHasScheduleToday(Long doctorId) {
+        log.info("检查医生[{}]今日是否有排班", doctorId);
+        try {
+            // 获取今天的日期
+            LocalDate today = LocalDate.now();
+            Date todayDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            
+            // 获取明天的日期（今天的结束）
+            Date tomorrowDate = Date.from(today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            
+            // 查询今天是否有排班
+            LambdaQueryWrapper<DoctorSchedule> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DoctorSchedule::getDoctorId, doctorId)
+                   .ge(DoctorSchedule::getScheduleDate, todayDate)
+                   .lt(DoctorSchedule::getScheduleDate, tomorrowDate);
+            
+            Integer count = doctorScheduleMapper.selectCount(wrapper);
+            return count != null && count > 0;
+        } catch (Exception e) {
+            log.error("检查医生今日是否有排班出错", e);
+            return false;
+        }
+    }
+
+    @Override
+    public Integer countTodayAppointmentsByDoctorId(Long doctorId) {
+        log.info("获取医生[{}]今日预约数量", doctorId);
+        try {
+            // 获取今天的日期
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date todayStart = calendar.getTime();
+            
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            Date tomorrowStart = calendar.getTime();
+            
+            // 查询今天的预约数量
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Orders::getDoctorId, doctorId)
+                   .ge(Orders::getAppointmentDate, todayStart)
+                   .lt(Orders::getAppointmentDate, tomorrowStart);
+            
+            Integer count = ordersMapper.selectCount(wrapper);
+            return count != null ? count : 0;
+        } catch (Exception e) {
+            log.error("获取医生今日预约数量出错", e);
+            return 0;
+        }
+    }
+
+    @Override
+    public Integer countWeekAppointmentsByDoctorId(Long doctorId) {
+        log.info("获取医生[{}]本周预约数量", doctorId);
+        try {
+            // 获取本周的开始和结束时间
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date weekStart = calendar.getTime();
+            
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+            Date nextWeekStart = calendar.getTime();
+            
+            // 查询本周的预约数量
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Orders::getDoctorId, doctorId)
+                   .ge(Orders::getAppointmentDate, weekStart)
+                   .lt(Orders::getAppointmentDate, nextWeekStart);
+            
+            Integer count = ordersMapper.selectCount(wrapper);
+            return count != null ? count : 0;
+        } catch (Exception e) {
+            log.error("获取医生本周预约数量出错", e);
+            return 0;
+        }
+    }
 }

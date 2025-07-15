@@ -8,6 +8,9 @@ import com.fourth.medical.auth.vo.LoginTokenVo;
 import com.fourth.medical.auth.vo.LoginVo;
 import com.fourth.medical.common.constant.LoginConstant;
 import com.fourth.medical.framework.response.ApiResult;
+import com.fourth.medical.medical.service.DoctorReportService;
+import com.fourth.medical.medical.service.DoctorScheduleService;
+import com.fourth.medical.medical.vo.DoctorDashboardVo;
 import com.fourth.medical.system.service.SysMenuService;
 import com.fourth.medical.system.vo.SysNavMenuTreeVo;
 import com.fourth.medical.util.CookieUtil;
@@ -25,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+import java.time.LocalDate;
 
 /**
  * 医生端登录控制器
@@ -43,6 +47,12 @@ public class DoctorLoginController {
     
     @Autowired
     private SysMenuService sysMenuService;
+    
+    @Autowired
+    private DoctorReportService doctorReportService;
+    
+    @Autowired
+    private DoctorScheduleService doctorScheduleService;
 
     /**
      * 医生登录
@@ -161,5 +171,44 @@ public class DoctorLoginController {
             log.error("获取菜单信息发生异常", e);
             throw e;
         }
+    }
+
+    /**
+     * 获取医生仪表盘数据
+     * 此接口需要Token校验，根据当前登录医生获取数据
+     *
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/dashboard")
+    @Operation(summary = "获取医生仪表盘数据")
+    public ApiResult<DoctorDashboardVo> getDashboard() {
+        log.info("获取医生仪表盘数据");
+        
+        // 获取当前登录医生ID
+        LoginVo loginVo = LoginUtil.getLoginUserInfo();
+        if (loginVo == null) {
+            log.error("获取登录医生信息失败，请先登录");
+            return ApiResult.fail("请先登录");
+        }
+        
+        Long doctorId = loginVo.getUserId();
+        log.info("获取医生[{}]仪表盘数据", doctorId);
+        
+        DoctorDashboardVo dashboardVo = new DoctorDashboardVo();
+        
+        // 获取待处理报告数量
+        Integer pendingReports = doctorReportService.countPendingReportsByDoctorId(doctorId);
+        dashboardVo.setPendingReports(pendingReports);
+        
+        // 判断今日是否有排班
+        Boolean hasTodaySchedule = doctorScheduleService.checkDoctorHasScheduleToday(doctorId);
+        dashboardVo.setHasTodaySchedule(hasTodaySchedule);
+        
+        // 获取本月体检报告数
+        Integer monthReports = doctorReportService.countMonthReportsByDoctorId(doctorId);
+        dashboardVo.setMonthReports(monthReports);
+        
+        return ApiResult.success(dashboardVo);
     }
 } 
