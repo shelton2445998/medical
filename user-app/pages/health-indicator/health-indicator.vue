@@ -110,17 +110,6 @@
 			}
 		},
 		
-		// // 每次页面显示时调用
-		// onShow() {
-		// 	try {
-		// 		// 获取健康指标数据
-		// 		console.log("页面显示 - onShow触发");
-		// 		this.getHealthData();
-		// 	} catch (error) {
-		// 		console.error("onShow错误:", error);
-		// 	}
-		// },
-		
 		// 页面初次渲染完成时
 		onReady() {
 			try {

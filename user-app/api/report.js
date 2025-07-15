@@ -107,3 +107,28 @@ export function getAppReportById(id) {
   })
 }
 
+/**
+ * 获取App体检报告分页
+ * @param {Object} query 查询条件
+ * @returns {Promise} 返回分页数据
+ */
+export function getAppReportPage(query) {
+  return request({
+    url: `${API_BASE_URL}/app/report/getAppReportPage`,
+    method: 'post',
+    data: query
+  });
+}
+
+/**
+ * 获取预约详情
+ * @param {String} id 预约ID
+ * @returns {Promise} 返回预约详情数据
+ */
+export function getAppointmentDetail(id) {
+  return request({
+    url: `${API_BASE_URL}/app/appointment/detail/${id}`,
+    method: 'get'
+  });
+}
+

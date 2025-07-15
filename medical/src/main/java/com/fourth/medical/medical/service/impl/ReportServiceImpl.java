@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
  * 体检报告总 服务实现类
@@ -118,7 +119,15 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
         // 设置查询条件，只查询当前用户的报告
         query.setUserId(userId);
         
-        return baseMapper.getAppReportPage(PageUtil.buildPage(query), query);
+        // 用分页对象调用mapper
+        IPage<AppReportVo> page = baseMapper.getAppReportPage(PageUtil.buildPage(query), query);
+        // 手动组装 Paging 返回
+        Paging<AppReportVo> paging = new Paging<>();
+        paging.setList(page.getRecords());
+        paging.setTotal(page.getTotal());
+        paging.setPageIndex(query.getPageIndex());
+        paging.setPageSize(query.getPageSize());
+        return paging;
     }
     
     @Override

@@ -2,7 +2,7 @@
 	<view class="content">
 		<!-- 报告列表 -->
 		<view class="report-list" v-if="reportList.length > 0">
-			<view class="report-item" v-for="(item, index) in reportList" :key="index" @click="viewReport(item)">
+			<view class="report-item" v-for="(item, index) in reportList" :key="index">
 				<view class="report-header">
 					<text class="report-title">{{item.packageName}}</text>
 					<text class="report-date">{{item.reportDate}}</text>
@@ -46,7 +46,7 @@
 					</button>
 					<button class="action-btn primary" @click.stop="viewReport(item)">
 						<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
-						<text>查看</text>
+						<text>详情</text>
 					</button>
 				</view>
 			</view>
@@ -58,70 +58,11 @@
 			<text class="empty-text">暂无体检报告</text>
 			<button class="make-appointment-btn" @click="makeAppointment">立即预约体检</button>
 		</view>
-		
-		<!-- 报告详情弹窗 -->
-		<view class="report-detail-modal" v-if="reportDetail" @click="closeReportDetail">
-			<view class="modal-content" @click.stop>
-				<view class="modal-header">
-					<text class="modal-title">体检报告详情</text>
-					<text class="modal-close" @click="closeReportDetail">×</text>
-				</view>
-				<view class="modal-body">
-					<view class="detail-section">
-						<view class="detail-item">
-							<text class="detail-label">报告ID：</text>
-							<text class="detail-value">{{reportDetail.id}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">订单ID：</text>
-							<text class="detail-value">{{reportDetail.orderId}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">用户ID：</text>
-							<text class="detail-value">{{reportDetail.userId}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">状态：</text>
-							<text class="detail-value" :class="{'status-completed': reportDetail.status === 1, 'status-pending': reportDetail.status === 0}">
-								{{reportDetail.status === 1 ? '已完成' : '未完成'}}
-							</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">医生ID：</text>
-							<text class="detail-value">{{reportDetail.doctorId}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">报告日期：</text>
-							<text class="detail-value">{{formatDate(reportDetail.reportDate)}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">创建时间：</text>
-							<text class="detail-value">{{formatDateTime(reportDetail.createTime)}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">总结论：</text>
-							<text class="detail-value">{{reportDetail.conclusion || '暂无结论'}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">检查项ID：</text>
-							<text class="detail-value">{{reportDetail.checkitemIds || '无'}}</text>
-						</view>
-						<view class="detail-item">
-							<text class="detail-label">报告项ID：</text>
-							<text class="detail-value">{{reportDetail.reportItemIds || '无'}}</text>
-						</view>
-					</view>
-				</view>
-				<view class="modal-footer">
-					<button class="modal-btn" @click="closeReportDetail">关闭</button>
-				</view>
-			</view>
-		</view>
 	</view>
 </template>
 
 <script>
-	import { getCurrentUserReportItemPage, getAppReportById } from '@/api/report';
+	import { getAppReportPage, getAppointmentDetail } from '@/api/report';
 	import { getLoginUserInfo } from '@/api/user';
 	
 	export default {
@@ -130,8 +71,7 @@
 				reportList: [],
 				loading: false,
 				error: null,
-				userInfo: null, // 存储用户信息
-				reportDetail: null // 存储报告详情
+				userInfo: null // 存储用户信息
 			}
 		},
 		onLoad() {
@@ -181,34 +121,97 @@
 				this.error = null;
 				
 				try {
-					// 添加查询参数，包含分页信息和用户ID（如果有）
 					const query = {
 						pageNum: 1,
-						pageSize: 10
+						pageSize: 10,
+						userId: this.userInfo?.id
 					};
 					
-					// 如果已经获取到用户信息，添加用户ID到查询参数
-					if (this.userInfo && this.userInfo.id) {
-						query.userId = this.userInfo.id;
-					}
-					
-					const res = await getCurrentUserReportItemPage(query);
+					const res = await getAppReportPage(query);
 					console.log('API返回数据:', res);
 					
 					// 根据API实际返回的数据结构处理
-					if (res && res.success && res.data && res.data.list && Array.isArray(res.data.list)) {
-						// 使用res.data.list作为数据源
-						this.reportList = res.data.list.map(item => ({
-							id: item.id,
-							packageName: item.packageName || '未命名套餐',
-							reportDate: item.createTime || '',
-							hospitalName: item.hospitalName || '',
-							personName: item.personName || '',
-							examDate: item.examDate || '',
-							abnormalCount: item.abnormalCount || 0,
-							totalCount: item.totalCount || 0,
-							adviceCount: item.adviceCount || 0
-						}));
+					if (res && res.success && res.data && Array.isArray(res.data.list)) {
+						// 使用res.data.list作为数据源，并获取预约详情
+						const reportListWithDetails = await Promise.all(
+							res.data.list.map(async (item) => {
+								let packageName = item.packageName;
+								
+								// 如果没有套餐名称，尝试通过预约详情获取
+								if (!packageName && item.orderId) {
+									try {
+										console.log('正在获取预约详情，orderId:', item.orderId);
+										const appointmentRes = await getAppointmentDetail(item.orderId);
+										console.log('预约详情返回:', appointmentRes);
+										if (appointmentRes && appointmentRes.success && appointmentRes.data) {
+											packageName = appointmentRes.data.setmealName || '未命名套餐';
+
+											// 使用预约详情中的医院和体检时间
+											return {
+												id: item.id,
+												orderId: item.orderId || '',
+												packageName: packageName,
+												reportDate: item.reportDate || item.createTime || '',
+												hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
+												personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+												examDate: (appointmentRes.data.appointmentDate && appointmentRes.data.timeSlot)
+												  ? `${appointmentRes.data.appointmentDate.slice(0, 10)} ${appointmentRes.data.timeSlot}`
+												  : (item.examDate || ''),
+												abnormalCount: item.abnormalCount || 0,
+												totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
+												adviceCount: item.adviceCount || 0,
+												patientGender: appointmentRes.data.patientGender || '',
+												patientAge: appointmentRes.data.patientAge || ''
+											};
+										} else {
+											console.warn('预约详情返回数据格式异常:', appointmentRes);
+											packageName = '未命名套餐';
+										}
+									} catch (error) {
+										console.error('获取预约详情失败，orderId:', item.orderId, '错误:', error);
+										// 如果是业务异常（如订单不存在），直接跳过，不再获取
+										if (error.message && error.message.includes('预约订单不存在')) {
+											console.warn('订单不存在，跳过套餐名称获取');
+											// 不设置packageName，保留原有值
+											return {
+												id: item.id,
+												orderId: item.orderId || '',
+												packageName: '未命名套餐',
+												reportDate: item.reportDate || item.createTime || '',
+												hospitalName: item.hospitalName || '',
+												personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+												examDate: item.examDate || '',
+												abnormalCount: item.abnormalCount || 0,
+												totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
+												adviceCount: item.adviceCount || 0,
+												patientGender: '',
+												patientAge: ''
+											};
+										}
+										packageName = '未命名套餐';
+									}
+								} else if (!packageName) {
+									packageName = '未命名套餐';
+								}
+								
+								return {
+									id: item.id,
+									orderId: item.orderId || '',
+									packageName: packageName,
+									reportDate: item.reportDate || item.createTime || '',
+									hospitalName: item.hospitalName || '',
+									personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+									examDate: item.examDate || '',
+									abnormalCount: item.abnormalCount || 0,
+									totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
+									adviceCount: item.adviceCount || 0,
+									patientGender: '',
+									patientAge: ''
+								};
+							})
+						);
+						
+						this.reportList = reportListWithDetails;
 					} else {
 						// 如果返回的数据结构不符合预期
 						this.reportList = [];
@@ -223,37 +226,6 @@
 					});
 				} finally {
 					this.loading = false;
-				}
-			},
-			
-			// 查看报告详情
-			async viewReport(report) {
-				try {
-					uni.showLoading({
-						title: '加载中...'
-					});
-					
-					// 调用 getAppReportById 接口获取报告详情
-					const res = await getAppReportById(report.id);
-					console.log('报告详情数据:', res);
-					
-					if (res && res.success && res.data) {
-						this.reportDetail = res.data;
-						// 直接显示模态框，不需要额外调用
-					} else {
-						uni.showToast({
-							title: '获取报告详情失败',
-							icon: 'none'
-						});
-					}
-				} catch (error) {
-					console.error('获取报告详情失败:', error);
-					uni.showToast({
-						title: '获取报告详情失败',
-						icon: 'none'
-					});
-				} finally {
-					uni.hideLoading();
 				}
 			},
 			
@@ -279,27 +251,30 @@
 					});
 				}, 2000);
 			},
+			// 查看报告详情
+			viewReport(report) {
+				// 传递体检人、体检医院、体检时间、patientGender、patientAge等参数
+				const paramsObj = {
+					id: report.orderId,
+					personName: report.personName || '',
+					hospitalName: report.hospitalName || '',
+					examDate: report.examDate || '',
+					patientGender: report.patientGender !== undefined ? report.patientGender : (report.gender !== undefined ? report.gender : ''),
+					patientAge: report.patientAge !== undefined ? report.patientAge : (report.age !== undefined ? report.age : '')
+				};
+				console.log('即将跳转到report-detail，传递的参数：', paramsObj);
+				const params = Object.keys(paramsObj)
+					.map(key => `${key}=${encodeURIComponent(paramsObj[key])}`)
+					.join('&');
+				uni.navigateTo({
+					url: `/pages/report-detail/report-detail?${params}`
+				});
+			},
 			// 立即预约
 			makeAppointment() {
 				uni.switchTab({
 					url: '/pages/appointment/appointment'
 				});
-			},
-			// 关闭报告详情弹窗
-			closeReportDetail() {
-				this.reportDetail = null;
-			},
-			// 格式化日期
-			formatDate(timestamp) {
-				if (!timestamp) return '';
-				const date = new Date(timestamp);
-				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-			},
-			// 格式化日期时间
-			formatDateTime(timestamp) {
-				if (!timestamp) return '';
-				const date = new Date(timestamp);
-				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 			}
 		}
 	}
@@ -324,8 +299,6 @@
 	background-color: #f5f5f5;
 	min-height: 100vh;
 }
-
-
 
 .report-list {
 	padding: 20rpx;
@@ -485,106 +458,6 @@
 		&::after {
 			border: none;
 		}
-	}
-}
-
-/* 报告详情弹窗样式 */
-.report-detail-modal {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 0.6);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
-}
-
-.modal-content {
-	background-color: #ffffff;
-	border-radius: 20rpx;
-	width: 90%;
-	max-height: 80%;
-	display: flex;
-	flex-direction: column;
-}
-
-.modal-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 30rpx;
-	border-bottom: 1rpx solid #eeeeee;
-}
-
-.modal-title {
-	font-size: 36rpx;
-	font-weight: bold;
-	color: #333333;
-}
-
-.modal-close {
-	font-size: 48rpx;
-	color: #999999;
-}
-
-.modal-body {
-	padding: 30rpx;
-	overflow-y: auto;
-	max-height: 60%;
-}
-
-.detail-section {
-	margin-bottom: 20rpx;
-}
-
-.detail-item {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	font-size: 28rpx;
-	color: #333333;
-	margin-bottom: 15rpx;
-}
-
-.detail-label {
-	font-weight: bold;
-	color: #666666;
-}
-
-.detail-value {
-	flex: 1;
-	text-align: right;
-	color: #333333;
-}
-
-.status-completed {
-	color: #1296db;
-}
-
-.status-pending {
-	color: #ff5a5f;
-}
-
-.modal-footer {
-	padding: 30rpx;
-	border-top: 1rpx solid #eeeeee;
-	text-align: right;
-}
-
-.modal-btn {
-	background-color: #1296db;
-	color: #ffffff;
-	font-size: 32rpx;
-	padding: 0 40rpx;
-	height: 80rpx;
-	line-height: 80rpx;
-	border-radius: 40rpx;
-	
-	&::after {
-		border: none;
 	}
 }
 </style> 
