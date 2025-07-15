@@ -33,7 +33,7 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 体检结果概要 -->
 		<view class="summary-card">
 			<view class="card-title">体检结果概要</view>
@@ -52,30 +52,20 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 体检结果列表 -->
 		<view class="result-card">
 			<view class="card-title">体检结果</view>
 			<view class="filter-tabs">
-				<view 
-					class="tab-item" 
-					v-for="(item, index) in filterOptions" 
-					:key="index"
-					:class="{active: currentFilter === item.value}"
-					@click="switchFilter(item.value)"
-				>
+				<view class="tab-item" v-for="(item, index) in filterOptions" :key="index" :class="{active: currentFilter === item.value}"
+				 @click="switchFilter(item.value)">
 					<text>{{item.label}}</text>
 				</view>
 			</view>
-			
+
 			<!-- 体检项目列表 -->
 			<view class="result-list">
-				<view 
-					class="result-item" 
-					v-for="(item, index) in filteredResults" 
-					:key="index"
-					:class="{'abnormal': item.isAbnormal}"
-				>
+				<view class="result-item" v-for="(item, index) in filteredResults" :key="index" :class="{'abnormal': item.isAbnormal}">
 					<view class="result-header" @click="toggleExpand(index)">
 						<view class="result-name">
 							<text class="status-icon" v-if="item.isAbnormal">!</text>
@@ -88,10 +78,6 @@
 						</view>
 					</view>
 					<view class="result-detail" v-if="item.expanded">
-						<view class="reference-range">
-							<text class="detail-label">参考范围：</text>
-							<text class="detail-value">{{item.referenceRange}}</text>
-						</view>
 						<view class="result-desc" v-if="item.description">
 							<text class="detail-label">结果说明：</text>
 							<text class="detail-value">{{item.description}}</text>
@@ -122,7 +108,7 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 健康建议 -->
 		<view class="advice-card">
 			<view class="card-title">健康建议</view>
@@ -133,7 +119,7 @@
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 底部操作栏 -->
 		<view class="bottom-actions">
 			<button class="action-btn" @click="shareReport">
@@ -153,15 +139,24 @@
 </template>
 
 <script>
-	import { getAppReportById } from '@/api/report';
+	import {
+		getAppReportById,
+		getAppReportItem,
+		getCheckitemById
+	} from '@/api/report';
 	export default {
 		data() {
 			return {
 				reportId: null,
 				currentFilter: 'all', // all, abnormal
-				filterOptions: [
-					{ label: '全部', value: 'all' },
-					{ label: '异常', value: 'abnormal' }
+				filterOptions: [{
+						label: '全部',
+						value: 'all'
+					},
+					{
+						label: '异常',
+						value: 'abnormal'
+					}
 				],
 				reportInfo: {
 					packageName: '',
@@ -212,55 +207,119 @@
 				// 获取报告详情
 				this.getReportDetail();
 			}
-			
+
 			// 初始化显示所有检查结果
 			this.filteredResults = this.examResults;
 		},
 		methods: {
 			// 获取报告详情
 			async getReportDetail() {
-				this.loading = true;
-				try {
-					// 调用 /api/app/report/getAppReport/{id} 接口，id为orderId
-					const res = await getAppReportById(this.reportId);
-					console.log('getAppReportById返回:', res);
-					if (res && res.success && res.data) {
-						// 赋值到reportInfo
-						this.reportInfo.id = res.data.id;
-						this.reportInfo.orderId = res.data.orderId;
-						this.reportInfo.userId = res.data.userId;
-						this.reportInfo.checkitemIds = res.data.checkitemIds;
-						this.reportInfo.reportItemIds = res.data.reportItemIds;
-						this.reportInfo.status = res.data.status;
-						this.reportInfo.conclusion = res.data.conclusion;
-						this.reportInfo.doctorId = res.data.doctorId;
-						this.reportInfo.reportDate = res.data.reportDate;
-						this.reportInfo.createId = res.data.createId;
-						this.reportInfo.createTime = res.data.createTime;
-						this.reportInfo.updateId = res.data.updateId;
-						this.reportInfo.updateTime = res.data.updateTime;
-					} else {
-						uni.showToast({
-							title: '获取报告详情失败',
-							icon: 'none'
-						});
-					}
-				} catch (error) {
-					console.error('获取报告详情失败:', error);
-					uni.showToast({
-						title: '获取报告详情失败',
-						icon: 'none'
-					});
-				} finally {
-					this.loading = false;
-				}
-			},
+			  this.loading = true;
+			  try {
+			    // 清空之前的检查结果
+			    this.examResults = [];
+			    
+			    // 调用 /api/app/report/getAppReport/{id} 接口，id为reportId
+			    const res = await getAppReportById(this.reportId);
+			    console.log('getAppReportById返回:', res);
+			    if (res && res.success && res.data) {
+			      // 赋值到reportInfo
+			      this.reportInfo.id = res.data.id;
+			      this.reportInfo.orderId = res.data.orderId;
+			      this.reportInfo.userId = res.data.userId;
+			      this.reportInfo.checkitemIds = res.data.checkitemIds;
+			      this.reportInfo.reportItemIds = res.data.reportItemIds;
+			      this.reportInfo.status = res.data.status;
+			      this.reportInfo.conclusion = res.data.conclusion;
+			      this.reportInfo.doctorId = res.data.doctorId;
+			      this.reportInfo.reportDate = res.data.createTime; // 用createTime作为报告时间
+			      this.reportInfo.createId = res.data.createId;
+			      this.reportInfo.createTime = res.data.createTime;
+			      this.reportInfo.updateId = res.data.updateId;
+			      this.reportInfo.updateTime = res.data.updateTime;
+			      
+			      // 设置套餐名称
+			      this.reportInfo.packageName = res.data.packageName || '体检报告';
 			
+			      // 遍历reportItemIds，依次调用getAppReportItem
+			      if (res.data.reportItemIds) {
+			        const ids = res.data.reportItemIds.split(',').map(id => id.trim()).filter(id => id);
+			        let abnormalCount = 0;
+			        
+			        for (const id of ids) {
+			          try {
+			            const itemRes = await getAppReportItem(id);
+			            console.log('getAppReportItem返回:', itemRes);
+			            if (itemRes && itemRes.success && itemRes.data && itemRes.data.itemId) {
+			              // 调用 getCheckitemById 获取检查项目名称等信息
+			              const checkitemRes = await getCheckitemById(itemRes.data.itemId);
+			              console.log('getCheckitemById返回:', checkitemRes);
+			              
+			              if (checkitemRes && checkitemRes.success && checkitemRes.data) {
+			                // 构建检查结果对象
+			                const examResult = {
+			                  id: itemRes.data.id,
+			                  name: checkitemRes.data.name || '未知检查项', // 检查项目名称
+			                  value: itemRes.data.value || '--',
+			                  unit: checkitemRes.data.unit || '',
+			                  referenceRange: checkitemRes.data.referenceRange || '--',
+			                  isAbnormal: itemRes.data.isAbnormal === 1,
+			                  description: itemRes.data.description || '',
+			                  // 如果conclusion为空，显示"体检结果正在生成"
+			                  conclusion: itemRes.data.conclusion || '体检结果正在生成',
+			                  advice: itemRes.data.advice || '',
+			                  expanded: false // 默认不展开
+			                };
+			                
+			                // 添加到检查结果数组
+			                this.examResults.push(examResult);
+			                
+			                // 统计异常项目数量
+			                if (examResult.isAbnormal) {
+			                  abnormalCount++;
+			                }
+			              }
+			            }
+			          } catch (e) {
+			            console.error('getAppReportItem或getCheckitemById调用失败:', id, e);
+			          }
+			        }
+			        
+			        // 更新报告概要信息
+			        this.reportInfo.abnormalCount = abnormalCount;
+			        this.reportInfo.totalCount = this.examResults.length;
+			        
+			        // 更新健康建议数量和列表
+			        const adviceList = this.examResults
+			          .filter(item => item.advice)
+			          .map(item => item.advice);
+			        this.reportInfo.adviceCount = adviceList.length;
+			        this.reportInfo.adviceList = adviceList;
+			      }
+			      
+			      // 更新筛选后的结果
+			      this.switchFilter(this.currentFilter);
+			    } else {
+			      uni.showToast({
+			        title: '获取报告详情失败',
+			        icon: 'none'
+			      });
+			    }
+			  } catch (error) {
+			    console.error('获取报告详情失败:', error);
+			    uni.showToast({
+			      title: '获取报告详情失败',
+			      icon: 'none'
+			    });
+			  } finally {
+			    this.loading = false;
+			  }
+			},
 			// 更新报告基本信息
 			updateReportInfo() {
 				const abnormalCount = this.examResults.filter(item => item.isAbnormal).length;
 				const totalCount = this.examResults.length;
-				
+
 				this.reportInfo = {
 					packageName: '体检报告',
 					reportDate: new Date().toLocaleDateString(),
@@ -278,7 +337,7 @@
 			// 切换筛选条件
 			switchFilter(filter) {
 				this.currentFilter = filter;
-				
+
 				if (filter === 'all') {
 					this.filteredResults = this.examResults;
 				} else if (filter === 'abnormal') {
@@ -301,7 +360,7 @@
 				uni.showLoading({
 					title: '下载中...'
 				});
-				
+
 				// 模拟下载
 				setTimeout(() => {
 					uni.hideLoading();
@@ -327,364 +386,380 @@
 </script>
 
 <style lang="scss">
-@font-face {
-	font-family: texticons;
-	font-weight: normal;
-	font-style: normal;
-	src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
-}
-
-.content {
-	background-color: #f5f5f5;
-	min-height: 100vh;
-	padding-bottom: 120rpx;
-}
-
-
-
-.report-info-card {
-	background-color: #ffffff;
-	margin: 20rpx;
-	padding: 30rpx;
-	border-radius: 10rpx;
-	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-	
-	.report-title {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333333;
-		
-		.report-date {
-			font-size: 24rpx;
-			font-weight: normal;
-			color: #999999;
-		}
+	@font-face {
+		font-family: texticons;
+		font-weight: normal;
+		font-style: normal;
+		src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
 	}
-	
-	.info-list {
-		.info-item {
-			display: flex;
-			margin-bottom: 10rpx;
-			font-size: 28rpx;
-			
-			.info-label {
-				width: 160rpx;
-				color: #666666;
-			}
-			
-			.info-value {
-				flex: 1;
-				color: #333333;
-			}
-		}
-	}
-}
 
-.summary-card, .result-card, .advice-card {
-	background-color: #ffffff;
-	margin: 20rpx;
-	padding: 30rpx;
-	border-radius: 10rpx;
-	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-	
-	.card-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333333;
-		margin-bottom: 20rpx;
-		position: relative;
-		padding-left: 20rpx;
-		
-		&::before {
-			content: '';
-			position: absolute;
-			left: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			width: 6rpx;
-			height: 30rpx;
-			background-color: #1296db;
-			border-radius: 3rpx;
-		}
-	}
-}
-
-.summary-content {
-	display: flex;
-	background-color: #f9f9f9;
-	border-radius: 10rpx;
-	padding: 20rpx 0;
-	
-	.summary-item {
-		flex: 1;
-		text-align: center;
-		position: relative;
-		
-		&:not(:last-child)::after {
-			content: '';
-			position: absolute;
-			right: 0;
-			top: 20%;
-			height: 60%;
-			width: 1px;
-			background-color: #eeeeee;
-		}
-		
-		&.abnormal {
-			.summary-value {
-				color: #ff5a5f;
-			}
-		}
-		
-		.summary-value {
-			font-size: 36rpx;
-			font-weight: bold;
-			color: #333333;
-			display: block;
-			margin-bottom: 5rpx;
-		}
-		
-		.summary-label {
-			font-size: 24rpx;
-			color: #999999;
-		}
-	}
-}
-
-.filter-tabs {
-	display: flex;
-	margin-bottom: 20rpx;
-	
-	.tab-item {
-		padding: 10rpx 30rpx;
-		font-size: 28rpx;
-		color: #666666;
+	.content {
 		background-color: #f5f5f5;
-		border-radius: 30rpx;
-		margin-right: 20rpx;
-		
-		&.active {
-			color: #ffffff;
-			background-color: #1296db;
-		}
+		min-height: 100vh;
+		padding-bottom: 120rpx;
 	}
-}
 
-.result-list {
-	.result-item {
-		border-bottom: 1px solid #eeeeee;
-		padding: 20rpx 0;
-		
-		&:last-child {
-			border-bottom: none;
-		}
-		
-		&.abnormal {
-			.result-header {
-				.result-name {
-					.status-icon {
-						display: inline-block;
-						width: 32rpx;
-						height: 32rpx;
-						line-height: 32rpx;
-						text-align: center;
-						background-color: #ff5a5f;
-						color: #ffffff;
-						border-radius: 50%;
-						font-size: 24rpx;
-						margin-right: 10rpx;
-					}
-				}
-			}
-		}
-		
-		.result-header {
+
+
+	.report-info-card {
+		background-color: #ffffff;
+		margin: 20rpx;
+		padding: 30rpx;
+		border-radius: 10rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+
+		.report-title {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			
-			.result-name {
-				font-size: 28rpx;
-				color: #333333;
-				display: flex;
-				align-items: center;
-			}
-			
-			.result-value {
-				font-size: 28rpx;
-				color: #333333;
-				display: flex;
-				align-items: center;
-				
-				.abnormal-text {
-					color: #ff5a5f;
-				}
-				
-				.result-unit {
-					font-size: 24rpx;
-					color: #999999;
-					margin-left: 5rpx;
-				}
-				
-				.expand-icon {
-					margin-left: 20rpx;
-					color: #999999;
-				}
+			margin-bottom: 20rpx;
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333333;
+
+			.report-date {
+				font-size: 24rpx;
+				font-weight: normal;
+				color: #999999;
 			}
 		}
-		
-		.result-detail {
-			margin-top: 15rpx;
-			padding: 15rpx;
-			background-color: #f9f9f9;
-			border-radius: 8rpx;
-			font-size: 26rpx;
-			
-			.reference-range, .result-desc, .result-conclusion, .result-advice {
+
+		.info-list {
+			.info-item {
+				display: flex;
 				margin-bottom: 10rpx;
-				
-				&:last-child {
-					margin-bottom: 0;
-				}
-				
-				.detail-label {
+				font-size: 28rpx;
+
+				.info-label {
+					width: 160rpx;
 					color: #666666;
 				}
-				
-				.detail-value {
+
+				.info-value {
+					flex: 1;
 					color: #333333;
 				}
 			}
-			
-			.result-conclusion {
-				.conclusion-content {
-					margin-top: 10rpx;
-					
-					.conclusion-text {
-						font-size: 24rpx;
-						color: #333333;
-						line-height: 1.5;
-						padding: 10rpx;
-						background-color: #f8f9fa;
-						border-radius: 8rpx;
-					}
-					
-					.conclusion-list {
-						.conclusion-item {
-							margin-bottom: 15rpx;
-							padding: 15rpx;
-							background-color: #f8f9fa;
-							border-radius: 8rpx;
-							border-left: 4rpx solid #1296db;
-							
-							.conclusion-category {
-								display: block;
-								font-size: 22rpx;
-								color: #1296db;
-								font-weight: bold;
-								margin-bottom: 8rpx;
-							}
-							
-							.conclusion-name {
-								display: block;
-								font-size: 24rpx;
-								color: #333333;
-								font-weight: bold;
-								margin-bottom: 6rpx;
-							}
-							
-							.conclusion-desc {
-								display: block;
-								font-size: 22rpx;
-								color: #666666;
-								line-height: 1.4;
-							}
+		}
+	}
+
+	.summary-card,
+	.result-card,
+	.advice-card {
+		background-color: #ffffff;
+		margin: 20rpx;
+		padding: 30rpx;
+		border-radius: 10rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+
+		.card-title {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333333;
+			margin-bottom: 20rpx;
+			position: relative;
+			padding-left: 20rpx;
+
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 6rpx;
+				height: 30rpx;
+				background-color: #1296db;
+				border-radius: 3rpx;
+			}
+		}
+	}
+
+	.summary-content {
+		display: flex;
+		background-color: #f9f9f9;
+		border-radius: 10rpx;
+		padding: 20rpx 0;
+
+		.summary-item {
+			flex: 1;
+			text-align: center;
+			position: relative;
+
+			&:not(:last-child)::after {
+				content: '';
+				position: absolute;
+				right: 0;
+				top: 20%;
+				height: 60%;
+				width: 1px;
+				background-color: #eeeeee;
+			}
+
+			&.abnormal {
+				.summary-value {
+					color: #ff5a5f;
+				}
+			}
+
+			.summary-value {
+				font-size: 36rpx;
+				font-weight: bold;
+				color: #333333;
+				display: block;
+				margin-bottom: 5rpx;
+			}
+
+			.summary-label {
+				font-size: 24rpx;
+				color: #999999;
+			}
+		}
+	}
+
+	.filter-tabs {
+		display: flex;
+		margin-bottom: 20rpx;
+
+		.tab-item {
+			padding: 10rpx 30rpx;
+			font-size: 28rpx;
+			color: #666666;
+			background-color: #f5f5f5;
+			border-radius: 30rpx;
+			margin-right: 20rpx;
+
+			&.active {
+				color: #ffffff;
+				background-color: #1296db;
+			}
+		}
+	}
+
+	.result-list {
+		.result-item {
+			border-bottom: 1px solid #eeeeee;
+			padding: 20rpx 0;
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			&.abnormal {
+				.result-header {
+					.result-name {
+						.status-icon {
+							display: inline-block;
+							width: 32rpx;
+							height: 32rpx;
+							line-height: 32rpx;
+							text-align: center;
+							background-color: #ff5a5f;
+							color: #ffffff;
+							border-radius: 50%;
+							font-size: 24rpx;
+							margin-right: 10rpx;
 						}
 					}
 				}
 			}
-			
-			.result-advice {
-				.detail-value {
-					color: #1296db;
+
+			.result-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+
+				.result-name {
+					font-size: 28rpx;
+					color: #333333;
+					display: flex;
+					align-items: center;
+					flex-wrap: wrap;
+					
+					.result-conclusion-text {
+						margin-left: 10rpx;
+						font-size: 24rpx;
+						color: #666666;
+						max-width: 400rpx;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+					}
+				}
+
+				.result-value {
+					font-size: 28rpx;
+					color: #333333;
+					display: flex;
+					align-items: center;
+
+					.abnormal-text {
+						color: #ff5a5f;
+					}
+
+					.result-unit {
+						font-size: 24rpx;
+						color: #999999;
+						margin-left: 5rpx;
+					}
+
+					.expand-icon {
+						margin-left: 20rpx;
+						color: #999999;
+					}
+				}
+			}
+
+			.result-detail {
+				margin-top: 15rpx;
+				padding: 15rpx;
+				background-color: #f9f9f9;
+				border-radius: 8rpx;
+				font-size: 26rpx;
+
+				.reference-range,
+				.result-desc,
+				.result-conclusion,
+				.result-advice {
+					margin-bottom: 10rpx;
+
+					&:last-child {
+						margin-bottom: 0;
+					}
+
+					.detail-label {
+						color: #666666;
+					}
+
+					.detail-value {
+						color: #333333;
+					}
+				}
+
+				.result-conclusion {
+					.conclusion-content {
+						margin-top: 10rpx;
+
+						.conclusion-text {
+							font-size: 24rpx;
+							color: #333333;
+							line-height: 1.5;
+							padding: 10rpx;
+							background-color: #f8f9fa;
+							border-radius: 8rpx;
+						}
+
+						.conclusion-list {
+							.conclusion-item {
+								margin-bottom: 15rpx;
+								padding: 15rpx;
+								background-color: #f8f9fa;
+								border-radius: 8rpx;
+								border-left: 4rpx solid #1296db;
+
+								.conclusion-category {
+									display: block;
+									font-size: 22rpx;
+									color: #1296db;
+									font-weight: bold;
+									margin-bottom: 8rpx;
+								}
+
+								.conclusion-name {
+									display: block;
+									font-size: 24rpx;
+									color: #333333;
+									font-weight: bold;
+									margin-bottom: 6rpx;
+								}
+
+								.conclusion-desc {
+									display: block;
+									font-size: 22rpx;
+									color: #666666;
+									line-height: 1.4;
+								}
+							}
+						}
+					}
+				}
+
+				.result-advice {
+					.detail-value {
+						color: #1296db;
+					}
 				}
 			}
 		}
 	}
-}
 
-.advice-list {
-	.advice-item {
+	.advice-list {
+		.advice-item {
+			display: flex;
+			margin-bottom: 15rpx;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			.advice-index {
+				width: 40rpx;
+				height: 40rpx;
+				line-height: 40rpx;
+				text-align: center;
+				background-color: #1296db;
+				color: #ffffff;
+				border-radius: 50%;
+				font-size: 24rpx;
+				margin-right: 15rpx;
+				flex-shrink: 0;
+			}
+
+			.advice-content {
+				flex: 1;
+				font-size: 28rpx;
+				color: #333333;
+				line-height: 1.5;
+			}
+		}
+	}
+
+	.bottom-actions {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ffffff;
 		display: flex;
-		margin-bottom: 15rpx;
-		
-		&:last-child {
-			margin-bottom: 0;
-		}
-		
-		.advice-index {
-			width: 40rpx;
-			height: 40rpx;
-			line-height: 40rpx;
-			text-align: center;
-			background-color: #1296db;
-			color: #ffffff;
-			border-radius: 50%;
-			font-size: 24rpx;
-			margin-right: 15rpx;
-			flex-shrink: 0;
-		}
-		
-		.advice-content {
+		padding: 20rpx;
+		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+
+		.action-btn {
 			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			font-size: 28rpx;
-			color: #333333;
-			line-height: 1.5;
-		}
-	}
-}
+			height: 80rpx;
+			line-height: 1;
+			border-radius: 40rpx;
+			margin: 0 10rpx;
+			background-color: #f5f5f5;
+			color: #666666;
 
-.bottom-actions {
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #ffffff;
-	display: flex;
-	padding: 20rpx;
-	box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-	
-	.action-btn {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 28rpx;
-		height: 80rpx;
-		line-height: 1;
-		border-radius: 40rpx;
-		margin: 0 10rpx;
-		background-color: #f5f5f5;
-		color: #666666;
-		
-		.iconfont {
-			font-size: 32rpx;
-			margin-right: 8rpx;
-			font-family: texticons;
-		}
-		
-		&.primary {
-			background-color: #1296db;
-			color: #ffffff;
-		}
-		
-		&::after {
-			border: none;
+			.iconfont {
+				font-size: 32rpx;
+				margin-right: 8rpx;
+				font-family: texticons;
+			}
+
+			&.primary {
+				background-color: #1296db;
+				color: #ffffff;
+			}
+
+			&::after {
+				border: none;
+			}
 		}
 	}
-}
-</style> 
+</style>
