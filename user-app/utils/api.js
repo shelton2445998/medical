@@ -77,11 +77,23 @@ export const userApi = {
   // 账号密码登录
   accountLogin: `${API_BASE_URL}/app/accountLogin`,
   // 用户注册
-  register: `${API_BASE_URL}/user/register`,
+  register: `${API_BASE_URL}/app/register`,
   // 获取用户信息
   getUserInfo: `${API_BASE_URL}/user/info`,
   // 获取登录用户信息
   getLoginUserInfo: `${API_BASE_URL}/app/getLoginUserInfo`,
+};
+
+// AI聊天相关接口
+export const chatApi = {
+  // 发送消息给AI
+  sendMessage: `${API_BASE_URL}/app/chat/send`,
+  // 获取聊天历史
+  getChatHistory: `${API_BASE_URL}/app/chat/history`,
+  // 清空聊天记录
+  clearChatHistory: `${API_BASE_URL}/app/chat/clear`,
+  // 获取AI医生列表
+  getAIDoctors: `${API_BASE_URL}/app/chat/doctors`,
 };
 
 export default {
@@ -91,4 +103,5 @@ export default {
   checkitemApi,
   reportApi,
   userApi,
+  chatApi,
 }; 

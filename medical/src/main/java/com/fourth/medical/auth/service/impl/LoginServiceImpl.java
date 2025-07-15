@@ -152,6 +152,8 @@ public class LoginServiceImpl implements LoginService {
         // 创建新用户
         SysUser sysUser = new SysUser();
         sysUser.setUsername(username);
+        // 设置默认昵称为用户名
+        sysUser.setNickname(username);
         
         // 密码加密
         String salt = PasswordUtil.generateSalt();

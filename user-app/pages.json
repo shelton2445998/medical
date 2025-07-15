@@ -58,6 +58,14 @@
 			}
 		},
 		{
+			"path": "pages/payment/payment",
+			"style": {
+				"navigationBarTitleText": "订单支付",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/appointment/normal-appointment",
 			"style": {
 				"navigationBarTitleText": "普通项目预约",

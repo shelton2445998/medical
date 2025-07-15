@@ -84,7 +84,8 @@
 				filteredHospitals: [],
 				loading: false,
 				memberId: null,
-				memberName: ''
+				memberName: '',
+				fromPackage: false
 			}
 		},
 		onLoad(options) {
@@ -94,6 +95,10 @@
 			}
 			if (options.memberName) {
 				this.memberName = options.memberName;
+			}
+			// 检查是否从套餐详情页面跳转过来
+			if (options.fromPackage) {
+				this.fromPackage = true;
 			}
 			// 获取医院列表数据
 			this.getHospitalList();
@@ -254,6 +259,31 @@
 			selectHospital(hospital) {
 				// 存储选择的医院信息
 				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
+				
+				// 如果是从套餐详情页面跳转过来的，则返回到套餐详情页面
+				if (this.fromPackage) {
+					// 获取当前套餐信息
+					const currentPackage = uni.getStorageSync('currentPackage');
+					if (currentPackage) {
+						try {
+							const packageInfo = JSON.parse(currentPackage);
+							// 更新套餐的医院信息
+							packageInfo.hospitalId = hospital.id;
+							packageInfo.hospitalName = hospital.name;
+							packageInfo.hospitalAddress = hospital.address;
+							packageInfo.hospitalImage = hospital.image;
+							// 存储更新后的套餐信息
+							uni.setStorageSync('selectedPackage', JSON.stringify(packageInfo));
+						} catch (e) {
+							console.error('解析套餐信息失败:', e);
+						}
+					}
+					
+					uni.navigateBack({
+						delta: 1
+					});
+					return;
+				}
 				
 				// 构建跳转URL，包含家庭成员信息
 				let selectUrl = '/pages/appointment/appointment-select';
