@@ -100,7 +100,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import { Iphone, Lock, DataBoard, User, Document } from '@element-plus/icons-vue'
+import { Iphone, Lock, DataBoard, User, Document, InfoFilled } from '@element-plus/icons-vue'
 
 const BACKEND_BASE_URL = 'http://localhost:8888'
 const request = axios.create({
