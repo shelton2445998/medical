@@ -132,8 +132,8 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createReportForOrder(Long orderId, Long userId, String checkitemIds, Long doctorId) {
-        log.info("创建体检报告，订单ID：{}，用户ID：{}，检查项：{}，医生ID：{}", orderId, userId, checkitemIds, doctorId);
+    public Long createReportForOrder(Long orderId, Long userId, String checkitemIds) {
+        log.info("创建体检报告，订单ID：{}，用户ID：{}，检查项：{}", orderId, userId, checkitemIds);
         
         try {
             // 先检查是否已经存在该订单的报告
@@ -153,7 +153,6 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
             report.setOrderId(orderId);
             report.setUserId(userId);
             report.setCheckitemIds(checkitemIds);
-            report.setDoctorId(doctorId);
             report.setStatus(0);  // 未完成状态
             
             // 插入数据库

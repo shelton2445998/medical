@@ -92,8 +92,7 @@ public class AppOrdersController {
                 Long reportId = reportService.createReportForOrder(
                         result.getId(),
                         result.getUserId(), 
-                        checkitemIds,
-                        doctorId);
+                        checkitemIds);
                 
                 // 创建report_item记录
                 if (reportId != null) {
