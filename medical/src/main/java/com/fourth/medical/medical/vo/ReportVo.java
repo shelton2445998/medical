@@ -26,6 +26,27 @@ public class ReportVo implements Serializable {
 
     @Schema(description = "用户ID")
     private Long userId;
+    
+    @Schema(description = "用户姓名")
+    private String userName;
+    
+    @Schema(description = "用户手机号")
+    private String userPhone;
+    
+    @Schema(description = "患者姓名")
+    private String patientName;
+    
+    @Schema(description = "患者年龄")
+    private Integer patientAge;
+    
+    @Schema(description = "患者性别 0:女，1:男")
+    private Integer patientGender;
+    
+    @Schema(description = "患者性别文本")
+    private String patientGenderText;
+    
+    @Schema(description = "患者联系方式")
+    private String patientPhone;
 
     @Schema(description = "检查项ID列表，多个ID用逗号分隔")
     private String checkitemIds;
@@ -41,6 +62,9 @@ public class ReportVo implements Serializable {
 
     @Schema(description = "医生ID")
     private Long doctorId;
+    
+    @Schema(description = "医生姓名")
+    private String doctorName;
 
     @Schema(description = "报告日期")
     private Date reportDate;
@@ -56,6 +80,5 @@ public class ReportVo implements Serializable {
 
     @Schema(description = "修改时间")
     private Date updateTime;
-
 }
 

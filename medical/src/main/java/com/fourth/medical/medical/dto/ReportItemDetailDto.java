@@ -27,6 +27,9 @@ public class ReportItemDetailDto implements Serializable {
     @Schema(description = "报告ID")
     @NotNull(message = "报告ID不能为空")
     private Long reportId;
+    
+    @Schema(description = "医生ID")
+    private Long doctorId;
 
     @Schema(description = "检查项明细ID")
     @NotNull(message = "检查项明细ID不能为空")

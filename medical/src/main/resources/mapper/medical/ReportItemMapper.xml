@@ -7,6 +7,11 @@
                o.user_id AS userId,
                u.nickname AS userName,
                u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
                d.name AS doctorName,
                i.name AS itemName
         FROM report_item r
@@ -30,8 +35,17 @@
         LEFT JOIN doctor d ON r.doctor_id = d.id
         LEFT JOIN checkitem i ON r.item_id = i.id
         <where>
-            <if test="query != null and query.doctorId != null">
-                AND r.doctor_id = #{query.doctorId}
+            <if test="query != null">
+                <choose>
+                    <when test="query.includeZeroDoctorId != null and query.includeZeroDoctorId == true and query.doctorId != null">
+                        AND (r.doctor_id = #{query.doctorId} OR r.doctor_id = 0)
+                    </when>
+                    <otherwise>
+                        <if test="query.doctorId != null">
+                            AND r.doctor_id = #{query.doctorId}
+                        </if>
+                    </otherwise>
+                </choose>
             </if>
             <if test="query != null and query.orderId != null">
                 AND r.order_id = #{query.orderId}
@@ -41,6 +55,52 @@
             </if>
             <if test="query != null and query.patientKeyword != null and query.patientKeyword != ''">
                 AND (u.nickname LIKE CONCAT('%', #{query.patientKeyword}, '%') OR u.phone LIKE CONCAT('%', #{query.patientKeyword}, '%'))
+            </if>
+        </where>
+        ORDER BY r.create_time DESC
+    </select>
+    
+    <select id="getReportItemList" resultType="com.fourth.medical.medical.vo.ReportItemVo">
+        SELECT r.*,
+               o.user_id AS userId,
+               u.nickname AS userName,
+               u.phone AS userPhone,
+               o.patient_name AS patientName,
+               o.patient_age AS patientAge,
+               o.patient_gender AS patientGender,
+               CASE o.patient_gender WHEN 0 THEN '女' WHEN 1 THEN '男' ELSE '未知' END AS patientGenderText,
+               o.patient_phone AS patientPhone,
+               d.name AS doctorName,
+               i.name AS itemName
+        FROM report_item r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN user u ON o.user_id = u.id
+        LEFT JOIN doctor d ON r.doctor_id = d.id
+        LEFT JOIN checkitem i ON r.item_id = i.id
+        <where>
+            <if test="query != null">
+                <choose>
+                    <when test="query.includeZeroDoctorId != null and query.includeZeroDoctorId == true and query.doctorId != null">
+                        AND (r.doctor_id = #{query.doctorId} OR r.doctor_id = 0)
+                    </when>
+                    <otherwise>
+                        <if test="query.doctorId != null">
+                            AND r.doctor_id = #{query.doctorId}
+                        </if>
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="query != null and query.orderId != null">
+                AND r.order_id = #{query.orderId}
+            </if>
+            <if test="query != null and query.reportStatus != null">
+                AND r.report_status = #{query.reportStatus}
+            </if>
+            <if test="query != null and query.patientKeyword != null and query.patientKeyword != ''">
+                AND (u.nickname LIKE CONCAT('%', #{query.patientKeyword}, '%') 
+                     OR u.phone LIKE CONCAT('%', #{query.patientKeyword}, '%')
+                     OR o.patient_name LIKE CONCAT('%', #{query.patientKeyword}, '%')
+                     OR o.patient_phone LIKE CONCAT('%', #{query.patientKeyword}, '%'))
             </if>
         </where>
         ORDER BY r.create_time DESC

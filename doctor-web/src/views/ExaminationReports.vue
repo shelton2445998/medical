@@ -20,15 +20,27 @@
         <el-tab-pane label="待录入报告" name="pending">
           <el-table :data="pendingReports" style="width: 100%" v-loading="loading">
             <el-table-column prop="id" label="报告ID" width="100" />
-            <el-table-column prop="patientName" label="患者姓名" width="120" />
-            <el-table-column prop="patientGender" label="性别" width="80">
+            <el-table-column label="患者姓名" width="120">
               <template #default="scope">
-                {{ scope.row.patientGender === 1 ? '男' : '女' }}
+                {{ scope.row.patientName || '未知' }}
               </template>
             </el-table-column>
-            <el-table-column prop="patientAge" label="年龄" width="80" />
-            <el-table-column prop="examDate" label="体检日期" width="150" />
-            <el-table-column prop="checkItems" label="检查项目" />
+            <el-table-column label="性别" width="80">
+              <template #default="scope">
+                {{ scope.row.patientGenderText || '未知' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="年龄" width="80">
+              <template #default="scope">
+                {{ scope.row.patientAge || '未知' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="体检日期" width="150">
+              <template #default="scope">
+                {{ formatDate(scope.row.createTime) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="itemName" label="检查项目" />
             <el-table-column label="操作" width="180">
               <template #default="scope">
                 <el-button 
@@ -44,21 +56,32 @@
         <el-tab-pane label="已完成报告" name="completed">
           <el-table :data="completedReports" style="width: 100%" v-loading="loading">
             <el-table-column prop="id" label="报告ID" width="100" />
-            <el-table-column prop="patientName" label="患者姓名" width="120" />
-            <el-table-column prop="patientGender" label="性别" width="80">
+            <el-table-column label="患者姓名" width="120">
               <template #default="scope">
-                {{ scope.row.patientGender === 1 ? '男' : '女' }}
+                {{ scope.row.patientName || '未知' }}
               </template>
             </el-table-column>
-            <el-table-column prop="patientAge" label="年龄" width="80" />
-            <el-table-column prop="examDate" label="体检日期" width="150" />
-            <el-table-column prop="reportDate" label="报告生成日期" width="150" />
-            <el-table-column prop="abnormalItems" label="异常项">
+            <el-table-column label="性别" width="80">
               <template #default="scope">
-                <el-tag v-if="scope.row.abnormalItems > 0" type="danger">{{ scope.row.abnormalItems }}项异常</el-tag>
-                <span v-else>无异常</span>
+                {{ scope.row.patientGenderText || '未知' }}
               </template>
             </el-table-column>
+            <el-table-column label="年龄" width="80">
+              <template #default="scope">
+                {{ scope.row.patientAge || '未知' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="体检日期" width="150">
+              <template #default="scope">
+                {{ formatDate(scope.row.createTime) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="报告生成日期" width="150">
+              <template #default="scope">
+                {{ formatDate(scope.row.updateTime) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="itemName" label="检查项目" />
             <el-table-column label="操作" width="220">
               <template #default="scope">
                 <el-button 
@@ -78,6 +101,9 @@
       </el-tabs>
 
       <div class="pagination-container">
+        <div class="pagination-info">
+          共 {{ activeTab === 'pending' ? pendingReports.length : completedReports.length }} 条记录
+        </div>
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
@@ -100,11 +126,11 @@
         <div class="patient-info">
           <h3>患者信息</h3>
           <el-descriptions :column="3" border>
-            <el-descriptions-item label="姓名">{{ currentReport.patientName }}</el-descriptions-item>
-            <el-descriptions-item label="性别">{{ currentReport.patientGender === 1 ? '男' : '女' }}</el-descriptions-item>
-            <el-descriptions-item label="年龄">{{ currentReport.patientAge }}</el-descriptions-item>
-            <el-descriptions-item label="手机号">{{ currentReport.patientMobile }}</el-descriptions-item>
-            <el-descriptions-item label="体检日期">{{ currentReport.examDate }}</el-descriptions-item>
+            <el-descriptions-item label="姓名">{{ currentReport.patientName || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="性别">{{ currentReport.patientGenderText || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="年龄">{{ currentReport.patientAge || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="手机号">{{ currentReport.patientPhone || currentReport.userPhone || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="体检日期">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
           </el-descriptions>
         </div>
 
@@ -173,11 +199,11 @@
         <div class="patient-info">
           <h3>个人信息</h3>
           <el-descriptions :column="3" border>
-            <el-descriptions-item label="姓名">{{ currentReport.patientName }}</el-descriptions-item>
-            <el-descriptions-item label="性别">{{ currentReport.patientGender === 1 ? '男' : '女' }}</el-descriptions-item>
-            <el-descriptions-item label="年龄">{{ currentReport.patientAge }}</el-descriptions-item>
-            <el-descriptions-item label="手机号">{{ currentReport.patientMobile }}</el-descriptions-item>
-            <el-descriptions-item label="体检日期">{{ currentReport.examDate }}</el-descriptions-item>
+            <el-descriptions-item label="姓名">{{ currentReport.patientName || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="性别">{{ currentReport.patientGenderText || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="年龄">{{ currentReport.patientAge || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="手机号">{{ currentReport.patientPhone || currentReport.userPhone || '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="体检日期">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
           </el-descriptions>
         </div>
 
@@ -251,6 +277,13 @@ export default {
     const conclusion = ref('')
     const isAutoCheckAbnormal = ref(true)
     
+    // 格式化日期函数
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '未知';
+      // 可以按需调整日期格式
+      return dateStr;
+    }
+    
     const fetchReportList = async () => {
       loading.value = true
       try {
@@ -267,7 +300,7 @@ export default {
         } else {
           completedReports.value = res.data.list
         }
-        totalRecords.value = res.data.total
+        totalRecords.value = res.data.total || res.data.list.length // 使用返回的total或数据长度
       } catch (error) {
         console.error('获取报告列表失败', error)
         ElMessage.error('获取报告列表失败')
@@ -431,6 +464,7 @@ export default {
       reportItems,
       conclusion,
       isAutoCheckAbnormal,
+      formatDate,
       handleSearch,
       handleSizeChange,
       handleCurrentChange,
@@ -464,7 +498,14 @@ export default {
 .pagination-container {
   margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; /* Changed to space-between to align items */
+  align-items: center; /* Align items vertically */
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #606266;
+  margin-right: 20px;
 }
 
 .patient-info {

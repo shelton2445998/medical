@@ -103,4 +103,13 @@ public interface ReportItemService extends IService<ReportItem> {
      * @return 创建的检查项ID列表
      */
     List<Long> createReportItemsForReport(Long reportId, Long orderId, Long userId, String checkitemIds, Long doctorId);
+    
+    /**
+     * 更新报告项的医生ID
+     *
+     * @param reportItemId 报告项ID
+     * @param doctorId 医生ID
+     * @return 是否更新成功
+     */
+    boolean updateReportItemDoctor(Long reportItemId, Long doctorId);
 }

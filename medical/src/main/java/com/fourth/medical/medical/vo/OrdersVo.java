@@ -69,6 +69,24 @@ public class OrdersVo implements Serializable {
 
     @Schema(description = "支付交易号")
     private String transactionId;
+    
+    @Schema(description = "检查项ID列表，多个ID用逗号分隔")
+    private String checkitemIds;
+    
+    @Schema(description = "患者姓名")
+    private String patientName;
+    
+    @Schema(description = "患者年龄")
+    private Integer patientAge;
+    
+    @Schema(description = "患者性别 0:女，1:男")
+    private Integer patientGender;
+    
+    @Schema(description = "患者性别文本")
+    private String patientGenderText;
+    
+    @Schema(description = "患者联系方式")
+    private String patientPhone;
 
     @Schema(description = "创建人ID")
     private Long createId;
@@ -81,6 +99,5 @@ public class OrdersVo implements Serializable {
 
     @Schema(description = "修改时间")
     private Date updateTime;
-
 }
 

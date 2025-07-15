@@ -81,7 +81,7 @@ public interface ReportService extends IService<Report> {
      * @throws Exception
      */
     Paging<AppReportVo> getAppReportPage(AppReportQuery query, String token);
-    
+
     /**
      * 为订单创建体检报告
      *
