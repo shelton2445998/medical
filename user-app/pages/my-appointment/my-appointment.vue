@@ -10,39 +10,39 @@
 		
 		<view class="main-content">
 			<!-- 页面头部 -->
-			<view class="page-header">
+		<view class="page-header">
 				<view class="header-icon">📋</view>
 				<view class="header-title">我的预约</view>
 				<view class="header-desc">查看和管理您的体检预约</view>
 			</view>
-			
+		
 			<!-- 预约状态选项卡 -->
-			<view class="status-tabs">
-				<view 
-					class="tab-item" 
-					v-for="(item, index) in statusList" 
-					:key="index"
-					:class="{active: currentStatus === item.id}"
-					@click="switchStatus(item.id)"
-				>
+		<view class="status-tabs">
+			<view 
+				class="tab-item" 
+				v-for="(item, index) in statusList" 
+				:key="index"
+				:class="{active: currentStatus === item.id}"
+				@click="switchStatus(item.id)"
+			>
 					<text class="tab-icon">{{item.icon}}</text>
 					<text class="tab-text">{{item.name}}</text>
 					<view class="tab-count" v-if="getStatusCount(item.id) > 0">{{getStatusCount(item.id)}}</view>
-				</view>
 			</view>
-			
-			<!-- 预约列表 -->
-			<view class="appointment-list" v-if="filteredAppointments.length > 0">
-				<view class="appointment-item" v-for="(item, index) in filteredAppointments" :key="index" @click="viewDetail(item)">
-					<view class="appointment-header">
+		</view>
+		
+		<!-- 预约列表 -->
+		<view class="appointment-list" v-if="filteredAppointments.length > 0">
+			<view class="appointment-item" v-for="(item, index) in filteredAppointments" :key="index" @click="viewDetail(item)">
+				<view class="appointment-header">
 						<view class="hospital-info">
 							<text class="hospital-icon">🏥</text>
 							<text class="hospital-name">{{item.hospitalName || '体检医院'}}</text>
-						</view>
+				</view>
 						<view class="status-badge" :class="'status-' + item.status">
 							<text class="status-icon">{{getStatusIcon(item.status)}}</text>
 							<text class="status-text">{{getStatusName(item.status)}}</text>
-						</view>
+					</view>
 					</view>
 					
 					<view class="appointment-content">
@@ -50,52 +50,67 @@
 							<view class="info-item">
 								<text class="info-label">预约时间</text>
 								<text class="info-value">{{formatDate(item.appointmentDate)}} {{item.timeSlot || '上午'}}</text>
-							</view>
+					</view>
 							<view class="info-item">
 								<text class="info-label">订单号</text>
 								<text class="info-value">{{item.orderNumber || 'N/A'}}</text>
-							</view>
+					</view>
 							<view class="info-item" v-if="item.price">
 								<text class="info-label">套餐价格</text>
-								<text class="info-value price">¥{{item.price}}</text>
-							</view>
+						<text class="info-value price">¥{{item.price}}</text>
+					</view>
 							<view class="info-item" v-if="item.amount">
 								<text class="info-label">订单金额</text>
 								<text class="info-value price">¥{{item.amount}}</text>
-							</view>
-						</view>
-						
-						<view class="appointment-actions">
-							<button 
-								class="action-btn cancel-btn" 
-								v-if="item.status === 1" 
-								@click.stop="cancelAppointment(item)"
-							>
-								<text class="btn-icon">❌</text>
-								<text class="btn-text">取消预约</text>
-							</button>
-							<button 
-								class="action-btn report-btn" 
-								v-if="item.status === 2 || item.status === 3" 
-								@click.stop="viewReport(item)"
-							>
-								<text class="btn-icon">📊</text>
-								<text class="btn-text">查看报告</text>
-							</button>
-							<button 
-								class="action-btn detail-btn" 
-								@click.stop="viewDetail(item)"
-							>
-								<text class="btn-icon">👁️</text>
-								<text class="btn-text">查看详情</text>
-							</button>
-						</view>
 					</view>
 				</view>
+						
+				<view class="appointment-actions">
+					<!-- 待支付状态显示取消预约按钮 -->
+					<button 
+						class="action-btn cancel-btn" 
+						v-if="item.status === 1" 
+						@click.stop="cancelAppointment(item)"
+					>
+						<text class="btn-icon">❌</text>
+						<text class="btn-text">取消预约</text>
+					</button>
+					
+					<!-- 已支付状态显示等待报告按钮 -->
+					<button 
+						class="action-btn wait-btn" 
+						v-if="item.status === 2" 
+						@click.stop="viewReport(item)"
+					>
+						<text class="btn-icon">⏳</text>
+						<text class="btn-text">等待报告</text>
+					</button>
+					
+					<!-- 已完成状态显示查看报告按钮 -->
+					<button 
+						class="action-btn report-btn" 
+						v-if="item.status === 3" 
+						@click.stop="viewReport(item)"
+					>
+						<text class="btn-icon">📊</text>
+						<text class="btn-text">查看报告</text>
+					</button>
+					
+					<!-- 已取消状态不显示操作按钮，只显示查看详情 -->
+					<button 
+						class="action-btn detail-btn" 
+						@click.stop="viewDetail(item)"
+					>
+						<text class="btn-icon">👁️</text>
+						<text class="btn-text">查看详情</text>
+					</button>
+				</view>
+				</view>
 			</view>
-			
-			<!-- 空状态 -->
-			<view class="empty-state" v-else>
+		</view>
+		
+		<!-- 空状态 -->
+		<view class="empty-state" v-else>
 				<view class="empty-icon">📋</view>
 				<text class="empty-title">暂无预约记录</text>
 				<text class="empty-desc">您还没有任何体检预约，快来预约一次专业的体检吧</text>
@@ -120,7 +135,8 @@ export default {
 				{ id: 0, name: '全部', icon: '📋' },
 				{ id: 1, name: '待支付', icon: '⚪️' },
 				{ id: 2, name: '已支付', icon: '✅' },
-				{ id: 3, name: '已完成', icon: '✅' }
+				{ id: 3, name: '已完成', icon: '✅' },
+				{ id: -1, name: '已取消', icon: '❌' }
 			],
 			appointments: [],
 			filteredAppointments: [],
@@ -199,6 +215,9 @@ export default {
 				if (statusId === 0) {
 					// 全部预约
 					this.filteredAppointments = this.appointments;
+				} else if (statusId === -1) {
+					// 已取消状态（status为0）
+					this.filteredAppointments = this.appointments.filter(item => item.status === 0);
 				} else {
 					// 按状态筛选
 					this.filteredAppointments = this.appointments.filter(item => item.status === statusId);
@@ -206,20 +225,33 @@ export default {
 			},
 			// 获取状态名称
 			getStatusName(statusId) {
-				const status = this.statusList.find(item => item.id === statusId);
-				return status ? status.name : '';
+				// 根据新的状态定义：0:已取消，1:待支付，2:已支付，3:已完成
+				const statusMap = {
+					0: '已取消',
+					1: '待支付', 
+					2: '已支付',
+					3: '已完成'
+				};
+				return statusMap[statusId] || '未知状态';
 			},
 			// 获取状态图标
 			getStatusIcon(statusId) {
-				if (statusId === 1) return '⚪️';
-				if (statusId === 2) return '✅';
-				if (statusId === 3) return '✅';
-				return '📋'; // 默认图标
+				// 根据新的状态定义：0:已取消，1:待支付，2:已支付，3:已完成
+				const iconMap = {
+					0: '❌', // 已取消
+					1: '⚪️', // 待支付
+					2: '✅', // 已支付
+					3: '✅'  // 已完成
+				};
+				return iconMap[statusId] || '📋'; // 默认图标
 			},
 			// 获取状态数量
 			getStatusCount(statusId) {
 				if (statusId === 0) {
 					return this.appointments.length;
+				} else if (statusId === -1) {
+					// 已取消状态（status为0）
+					return this.appointments.filter(item => item.status === 0).length;
 				} else {
 					return this.appointments.filter(item => item.status === statusId).length;
 				}
@@ -242,32 +274,32 @@ export default {
 							
 							// 使用API函数调用
 							cancelAppointment(appointment.id).then(res => {
-								console.log('取消预约响应：', res);
+									console.log('取消预约响应：', res);
 								if (res && res.code === 200) {
-									// 更新本地数据
-									const index = this.appointments.findIndex(item => item.id === appointment.id);
-									if (index !== -1) {
+										// 更新本地数据
+										const index = this.appointments.findIndex(item => item.id === appointment.id);
+										if (index !== -1) {
 										this.appointments[index].status = 0; // 0表示已取消
-										// 重新筛选
-										this.switchStatus(this.currentStatus);
-									}
-									
-									uni.showToast({
-										title: '取消预约成功',
-										icon: 'success'
-									});
-								} else {
-									uni.showToast({
+											// 重新筛选
+											this.switchStatus(this.currentStatus);
+										}
+										
+										uni.showToast({
+											title: '取消预约成功',
+											icon: 'success'
+										});
+									} else {
+										uni.showToast({
 										title: res.msg || '取消预约失败',
+											icon: 'none'
+										});
+									}
+							}).catch(err => {
+									console.error('取消预约失败：', err);
+									uni.showToast({
+										title: '网络错误，请重试',
 										icon: 'none'
 									});
-								}
-							}).catch(err => {
-								console.error('取消预约失败：', err);
-								uni.showToast({
-									title: '网络错误，请重试',
-									icon: 'none'
-								});
 							});
 						}
 					}
@@ -302,263 +334,307 @@ export default {
 	}
 </script>
 
-<style lang="scss">
-@font-face {
-	font-family: texticons;
-	font-weight: normal;
-	font-style: normal;
-	src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
-}
-
+<style lang="scss" scoped>
 .content {
-	background-color: #f5f5f5;
+  background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
 	min-height: 100vh;
-	position: relative;
-	overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 40rpx;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: flow 20s linear infinite;
+    pointer-events: none;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+    animation: shimmer 8s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
 
 .floating-shapes {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: -1;
-	
-	.shape {
-		position: absolute;
-		background: linear-gradient(45deg, #4facfe, #00f2fe);
-		border-radius: 50%;
-		opacity: 0.1;
-		animation: float 10s infinite ease-in-out;
-	}
-	
-	.shape-1 {
-		width: 100px;
-		height: 100px;
-		top: 10%;
-		left: 10%;
-	}
-	
-	.shape-2 {
-		width: 150px;
-		height: 150px;
-		bottom: 20%;
-		right: 20%;
-	}
-	
-	.shape-3 {
-		width: 200px;
-		height: 200px;
-		top: 50%;
-		left: 30%;
-	}
-	
-	.shape-4 {
-		width: 120px;
-		height: 120px;
-		bottom: 10%;
-		right: 50%;
-	}
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+
+  .shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    filter: blur(50px);
+    animation: float 15s infinite ease-in-out;
+    transition: all 0.3s ease;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    &.shape-1 {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-delay: -2s;
+    }
+    &.shape-2 {
+      width: 150px;
+      height: 150px;
+      top: 70%;
+      left: 30%;
+      animation-delay: -5s;
+    }
+    &.shape-3 {
+      width: 120px;
+      height: 120px;
+      top: 20%;
+      right: 20%;
+      animation-delay: -8s;
+    }
+    &.shape-4 {
+      width: 180px;
+      height: 180px;
+      bottom: 10%;
+      right: 50%;
+      animation-delay: -10s;
+    }
+  }
 }
 
 .main-content {
-	padding: 20rpx;
+  padding: 20rpx 40rpx 0 40rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .page-header {
 	text-align: center;
-	padding: 40rpx 0;
-	
-	.header-icon {
-		font-size: 80rpx;
-		color: #1296db;
-		margin-bottom: 10rpx;
-	}
-	
-	.header-title {
-		font-size: 40rpx;
-		font-weight: bold;
-		color: #333333;
-		margin-bottom: 10rpx;
-	}
-	
-	.header-desc {
-		font-size: 24rpx;
-		color: #666666;
+  margin-bottom: 40rpx;
+  animation: fadeInDown 0.8s ease-out;
+  
+  .header-icon {
+    font-size: 80rpx;
+    margin-bottom: 20rpx;
+    animation: bounce 2s infinite;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+  
+  .header-title {
+    font-size: 44rpx;
+    font-weight: bold;
+		color: #ffffff;
+    margin-bottom: 16rpx;
+    text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .header-desc {
+    font-size: 28rpx;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
 	}
 }
 
 .status-tabs {
 	display: flex;
-	background-color: #ffffff;
-	padding: 0 20rpx;
-	margin-bottom: 20rpx;
-	box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-	border-radius: 10rpx;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50rpx;
+  padding: 15rpx 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  animation: slideInDown 0.8s ease-out;
+  flex-wrap: wrap;
+  gap: 10rpx;
 	
 	.tab-item {
-		flex: 1;
-		height: 80rpx;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		position: relative;
-		font-size: 28rpx;
+    margin: 0 5rpx;
+    padding: 12rpx 20rpx;
+    border-radius: 25rpx;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: fit-content;
+    
+    .tab-icon {
+      font-size: 22rpx;
+      margin-right: 8rpx;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-text {
+      font-size: 24rpx;
 		color: #666666;
-		
-		.tab-icon {
-			font-size: 36rpx;
-			margin-right: 10rpx;
-		}
-		
-		.tab-text {
-			font-weight: bold;
-		}
-		
-		.tab-count {
-			position: absolute;
-			top: 0;
-			right: 0;
-			background-color: #1296db;
-			color: #ffffff;
-			font-size: 20rpx;
-			font-weight: bold;
-			border-radius: 20rpx;
-			padding: 4rpx 10rpx;
-			transform: translate(50%, -50%);
-		}
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-count {
+      background: linear-gradient(135deg, #ff7675, #fd79a8);
+      color: #ffffff;
+      font-size: 18rpx;
+      padding: 3rpx 6rpx;
+      border-radius: 8rpx;
+      margin-left: 6rpx;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    &:hover {
+      background: rgba(9, 132, 227, 0.1);
+      transform: translateY(-2rpx);
+    }
 		
 		&.active {
-			color: #1296db;
-			font-weight: bold;
-			
-			&::after {
-				content: '';
-				position: absolute;
-				left: 50%;
-				bottom: 0;
-				transform: translateX(-50%);
-				width: 60rpx;
-				height: 4rpx;
-				background-color: #1296db;
-				border-radius: 2rpx;
+      background: linear-gradient(135deg, #0984e3, #74b9ff);
+      box-shadow: 0 6rpx 20rpx rgba(9, 132, 227, 0.3);
+      
+      .tab-icon, .tab-text {
+        color: #ffffff;
+      }
+      
+      .tab-count {
+        background: rgba(255, 255, 255, 0.2);
 			}
 		}
 	}
 }
 
 .appointment-list {
-	background-color: #ffffff;
-	border-radius: 15rpx;
-	box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
-	padding: 20rpx;
+  animation: fadeInUp 0.8s ease-out;
 	
 	.appointment-item {
-		border-bottom: 1rpx solid #eeeeee;
-		padding: 20rpx 0;
-		transition: all 0.3s ease;
-		
-		&:last-child {
-			border-bottom: none;
-		}
-		
-		&:hover {
-			transform: translateY(-5rpx);
-			box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.1);
-		}
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24rpx;
+		padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10rpx);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4rpx);
+      box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+    }
 		
 		.appointment-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 15rpx;
+      margin-bottom: 25rpx;
+      
+      .hospital-info {
+        display: flex;
+        align-items: center;
+        
+        .hospital-icon {
+          font-size: 32rpx;
+          margin-right: 15rpx;
+          color: #0984e3;
+        }
 			
-			.hospital-info {
-				display: flex;
-				align-items: center;
-				
-				.hospital-icon {
-					font-size: 36rpx;
-					color: #1296db;
-					margin-right: 10rpx;
-				}
-				
-				.hospital-name {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #333333;
-				}
-			}
-			
-			.status-badge {
-				display: flex;
-				align-items: center;
-				padding: 8rpx 15rpx;
-				border-radius: 20rpx;
-				font-size: 24rpx;
+			.hospital-name {
+				font-size: 32rpx;
 				font-weight: bold;
+				color: #333333;
+			}
+      }
+      
+      .status-badge {
+        padding: 8rpx 16rpx;
+        border-radius: 20rpx;
+        display: flex;
+        align-items: center;
+				font-size: 24rpx;
+        font-weight: bold;
+        transition: all 0.3s ease;
 				
-				.status-icon {
-					font-size: 28rpx;
-					margin-right: 8rpx;
-				}
-				
-				&.status-0 {
-					background-color: #ff9800;
-					color: #ffffff;
+        .status-icon {
+          margin-right: 8rpx;
 				}
 				
 				&.status-1 {
-					background-color: #1296db;
-					color: #ffffff;
+          background: linear-gradient(135deg, #ffa726, #ff9800);
+          color: #ffffff;
 				}
 				
 				&.status-2 {
-					background-color: #42b983;
-					color: #ffffff;
+          background: linear-gradient(135deg, #66bb6a, #4caf50);
+          color: #ffffff;
 				}
 				
 				&.status-3 {
-					background-color: #42b983;
-					color: #ffffff;
+          background: linear-gradient(135deg, #42a5f5, #2196f3);
+          color: #ffffff;
 				}
 				
-				&.status-4 {
-					background-color: #999999;
-					color: #ffffff;
+				&.status-0 {
+          background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+          color: #ffffff;
 				}
 			}
 		}
 		
-		.appointment-content {
-			margin-bottom: 15rpx;
-			
-			.info-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 15rpx;
-				margin-bottom: 15rpx;
-			}
-			
-			.info-item {
-				display: flex;
-				align-items: center;
-				font-size: 28rpx;
-				
+    .appointment-content {
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20rpx;
+        margin-bottom: 25rpx;
+        
+        .info-item {
 				.info-label {
-					width: 180rpx;
+            font-size: 24rpx;
 					color: #666666;
-					margin-right: 10rpx;
+            margin-bottom: 8rpx;
+            display: block;
 				}
 				
 				.info-value {
-					flex: 1;
+            font-size: 26rpx;
 					color: #333333;
-					font-weight: bold;
+            font-weight: 500;
 					
 					&.price {
-						color: #ff6b35;
+              color: #ff5a5f;
+						font-weight: bold;
 					}
 				}
 			}
@@ -566,60 +642,64 @@ export default {
 		
 		.appointment-actions {
 			display: flex;
-			justify-content: flex-end;
+        gap: 15rpx;
 			
 			.action-btn {
-				display: flex;
-				align-items: center;
-				font-size: 28rpx;
-				padding: 0 30rpx;
-				height: 60rpx;
-				line-height: 60rpx;
-				border-radius: 30rpx;
-				margin-left: 20rpx;
-				transition: all 0.3s ease;
-				
-				&.cancel-btn {
-					background-color: #ff6b35;
+          flex: 1;
+          height: 70rpx;
+          border-radius: 35rpx;
+				font-size: 24rpx;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          border: none;
+          
+          .btn-icon {
+            font-size: 20rpx;
+            margin-right: 8rpx;
+          }
+          
+          &.cancel-btn {
+            background: linear-gradient(135deg, #ff7675, #fd79a8);
+            color: #ffffff;
+            
+            &:hover {
+              transform: translateY(-2rpx);
+              box-shadow: 0 6rpx 20rpx rgba(255, 118, 117, 0.3);
+            }
+          }
+          
+          &.report-btn {
+            background: linear-gradient(135deg, #00b894, #00cec9);
 					color: #ffffff;
-					
-					&:hover {
-						background-color: #e65c28;
-						transform: translateY(-3rpx);
-					}
+            
+            &:hover {
+              transform: translateY(-2rpx);
+              box-shadow: 0 6rpx 20rpx rgba(0, 184, 148, 0.3);
+            }
 				}
 				
-				&.report-btn {
-					background-color: #42b983;
-					color: #ffffff;
-					
-					&:hover {
-						background-color: #36a070;
-						transform: translateY(-3rpx);
-					}
-				}
-				
-				&.detail-btn {
-					background-color: #1296db;
-					color: #ffffff;
-					
-					&:hover {
-						background-color: #0d7ac6;
-						transform: translateY(-3rpx);
-					}
-				}
-				
-				.btn-icon {
-					font-size: 28rpx;
-					margin-right: 10rpx;
-				}
-				
-				.btn-text {
-					font-weight: bold;
-				}
-				
-				&::after {
-					border: none;
+          &.wait-btn {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: #ffffff;
+            
+            &:hover {
+              transform: translateY(-2rpx);
+              box-shadow: 0 6rpx 20rpx rgba(253, 203, 110, 0.3);
+            }
+          }
+          
+          &.detail-btn {
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            color: #ffffff;
+            
+            &:hover {
+              transform: translateY(-2rpx);
+              box-shadow: 0 6rpx 20rpx rgba(9, 132, 227, 0.3);
+            }
+          }
 				}
 			}
 		}
@@ -627,70 +707,156 @@ export default {
 }
 
 .empty-state {
-	text-align: center;
-	padding: 100rpx 0;
+  text-align: center;
+  padding: 80rpx 40rpx;
+  animation: fadeInUp 0.8s ease-out;
 	
-	.empty-icon {
-		font-size: 100rpx;
-		color: #1296db;
+  .empty-icon {
+    font-size: 120rpx;
 		margin-bottom: 30rpx;
+    animation: bounce 2s infinite;
+    transition: all 0.3s ease;
 	}
 	
-	.empty-title {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: #333333;
-		margin-bottom: 10rpx;
-	}
-	
-	.empty-desc {
-		font-size: 24rpx;
-		color: #666666;
+  .empty-title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 20rpx;
+  }
+  
+  .empty-desc {
+		font-size: 28rpx;
+    color: #666666;
 		margin-bottom: 40rpx;
+    line-height: 1.5;
 	}
 	
 	.make-appointment-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: linear-gradient(45deg, #4facfe, #00f2fe);
+    background: linear-gradient(135deg, #0984e3, #74b9ff);
 		color: #ffffff;
+    border: none;
+    border-radius: 50rpx;
+    padding: 20rpx 40rpx;
 		font-size: 28rpx;
-		padding: 0 40rpx;
-		height: 80rpx;
-		line-height: 80rpx;
-		border-radius: 40rpx;
-		box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.2);
-		
-		&:hover {
-			transform: translateY(-5rpx);
-			box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.3);
-		}
-		
-		.btn-icon {
-			font-size: 36rpx;
-			margin-right: 10rpx;
-		}
-		
-		.btn-text {
-			font-weight: bold;
-		}
-		
-		&::after {
-			border: none;
-		}
-	}
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+    
+    &:hover {
+      transform: translateY(-4rpx);
+      box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.4);
+    }
+    
+    .btn-icon {
+      font-size: 24rpx;
+      margin-right: 10rpx;
+    }
+  }
 }
 
+// 动画定义
 @keyframes float {
-	0% {
-		transform: translateY(0) translateX(0) rotate(0deg);
-	}
-	50% {
-		transform: translateY(-10px) translateX(10px) rotate(5deg);
-	}
-	100% {
-		transform: translateY(0) translateX(0) rotate(0deg);
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-20px) translateX(20px) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(20px) translateX(-20px) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes flow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10rpx);
+  }
+  60% {
+    transform: translateY(-5rpx);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+		}
+  to {
+    opacity: 1;
+    transform: translateY(0);
 	}
 }
 </style> 

@@ -153,7 +153,7 @@
 </template>
 
 <script>
-	import { getCurrentUserReportItemPage, getReportItemConclusion } from '@/api/report'
+	import { reportApi } from '@/utils/api.js'
 	
 	export default {
 		data() {
@@ -197,93 +197,84 @@
 			async getReportDetail() {
 				this.loading = true;
 				try {
-					// 使用现有的后端接口获取报告项列表
-					const query = {
-						pageIndex: 1,
-						pageSize: 100,
-						reportId: this.reportId
-					};
+					// 获取报告检查项列表
+					const response = await uni.request({
+						url: reportApi.getAppReportItemPage,
+						method: 'POST',
+						data: {
+							pageNum: 1,
+							pageSize: 100,
+							orderId: this.reportId
+						}
+					});
 					
-					const res = await getCurrentUserReportItemPage(query);
+					if (response.statusCode === 200 && response.data.code === 200) {
+						const reportItems = response.data.data.records || [];
+						this.examResults = reportItems.map(item => {
+							// 解析检查结论
+							let conclusion = null;
+							if (item.conclusion) {
+								try {
+									// 尝试解析JSON格式的结论
+									conclusion = JSON.parse(item.conclusion);
+								} catch (e) {
+									// 如果不是JSON格式，直接使用字符串
+									conclusion = item.conclusion;
+								}
+							}
+							
+							return {
+								id: item.id,
+								name: item.itemName || '检查项目',
+								value: item.value || '待检查',
+						unit: item.unit || '',
+						referenceRange: item.referenceRange || '',
+						description: item.description || '',
+								conclusion: conclusion,
+						advice: item.advice || '',
+								isAbnormal: item.isAbnormal || false,
+						expanded: false
+							};
+						});
+						
+						// 更新报告基本信息
+						this.updateReportInfo();
 					
-					if (res && res.success && res.data && res.data.list) {
-						// 更新报告基本信息（这里需要根据实际数据结构调整）
-						this.reportInfo = {
-							packageName: '体检报告',
-							reportDate: new Date().toLocaleDateString(),
-							hospitalName: '体检医院',
-							personName: '体检人',
-							gender: '男',
-							age: 30,
-							examDate: new Date().toLocaleDateString(),
-							abnormalCount: 0,
-							totalCount: res.data.list.length,
-							adviceCount: 0,
-							adviceList: []
-						};
-						
-						// 更新检查结果数据
-						this.examResults = res.data.list.map(item => ({
-							id: item.id,
-							name: item.checkitemName || '',
-							value: item.result || '',
-							unit: item.unit || '',
-							referenceRange: item.referenceRange || '',
-							isAbnormal: item.isAbnormal || false,
-							description: item.description || '',
-							advice: item.advice || '',
-							expanded: false,
-							conclusion: '等待医生检测'
-						}));
-						
-						// 获取检查项结论
-						await this.loadCheckitemConclusions();
-						
-						// 初始化过滤结果
-						this.filteredResults = this.examResults;
+						// 初始化显示所有检查结果
+					this.filteredResults = this.examResults;
+					} else {
+						throw new Error(response.data.msg || '获取报告详情失败');
 					}
-					
 				} catch (error) {
 					console.error('获取报告详情失败:', error);
 					uni.showToast({
-						title: '获取报告详情失败',
-						icon: 'none'
+						title: error.message || '获取报告详情失败',
+						icon: 'none',
+						duration: 2000
 					});
 				} finally {
 					this.loading = false;
 				}
 			},
 			
-			// 加载检查项结论
-			async loadCheckitemConclusions() {
-				for (let i = 0; i < this.examResults.length; i++) {
-					const result = this.examResults[i];
-					if (result.id) {
-						try {
-							const conclusionRes = await getReportItemConclusion(result.id);
-							if (conclusionRes && conclusionRes.success) {
-								if (conclusionRes.data && conclusionRes.data !== '等待医生检测') {
-									// 解析JSON格式的结论
-									try {
-										const conclusionData = JSON.parse(conclusionRes.data);
-										if (Array.isArray(conclusionData)) {
-											result.conclusion = conclusionData;
-										} else {
-											result.conclusion = conclusionRes.data;
-										}
-									} catch (e) {
-										result.conclusion = conclusionRes.data;
-									}
-								} else {
-									result.conclusion = '等待医生检测';
-								}
-							}
-						} catch (error) {
-							console.error('获取检查项结论失败:', error);
-							result.conclusion = '等待医生检测';
-						}
-					}
-				}
+			// 更新报告基本信息
+			updateReportInfo() {
+				const abnormalCount = this.examResults.filter(item => item.isAbnormal).length;
+				const totalCount = this.examResults.length;
+				
+				this.reportInfo = {
+					packageName: '体检报告',
+					reportDate: new Date().toLocaleDateString(),
+					hospitalName: '体检医院',
+					personName: '体检人',
+					gender: '男',
+					age: 30,
+					examDate: new Date().toLocaleDateString(),
+					abnormalCount: abnormalCount,
+					totalCount: totalCount,
+					adviceCount: 0,
+					adviceList: []
+				};
 			},
 			// 切换筛选条件
 			switchFilter(filter) {

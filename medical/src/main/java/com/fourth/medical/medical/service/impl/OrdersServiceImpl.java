@@ -12,8 +12,10 @@ import com.fourth.medical.medical.dto.OrdersDto;
 import com.fourth.medical.medical.dto.AppOrdersDto;
 import com.fourth.medical.medical.entity.Orders;
 import com.fourth.medical.medical.entity.Setmeal;
+import com.fourth.medical.medical.entity.Checkitem;
 import com.fourth.medical.medical.mapper.OrdersMapper;
 import com.fourth.medical.medical.mapper.SetmealMapper;
+import com.fourth.medical.medical.mapper.CheckitemMapper;
 import com.fourth.medical.medical.query.OrdersQuery;
 import com.fourth.medical.medical.service.OrdersService;
 import com.fourth.medical.medical.vo.OrdersVo;
@@ -29,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * 体检预约订单 服务实现类
@@ -45,6 +48,9 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     
     @Autowired
     private SetmealMapper setmealMapper;
+    
+    @Autowired
+    private CheckitemMapper checkitemMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -154,33 +160,61 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 验证token并获取用户信息
         AppLoginVo appLoginVo = validateTokenAndGetUser(token);
         
-        // 获取套餐信息
-        Setmeal setmeal = setmealMapper.selectById(dto.getSetmealId());
-        if (setmeal == null) {
-            throw new BusinessException("套餐不存在");
-        }
-        
         // 创建订单
         Orders orders = new Orders();
         BeanUtils.copyProperties(dto, orders);
+        
         // 设置基本信息
         orders.setUserId(appLoginVo.getUserId());
         orders.setDoctorId(dto.getDoctorId()); // 设置医生ID
         orders.setTimeSlot(dto.getAppointmentTime()); // 设置时间段
         orders.setOrderNumber(generateOrderNumber());
-        orders.setPrice(setmeal.getPrice());
-        orders.setAmount(setmeal.getPrice()); // 设置订单金额
         orders.setStatus(1); // 1-待支付
         
-        // 处理检查项ID列表
+        // 设置患者信息
+        orders.setPatientName(dto.getPatientName());
+        orders.setPatientAge(dto.getPatientAge());
+        orders.setPatientGender(dto.getPatientGender());
+        orders.setPatientPhone(dto.getPatientPhone());
+        
+        // 处理套餐信息和价格
+        BigDecimal totalPrice = BigDecimal.ZERO;
         String checkitemIds = null;
-        if (dto.getCheckitemIds() != null && !dto.getCheckitemIds().isEmpty()) {
-            // 如果前端传入了自定义的检查项ID列表
-            checkitemIds = dto.getCheckitemIds();
-        } else if (setmeal.getCheckitemIds() != null && !setmeal.getCheckitemIds().isEmpty()) {
-            // 否则使用套餐中的检查项ID列表
-            checkitemIds = setmeal.getCheckitemIds();
+        
+        if (dto.getSetmealId() != null) {
+            // 套餐预约
+            Setmeal setmeal = setmealMapper.selectById(dto.getSetmealId());
+            if (setmeal == null) {
+                throw new BusinessException("套餐不存在");
+            }
+            orders.setSetmealId(dto.getSetmealId());
+        orders.setPrice(setmeal.getPrice());
+            orders.setAmount(setmeal.getPrice());
+            
+            // 使用套餐中的检查项ID列表
+            if (setmeal.getCheckitemIds() != null && !setmeal.getCheckitemIds().isEmpty()) {
+                checkitemIds = setmeal.getCheckitemIds();
+            }
+        } else {
+            // 普通项目预约
+            orders.setSetmealId(0L); // 套餐ID设为0表示普通项目预约
+            
+            // 计算检查项总价
+            if (dto.getCheckitemIds() != null && !dto.getCheckitemIds().isEmpty()) {
+                checkitemIds = dto.getCheckitemIds();
+                // 根据检查项ID计算总价
+                totalPrice = calculateCheckitemTotalPrice(checkitemIds);
+            }
+            
+            orders.setPrice(totalPrice);
+            orders.setAmount(totalPrice);
         }
+        
+        // 如果前端传入了自定义的检查项ID列表，优先使用前端的
+        if (dto.getCheckitemIds() != null && !dto.getCheckitemIds().isEmpty()) {
+            checkitemIds = dto.getCheckitemIds();
+        }
+        
         orders.setCheckitemIds(checkitemIds);
         
         // 保存订单
@@ -189,8 +223,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new BusinessException("创建预约失败");
         }
         
-        log.info("创建预约成功，订单ID: {}, 用户ID: {}, 检查项IDs: {}", 
-            orders.getId(), appLoginVo.getUserId(), checkitemIds);
+        log.info("创建预约成功，订单ID: {}, 用户ID: {}, 套餐ID: {}, 检查项IDs: {}", 
+            orders.getId(), appLoginVo.getUserId(), orders.getSetmealId(), checkitemIds);
         
         // 查询并返回创建的订单
         return ordersMapper.getAppOrdersById(orders.getId());
@@ -204,35 +238,53 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 验证token并获取用户信息
         AppLoginVo appLoginVo = validateTokenAndGetUser(token);
         
-        // 查询订单
+        // 获取订单详情
         Orders orders = getById(id);
         if (orders == null) {
             throw new BusinessException("预约订单不存在");
         }
         
-        // 验证订单所属
+        // 验证订单所属用户
         if (!orders.getUserId().equals(appLoginVo.getUserId())) {
             throw new BusinessException("无权操作此订单");
         }
         
-        // 检查订单状态
-        if (orders.getStatus() == 0) { // 0表示已取消
-            throw new BusinessException("订单已取消");
-        }
-        
-        if (orders.getStatus() == 2 || orders.getStatus() == 3) { // 2表示已支付，3表示已完成
-            throw new BusinessException("订单已完成，无法取消");
-        }
-        
-        // 更新订单状态为取消
-        orders.setStatus(0); // 0表示已取消
+        // 更新订单状态为已取消
+        orders.setStatus(0); // 0-已取消
         orders.setCancelTime(new Date());
         
         boolean result = updateById(orders);
-        if (result) {
-            log.info("取消预约成功，订单ID: {}, 用户ID: {}", id, appLoginVo.getUserId());
+        log.info("取消App预约结果：{}", result);
+        return result;
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean confirmPayment(Long id, String token) {
+        log.info("确认支付，id: {}, token: {}", id, token);
+        
+        // 验证token并获取用户信息
+        AppLoginVo appLoginVo = validateTokenAndGetUser(token);
+        
+        // 获取订单详情
+        Orders orders = getById(id);
+        if (orders == null) {
+            throw new BusinessException("预约订单不存在");
         }
         
+        // 验证订单所属用户
+        if (!orders.getUserId().equals(appLoginVo.getUserId())) {
+            throw new BusinessException("无权操作此订单");
+        }
+        
+        // 更新订单状态为已支付
+        orders.setStatus(2); // 2-已支付
+        orders.setPayTime(new Date());
+        orders.setPayType(1); // 1-支付宝（默认）
+        orders.setTransactionId("PAY" + System.currentTimeMillis()); // 生成交易号
+        
+        boolean result = updateById(orders);
+        log.info("确认支付结果：{}", result);
         return result;
     }
     
@@ -273,6 +325,63 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private String generateOrderNumber() {
         // 简单实现，实际可能需要更复杂的逻辑
         return "ORD" + System.currentTimeMillis();
+    }
+    
+    /**
+     * 根据检查项ID列表计算总价
+     *
+     * @param checkitemIds 检查项ID列表，逗号分隔
+     * @return 总价
+     */
+    private BigDecimal calculateCheckitemTotalPrice(String checkitemIds) {
+        if (StringUtils.isBlank(checkitemIds)) {
+            return BigDecimal.ZERO;
+        }
+        
+        try {
+            String[] ids = checkitemIds.split(",");
+            BigDecimal totalPrice = BigDecimal.ZERO;
+            
+            for (String idStr : ids) {
+                if (StringUtils.isNotBlank(idStr)) {
+                    Long checkitemId = Long.parseLong(idStr.trim());
+                    // 查询检查项价格
+                    BigDecimal price = getCheckitemPrice(checkitemId);
+                    if (price != null) {
+                        totalPrice = totalPrice.add(price);
+                    }
+                }
+            }
+            
+            log.info("计算检查项总价 - checkitemIds: {}, totalPrice: {}", checkitemIds, totalPrice);
+            return totalPrice;
+        } catch (Exception e) {
+            log.error("计算检查项总价失败 - checkitemIds: {}", checkitemIds, e);
+            return BigDecimal.ZERO;
+        }
+    }
+    
+    /**
+     * 获取检查项价格
+     *
+     * @param checkitemId 检查项ID
+     * @return 价格
+     */
+    private BigDecimal getCheckitemPrice(Long checkitemId) {
+        try {
+            // 查询数据库获取检查项价格
+            Checkitem checkitem = checkitemMapper.selectById(checkitemId);
+            if (checkitem != null && checkitem.getPrice() != null) {
+                log.info("获取检查项价格成功 - checkitemId: {}, price: {}", checkitemId, checkitem.getPrice());
+                return checkitem.getPrice();
+            } else {
+                log.warn("检查项不存在或价格为空 - checkitemId: {}", checkitemId);
+                return BigDecimal.ZERO;
+            }
+        } catch (Exception e) {
+            log.error("获取检查项价格失败 - checkitemId: {}", checkitemId, e);
+            return BigDecimal.ZERO;
+        }
     }
 
 }

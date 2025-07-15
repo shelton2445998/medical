@@ -105,14 +105,10 @@
 					<view class="package-items">
 						<view class="items-header">
 							<text class="items-title">检查项目</text>
-							<text class="items-count">{{item.checkItems.length}}项</text>
+							<text class="items-count">{{item.checkitemCount || 0}}项</text>
 						</view>
-						<view class="items-list">
-							<view class="item-tag" v-for="(checkitem, tagIndex) in item.checkItems.slice(0, 6)" :key="tagIndex">
-								<text class="item-name">{{checkitem.name}}</text>
-								<text class="item-desc" v-if="checkitem.description">({{checkitem.description}})</text>
-							</view>
-							<text class="item-more" v-if="item.checkItems.length > 6">+{{item.checkItems.length - 6}}项</text>
+						<view class="items-preview">
+							<text class="preview-text">点击详情查看具体检查项目</text>
 						</view>
 					</view>
 					
@@ -201,25 +197,30 @@
 				try {
 					const result = await get(packageApi.getPackageList, { pageIndex: 1, pageSize: 20 });
 					if (result && result.data && result.data.list) {
-						this.packages = result.data.list.map((item, index) => ({
-							id: item.id,
-							name: item.name,
-							type: item.type || 1,
-							price: item.price || 0,
-							discountPrice: item.discountPrice || item.price || 0,
-							description: item.description || '',
-							checkItems: item.items || [],
-							checkitemIds: item.checkitemIds || '',
-							suitableCrowd: item.suitableCrowd || '适合一般人群',
-							appointmentNotice: item.appointmentNotice || '请按医院要求准备',
-							sold: item.sold || 0,
-							recommend: item.recommend || false,
-							popular: item.popular || false,
-							new: item.new || false
-						}));
-						
-						// 获取检查项详情
-						await this.loadCheckitemDetails();
+						this.packages = result.data.list.map((item, index) => {
+							// 计算检查项目数量
+							let checkitemCount = 0;
+							if (item.checkitemIds) {
+								checkitemCount = item.checkitemIds.split(',').length;
+							}
+							
+							return {
+								id: item.id,
+								name: item.name,
+								type: item.type || 1,
+								price: item.price || 0,
+								discountPrice: item.discountPrice || item.price || 0,
+								description: item.description || '',
+								checkitemIds: item.checkitemIds || '',
+								checkitemCount: checkitemCount,
+								suitableCrowd: item.suitableCrowd || '适合一般人群',
+								appointmentNotice: item.appointmentNotice || '请按医院要求准备',
+								sold: item.sold || 0,
+								recommend: item.recommend || false,
+								popular: item.popular || false,
+								new: item.new || false
+							};
+						});
 					} else {
 						this.packages = [];
 					}
@@ -229,38 +230,7 @@
 				}
 			},
 			
-			// 加载检查项详情
-			async loadCheckitemDetails() {
-				for (let i = 0; i < this.packages.length; i++) {
-					const packageItem = this.packages[i];
-					if (packageItem.checkitemIds) {
-						try {
-							// 分割检查项ID字符串
-							const checkitemIds = packageItem.checkitemIds.split(',').map(id => id.trim());
-							const checkItems = [];
-							
-							// 逐个获取检查项详情
-							for (const id of checkitemIds) {
-								if (id) {
-									const checkitemResult = await getCheckitemById(id);
-									if (checkitemResult && checkitemResult.success && checkitemResult.data) {
-										checkItems.push({
-											id: checkitemResult.data.id,
-											name: checkitemResult.data.name,
-											description: checkitemResult.data.description,
-											price: checkitemResult.data.price
-										});
-									}
-								}
-							}
-							
-							packageItem.checkItems = checkItems;
-						} catch (error) {
-							console.error('获取检查项详情失败:', error);
-						}
-					}
-				}
-			},
+
 			// 切换套餐类型
 			switchType(typeId) {
 				this.currentType = typeId;
@@ -306,8 +276,7 @@
 					const keyword = this.searchKeyword.toLowerCase();
 					filtered = filtered.filter(item => 
 						item.name.toLowerCase().includes(keyword) ||
-						item.description.toLowerCase().includes(keyword) ||
-						item.checkItems.some(tag => tag.toLowerCase().includes(keyword))
+						item.description.toLowerCase().includes(keyword)
 					);
 				}
 				
@@ -482,7 +451,7 @@
 }
 
 .main-content {
-	padding: 40rpx 40rpx 0 40rpx;
+  padding: 20rpx 40rpx 0 40rpx;
 }
 
 .page-header {
@@ -990,58 +959,22 @@
 				}
 			}
 			
-			.items-list {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 10rpx;
+			.items-preview {
+				margin-top: 15rpx;
 				
-				.item-tag {
-					font-size: 24rpx;
+				.preview-text {
+					font-size: 26rpx;
 					color: #666666;
-					background-color: #f5f5f5;
-					padding: 8rpx 16rpx;
-					border-radius: 30rpx;
+					text-align: center;
+					padding: 20rpx;
+					background: rgba(116, 185, 255, 0.05);
+					border-radius: 12rpx;
+					border: 2rpx dashed rgba(116, 185, 255, 0.2);
 					transition: all 0.3s ease;
-					cursor: pointer;
-					display: flex;
-					align-items: center;
-					gap: 8rpx;
-					
-					.item-name {
-						font-weight: 500;
-					}
-					
-					.item-desc {
-						font-size: 20rpx;
-						color: #0984e3;
-						opacity: 0.8;
-					}
 					
 					&:hover {
-						background-color: #0984e3;
-						color: #ffffff;
-						transform: scale(1.1) translateY(-2rpx);
-						box-shadow: 0 4rpx 12rpx rgba(9, 132, 227, 0.3);
-						
-						.item-category {
-							color: rgba(255, 255, 255, 0.8);
-						}
-					}
-				}
-				
-				.item-more {
-					font-size: 24rpx;
-					color: #0984e3;
-					background-color: rgba(9, 132, 227, 0.1);
-					padding: 8rpx 16rpx;
-					border-radius: 30rpx;
-					transition: all 0.3s ease;
-					cursor: pointer;
-					
-					&:hover {
-						background-color: #0984e3;
-						color: #ffffff;
-						transform: scale(1.1);
+						background: rgba(116, 185, 255, 0.1);
+						border-color: rgba(116, 185, 255, 0.3);
 					}
 				}
 			}

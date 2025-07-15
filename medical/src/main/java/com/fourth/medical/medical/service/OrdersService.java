@@ -103,5 +103,15 @@ public interface OrdersService extends IService<Orders> {
      * @throws Exception
      */
     boolean cancelAppOrders(Long id, String token);
+    
+    /**
+     * 确认支付
+     *
+     * @param id
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    boolean confirmPayment(Long id, String token);
 
 }

@@ -170,4 +170,23 @@ public class AppOrdersController {
         return ApiResult.result(result);
     }
 
+    /**
+     * 确认支付
+     *
+     * @param id
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @Operation(summary = "确认支付")
+    @PutMapping("/confirmPayment/{id}")
+    public ApiResult confirmPayment(@PathVariable Long id, HttpServletRequest request) {
+        log.info("确认支付：{}", id);
+        // 从请求中获取token
+        String token = TokenUtil.getToken(request);
+        log.info("获取到token: {}", token);
+        
+        boolean result = ordersService.confirmPayment(id, token);
+        return ApiResult.result(result);
+    }
 }
