@@ -253,9 +253,9 @@
 			},
 			// 查看报告详情
 			viewReport(report) {
-				// 传递体检人、体检医院、体检时间、patientGender、patientAge等参数
+				// 传递reportId等参数
 				const paramsObj = {
-					id: report.orderId,
+					id: report.id, // 这里确保是report.id
 					personName: report.personName || '',
 					hospitalName: report.hospitalName || '',
 					examDate: report.examDate || '',

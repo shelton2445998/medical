@@ -132,3 +132,14 @@ export function getAppointmentDetail(id) {
   });
 }
 
+/**
+ * 获取App体检报告检查项信息详情
+ * @param {String} id 检查项ID
+ * @returns {Promise} 返回检查项详情
+ */
+export function getAppReportItem(id) {
+  return request({
+    url: `${API_BASE_URL}/app/reportItem/getAppReportItem/${id}`,
+    method: 'post'
+  });
+}
