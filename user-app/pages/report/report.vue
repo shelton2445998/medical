@@ -2,26 +2,29 @@
 	<view class="content">
 		<!-- 报告列表 -->
 		<view class="report-list" v-if="reportList.length > 0">
-			<view class="report-item" v-for="(item, index) in reportList" :key="index">
-				<view class="report-header">
-					<text class="report-title">{{item.packageName}}</text>
+			<view class="report-item beautify-report-item" v-for="(item, index) in reportList" :key="index">
+				<view class="report-header beautify-header">
+					<view class="title-center-group">
+						<!-- <text class="package-icon">📄</text> -->
+						<text class="report-title">{{item.packageName}}</text>
+					</view>
 					<text class="report-date">{{item.reportDate}}</text>
 				</view>
-				<view class="report-info">
-					<view class="info-row">
-						<text class="info-label">体检医院：</text>
+				<view class="report-info beautify-info-list">
+					<view class="info-row beautify-info-item">
+						<text class="info-label">体检医院</text>
 						<text class="info-value">{{item.hospitalName}}</text>
 					</view>
-					<view class="info-row">
-						<text class="info-label">体检人：</text>
+					<view class="info-row beautify-info-item">
+						<text class="info-label">体检人</text>
 						<text class="info-value">{{item.personName}}</text>
 					</view>
-					<view class="info-row">
-						<text class="info-label">体检时间：</text>
+					<view class="info-row beautify-info-item">
+						<text class="info-label">体检时间</text>
 						<text class="info-value">{{item.examDate}}</text>
 					</view>
 				</view>
-				<view class="report-summary">
+				<view class="report-summary beautify-summary">
 					<view class="summary-item" :class="{'abnormal': item.abnormalCount > 0}">
 						<text class="summary-value">{{item.abnormalCount}}</text>
 						<text class="summary-label">异常指标</text>
@@ -31,11 +34,11 @@
 						<text class="summary-label">检查项目</text>
 					</view>
 					<view class="summary-item">
-						<text class="summary-value">{{item.adviceCount}}</text>
-						<text class="summary-label">健康建议</text>
+						<text class="summary-value">{{item.finishedCount}}</text>
+						<text class="summary-label">完成项目</text>
 					</view>
 				</view>
-				<view class="report-actions">
+				<view class="report-actions beautify-actions">
 					<button class="action-btn" @click.stop="shareReport(item)">
 					  <image src="/static/icon/share.png" mode="aspectFit" class="btn-icon"></image>
 					  <text>分享</text>
@@ -144,7 +147,7 @@
 										const appointmentRes = await getAppointmentDetail(item.orderId);
 										console.log('预约详情返回:', appointmentRes);
 										if (appointmentRes && appointmentRes.success && appointmentRes.data) {
-											packageName = appointmentRes.data.setmealName || '未命名套餐';
+											packageName = appointmentRes.data.setmealName || '定制套餐';
 
 											// 使用预约详情中的医院和体检时间
 											return {
@@ -161,11 +164,12 @@
 												totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
 												adviceCount: item.adviceCount || 0,
 												patientGender: appointmentRes.data.patientGender || '',
-												patientAge: appointmentRes.data.patientAge || ''
+												patientAge: appointmentRes.data.patientAge || '',
+												finishedCount: 0 // 新增统计 finishedCount
 											};
 										} else {
 											console.warn('预约详情返回数据格式异常:', appointmentRes);
-											packageName = '未命名套餐';
+											packageName = '定制套餐';
 										}
 									} catch (error) {
 										console.error('获取预约详情失败，orderId:', item.orderId, '错误:', error);
@@ -176,7 +180,7 @@
 											return {
 												id: item.id,
 												orderId: item.orderId || '',
-												packageName: '未命名套餐',
+												packageName: '定制套餐',
 												reportDate: item.reportDate || item.createTime || '',
 												hospitalName: item.hospitalName || '',
 												personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
@@ -185,13 +189,31 @@
 												totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
 												adviceCount: item.adviceCount || 0,
 												patientGender: '',
-												patientAge: ''
+												patientAge: '',
+												finishedCount: 0 // 新增统计 finishedCount
 											};
 										}
 										packageName = '未命名套餐';
 									}
 								} else if (!packageName) {
 									packageName = '未命名套餐';
+								}
+								
+								// 在 getReportList 处理每个报告时，异步获取每个报告的明细并统计 conclusion
+								let finishedCount = 0;
+								// 需要调用接口获取每个报告的所有项目明细
+								try {
+									// 假设有 getAppReportItemList(reportId) 返回该报告所有项目明细
+									if (item.id) {
+										const detailRes = await this.$api?.getAppReportItemList?.(item.id);
+										if (detailRes && detailRes.success && Array.isArray(detailRes.data)) {
+											finishedCount = detailRes.data.filter(
+												d => d.conclusion && d.conclusion !== '体检结果正在生成'
+											).length;
+										}
+									}
+								} catch (e) {
+									finishedCount = 0;
 								}
 								
 								return {
@@ -206,7 +228,8 @@
 									totalCount: (item.checkitemIds ? item.checkitemIds.split(',').filter(id => id.trim() !== '').length : 0),
 									adviceCount: item.adviceCount || 0,
 									patientGender: '',
-									patientAge: ''
+									patientAge: '',
+									finishedCount: finishedCount // 新增统计 finishedCount
 								};
 							})
 						);
@@ -455,6 +478,140 @@
 		line-height: 80rpx;
 		border-radius: 40rpx;
 		
+		&::after {
+			border: none;
+		}
+	}
+}
+
+.beautify-report-item {
+	box-shadow: 0 6rpx 32rpx rgba(18, 150, 219, 0.08), 0 1rpx 4rpx rgba(0,0,0,0.04);
+	border-radius: 18rpx;
+	padding: 36rpx 28rpx;
+	margin-bottom: 28rpx;
+}
+.beautify-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 18rpx;
+	.title-center-group {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.package-icon {
+		display: none;
+	}
+	.report-title {
+		font-size: 52rpx;
+		font-weight: 700;
+		color: #1296db;
+		letter-spacing: 1rpx;
+	}
+	.report-date {
+		font-size: 26rpx;
+		color: #999;
+		font-weight: 400;
+		margin-top: 4rpx;
+		text-align: right;
+		align-self: flex-end;
+		width: 100%;
+	}
+}
+.beautify-info-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 10rpx 0 0 0;
+	.beautify-info-item {
+		padding: 18rpx 0 12rpx 0;
+		border-bottom: 1px solid #f0f3fa;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		.info-label {
+			font-size: 24rpx;
+			color: #999;
+			font-weight: 400;
+			margin-bottom: 4rpx;
+		}
+		.info-value {
+			font-size: 30rpx;
+			color: #222;
+			font-weight: 600;
+			word-break: break-all;
+		}
+	}
+	.beautify-info-item:last-child {
+		border-bottom: none;
+	}
+}
+.beautify-summary {
+	display: flex;
+	background: #f3f8fd;
+	border-radius: 12rpx;
+	padding: 24rpx 0;
+	box-shadow: 0 2rpx 8rpx rgba(18, 150, 219, 0.04);
+	margin-bottom: 18rpx;
+	.summary-item {
+		flex: 1;
+		text-align: center;
+		position: relative;
+		&:not(:last-child)::after {
+			content: '';
+			position: absolute;
+			right: 0;
+			top: 20%;
+			height: 60%;
+			width: 1px;
+			background: #e3eaf2;
+		}
+		&.abnormal .summary-value {
+			color: #ff5a5f;
+		}
+		.summary-value {
+			font-size: 40rpx;
+			font-weight: 700;
+			display: block;
+			margin-bottom: 6rpx;
+		}
+		.summary-label {
+			font-size: 26rpx;
+			color: #888;
+		}
+	}
+}
+.beautify-actions {
+	display: flex;
+	justify-content: flex-end;
+	.action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		padding: 0 24rpx;
+		height: 72rpx;
+		line-height: 1;
+		border-radius: 36rpx;
+		margin-left: 18rpx;
+		background: #f3f8fd;
+		color: #1296db;
+		font-weight: 700;
+		box-shadow: 0 1rpx 4rpx rgba(18, 150, 219, 0.04);
+		transition: background 0.2s, color 0.2s;
+		.iconfont {
+			font-size: 32rpx;
+			margin-right: 8rpx;
+			font-family: texticons;
+		}
+		&.primary {
+			background: linear-gradient(90deg, #1296db 0%, #6ec6ff 100%);
+			color: #fff;
+		}
+		&:active {
+			background: #e0e7ff;
+		}
 		&::after {
 			border: none;
 		}
