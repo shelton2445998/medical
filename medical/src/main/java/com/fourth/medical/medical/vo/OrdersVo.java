@@ -82,9 +82,6 @@ public class OrdersVo implements Serializable {
     @Schema(description = "患者性别 0:女，1:男")
     private Integer patientGender;
     
-    @Schema(description = "患者性别文本")
-    private String patientGenderText;
-    
     @Schema(description = "患者联系方式")
     private String patientPhone;
 

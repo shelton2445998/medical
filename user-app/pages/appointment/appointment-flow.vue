@@ -168,17 +168,7 @@
         </picker>
       </view>
           
-      <view class="form-item">
-            <text class="form-label">选择医生</text>
-        <picker :range="doctorList" range-key="name" @change="onDoctorChange">
-              <view class="picker-display">
-                <text class="picker-text" :class="{ 'placeholder': !selectedDoctor }">
-                  {{ selectedDoctor ? `${selectedDoctor.name} (${selectedDoctor.title})` : '张医生 (主任医师)' }}
-                </text>
-                <text class="picker-icon">👨‍⚕️</text>
-          </view>
-        </picker>
-      </view>
+
 
       <view class="form-item">
             <text class="form-label">患者年龄</text>
@@ -334,8 +324,6 @@ export default {
         '下午(14:00-18:00)',
         '晚上(19:00-21:00)'
       ],
-      doctorList: [],
-      selectedDoctor: null,
       patientAge: '',
       patientGender: '',
       patientPhone: '',
@@ -414,13 +402,12 @@ export default {
       this.gender = '男'; // 默认性别
       this.selectedDate = this.getNextAvailableDate(); // 设置默认日期
       this.selectedTime = '上午(08:00-12:00)'; // 默认时间段
-      this.selectedDoctor = { id: 3001, name: '张医生', title: '主任医师', department: '内科' }; // 默认医生
+
       
       this.step = 4; // 直接跳到支付步骤
     }
     
-    // 初始化医生列表
-    this.initDoctorList();
+
     
     // 获取医院列表
     this.getHospitalList();
@@ -436,8 +423,6 @@ export default {
   methods: {
     selectHospital(hospital) {
       this.selectedHospital = hospital;
-      // 选择医院后获取该医院的医生列表
-      this.getDoctorList(this.selectedHospital.id);
     },
     selectPackage(pkg) {
       this.selectedPackage = pkg;
@@ -449,17 +434,7 @@ export default {
       const index = e.detail.value;
       this.selectedTime = this.timeSlots[index];
     },
-    onDoctorChange(e) {
-      const index = e.detail.value;
-      console.log('医生选择事件触发，index:', index, 'doctorList:', this.doctorList);
-      if (index >= 0 && index < this.doctorList.length) {
-        this.selectedDoctor = this.doctorList[index];
-        console.log('选择医生:', this.selectedDoctor);
-      } else {
-        this.selectedDoctor = null;
-        console.log('医生选择无效，设置为null');
-      }
-    },
+
     selectPayMethod(value) {
       this.payMethod = value;
     },
@@ -500,11 +475,7 @@ export default {
         return;
       }
       
-      // 如果没有选择医生，使用默认医生ID 3001
-      if (!this.selectedDoctor || !this.selectedDoctor.id) {
-        console.log('未选择医生，使用默认医生ID: 3001');
-        this.selectedDoctor = { id: 3001, name: '张医生', title: '主任医师', department: '内科' };
-      }
+
       
       if (!this.selectedDate) {
         uni.showToast({
@@ -531,7 +502,7 @@ export default {
       const orderData = {
         setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID，普通项目预约时为null
         hospitalId: this.selectedHospital.id, // 医院ID
-        doctorId: this.selectedDoctor ? this.selectedDoctor.id : 3001, // 医生ID，默认3001
+        doctorId: 3001, // 医生ID，默认3001
         familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
         appointmentDate: this.selectedDate, // 预约日期
         appointmentTime: this.selectedTime, // 预约时间段
@@ -544,8 +515,7 @@ export default {
       };
       
       console.log('预约订单数据：', orderData);
-      console.log('selectedDoctor:', this.selectedDoctor);
-      console.log('selectedDoctor.id:', this.selectedDoctor ? this.selectedDoctor.id : 'null');
+
       console.log('套餐检查项目ID列表:', this.selectedPackage ? this.selectedPackage.checkitemIds : '无套餐');
       
       // 获取token
@@ -626,39 +596,9 @@ export default {
       return `${year}-${month}-${day}`;
     },
     
-    // 获取医生列表（根据医院ID获取对应医生）
-    getDoctorList(hospitalId) {
-      if (!hospitalId) return;
-      
-      // 暂时使用固定的医生列表，后续可以根据医院ID筛选
-      // 这里可以根据hospitalId来筛选对应医院的医生
-      this.doctorList = [
-        { id: 3001, name: '张医生', title: '主任医师', department: '内科' },
-        { id: 3002, name: '李医生', title: '副主任医师', department: '外科' },
-        { id: 3003, name: '王医生', title: '主治医师', department: '妇产科' }
-      ];
-      
-      // 默认选择第一个医生
-      if (this.doctorList.length > 0) {
-        this.selectedDoctor = this.doctorList[0];
-      }
-    },
+
     
-    // 初始化医生列表
-    initDoctorList() {
-      // 设置默认医生列表
-      this.doctorList = [
-        { id: 3001, name: '张医生', title: '主任医师', department: '内科' },
-        { id: 3002, name: '李医生', title: '副主任医师', department: '外科' },
-        { id: 3003, name: '王医生', title: '主治医师', department: '妇产科' }
-      ];
-      
-      // 默认选择第一个医生
-      if (this.doctorList.length > 0) {
-        this.selectedDoctor = this.doctorList[0];
-        console.log('初始化医生列表，默认选择:', this.selectedDoctor);
-      }
-    },
+
     
     // 获取用户预约列表
     getAppointmentList() {
@@ -780,8 +720,7 @@ export default {
     onHospitalChange(e) {
       const index = e.detail.value;
       this.selectedHospital = this.hospitalList[index];
-      // 选择医院后获取该医院的医生列表
-      this.getDoctorList(this.selectedHospital.id);
+
     },
     // 自动填充用户信息
     async autoFillUserInfo() {

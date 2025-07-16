@@ -16,5 +16,11 @@ public class AppCheckitemQuery extends BasePageQuery {
 
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "医院ID")
+    private Long hospitalId;
+
+    @Schema(description = "科室ID")
+    private Long departmentId;
+
 }
 

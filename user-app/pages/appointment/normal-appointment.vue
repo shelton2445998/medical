@@ -64,7 +64,7 @@
           <picker :range="checkitemList" range-key="name" @change="onCheckitemChange">
             <view class="form-picker">
               <text class="picker-text" :class="{ 'placeholder': checkitemList.length === 0 }">
-                {{ checkitemList.length > 0 ? '请选择检查项' : '加载中...' }}
+                {{ checkitemList.length > 0 ? '请选择检查项' : '暂无' }}
               </text>
               <text class="picker-arrow">▼</text>
         </view>
@@ -324,13 +324,20 @@ export default {
   },
   onLoad() {
     this.getHospitalList();
-    this.getCheckitemList();
+    // 不立即加载检查项列表，等用户选择医院后再加载
+    // this.getCheckitemList();
     // 加载用户信息用于自动填充
     this.loadUserInfo();
   },
   onShow() {
     // 检查是否有已选择的医院信息
     this.checkSelectedHospital();
+    
+    // 如果已经有选择的医院但没有检查项列表，则重新加载
+    if (this.selectedHospital && this.selectedHospital.id && this.checkitemList.length === 0) {
+      console.log('页面显示时重新加载检查项，医院ID:', this.selectedHospital.id);
+      this.getCheckitemList(this.selectedHospital.id);
+    }
   },
   methods: {
     // 加载用户信息用于自动填充
@@ -358,8 +365,9 @@ export default {
       if (userInfo.phone) {
         this.patientPhone = userInfo.phone;
       }
-      if (userInfo.gender) {
-        this.patientGender = userInfo.gender;
+      if (userInfo.gender !== undefined && userInfo.gender !== null) {
+        // 将数值转换为文本显示
+        this.patientGender = userInfo.gender === 1 ? '男' : userInfo.gender === 0 ? '女' : '';
       }
       if (userInfo.idCard) {
         // 从身份证号计算年龄
@@ -414,6 +422,12 @@ export default {
           
           // 更新选择的医院信息
           this.selectedHospital = hospitalInfo;
+          
+          // 自动加载该医院的检查项列表
+          if (this.selectedHospital && this.selectedHospital.id) {
+            console.log('自动加载医院检查项，医院ID:', this.selectedHospital.id);
+            this.getCheckitemList(this.selectedHospital.id);
+          }
         } catch (e) {
           console.error('解析已选择的医院信息失败:', e);
         }
@@ -504,7 +518,7 @@ export default {
     },
     
     // 获取检查项列表
-    async getCheckitemList() {
+    async getCheckitemList(hospitalId = null) {
       try {
         uni.showLoading({ title: '加载检查项列表...' });
         
@@ -524,11 +538,24 @@ export default {
           return;
         }
         
-        // 使用后端AppCheckitemController的接口
-        const result = await post(checkitemApi.getCheckitemList, {
+        // 构建查询参数
+        const queryParams = {
           pageNum: 1,
           pageSize: 100
-        });
+        };
+        
+        // 如果指定了医院ID，添加到查询参数中
+        if (hospitalId) {
+          queryParams.hospitalId = hospitalId;
+          console.log('传递医院ID:', hospitalId);
+        } else {
+          console.log('未传递医院ID');
+        }
+        
+        console.log('查询参数:', queryParams);
+        
+        // 使用后端AppCheckitemController的接口
+        const result = await post(checkitemApi.getCheckitemList, queryParams);
         
         console.log('检查项列表API响应:', result);
         
@@ -594,6 +621,19 @@ export default {
     
     onHospitalChange(e) {
       this.selectedHospital = this.hospitalList[e.detail.value];
+      console.log('选择的医院:', this.selectedHospital);
+      
+      // 清空已选择的检查项
+      this.selectedCheckitems = [];
+      this.calculateTotalPrice();
+      
+      // 重新加载该医院的检查项列表
+      if (this.selectedHospital && this.selectedHospital.id) {
+        console.log('调用getCheckitemList，医院ID:', this.selectedHospital.id);
+        this.getCheckitemList(this.selectedHospital.id);
+      } else {
+        console.log('医院ID无效:', this.selectedHospital);
+      }
     },
     onDateChange(e) {
       this.selectedDate = e.detail.value;

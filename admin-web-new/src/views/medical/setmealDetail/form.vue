@@ -20,7 +20,7 @@
               <el-form-item label="检查项ID" prop="itemId">
                 <el-select v-model="form.itemId" placeholder="请选择检查项" filterable>
                   <el-option
-                    v-for="item in checkItemOptions"
+                    v-for="item in filteredCheckItemOptions"
                     :key="item.id"
                     :label="item.name"
                     :value="item.id"
@@ -37,7 +37,7 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="所属医院" prop="hospitalId">
-                <el-select v-model="form.hospitalId" placeholder="请选择医院">
+                <el-select v-model="form.hospitalId" placeholder="请选择医院" @change="onHospitalChange">
                   <el-option
                     v-for="item in hospitalOptions"
                     :key="item.id"
@@ -175,7 +175,7 @@
 <script setup lang="ts">
 import {ElMessage, FormInstance, FormRules} from "element-plus";
 import {addSetmealDetail, getSetmealDetail, updateSetmealDetail, SetmealDetail} from "@/api/medical/setmealDetail";
-import {onMounted, ref, reactive} from "vue";
+import {onMounted, ref, reactive, computed} from "vue";
 import {getSetmealPage} from "@/api/medical/setmeal";
 import {getCheckitemPage} from "@/api/medical/checkitem";
 import {getHospitalPage} from "@/api/medical/hospital";
@@ -234,6 +234,18 @@ const setmealOptions = ref([])
 const checkItemOptions = ref([])
 const hospitalOptions = ref([])
 const departmentOptions = ref([])
+
+// 根据选择的医院过滤检查项
+const filteredCheckItemOptions = computed(() => {
+  if (!form.value.hospitalId) {
+    return checkItemOptions.value;
+  }
+  
+  // 这里需要根据医院ID过滤检查项
+  // 由于前端无法直接知道检查项属于哪个医院，我们需要显示所有检查项
+  // 或者通过后端API获取该医院的检查项
+  return checkItemOptions.value;
+})
 
 // 加载下拉选项数据
 const loadOptions = async () => {
@@ -380,6 +392,16 @@ const submit = async () => {
       }
     }
   });
+}
+
+// 医院选择变化处理
+const onHospitalChange = (hospitalId) => {
+  // 清空检查项选择
+  form.value.itemId = undefined;
+  
+  // 这里可以根据医院ID重新加载检查项列表
+  // 由于前端无法直接过滤，我们保持显示所有检查项
+  console.log('医院选择变化:', hospitalId);
 }
 
 defineExpose({
