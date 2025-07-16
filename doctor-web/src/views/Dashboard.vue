@@ -55,14 +55,18 @@
           <template #header>
             <div class="card-header">
               <span>最近体检报告</span>
-              <el-button text>查看全部</el-button>
+              <el-button text @click="$router.push('/reports')">查看全部</el-button>
             </div>
           </template>
           <div v-if="recentReports.length === 0" class="empty-data">
             <el-empty description="暂无最近的体检报告"></el-empty>
           </div>
-          <el-table v-else :data="recentReports" style="width: 100%">
-            <el-table-column prop="patientName" label="患者姓名" width="120" />
+          <el-table v-else :data="recentReports" style="width: 100%" class="custom-table">
+            <el-table-column prop="patientName" label="患者姓名" width="120">
+              <template #default="scope">
+                <span class="patient-name">{{ scope.row.patientName }}</span>
+              </template>
+            </el-table-column>
             <el-table-column prop="itemName" label="检查项目" />
             <el-table-column prop="createTime" label="日期" width="180">
               <template #default="scope">
@@ -71,7 +75,7 @@
             </el-table-column>
             <el-table-column prop="status" label="状态" width="100">
               <template #default="scope">
-                <el-tag :type="scope.row.conclusion ? 'success' : 'warning'" size="small">
+                <el-tag :type="scope.row.conclusion ? 'success' : 'warning'" effect="light" size="small">
                   {{ scope.row.conclusion ? '已完成' : '待处理' }}
                 </el-tag>
               </template>
@@ -162,7 +166,7 @@ export default {
     const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
     const clockTimer = ref(null)
     
-    // 模拟数据 - 在实际项目中这些应从API获取
+    // 数据
     const recentReports = ref([])
     const workItems = ref([])
     const notices = ref([])
@@ -191,26 +195,14 @@ export default {
     // 从localStorage读取医生姓名
     const readDoctorName = () => {
       const doctorInfoStr = localStorage.getItem('doctorInfo')
-      console.log('Dashboard - 读取到的doctorInfo:', doctorInfoStr)
-      
       if (doctorInfoStr) {
         try {
           const doctorInfo = JSON.parse(doctorInfoStr)
-          console.log('Dashboard - 解析后的doctorInfo:', doctorInfo)
-          
-          if (doctorInfo && doctorInfo.username) {
-            console.log('Dashboard - 设置医生姓名:', doctorInfo.username)
-            doctorName.value = doctorInfo.username
-          } else {
-            console.log('Dashboard - doctorInfo中无username字段，使用默认名称')
-            doctorName.value = '医生'
-          }
+          doctorName.value = doctorInfo && doctorInfo.username ? doctorInfo.username : '医生'
         } catch (e) {
-          console.error('解析本地存储的医生信息失败', e)
           doctorName.value = '医生'
         }
       } else {
-        console.log('Dashboard - localStorage中未找到doctorInfo')
         doctorName.value = '医生'
       }
     }
@@ -240,7 +232,6 @@ export default {
           lastUpdateTime.value = new Date().toLocaleTimeString()
         }
       } catch (error) {
-        console.error('获取仪表盘数据失败:', error)
         ElMessage.error('获取仪表盘数据失败，请检查网络或登录状态')
         
         // 如果是401错误，可能是token失效，跳转到登录页
@@ -255,28 +246,6 @@ export default {
         loading.value = false
       }
     }
-    
-    // 模拟一些示例数据 - 实际项目中应从API获取
-    const initMockData = () => {
-      // 模拟最近报告
-      recentReports.value = [
-        { id: 1, patientName: '张三', itemName: '常规体检', createTime: '2023-07-15 09:30:00', conclusion: '正常' },
-        { id: 2, patientName: '李四', itemName: '心电图检查', createTime: '2023-07-14 14:20:00', conclusion: '' }
-      ];
-      
-      // 模拟工作项目
-      workItems.value = [
-        { title: '上午门诊', time: '08:30 - 12:00', type: 'primary' },
-        { title: '例行会议', time: '13:30 - 14:30', type: 'warning' },
-        { title: '下午门诊', time: '15:00 - 17:30', type: 'success' }
-      ];
-      
-      // 模拟系统通知
-      notices.value = [
-        { title: '系统升级通知', content: '系统将于今晚22:00进行升级维护，预计1小时', time: '10:30' },
-        { title: '工作提醒', content: '您有3份待处理的体检报告', time: '昨天' }
-      ];
-    }
 
     onMounted(() => {
       // 读取医生姓名
@@ -284,9 +253,6 @@ export default {
       
       // 加载仪表盘数据
       fetchDashboardData()
-      
-      // 初始化模拟数据
-      initMockData()
       
       // 启动时钟
       updateClock()
@@ -468,10 +434,18 @@ export default {
   border-radius: var(--border-radius-md);
   border: none;
   overflow: hidden;
+  box-shadow: var(--box-shadow-light) !important;
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow) !important;
+  }
   
   :deep(.el-card__header) {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-light);
+    background-color: var(--background-light);
   }
   
   :deep(.el-card__body) {
@@ -494,6 +468,22 @@ export default {
 .recent-reports-card {
   height: 100%;
   min-height: 400px;
+  
+  .custom-table {
+    :deep(.el-table__row) {
+      cursor: pointer;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: var(--background-hover) !important;
+      }
+    }
+    
+    .patient-name {
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+  }
 }
 
 // 工作时间线样式
@@ -582,6 +572,7 @@ export default {
         font-size: 14px;
         color: var(--text-primary);
         margin-bottom: 6px;
+        font-weight: 500;
       }
       
       .notice-desc {
@@ -605,6 +596,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 200px;
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-md);
 }
 
 // 页脚

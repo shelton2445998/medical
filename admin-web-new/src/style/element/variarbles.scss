@@ -1,21 +1,63 @@
 @forward 'element-plus/theme-chalk/src/common/var.scss' with (
   $colors: (
     'primary': (
-      'base': #2e5cf6,
+      'base': #409eff,
     ),
     'success': (
-      'base': #3CCB7F,
-    ),
-    'info': (
-      'base': #A3A3A3,
+      'base': #67c23a,
     ),
     'warning': (
-      'base': #FF692E,
+      'base': #e6a23c,
     ),
     'danger': (
-      'base': #E62E05,
+      'base': #f56c6c,
+    ),
+    'info': (
+      'base': #909399,
+    ),
+    'text': (
+      'primary': #303133,
+      'regular': #606266,
+      'secondary': #909399,
+      'placeholder': #c0c4cc,
+    ),
+    'border': (
+      'base': #dcdfe6,
+      'light': #e4e7ed,
+      'lighter': #ebeef5,
+      'extra-light': #f2f6fc,
+    ),
+    'fill': (
+      'base': #f5f7fa,
+      'light': #fafafa,
+      'lighter': #fbfbfb,
+      'extra-light': #fefefe,
+      'blank': #ffffff,
     ),
   ),
+  $button: (
+    'border-radius': 4px,
+    'font-weight': 500,
+  ),
+  $card: (
+    'border-radius': 6px,
+    'padding': 16px,
+  ),
+  $table: (
+    'border-color': #ebeef5,
+    'border': 1px solid #ebeef5,
+    'text-color': #606266,
+    'header-text-color': #303133,
+    'row-hover-bg-color': #f5f7fa,
+    'current-row-bg-color': #ecf5ff,
+  ),
+  $pagination: (
+    'font-size': 14px,
+    'button-bg-color': #ffffff,
+    'button-height': 32px,
+    'button-width': 32px,
+    'button-border-radius': 4px,
+  )
 );
 
 
