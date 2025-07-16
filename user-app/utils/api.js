@@ -44,8 +44,10 @@ export const appointmentApi = {
   cancelAppointment: (id) => `${API_BASE_URL}/app/appointment/cancel/${id}`,
   // 确认支付
   confirmPayment: (id) => `${API_BASE_URL}/app/appointment/confirmPayment/${id}`,
+  // 删除预约
+  deleteAppointment: (id) => `${API_BASE_URL}/app/appointment/delete/${id}`,
   // 获取医生列表
-  getDoctorList: `${API_BASE_URL}/app/doctor/list`,
+  getDoctorList: `${API_BASE_URL}/app/doctor/getAppDoctorPage`,
 };
 
 // 检查项相关接口
@@ -61,9 +63,9 @@ export const checkitemApi = {
 // 报告相关接口
 export const reportApi = {
   // 获取报告列表
-  getReportList: `${API_BASE_URL}/report/list`,
+  getReportList: `${API_BASE_URL}/app/report/getAppReportPage`,
   // 获取报告详情
-  getReportDetail: (id) => `${API_BASE_URL}/report/detail/${id}`,
+  getReportDetail: (id) => `${API_BASE_URL}/app/report/getAppReport/${id}`,
   // 获取App报告检查项信息
   getAppReportItem: (id) => `${API_BASE_URL}/app/reportItem/getAppReportItem/${id}`,
   // 获取App报告检查项信息分页列表

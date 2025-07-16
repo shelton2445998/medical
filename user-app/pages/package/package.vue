@@ -45,22 +45,7 @@
 				</view>
 			</view>
 			
-			<!-- 筛选标签 -->
-			<view class="filter-section" v-if="showFilters">
-				<view class="filter-title">快速筛选</view>
-				<view class="filter-tags">
-					<view 
-						class="filter-tag" 
-						v-for="(tag, index) in filterTags" 
-						:key="index"
-						:class="{active: activeFilters.includes(tag.value)}"
-						@click="toggleFilter(tag.value)"
-					>
-						<text class="tag-icon">{{tag.icon}}</text>
-						<text class="tag-text">{{tag.name}}</text>
-					</view>
-				</view>
-			</view>
+
 			
 			<!-- 套餐列表 -->
 			<view class="package-list">
@@ -159,20 +144,14 @@
 					{ id: 2, name: '高级', icon: '⭐' },
 					{ id: 3, name: '专项', icon: '🎯' }
 				],
-				filterTags: [
-					{ name: '有优惠', value: 'discount', icon: '💰' },
-					{ name: '推荐套餐', value: 'recommend', icon: '⭐' },
-					{ name: '热门', value: 'popular', icon: '🔥' },
-					{ name: '新品', value: 'new', icon: '🆕' }
-				],
-				activeFilters: [],
+
 				searchKeyword: '',
 				packages: [],
 				filteredPackages: [],
 				selectedHospital: null,
 				memberId: null,
 				memberName: '',
-				showFilters: true
+
 			}
 		},
 		onLoad(options) {
@@ -260,7 +239,6 @@
 			resetFilters() {
 				this.currentType = 0;
 				this.searchKeyword = '';
-				this.activeFilters = [];
 				this.applyFilters();
 			},
 			// 应用筛选
@@ -280,24 +258,6 @@
 						item.description.toLowerCase().includes(keyword)
 					);
 				}
-				
-				// 按标签筛选
-				this.activeFilters.forEach(filter => {
-					switch (filter) {
-						case 'discount':
-							filtered = filtered.filter(item => item.discountPrice < item.price);
-							break;
-						case 'recommend':
-							filtered = filtered.filter(item => item.recommend);
-							break;
-						case 'popular':
-							filtered = filtered.filter(item => item.popular);
-							break;
-						case 'new':
-							filtered = filtered.filter(item => item.new);
-							break;
-					}
-				});
 				
 				this.filteredPackages = filtered;
 			},

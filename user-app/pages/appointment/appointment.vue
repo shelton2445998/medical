@@ -270,7 +270,12 @@ export default {
 			uni.navigateTo({ url });
 		},
 		selectHospital(hospital) {
-			uni.navigateTo({ url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}` });
+			// 存储选择的医院信息
+			uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
+			
+			uni.navigateTo({ 
+				url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}` 
+			});
 		},
 		selectPackage(pkg) {
 			uni.navigateTo({ url: `/pages/package-detail/package-detail?id=${pkg.id}` });

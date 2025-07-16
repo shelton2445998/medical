@@ -96,7 +96,17 @@
 						<text class="btn-text">查看报告</text>
 					</button>
 					
-					<!-- 已取消状态不显示操作按钮，只显示查看详情 -->
+					<!-- 已取消状态显示删除订单按钮 -->
+					<button 
+						class="action-btn delete-btn" 
+						v-if="item.status === 0" 
+						@click.stop="deleteAppointment(item)"
+					>
+						<text class="btn-icon">🗑️</text>
+						<text class="btn-text">删除订单</text>
+					</button>
+					
+					<!-- 查看详情按钮（所有状态都显示） -->
 					<button 
 						class="action-btn detail-btn" 
 						@click.stop="viewDetail(item)"
@@ -300,6 +310,58 @@ export default {
 										title: '网络错误，请重试',
 										icon: 'none'
 									});
+							});
+						}
+					}
+				});
+			},
+			
+			// 删除预约
+			deleteAppointment(appointment) {
+				uni.showModal({
+					title: '确认删除',
+					content: '确定要删除此订单吗？删除后无法恢复。',
+					success: (res) => {
+						if (res.confirm) {
+							// 获取token
+							const token = uni.getStorageSync('uniIdToken');
+							
+							uni.request({
+								url: appointmentApi.deleteAppointment(appointment.id),
+								method: 'DELETE',
+								header: {
+									'Authorization': token || '',
+									'Content-Type': 'application/json'
+								},
+								success: (res) => {
+									console.log('删除预约响应：', res);
+									if (res.statusCode === 200 && res.data.code === 200) {
+										// 从本地列表中移除
+										const index = this.appointments.findIndex(item => item.id === appointment.id);
+										if (index !== -1) {
+											this.appointments.splice(index, 1);
+											// 重新筛选
+											this.switchStatus(this.currentStatus);
+										}
+										
+										uni.showToast({
+											title: '删除成功',
+											icon: 'success'
+										});
+									} else {
+										uni.showToast({
+											title: res.data.msg || '删除失败',
+											icon: 'none'
+										});
+									}
+								},
+								fail: (err) => {
+									console.error('删除预约失败：', err);
+									uni.showToast({
+										title: '网络错误，请重试',
+										icon: 'none'
+									});
+								}
 							});
 						}
 					}
@@ -698,6 +760,16 @@ export default {
             &:hover {
               transform: translateY(-2rpx);
               box-shadow: 0 6rpx 20rpx rgba(9, 132, 227, 0.3);
+            }
+          }
+          
+          &.delete-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #ffffff;
+            
+            &:hover {
+              transform: translateY(-2rpx);
+              box-shadow: 0 6rpx 20rpx rgba(231, 76, 60, 0.3);
             }
           }
 				}

@@ -223,6 +223,7 @@
 			// 如果已登录，获取用户信息
 			if (this.hasLogin) {
 				this.getUserInfo();
+				this.getUserCounts();
 			}
 		},
 		methods: {
@@ -276,6 +277,84 @@
 						});
 					}
 				});
+			},
+			// 获取用户数量统计
+			getUserCounts() {
+				// 获取token
+				const token = uni.getStorageSync('uniIdToken');
+				
+				if (!token) {
+					console.log('未找到token，无法获取用户统计信息');
+					return;
+				}
+				
+				// 使用API配置中的地址
+				const API_BASE_URL = process.env.NODE_ENV === 'development' 
+					? 'http://localhost:8888/api' 
+					: 'http://39.104.57.236:8888/api';
+				
+				// 获取体检预约列表
+				uni.request({
+					url: `${API_BASE_URL}/app/appointment/list`,
+					method: 'GET',
+					header: {
+						'Authorization': token,
+						'Content-Type': 'application/json'
+					},
+					data: {
+						pageIndex: 1,
+						pageSize: 1000 // 获取所有数据
+					},
+					success: (res) => {
+						console.log('获取预约列表响应：', res);
+						if (res.statusCode === 200 && res.data.code === 200) {
+							// 根据列表长度设置数量
+							const appointmentList = res.data.data?.list || res.data.data || [];
+							this.userInfo.appointmentCount = appointmentList.length;
+						} else {
+							// 如果接口失败，使用模拟数据
+							this.userInfo.appointmentCount = 0;
+						}
+					},
+					fail: (err) => {
+						console.error('获取预约列表失败：', err);
+						// 使用模拟数据
+						this.userInfo.appointmentCount = 0;
+					}
+				});
+				
+				// 获取体检报告列表
+				uni.request({
+					url: `${API_BASE_URL}/app/report/getAppReportPage`,
+					method: 'POST',
+					header: {
+						'Authorization': token,
+						'Content-Type': 'application/json'
+					},
+					data: {
+						pageIndex: 1,
+						pageSize: 1000 // 获取所有数据
+					},
+					success: (res) => {
+						console.log('获取报告列表响应：', res);
+						if (res.statusCode === 200 && res.data.code === 200) {
+							// 根据列表长度设置数量
+							const reportList = res.data.data?.list || res.data.data || [];
+							this.userInfo.reportCount = reportList.length;
+						} else {
+							// 如果接口失败，使用模拟数据
+							this.userInfo.reportCount = 0;
+						}
+					},
+					fail: (err) => {
+						console.error('获取报告列表失败：', err);
+						// 使用模拟数据
+						this.userInfo.reportCount = 0;
+					}
+				});
+				
+				// 收藏医生数量（模拟数据）
+				this.userInfo.favoriteCount = 3; // 使用模拟数据
 			},
 			// 页面跳转
 			navigateTo(url) {
