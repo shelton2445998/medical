@@ -1,126 +1,214 @@
-/*菜单*/
-.el-menu {
-  border: none !important;
+@use './variarbles.scss' as *;
+@use 'element-plus/theme-chalk/src/index.scss' as *;
+@import '../variables.scss';
 
-  svg {
-    width: 14px;
-    height: 14px;
+// 自定义Element Plus样式
+:root {
+  --el-color-primary: #{$primary-color};
+}
+
+// 表格样式优化
+.el-table {
+  --el-table-border-color: var(--el-border-color-lighter);
+  --el-table-border: 1px solid var(--el-border-color-lighter);
+  --el-table-text-color: var(--el-text-color-regular);
+  --el-table-header-text-color: var(--el-text-color-primary);
+  --el-table-row-hover-bg-color: var(--el-fill-color-light);
+  
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  
+  th.el-table__cell {
+    background-color: var(--el-fill-color-light) !important;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+  
+  .el-table__header-wrapper .el-table__header th {
+    padding: 12px 0;
   }
 }
 
-.el-menu-item, .el-sub-menu__title {
-  color: #3C3D3E;
-}
-
-.el-menu--horizontal > .el-menu-item, .el-menu--horizontal > .el-sub-menu .el-sub-menu__title {
-  line-height: 48px !important;
-}
-
-/** Button 按钮*/
-.el-button{
-  font-weight: normal !important;
-}
-
-/** Card 卡片*/
-.el-card__body{
-  padding: 10px;
-  height: 100%;
-}
-
-/** 下拉框*/
-.el-select{
-  width: 100%;
-}
-
-/*级联选择器*/
-.el-cascader{
-  width: 100%;
-}
-
-/*对话框 dialog*/
-.el-dialog__body{
-  max-height: calc(90vh - 80px)!important;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 20px !important;
-}
-.el-overlay .el-overlay-dialog{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .el-dialog{
-    margin: auto !important;
+// 卡片样式优化
+.el-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  
+  &.is-always-shadow {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .el-card__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    font-weight: 600;
   }
 }
 
-/** Message Box 消息弹出框*/
-.el-message-box__btns{
-  flex-direction: row-reverse;
-  justify-content: flex-start;
-  button:nth-child(1){
-    margin-left: 10px;
+// 按钮样式优化
+.el-button {
+  &.el-button--primary {
+    &:not(.is-disabled) {
+      &:hover, &:focus {
+        background-color: var(--el-color-primary-light-3);
+        border-color: var(--el-color-primary-light-3);
+      }
+    }
+  }
+  
+  &--default {
+    &:not(.is-disabled) {
+      &:hover, &:focus {
+        border-color: var(--el-color-primary-light-5);
+        color: var(--el-color-primary);
+        background-color: var(--el-color-primary-light-9);
+      }
+    }
+  }
+  
+  // 添加过渡效果
+  transition: all 0.3s ease;
+}
+
+// 表单样式优化
+.el-form {
+  .el-form-item__label {
+    font-weight: 500;
+  }
+  
+  .el-input__wrapper,
+  .el-textarea__wrapper {
+    box-shadow: 0 0 0 1px var(--el-border-color) inset;
+    border-radius: 4px;
+    
+    &:hover {
+      box-shadow: 0 0 0 1px var(--el-border-color-darker) inset;
+    }
+    
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
   }
 }
 
-/*侧边栏*/
-.el-drawer__close-btn {
-  padding: 0 !important;
-}
-
-.el-drawer__header {
-  margin-bottom: 0 !important;
-}
-
-
-/* 面包屑*/
-.el-breadcrumb {
-  .el-breadcrumb__inner.is-link {
-    color: #3C3D3E;
-    font-weight: unset;
+// 分页样式优化
+.el-pagination {
+  margin-top: 20px;
+  justify-content: flex-end;
+  
+  .el-pagination__sizes .el-select .el-input {
+    width: 110px;
   }
-  .el-breadcrumb__item:last-child .el-breadcrumb__inner{
-    color: #3C3D3E;
-    opacity: .7;
+  
+  button {
+    min-width: 32px;
+    height: 32px;
+    
+    &:not(:disabled):hover {
+      color: var(--el-color-primary);
+    }
+  }
+  
+  .el-pager li {
+    min-width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 4px;
+    
+    &:not(.is-disabled) {
+      &.is-active {
+        background-color: var(--el-color-primary);
+        color: #fff;
+      }
+      
+      &:hover {
+        color: var(--el-color-primary);
+      }
+    }
   }
 }
 
-/* 表格*/
-.el-table{
-  width: 100%;
-  color: #3C3D3E !important;
-}
-.el-table thead{
-  color: #3C3D3E !important;
-}
-.el-table th.el-table__cell{
-  background-color: #f5f7fa !important;
-  color: #3C3D3E !important;
-}
-
-.el-form-item__label{
-  color: #3C3D3E !important;
-}
-
-.el-input__inner{
-  color: #3C3D3E !important;
-}
-
-.el-select-dropdown__item{
-  color: #3C3D3E !important;
-}
-
-.el-dropdown{
-  color: #3C3D3E !important;
-}
-
-.el-table__cell .el-button{
-  font-size: 13px;
+// 弹窗样式优化
+.el-dialog {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  
+  .el-dialog__header {
+    margin: 0;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    
+    .el-dialog__title {
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--el-text-color-primary);
+    }
+  }
+  
+  .el-dialog__body {
+    padding: 20px;
+  }
+  
+  .el-dialog__footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--el-border-color-lighter);
+  }
 }
 
-.el-table__cell .el-button + .el-button{
-  margin-left: 8px !important;
+// 下拉菜单样式优化
+.el-dropdown-menu {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  
+  .el-dropdown-menu__item {
+    line-height: 36px;
+    
+    &:not(.is-disabled):hover {
+      background-color: var(--el-color-primary-light-9);
+      color: var(--el-color-primary);
+    }
+  }
 }
 
-.el-table .cell{
-  padding: 0px 8px !important;
+// 标签样式优化
+.el-tag {
+  border-radius: 4px;
+  
+  &.el-tag--primary {
+    background-color: var(--el-color-primary-light-9);
+    border-color: var(--el-color-primary-light-8);
+    color: var(--el-color-primary);
+  }
+  
+  &.el-tag--success {
+    background-color: var(--el-color-success-light-9);
+    border-color: var(--el-color-success-light-8);
+    color: var(--el-color-success);
+  }
+  
+  &.el-tag--warning {
+    background-color: var(--el-color-warning-light-9);
+    border-color: var(--el-color-warning-light-8);
+    color: var(--el-color-warning);
+  }
+  
+  &.el-tag--danger {
+    background-color: var(--el-color-danger-light-9);
+    border-color: var(--el-color-danger-light-8);
+    color: var(--el-color-danger);
+  }
+  
+  &.el-tag--info {
+    background-color: var(--el-color-info-light-9);
+    border-color: var(--el-color-info-light-8);
+    color: var(--el-color-info);
+  }
 }

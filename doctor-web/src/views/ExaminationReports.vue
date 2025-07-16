@@ -41,6 +41,7 @@
             stripe
             highlight-current-row
             class="custom-table"
+            :empty-text="loading ? '加载中...' : '暂无待处理的体检报告'"
           >
             <el-table-column prop="id" label="报告ID" width="100" />
             <el-table-column label="患者姓名" width="120">
@@ -83,10 +84,6 @@
               </template>
             </el-table-column>
           </el-table>
-          
-          <div v-if="pendingReports.length === 0 && !loading" class="empty-data">
-            <el-empty description="暂无待处理的体检报告"></el-empty>
-          </div>
         </el-tab-pane>
 
         <el-tab-pane label="已完成报告" name="completed">
@@ -104,6 +101,7 @@
             stripe
             highlight-current-row
             class="custom-table"
+            :empty-text="loading ? '加载中...' : '暂无已完成的体检报告'"
           >
             <el-table-column prop="id" label="报告ID" width="100" />
             <el-table-column label="患者姓名" width="120">
@@ -153,10 +151,6 @@
               </template>
             </el-table-column>
           </el-table>
-          
-          <div v-if="completedReports.length === 0 && !loading" class="empty-data">
-            <el-empty description="暂无已完成的体检报告"></el-empty>
-          </div>
         </el-tab-pane>
       </el-tabs>
 
@@ -315,6 +309,14 @@
                   </el-tag>
                 </template>
               </el-table-column>
+              <el-table-column label="说明" min-width="180">
+                <template #default="scope">
+                  <span v-if="scope.row.isAbnormal" class="abnormal-hint">
+                    {{ getAbnormalHint(scope.row) }}
+                  </span>
+                  <span v-else class="normal-hint">正常范围内</span>
+                </template>
+              </el-table-column>
             </el-table>
             </div>
           </div>
@@ -333,6 +335,7 @@
 
         <div class="doctor-signature">
           <p>检查医生：<span class="doctor-name">{{ currentReport.doctorName }}</span></p>
+          <p>报告日期：<span>{{ formatDate(currentReport.updateTime || currentReport.createTime) }}</span></p>
         </div>
       </div>
       <template #footer>
@@ -397,6 +400,30 @@ export default {
       // 可以按需调整日期格式
       return dateStr;
     }
+    
+    // 获取异常提示文本
+    const getAbnormalHint = (item) => {
+      if (!item.value || !item.normalValue) return '数据异常';
+      
+      if (item.normalValue.includes('-')) {
+        try {
+          const [min, max] = item.normalValue.split('-').map(v => parseFloat(v));
+          const value = parseFloat(item.value);
+          
+          if (value < min) {
+            return `低于正常值 (${item.normalValue})`;
+          } else if (value > max) {
+            return `高于正常值 (${item.normalValue})`;
+          }
+        } catch (e) {
+          return '数据异常';
+        }
+      } else if (item.normalValue === '阴性' || item.normalValue === '阳性') {
+        return `应为${item.normalValue}，实际为${item.value}`;
+      }
+      
+      return '异常值';
+    };
     
     const fetchReportList = async () => {
       loading.value = true
@@ -595,21 +622,13 @@ export default {
     
     // 刷新数据
     const refreshData = () => {
-      if (activeTab.value === 'pending') {
-        fetchPendingReports();
-      } else {
-        fetchCompletedReports();
-      }
+      fetchReportList()
       ElMessage.success('数据已刷新');
     };
     
     // 处理选项卡变化
     const handleTabChange = (tab) => {
-      if (tab === 'pending') {
-        fetchPendingReports();
-      } else {
-        fetchCompletedReports();
-      }
+      fetchReportList();
     };
     
     // 下载PDF报告
@@ -639,6 +658,7 @@ export default {
       conclusion,
       isAutoCheckAbnormal,
       formatDate,
+      getAbnormalHint,
       handleSearch,
       handleSizeChange,
       handleCurrentChange,
@@ -660,6 +680,7 @@ export default {
 .examination-reports-container {
   padding: 24px;
   min-height: calc(100vh - 84px);
+  background-color: var(--background-color);
 }
 
 .page-header {
@@ -705,9 +726,12 @@ export default {
 
 .report-list-card {
   margin-bottom: 24px;
+  box-shadow: var(--box-shadow-light) !important;
+  border-radius: var(--border-radius-md);
+  border: none;
   
   .custom-tabs {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
   }
   
   .table-toolbar {
@@ -729,11 +753,12 @@ export default {
     
     .patient-name {
       font-weight: 500;
-      color: var(--text-primary);
+      color: var(--primary-color);
     }
     
     .action-button {
       padding: 6px 12px;
+      margin: 0 4px;
       
       .el-icon {
         margin-right: 4px;
@@ -754,8 +779,8 @@ export default {
   align-items: center;
   padding-top: 16px;
 
-.pagination-info {
-  font-size: 14px;
+  .pagination-info {
+    font-size: 14px;
     color: var(--text-secondary);
   }
 }
@@ -766,6 +791,7 @@ export default {
     border-bottom: 1px solid var(--border-light);
     padding: 20px;
     margin: 0;
+    background-color: var(--background-light);
   }
   
   :deep(.el-dialog__body) {
@@ -775,6 +801,7 @@ export default {
   :deep(.el-dialog__footer) {
     border-top: 1px solid var(--border-light);
     padding: 16px 20px;
+    background-color: var(--background-light);
   }
 }
 
@@ -791,6 +818,7 @@ export default {
   border: 1px solid var(--border-light);
   margin-bottom: 24px;
   overflow: hidden;
+  box-shadow: var(--box-shadow-light);
   
   .panel-header {
     padding: 12px 16px;
@@ -842,16 +870,17 @@ export default {
       font-size: 24px;
       margin: 0 0 16px;
       color: var(--primary-color);
-}
+      font-weight: 600;
+    }
 
-.report-info {
-  display: flex;
+    .report-info {
+      display: flex;
       justify-content: center;
       gap: 24px;
       font-size: 14px;
       color: var(--text-secondary);
     }
-}
+  }
 
   .exam-item-title {
     margin: 16px 0 12px;
@@ -867,9 +896,9 @@ export default {
       margin-right: 8px;
       color: var(--primary-color);
     }
-}
+  }
 
-.conclusion-card {
+  .conclusion-card {
     background-color: #f9f9f9;
     
     .conclusion-content {
@@ -877,10 +906,10 @@ export default {
       line-height: 1.6;
       white-space: pre-line;
     }
-}
+  }
 
-.doctor-signature {
-  text-align: right;
+  .doctor-signature {
+    text-align: right;
     margin-top: 32px;
     padding-top: 16px;
     border-top: 1px dashed var(--border-light);
@@ -888,12 +917,23 @@ export default {
     p {
       font-size: 14px;
       color: var(--text-secondary);
+      margin: 8px 0;
       
       .doctor-name {
         font-weight: 500;
         color: var(--text-primary);
       }
     }
+  }
+  
+  .abnormal-hint {
+    color: var(--danger-color);
+    font-size: 13px;
+  }
+  
+  .normal-hint {
+    color: var(--success-color);
+    font-size: 13px;
   }
 }
 
@@ -922,6 +962,24 @@ export default {
     .pagination-info {
       margin-top: 16px;
     }
+  }
+}
+
+// 打印样式
+@media print {
+  .report-detail-dialog {
+    :deep(.el-dialog__header),
+    :deep(.el-dialog__footer) {
+      display: none;
+    }
+    
+    :deep(.el-dialog__body) {
+      padding: 0;
+    }
+  }
+  
+  .report-detail {
+    padding: 20px;
   }
 }
 </style> 
