@@ -75,7 +75,7 @@
 							<text>{{item.name}}</text>
 						</view>
 						<view class="result-value">
-							<text :class="{'abnormal-text': item.isAbnormal}">{{item.value}}</text>
+							<!-- <text :class="{'abnormal-text': item.isAbnormal}">{{item.value}}</text> -->
 							<text class="result-unit">{{item.unit}}</text>
 							<text class="expand-icon">{{item.expanded ? '∧' : '∨'}}</text>
 						</view>
