@@ -111,8 +111,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             throw new BusinessException("无权查看此订单");
         }
         
-        log.info("获取预约详情成功 - 订单ID: {}, 用户ID: {}, 状态: {}, 订单号: {}", 
-            appOrdersVo.getId(), appOrdersVo.getUserId(), appOrdersVo.getStatus(), appOrdersVo.getOrderNumber());
+        log.info("获取预约详情成功 - 订单ID: {}, 用户ID: {}, 状态: {}", 
+            appOrdersVo.getId(), appOrdersVo.getUserId(), appOrdersVo.getStatus());
         
         return appOrdersVo;
     }
@@ -168,7 +168,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setUserId(appLoginVo.getUserId());
         orders.setDoctorId(dto.getDoctorId()); // 设置医生ID
         orders.setTimeSlot(dto.getAppointmentTime()); // 设置时间段
-        orders.setOrderNumber(generateOrderNumber());
+
         orders.setStatus(1); // 1-待支付
         
         // 设置患者信息
@@ -317,15 +317,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return appLoginVo;
     }
     
-    /**
-     * 生成订单编号
-     *
-     * @return
-     */
-    private String generateOrderNumber() {
-        // 简单实现，实际可能需要更复杂的逻辑
-        return "ORD" + System.currentTimeMillis();
-    }
+
     
     /**
      * 根据检查项ID列表计算总价

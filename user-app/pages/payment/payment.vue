@@ -25,7 +25,7 @@
         <view class="info-content">
           <view class="info-row">
             <text class="info-label">订单编号</text>
-            <text class="info-value">{{orderInfo.orderNumber}}</text>
+            <text class="info-value">{{orderInfo.id}}</text>
           </view>
           <view class="info-row">
             <text class="info-label">医院名称</text>

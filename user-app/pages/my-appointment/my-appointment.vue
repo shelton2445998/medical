@@ -53,7 +53,7 @@
 					</view>
 							<view class="info-item">
 								<text class="info-label">订单号</text>
-								<text class="info-value">{{item.orderNumber || 'N/A'}}</text>
+								<text class="info-value">{{item.id || 'N/A'}}</text>
 					</view>
 							<view class="info-item" v-if="item.price">
 								<text class="info-label">套餐价格</text>

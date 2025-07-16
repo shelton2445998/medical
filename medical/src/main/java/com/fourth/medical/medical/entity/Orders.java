@@ -25,9 +25,6 @@ public class Orders implements Serializable {
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
-    @Schema(description = "订单编号")
-    private String orderNumber;
-
     @Schema(description = "用户ID")
     private Long userId;
 

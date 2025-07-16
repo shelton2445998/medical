@@ -47,7 +47,7 @@
           <view class="info-section">
             <view class="info-row">
               <text class="info-label">订单号</text>
-              <text class="info-value">{{ appointmentDetail.orderNumber }}</text>
+              <text class="info-value">{{ appointmentDetail.id }}</text>
             </view>
             <view class="info-row">
               <text class="info-label">预约状态</text>
@@ -152,6 +152,17 @@
         
         <!-- 操作按钮 -->
         <view class="action-buttons">
+          <!-- 待支付状态显示支付按钮 -->
+          <button 
+            class="action-btn pay-btn" 
+            v-if="appointmentDetail.status === 1"
+            @click="goToPayment"
+          >
+            <text class="btn-icon">💳</text>
+            <text>立即支付</text>
+          </button>
+          
+          <!-- 待支付状态显示取消预约按钮 -->
           <button 
             class="action-btn danger-btn" 
             v-if="appointmentDetail.status === 1"
@@ -160,8 +171,11 @@
             <text class="btn-icon">❌</text>
             <text>取消预约</text>
           </button>
+          
+          <!-- 其他状态显示返回按钮 -->
           <button 
             class="action-btn primary-btn" 
+            v-if="appointmentDetail.status !== 1"
             @click="goBack"
           >
             <text class="btn-icon">←</text>
@@ -283,6 +297,17 @@ export default {
           icon: 'none'
         });
       }
+    },
+    
+    // 跳转到支付页面
+    goToPayment() {
+      // 将订单信息存储到本地，供支付页面使用
+      uni.setStorageSync('currentOrder', JSON.stringify(this.appointmentDetail));
+      
+      // 跳转到支付页面
+      uni.navigateTo({
+        url: '/pages/payment/payment'
+      });
     },
     
     // 返回列表
@@ -666,6 +691,17 @@ export default {
       &:hover {
         transform: translateY(-2rpx);
         box-shadow: 0 12rpx 32rpx rgba(255, 118, 117, 0.4);
+      }
+    }
+    
+    &.pay-btn {
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      color: #ffffff;
+      box-shadow: 0 8rpx 24rpx rgba(0, 184, 148, 0.3);
+      
+      &:hover {
+        transform: translateY(-2rpx);
+        box-shadow: 0 12rpx 32rpx rgba(0, 184, 148, 0.4);
       }
     }
   }

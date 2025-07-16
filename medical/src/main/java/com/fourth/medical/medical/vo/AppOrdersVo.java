@@ -22,9 +22,6 @@ public class AppOrdersVo implements Serializable {
     @Schema(description = "主键")
     private Long id;
 
-    @Schema(description = "订单编号")
-    private String orderNumber;
-
     @Schema(description = "用户ID")
     private Long userId;
 
