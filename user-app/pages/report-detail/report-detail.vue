@@ -1,5 +1,7 @@
 <template>
 	<view class="content">
+
+		
 		<!-- 报告基本信息 -->
 		<view class="report-info-card enhanced-card">
 			<view class="report-title beautify-title">
@@ -75,7 +77,7 @@
 							<text>{{item.name}}</text>
 						</view>
 						<view class="result-value">
-							<text :class="{'abnormal-text': item.isAbnormal}">{{item.value}}</text>
+							<!-- <text :class="{'abnormal-text': item.isAbnormal}">{{item.value}}</text> -->
 							<text class="result-unit">{{item.unit}}</text>
 							<text class="expand-icon">{{item.expanded ? '∧' : '∨'}}</text>
 						</view>
@@ -113,20 +115,12 @@
 		</view>
 
 		<!-- 底部操作栏 -->
-		<!-- <view class="bottom-actions enhanced-bottom">
-			<button class="action-btn" @click="shareReport">
-				<text class="iconfont icon-share"></text>
-				<text>分享</text>
+		<view class="bottom-actions enhanced-bottom">
+			<button class="action-btn primary" @click="generateAndShareReport">
+				<text class="btn-icon">📥</text>
+				<text>下载报告</text>
 			</button>
-			<button class="action-btn" @click="downloadReport">
-				<text class="iconfont icon-download"></text>
-				<text>下载</text>
-			</button>
-			<button class="action-btn primary" @click="makeConsultation">
-				<text class="iconfont icon-doctor"></text>
-				<text>在线咨询</text>
-			</button>
-		</view> -->
+		</view>
 	</view>
 </template>
 
@@ -195,7 +189,15 @@
 					}
 				}
 				if (options.patientAge) {
-					this.reportInfo.age = decodeURIComponent(options.patientAge);
+					const ageValue = decodeURIComponent(options.patientAge);
+					// 确保年龄是有效数字
+					if (ageValue && ageValue !== 'null' && ageValue !== 'undefined' && ageValue !== '') {
+						this.reportInfo.age = parseInt(ageValue) || 25;
+					} else {
+						this.reportInfo.age = 25; // 默认年龄
+					}
+				} else {
+					this.reportInfo.age = 25; // 默认年龄
 				}
 				// 获取报告详情
 				this.getReportDetail();
@@ -377,7 +379,246 @@
 			// 返回上一页
 			goBack() {
 				uni.navigateBack();
-			}
+			},
+			
+			// 生成并下载报告
+			async generateAndShareReport() {
+				try {
+					uni.showLoading({
+						title: '生成报告中...'
+					});
+					
+					// 构建报告内容
+					const reportContent = this.buildReportContent();
+					
+					// 下载报告到本地
+					uni.hideLoading();
+					this.showShareOptions(reportContent);
+					
+				} catch (error) {
+					console.error('生成报告失败:', error);
+					uni.hideLoading();
+					uni.showToast({
+						title: '生成报告失败',
+						icon: 'none'
+					});
+				}
+			},
+			
+			// 显示分享选项
+			showShareOptions(reportContent) {
+				// 直接下载到本地
+				this.saveToLocal(reportContent);
+			},
+			
+			// 保存到本地
+			async saveToLocal(content) {
+				try {
+					// 在H5环境下，直接下载文件
+					// #ifdef H5
+					const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+					const url = URL.createObjectURL(blob);
+					const link = document.createElement('a');
+					link.href = url;
+					link.download = `体检报告_${this.reportInfo.personName || '用户'}_${Date.now()}.txt`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					URL.revokeObjectURL(url);
+					// #endif
+					
+					// #ifdef APP-PLUS || MP
+					// 在APP和小程序环境下，保存到本地
+					const tempFilePath = await this.createReportFile(content);
+					await this.saveFileToLocal(tempFilePath);
+					// #endif
+					
+					// 显示成功提示
+					uni.showModal({
+						title: '下载成功',
+						content: '体检报告已下载到本地，快拿去和你的朋友分享吧！',
+						showCancel: false,
+						confirmText: '知道了',
+						confirmColor: '#1296db'
+					});
+				} catch (error) {
+					console.error('保存失败:', error);
+					uni.showToast({
+						title: '下载失败',
+						icon: 'none'
+					});
+				}
+			},
+			
+			// 构建报告内容
+			buildReportContent() {
+				const content = [];
+				
+				// 添加标题
+				content.push('体检报告');
+				content.push('='.repeat(50));
+				content.push('');
+				
+				// 添加基本信息
+				content.push(`体检人：${this.reportInfo.personName || '未知'}`);
+				content.push(`性别：${this.reportInfo.gender || '未知'}`);
+				content.push(`年龄：${this.reportInfo.age || '未知'}岁`);
+				content.push(`体检医院：${this.reportInfo.hospitalName || '未知'}`);
+				content.push(`体检时间：${this.reportInfo.examDate || '未知'}`);
+				content.push(`报告时间：${this.reportInfo.reportDate || '未知'}`);
+				content.push('');
+				
+				// 添加检查结果
+				content.push('检查结果');
+				content.push('-'.repeat(30));
+				content.push('');
+				
+				this.filteredResults.forEach((item, index) => {
+					content.push(`${index + 1}. ${item.name}`);
+					
+					if (item.description) {
+						content.push(`   结果说明：${item.description}`);
+					}
+					
+					if (item.conclusion && item.conclusion !== '体检结果正在生成') {
+						content.push(`   医生结论：${item.conclusion}`);
+					}
+					
+					if (item.advice) {
+						content.push(`   健康建议：${item.advice}`);
+					}
+					
+					content.push('');
+				});
+				
+				// 添加页脚
+				content.push('='.repeat(50));
+				content.push('本报告由医疗系统生成');
+				content.push(`生成时间：${new Date().toLocaleString()}`);
+				
+				return content.join('\n');
+			},
+			
+			// 创建报告文件
+			async createReportFile(content) {
+				return new Promise((resolve, reject) => {
+					// 使用uni-app的文件系统API创建临时文件
+					const fs = uni.getFileSystemManager();
+					const tempFilePath = `${uni.env.USER_DATA_PATH}/report_${Date.now()}.txt`;
+					
+					fs.writeFile({
+						filePath: tempFilePath,
+						data: content,
+						encoding: 'utf8',
+						success: () => {
+							resolve(tempFilePath);
+						},
+						fail: (error) => {
+							reject(error);
+						}
+					});
+				});
+			},
+			
+			// 复制到剪贴板
+			copyToClipboard(content) {
+				// #ifdef H5
+				if (navigator.clipboard) {
+					navigator.clipboard.writeText(content).then(() => {
+						uni.showToast({
+							title: '报告内容已复制到剪贴板',
+							icon: 'success'
+						});
+					}).catch(() => {
+						uni.showToast({
+							title: '复制失败',
+							icon: 'none'
+						});
+					});
+				} else {
+					// 降级方案：使用传统方法
+					const textArea = document.createElement('textarea');
+					textArea.value = content;
+					document.body.appendChild(textArea);
+					textArea.select();
+					try {
+						document.execCommand('copy');
+						uni.showToast({
+							title: '报告内容已复制到剪贴板',
+							icon: 'success'
+						});
+					} catch (err) {
+						uni.showToast({
+							title: '复制失败',
+							icon: 'none'
+						});
+					}
+					document.body.removeChild(textArea);
+				}
+				// #endif
+				
+				// #ifdef APP-PLUS || MP
+				uni.setClipboardData({
+					data: content,
+					success: () => {
+						uni.showToast({
+							title: '报告内容已复制到剪贴板',
+							icon: 'success'
+						});
+					},
+					fail: () => {
+						uni.showToast({
+							title: '复制失败',
+							icon: 'none'
+						});
+					}
+				});
+				// #endif
+			},
+			
+			// 保存文件到本地
+			saveFileToLocal(tempFilePath) {
+				return new Promise((resolve, reject) => {
+					// 在H5环境下，触发下载
+					// #ifdef H5
+					const link = document.createElement('a');
+					link.href = tempFilePath;
+					link.download = `体检报告_${this.reportInfo.personName}_${Date.now()}.txt`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					resolve();
+					// #endif
+					
+					// #ifdef APP-PLUS
+					// 在APP环境下，保存到相册
+					uni.saveImageToPhotosAlbum({
+						filePath: tempFilePath,
+						success: () => {
+							resolve();
+						},
+						fail: (error) => {
+							reject(error);
+						}
+					});
+					// #endif
+					
+					// #ifdef MP
+					// 在小程序环境下，保存到相册
+					uni.saveImageToPhotosAlbum({
+						filePath: tempFilePath,
+						success: () => {
+							resolve();
+						},
+						fail: (error) => {
+							reject(error);
+						}
+					});
+					// #endif
+				});
+			},
+			
+
 		}
 	}
 </script>
@@ -600,6 +841,10 @@
 				font-size: 36rpx;
 				margin-right: 10rpx;
 				font-family: texticons;
+			}
+			.btn-icon {
+				font-size: 36rpx;
+				margin-right: 10rpx;
 			}
 			&.primary {
 				background: linear-gradient(90deg, #1296db 0%, #6ec6ff 100%);

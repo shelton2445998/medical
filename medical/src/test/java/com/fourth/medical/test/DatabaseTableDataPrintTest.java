@@ -234,7 +234,7 @@ public class DatabaseTableDataPrintTest {
         list.forEach(System.out::println);
     }
 
-    /**
+    /**c
      * 打印报告项详情表数据
      */
     private void printReportItemDetailData() {

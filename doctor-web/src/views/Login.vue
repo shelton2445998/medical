@@ -25,10 +25,10 @@
         <div class="subtitle">医疗预约管理系统</div>
       </div>
       
-      <div class="demo-tip">
+      <!-- <div class="demo-tip">
         <el-icon class="tip-icon"><InfoFilled /></el-icon>
         <span>演示模式：API不可用时，可使用任意手机号和密码登录</span>
-      </div>
+      </div> -->
       
       <!-- 登录表单 -->
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
