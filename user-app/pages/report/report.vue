@@ -25,28 +25,22 @@
 						</view>
 						<view class="report-actions" style="position: relative;right: 0;">
 							<view>
-							<button class="action-btn primary" @click.stop="viewReport(item)">
-								<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
-								<text>详情</text>
-							</button>
+								<button class="action-btn primary" @click.stop="viewReport(item)">
+									<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
+									<text>详情</text>
+								</button>
 							</view>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
-		
+
 		<!-- 空状态 -->
-		<view class="empty-state" v-else-if="!loading">
+		<view class="empty-state" v-else>
 			<image class="empty-image" src="/static/images/empty-report.png" mode="aspectFit"></image>
 			<text class="empty-text">暂无体检报告</text>
 			<button class="make-appointment-btn" @click="makeAppointment">立即预约体检</button>
-		</view>
-
-		<!-- 加载状态 -->
-		<view class="loading-state" v-if="loading">
-			<view class="loading-spinner"></view>
-			<text class="loading-text">加载中...</text>
 		</view>
 
 		<!-- 分页组件 -->
@@ -74,13 +68,12 @@
 	import {
 		getLoginUserInfo
 	} from '@/api/user';
-	
+
 	export default {
 		data() {
 			return {
 				allReports: [], // 保存所有报告
 				reportList: [], // 当前页显示的报告
-				loading: false,
 				error: null,
 				userInfo: null, // 存储用户信息
 				// 分页相关数据
@@ -146,10 +139,9 @@
 					}
 				});
 			},
-			
+
 			// 获取所有报告并保存，前端分页
 			async getAllReports() {
-				this.loading = true;
 				this.error = null;
 				try {
 					const query = {
@@ -162,41 +154,41 @@
 					if (res && res.success && res.data) {
 						const list = Array.isArray(res.data.list) ? res.data.list : [];
 						const reportListWithDetails = await Promise.all(list.map(async (item) => {
-								let packageName = item.packageName;
-								if (!packageName && item.orderId) {
-									try {
-										const appointmentRes = await getAppointmentDetail(item.orderId);
-										if (appointmentRes && appointmentRes.success && appointmentRes.data) {
-											packageName = appointmentRes.data.setmealName || '定制套餐';
-											return {
-												id: item.id,
-												orderId: item.orderId || '',
+							let packageName = item.packageName;
+							if (!packageName && item.orderId) {
+								try {
+									const appointmentRes = await getAppointmentDetail(item.orderId);
+									if (appointmentRes && appointmentRes.success && appointmentRes.data) {
+										packageName = appointmentRes.data.setmealName || '定制套餐';
+										return {
+											id: item.id,
+											orderId: item.orderId || '',
 											packageName,
-												reportDate: item.reportDate || item.createTime || '',
-												hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
-												personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+											reportDate: item.reportDate || item.createTime || '',
+											hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
+											personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
 											examDate: (appointmentRes.data.appointmentDate && appointmentRes.data.timeSlot) ?
 												`${appointmentRes.data.appointmentDate.slice(0, 10)} ${appointmentRes.data.timeSlot}` :
 												(item.examDate || ''),
-												adviceCount: item.adviceCount || 0,
-												patientGender: appointmentRes.data.patientGender || '',
-												patientAge: appointmentRes.data.patientAge || ''
-											};
+											adviceCount: item.adviceCount || 0,
+											patientGender: appointmentRes.data.patientGender || '',
+											patientAge: appointmentRes.data.patientAge || ''
+										};
 									}
 								} catch (error) {}
 							}
-								return {
-									id: item.id,
-									orderId: item.orderId || '',
+							return {
+								id: item.id,
+								orderId: item.orderId || '',
 								packageName: packageName || '未命名套餐',
-									reportDate: item.reportDate || item.createTime || '',
-									hospitalName: item.hospitalName || '',
-									personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
-									examDate: item.examDate || '',
-									adviceCount: item.adviceCount || 0,
-									patientGender: '',
-									patientAge: ''
-								};
+								reportDate: item.reportDate || item.createTime || '',
+								hospitalName: item.hospitalName || '',
+								personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+								examDate: item.examDate || '',
+								adviceCount: item.adviceCount || 0,
+								patientGender: '',
+								patientAge: ''
+							};
 						}));
 						this.allReports = reportListWithDetails;
 						this.total = this.allReports.length;
@@ -213,8 +205,6 @@
 					this.reportList = [];
 					this.total = 0;
 					this.totalPages = 0;
-				} finally {
-					this.loading = false;
 				}
 			},
 
@@ -234,7 +224,7 @@
 					});
 				}
 			},
-			
+
 			// 分享报告
 			shareReport(report) {
 				uni.showToast({
@@ -247,7 +237,7 @@
 				uni.showLoading({
 					title: '下载中...'
 				});
-				
+
 				// 模拟下载
 				setTimeout(() => {
 					uni.hideLoading();
@@ -343,36 +333,34 @@
 
 .report-list {
 	padding: 20rpx;
-	
+
 	.report-item {
 		background-color: #ffffff;
 		border-radius: 10rpx;
 		margin-bottom: 20rpx;
 		padding: 30rpx;
 		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-		
+
 		.report-header {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			margin-bottom: 20rpx;
-			
+
 			.report-title {
 				font-size: 32rpx;
 				font-weight: bold;
 				color: #333333;
 			}
-			
+
 			.report-date {
 				font-size: 24rpx;
 				color: #999999;
 			}
 		}
-		
 
-		
 
-		
+
 
 	}
 }
@@ -383,19 +371,19 @@
 	align-items: center;
 	justify-content: center;
 	padding: 100rpx 0;
-	
+
 	.empty-image {
 		width: 200rpx;
 		height: 200rpx;
 		margin-bottom: 30rpx;
 	}
-	
+
 	.empty-text {
 		font-size: 28rpx;
 		color: #999999;
 		margin-bottom: 40rpx;
 	}
-	
+
 	.make-appointment-btn {
 		background-color: #1296db;
 		color: #ffffff;
@@ -404,7 +392,7 @@
 		height: 80rpx;
 		line-height: 80rpx;
 		border-radius: 40rpx;
-		
+
 		&::after {
 			border: none;
 		}
@@ -506,13 +494,13 @@
 	border: 1px solid rgba(76, 175, 80, 0.3);
 		position: relative;
 		right: 0;
-	
+
 	&.primary {
 		background-color: #4CAF50;
 		color: #ffffff;
 		border: 1px solid #4CAF50;
 	}
-	
+
 	&::after {
 		border: none;
 	}
