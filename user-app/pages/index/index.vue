@@ -243,7 +243,7 @@
 		onLoad() {
 			// 设置页面标题
 			uni.setNavigationBarTitle({
-				title: '杏林春暖·健康预约'
+				title: '熙康健康'
 			});
 			
 			// 页面加载时获取推荐医院

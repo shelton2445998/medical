@@ -3,7 +3,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "杏林春暖·健康预约",
+				"navigationBarTitleText": "熙康健康",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white",
 				"enablePullDownRefresh": true
