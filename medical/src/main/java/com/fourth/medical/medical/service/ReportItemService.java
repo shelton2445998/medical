@@ -106,6 +106,18 @@ public interface ReportItemService extends IService<ReportItem> {
     List<Long> createReportItemsForReport(Long reportId, Long orderId, Long userId, String checkitemIds, Long doctorId);
     
     /**
+     * 为单个检查项创建报告记录
+     *
+     * @param reportId 报告ID
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @param checkItemId 检查项ID
+     * @param doctorId 医生ID
+     * @return 创建的检查项报告ID
+     */
+    Long createReportItemForCheckItem(Long reportId, Long orderId, Long userId, Long checkItemId, Long doctorId);
+    
+    /**
      * 更新报告项的医生ID
      *
      * @param reportItemId 报告项ID

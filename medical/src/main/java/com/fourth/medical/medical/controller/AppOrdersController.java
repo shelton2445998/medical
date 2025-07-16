@@ -8,9 +8,7 @@ import com.fourth.medical.medical.service.OrdersService;
 import com.fourth.medical.medical.service.ReportService;
 import com.fourth.medical.medical.service.ReportItemService;
 import com.fourth.medical.medical.service.DoctorScheduleService;
-import com.fourth.medical.medical.service.SetmealService;
 import com.fourth.medical.medical.vo.AppOrdersVo;
-import com.fourth.medical.medical.vo.SetmealVo;
 import com.fourth.medical.auth.util.TokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * App体检预约订单 控制器
@@ -45,9 +47,6 @@ public class AppOrdersController {
     
     @Autowired
     private DoctorScheduleService doctorScheduleService;
-    
-    @Autowired
-    private SetmealService setmealService;
 
     /**
      * 创建体检预约
@@ -70,38 +69,47 @@ public class AppOrdersController {
         
         // 根据订单信息创建体检报告
         if (result != null && result.getId() != null) {
-            // 获取套餐信息，从中获取检查项ID列表
-            String checkitemIds = null;
-            if (result.getSetmealId() != null) {
-                SetmealVo setmealVo = setmealService.getSetmealById(result.getSetmealId());
-                if (setmealVo != null) {
-                    checkitemIds = setmealVo.getCheckitemIds();
-                }
-            }
+            // 直接使用order中的检查项ID列表
+            String checkitemIds = result.getCheckitemIds();
             
             // 如果订单创建成功且有检查项目，则创建对应的report和report_item
             if (StringUtils.isNotBlank(checkitemIds)) {
-                // 分配医生 - 根据科室和当天值班情况分配医生
-                Long doctorId = doctorScheduleService.assignDoctorForOrder(
-                        result.getId(), 
-                        result.getHospitalId(), 
-                        result.getAppointmentDate(), 
-                        checkitemIds);
-                
-                // 创建report记录
+                // 创建report记录，不设置doctorId
                 Long reportId = reportService.createReportForOrder(
                         result.getId(),
                         result.getUserId(), 
                         checkitemIds);
                 
-                // 创建report_item记录
                 if (reportId != null) {
-                    reportItemService.createReportItemsForReport(
-                            reportId, 
-                            result.getId(), 
-                            result.getUserId(), 
-                            checkitemIds, 
-                            doctorId);
+                    // 解析检查项ID列表
+                    List<Long> checkItemIdList = Arrays.stream(checkitemIds.split(","))
+                            .map(Long::parseLong)
+                            .collect(Collectors.toList());
+                    
+                    // 获取检查项与科室的映射关系
+                    Map<Long, Long> checkItemDepartmentMap = doctorScheduleService.getCheckItemDepartmentMap(checkItemIdList);
+                    
+                    // 根据科室分配医生
+                    Map<Long, Long> departmentDoctorMap = doctorScheduleService.assignDoctorsForDepartments(
+                            result.getHospitalId(),
+                            result.getAppointmentDate(),
+                            checkItemDepartmentMap.values().stream().distinct().collect(Collectors.toList()));
+                    
+                    // 为每个检查项创建report_item记录，并根据科室分配医生
+                    for (Long checkItemId : checkItemIdList) {
+                        // 获取检查项对应的科室
+                        Long departmentId = checkItemDepartmentMap.get(checkItemId);
+                        // 获取科室对应的医生
+                        Long doctorId = departmentDoctorMap.get(departmentId);
+                        
+                        // 创建report_item记录
+                        reportItemService.createReportItemForCheckItem(
+                                reportId,
+                                result.getId(),
+                                result.getUserId(),
+                                checkItemId,
+                                doctorId);
+                    }
                 }
             }
         }

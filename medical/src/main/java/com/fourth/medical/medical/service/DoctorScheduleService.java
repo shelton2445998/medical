@@ -11,6 +11,7 @@ import com.fourth.medical.medical.vo.AppDoctorScheduleVo;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -127,4 +128,22 @@ public interface DoctorScheduleService extends IService<DoctorSchedule> {
      * @return 本周预约数量
      */
     Integer countWeekAppointmentsByDoctorId(Long doctorId);
+    
+    /**
+     * 获取检查项与科室的映射关系
+     *
+     * @param checkItemIds 检查项ID列表
+     * @return 检查项ID到科室ID的映射
+     */
+    Map<Long, Long> getCheckItemDepartmentMap(List<Long> checkItemIds);
+    
+    /**
+     * 根据科室分配医生
+     *
+     * @param hospitalId 医院ID
+     * @param appointmentDate 预约日期
+     * @param departmentIds 科室ID列表
+     * @return 科室ID到医生ID的映射
+     */
+    Map<Long, Long> assignDoctorsForDepartments(Long hospitalId, Date appointmentDate, List<Long> departmentIds);
 }

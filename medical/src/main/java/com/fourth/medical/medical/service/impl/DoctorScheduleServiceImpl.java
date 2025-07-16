@@ -252,29 +252,120 @@ public class DoctorScheduleServiceImpl extends ServiceImpl<DoctorScheduleMapper,
     public Integer countWeekAppointmentsByDoctorId(Long doctorId) {
         log.info("获取医生[{}]本周预约数量", doctorId);
         try {
-            // 获取本周的开始和结束时间
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            Date weekStart = calendar.getTime();
+            // 获取本周的开始日期和结束日期
+            LocalDate now = LocalDate.now();
+            LocalDate startOfWeek = now.with(java.time.DayOfWeek.MONDAY);
+            LocalDate endOfWeek = now.with(java.time.DayOfWeek.SUNDAY);
             
-            calendar.add(Calendar.WEEK_OF_YEAR, 1);
-            Date nextWeekStart = calendar.getTime();
+            // 转换为Date类型
+            Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(endOfWeek.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
             
-            // 查询本周的预约数量
-            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Orders::getDoctorId, doctorId)
-                   .ge(Orders::getAppointmentDate, weekStart)
-                   .lt(Orders::getAppointmentDate, nextWeekStart);
-            
-            Long count = ordersMapper.selectCount(wrapper);
-            return count != null ? count.intValue() : 0;
+            // 查询本周预约数量
+            Integer count = ordersMapper.countAppointmentsByDoctorIdAndDateRange(doctorId, startDate, endDate);
+            log.info("医生[{}]本周预约数量：{}", doctorId, count);
+            return count;
         } catch (Exception e) {
-            log.error("获取医生本周预约数量出错", e);
+            log.error("获取医生本周预约数量失败", e);
             return 0;
+        }
+    }
+    
+    /**
+     * 获取检查项与科室的映射关系
+     *
+     * @param checkItemIds 检查项ID列表
+     * @return 检查项ID到科室ID的映射
+     */
+    @Override
+    public Map<Long, Long> getCheckItemDepartmentMap(List<Long> checkItemIds) {
+        log.info("获取检查项与科室的映射关系，检查项ID：{}", checkItemIds);
+        try {
+            // 调用mapper查询检查项与科室的关系
+            List<Map<String, Object>> checkItemDepartments = baseMapper.getCheckItemDepartmentMapping(checkItemIds);
+            
+            // 将结果转换为Map
+            Map<Long, Long> result = new HashMap<>();
+            for (Map<String, Object> item : checkItemDepartments) {
+                Long checkItemId = (Long) item.get("checkItemId");
+                Long departmentId = (Long) item.get("departmentId");
+                result.put(checkItemId, departmentId);
+            }
+            
+            log.info("检查项与科室映射关系：{}", result);
+            return result;
+        } catch (Exception e) {
+            log.error("获取检查项与科室映射关系失败", e);
+            return new HashMap<>();
+        }
+    }
+    
+    /**
+     * 根据科室分配医生
+     *
+     * @param hospitalId 医院ID
+     * @param appointmentDate 预约日期
+     * @param departmentIds 科室ID列表
+     * @return 科室ID到医生ID的映射
+     */
+    @Override
+    public Map<Long, Long> assignDoctorsForDepartments(Long hospitalId, Date appointmentDate, List<Long> departmentIds) {
+        log.info("根据科室分配医生，医院ID：{}，预约日期：{}，科室ID：{}", hospitalId, appointmentDate, departmentIds);
+        
+        Map<Long, Long> departmentDoctorMap = new HashMap<>();
+        
+        try {
+            for (Long departmentId : departmentIds) {
+                // 根据医院ID、预约日期、科室ID查询当天值班医生
+                List<Map<String, Object>> availableDoctors = baseMapper.getAvailableDoctorsForDepartment(
+                        hospitalId, 
+                        appointmentDate,
+                        departmentId);
+                
+                if (availableDoctors == null || availableDoctors.isEmpty()) {
+                    log.warn("科室[{}]当天没有可用的值班医生，尝试寻找排班日期最近的医生", departmentId);
+                    
+                    // 尝试查找最近的排班医生
+                    List<Map<String, Object>> nearestDoctors = baseMapper.getNearestAvailableDoctorsForDepartment(
+                            hospitalId,
+                            appointmentDate,
+                            departmentId);
+                    
+                    if (nearestDoctors != null && !nearestDoctors.isEmpty()) {
+                        // 找出与预约日期相差最小的医生
+                        Map<String, Object> nearestDoctor = nearestDoctors.get(0);
+                        Long doctorId = (Long) nearestDoctor.get("doctorId");
+                        log.info("科室[{}]找到最近的可用医生，医生ID：{}，排班日期：{}", 
+                                departmentId, doctorId, nearestDoctor.get("workDate"));
+                        
+                        departmentDoctorMap.put(departmentId, doctorId);
+                    } else {
+                        log.warn("科室[{}]未找到任何可用的排班医生", departmentId);
+                        // 如果找不到医生，设置为null
+                        departmentDoctorMap.put(departmentId, null);
+                    }
+                } else {
+                    // 找出当前预约人数最少的医生
+                    Map<String, Object> selectedDoctor = availableDoctors.stream()
+                            .min(Comparator.comparing(doctor -> (Long) doctor.get("appointmentCount")))
+                            .orElse(null);
+                    
+                    if (selectedDoctor != null) {
+                        Long doctorId = (Long) selectedDoctor.get("doctorId");
+                        log.info("科室[{}]分配了医生，医生ID：{}", departmentId, doctorId);
+                        departmentDoctorMap.put(departmentId, doctorId);
+                    } else {
+                        log.warn("科室[{}]无法找到合适的医生", departmentId);
+                        departmentDoctorMap.put(departmentId, null);
+                    }
+                }
+            }
+            
+            log.info("科室医生分配结果：{}", departmentDoctorMap);
+            return departmentDoctorMap;
+        } catch (Exception e) {
+            log.error("分配科室医生发生异常", e);
+            return departmentDoctorMap;
         }
     }
 }

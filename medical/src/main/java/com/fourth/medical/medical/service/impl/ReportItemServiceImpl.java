@@ -313,4 +313,54 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
             return ApiResult.fail("获取已完成报告列表失败：" + e.getMessage());
         }
     }
+    
+    /**
+     * 为单个检查项创建报告记录
+     *
+     * @param reportId 报告ID
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @param checkItemId 检查项ID
+     * @param doctorId 医生ID
+     * @return 创建的检查项报告ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createReportItemForCheckItem(Long reportId, Long orderId, Long userId, Long checkItemId, Long doctorId) {
+        log.info("为单个检查项创建报告记录，报告ID：{}，订单ID：{}，用户ID：{}，检查项ID：{}，医生ID：{}", 
+                reportId, orderId, userId, checkItemId, doctorId);
+        
+        try {
+            // 检查是否已经存在该检查项的报告
+            List<ReportItem> existingItems = baseMapper.selectList(
+                    new LambdaQueryWrapper<ReportItem>()
+                            .eq(ReportItem::getOrderId, orderId)
+                            .eq(ReportItem::getItemId, checkItemId));
+            
+            if (existingItems != null && !existingItems.isEmpty()) {
+                // 如果有多条记录，取第一条
+                ReportItem existingItem = existingItems.get(0);
+                log.info("检查项报告已存在，ID：{}", existingItem.getId());
+                return existingItem.getId();
+            }
+            
+            // 创建新的报告检查项
+            ReportItem reportItem = new ReportItem();
+            reportItem.setOrderId(orderId);
+            reportItem.setUserId(userId);
+            reportItem.setItemId(checkItemId);
+            reportItem.setDoctorId(doctorId);
+            reportItem.setReportId(reportId);
+            reportItem.setReportStatus(0); // 未生成状态
+            
+            // 插入数据库
+            baseMapper.insert(reportItem);
+            log.info("成功创建检查项报告，ID：{}", reportItem.getId());
+            
+            return reportItem.getId();
+        } catch (Exception e) {
+            log.error("创建检查项报告失败", e);
+            throw new BusinessException("创建检查项报告失败");
+        }
+    }
 }
