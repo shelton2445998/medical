@@ -202,6 +202,14 @@
 			}
 		},
 		{
+			"path": "pages/member-profile/member-profile",
+			"style": {
+				"navigationBarTitleText": "个人信息",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/health-assessment/health-assessment",
 			"style": {
 				"navigationBarTitleText": "健康评估",

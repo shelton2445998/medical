@@ -4,6 +4,7 @@ import com.fourth.medical.auth.annotation.Login;
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
 import com.fourth.medical.auth.dto.AppRegisterDto;
+import com.fourth.medical.auth.dto.AppUserUpdateProfileDto;
 import com.fourth.medical.auth.service.AppLoginService;
 import com.fourth.medical.auth.vo.AppLoginVo;
 import com.fourth.medical.auth.vo.LoginTokenVo;
@@ -128,6 +129,21 @@ public class AppLoginController {
      */
     private void addCookie(String token, HttpServletRequest request, HttpServletResponse response) {
         CookieUtil.addCookie(LoginConstant.APP_COOKIE_TOKEN_NAME, token, request, response);
+    }
+
+    /**
+     * 修改用户个人信息（User表）
+     *
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    @Login
+    @PostMapping("/updateUserProfile")
+    @Operation(summary = "修改用户个人信息")
+    public ApiResult updateUserProfile(@Valid @RequestBody AppUserUpdateProfileDto dto) {
+        boolean flag = appLoginService.updateAppUserProfile(dto);
+        return ApiResult.result(flag);
     }
 
 }

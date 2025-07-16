@@ -45,6 +45,16 @@ public class User implements Serializable {
     @Schema(description = "头像")
     private String head;
 
+    @Schema(description = "性别 0:女，1:男")
+    private Integer gender;
+
+    @Schema(description = "身份证号")
+    @TableField("idCard")
+    private String idCard;
+
+    @Schema(description = "个人简介")
+    private String introduction;
+
     @Schema(description = "用户角色ID")
     private Long userRoleId;
 

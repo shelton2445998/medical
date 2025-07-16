@@ -176,9 +176,9 @@
 						implemented: true
 					},
 					{
-						name: '家庭成员',
-						icon: '/static/images/icons/icon-family.png',
-						url: '/pages/family/family',
+						name: '个人信息',
+						icon: '/static/images/icons/icon-profile.png',
+						url: '/pages/member-profile/member-profile',
 						implemented: true
 					},
 					{

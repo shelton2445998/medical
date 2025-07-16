@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.user.dto.AppUserHeadDto;
 import com.fourth.medical.user.dto.AppUserNicknameDto;
+import com.fourth.medical.user.dto.AppUserUpdateProfileDto;
 import com.fourth.medical.user.dto.UserDto;
 import com.fourth.medical.user.entity.User;
 import com.fourth.medical.user.query.UserQuery;
@@ -107,5 +108,14 @@ public interface UserService extends IService<User> {
      * @throws Exception
      */
     boolean updateNickname(AppUserNicknameDto dto);
+
+    /**
+     * 修改App用户个人信息
+     *
+     * @param dto
+     * @return
+     * @throws Exception
+     */
+    boolean updateAppUserProfile(AppUserUpdateProfileDto dto);
 
 }

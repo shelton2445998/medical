@@ -121,6 +121,12 @@
         </view>
         
         <view class="form-section">
+          <!-- 自动填充提示 -->
+          <view class="auto-fill-tip" v-if="!memberName">
+            <text class="tip-icon">💡</text>
+            <text class="tip-text">已自动填充您的个人信息，可继续编辑</text>
+          </view>
+          
       <view class="form-item">
             <text class="form-label">姓名</text>
             <input class="form-input" v-model="name" placeholder="请输入姓名" />
@@ -247,7 +253,7 @@
 </template>
 
 <script>
-import { appointmentApi, hospitalApi } from '@/utils/api.js';
+import { appointmentApi, hospitalApi, userApi } from '@/utils/api.js';
 import { post, get } from '@/utils/request.js';
 
 export default {
@@ -421,6 +427,11 @@ export default {
     
     // 获取用户预约列表
     this.getAppointmentList();
+    
+    // 自动填充用户信息（如果不是为家庭成员预约）
+    if (!this.memberName) {
+      this.autoFillUserInfo();
+    }
   },
   methods: {
     selectHospital(hospital) {
@@ -772,6 +783,86 @@ export default {
       // 选择医院后获取该医院的医生列表
       this.getDoctorList(this.selectedHospital.id);
     },
+    // 自动填充用户信息
+    async autoFillUserInfo() {
+      try {
+        // 获取token
+        const token = uni.getStorageSync('uniIdToken');
+        if (!token) {
+          console.log('未找到token，跳过用户信息自动填充');
+          return;
+        }
+        
+        // 调用用户信息API
+        const result = await post(userApi.getLoginUserInfo, {});
+        
+        console.log('用户信息API响应:', result);
+        
+        if (result && result.data) {
+          const userInfo = result.data;
+          console.log('获取到用户信息:', userInfo);
+          
+          // 自动填充用户信息（除了备注和个人简介）
+          if (userInfo.nickname) {
+            this.name = userInfo.nickname;
+          }
+          if (userInfo.gender !== undefined && userInfo.gender !== null) {
+            this.patientGender = userInfo.gender === 1 ? '男' : '女';
+          }
+          if (userInfo.phone) {
+            this.patientPhone = userInfo.phone;
+          }
+          if (userInfo.idCard) {
+            // 从身份证号计算年龄
+            const age = this.calculateAgeFromIdCard(userInfo.idCard);
+            if (age > 0) {
+              this.patientAge = age.toString();
+            }
+          }
+          
+          // 显示自动填充提示
+          uni.showToast({
+            title: '已自动填充您的个人信息',
+            icon: 'success',
+            duration: 2000
+          });
+        }
+      } catch (error) {
+        console.error('自动填充用户信息失败:', error);
+        // 静默处理错误，不影响正常流程
+      }
+    },
+    
+    // 从身份证号计算年龄
+    calculateAgeFromIdCard(idCard) {
+      if (!idCard || idCard.length !== 18) {
+        return 0;
+      }
+      
+      try {
+        const birthYear = parseInt(idCard.substring(6, 10));
+        const birthMonth = parseInt(idCard.substring(10, 12));
+        const birthDay = parseInt(idCard.substring(12, 14));
+        
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
+        
+        let age = currentYear - birthYear;
+        
+        // 如果今年还没过生日，年龄减1
+        if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+          age--;
+        }
+        
+        return age > 0 ? age : 0;
+      } catch (error) {
+        console.error('计算年龄失败:', error);
+        return 0;
+      }
+    },
+    
     // 获取医院列表
     async getHospitalList() {
       try {
@@ -1889,6 +1980,29 @@ export default {
         transform: scale(1.1);
 }
     }
+  }
+}
+
+.auto-fill-tip {
+  display: flex;
+  align-items: center;
+  background: rgba(9, 132, 227, 0.1);
+  border: 1rpx solid rgba(9, 132, 227, 0.3);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  animation: slideInUp 0.8s ease-out 0.2s both;
+  
+  .tip-icon {
+    font-size: 32rpx;
+    margin-right: 15rpx;
+    color: #0984e3;
+  }
+  
+  .tip-text {
+    font-size: 26rpx;
+    color: #0984e3;
+    font-weight: 500;
   }
 }
 

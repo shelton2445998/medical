@@ -3,6 +3,7 @@ package com.fourth.medical.auth.service.impl;
 import com.fourth.medical.auth.dto.AppAccountLoginDto;
 import com.fourth.medical.auth.dto.AppLoginDto;
 import com.fourth.medical.auth.dto.AppRegisterDto;
+import com.fourth.medical.auth.dto.AppUserUpdateProfileDto;
 import com.fourth.medical.auth.service.AppLoginRedisService;
 import com.fourth.medical.auth.service.AppLoginService;
 import com.fourth.medical.auth.util.AppLoginUtil;
@@ -229,5 +230,49 @@ public class AppLoginServiceImpl implements AppLoginService {
         String token = TokenUtil.getToken();
         // 删除缓存
         appLoginRedisService.deleteLoginVo(token);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateAppUserProfile(AppUserUpdateProfileDto dto) {
+        // 获取当前登录用户
+        AppLoginVo appLoginVo = AppLoginUtil.getLoginVo();
+        if (appLoginVo == null) {
+            throw new LoginException("请先登录");
+        }
+        
+        Long userId = appLoginVo.getUserId();
+        User user = userService.getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户信息不存在");
+        }
+        
+        // 只更新非空字段
+        if (dto.getNickname() != null) {
+            user.setNickname(dto.getNickname());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getHead() != null) {
+            user.setHead(dto.getHead());
+        }
+        if (dto.getOpenid() != null) {
+            user.setOpenid(dto.getOpenid());
+        }
+        if (dto.getRemark() != null) {
+            user.setRemark(dto.getRemark());
+        }
+        if (dto.getGender() != null) {
+            user.setGender(dto.getGender());
+        }
+        if (dto.getIdCard() != null) {
+            user.setIdCard(dto.getIdCard());
+        }
+        if (dto.getIntroduction() != null) {
+            user.setIntroduction(dto.getIntroduction());
+        }
+        
+        return userService.updateById(user);
     }
 }
