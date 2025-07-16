@@ -211,4 +211,30 @@ public class AppOrdersController {
         boolean result = ordersService.confirmPayment(id, token);
         return ApiResult.result(result);
     }
+
+    /**
+     * 删除体检预约订单
+     *
+     * @param id
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @Operation(summary = "删除体检预约订单")
+    @DeleteMapping("/delete/{id}")
+    public ApiResult deleteAppointment(@PathVariable Long id, HttpServletRequest request) {
+        log.info("删除体检预约订单：{}", id);
+        // 从请求中获取token
+        String token = TokenUtil.getToken(request);
+        log.info("获取到token: {}", token);
+        
+        // 验证用户权限，只能删除自己的订单
+        AppOrdersVo order = ordersService.getAppOrdersById(id, token);
+        if (order == null) {
+            return ApiResult.fail("订单不存在或无权限删除");
+        }
+        
+        boolean result = ordersService.deleteOrders(id);
+        return ApiResult.result(result);
+    }
 }

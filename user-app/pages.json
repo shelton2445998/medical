@@ -138,6 +138,14 @@
 			}
 		},
 		{
+			"path": "pages/hospital-detail/hospital-detail",
+			"style": {
+				"navigationBarTitleText": "医院详情",
+				"navigationBarBackgroundColor": "#0984e3",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "个人中心",

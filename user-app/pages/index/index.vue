@@ -254,9 +254,11 @@
 			// 获取推荐医院列表
 			async getRecommendHospitals() {
 				this.hospitalLoading = true;
+				console.log('开始获取推荐医院...');
 				
 				try {
 					const result = await get(hospitalApi.getRecommendHospitals);
+					console.log('医院接口返回结果:', result);
 					
 					// 检查返回的数据结构
 					if (result && result.data) {
@@ -283,6 +285,7 @@
 							hospital.address = '地址信息待完善';
 						}
 					});
+					console.log('处理后的医院列表:', this.hospitalList);
 				} catch (error) {
 					// 如果接口失败，使用测试数据
 					this.hospitalList = [
@@ -388,8 +391,30 @@
 				}
 			},
 			selectHospital(hospital) {
+				console.log('点击医院:', hospital);
+				
+				// 显示提示
+				uni.showToast({
+					title: '正在跳转...',
+					icon: 'loading',
+					duration: 1000
+				});
+				
+				// 存储选择的医院信息
+				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
+				
 				uni.navigateTo({
-					url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}`
+					url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}`,
+					success: () => {
+						console.log('成功跳转到医院详情页面');
+					},
+					fail: (err) => {
+						console.error('跳转失败:', err);
+						uni.showToast({
+							title: '跳转失败，请稍后重试',
+							icon: 'none'
+						});
+					}
 				});
 			},
 			selectPackage(pkg) {
