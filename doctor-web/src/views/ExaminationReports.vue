@@ -195,53 +195,17 @@
           </div>
         </div>
 
-        <div class="exam-items-container">
-          <div class="panel exam-item-panel" v-for="item in checkItems" :key="item.id">
-            <div class="panel-header">
-              <h4><el-icon><CheckboxFilled /></el-icon>{{ item.name }}</h4>
-            </div>
-            <div class="panel-body">
-              <el-table :data="item.details" border stripe class="custom-table">
-            <el-table-column prop="name" label="检查项目" width="180" />
-            <el-table-column prop="normalValue" label="正常值" width="180" />
-            <el-table-column prop="unit" label="单位" width="100" />
-            <el-table-column label="检查结果">
-              <template #default="scope">
-                <el-input v-model="scope.row.value" placeholder="请输入检查结果" />
-              </template>
-            </el-table-column>
-            <el-table-column label="是否异常" width="150">
-              <template #default="scope">
-                <el-switch
-                  v-model="scope.row.isAbnormal"
-                  active-text="异常"
-                  inactive-text="正常"
-                  :disabled="isAutoCheckAbnormal"
-                />
-              </template>
-            </el-table-column>
-          </el-table>
-            </div>
-          </div>
-        </div>
+        <!-- 体检结果部分已移除 -->
 
         <div class="panel conclusion-panel">
           <div class="panel-header">
-            <h4><el-icon><Document /></el-icon>体检结论</h4>
+            <h3><el-icon><Document /></el-icon>体检结论</h3>
           </div>
           <div class="panel-body">
-          <el-input
-            v-model="conclusion"
-            type="textarea"
-            rows="4"
-            placeholder="请输入体检结论和医疗建议"
-              class="conclusion-input"
-          />
+            <el-card class="conclusion-card" shadow="never">
+              <div class="conclusion-content">{{ currentReport.conclusion }}</div>
+          </el-card>
           </div>
-        </div>
-
-        <div class="auto-check-option">
-          <el-checkbox v-model="isAutoCheckAbnormal">自动标记异常项（根据正常值范围对比）</el-checkbox>
         </div>
       </div>
       <template #footer>
@@ -288,39 +252,7 @@
           </div>
         </div>
 
-        <div class="panel exam-results-panel">
-          <div class="panel-header">
-            <h3><el-icon><Files /></el-icon>体检结果</h3>
-          </div>
-          <div class="panel-body">
-          <div v-for="item in reportItems" :key="item.id" class="exam-item">
-              <h4 class="exam-item-title">
-                <el-icon><CheckboxFilled /></el-icon>{{ item.name }}
-              </h4>
-              <el-table :data="item.details" class="custom-table" border stripe>
-              <el-table-column prop="name" label="检查项目" width="180" />
-              <el-table-column prop="value" label="检查结果" width="120" />
-              <el-table-column prop="unit" label="单位" width="80" />
-              <el-table-column prop="normalValue" label="参考范围" width="150" />
-              <el-table-column label="结果" width="100">
-                <template #default="scope">
-                    <el-tag :type="scope.row.isAbnormal ? 'danger' : 'success'" effect="dark">
-                    {{ scope.row.isAbnormal ? '异常' : '正常' }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="说明" min-width="180">
-                <template #default="scope">
-                  <span v-if="scope.row.isAbnormal" class="abnormal-hint">
-                    {{ getAbnormalHint(scope.row) }}
-                  </span>
-                  <span v-else class="normal-hint">正常范围内</span>
-                </template>
-              </el-table-column>
-            </el-table>
-            </div>
-          </div>
-        </div>
+        <!-- 体检结果部分已移除 -->
 
         <div class="panel conclusion-panel">
           <div class="panel-header">
@@ -344,9 +276,6 @@
           <el-button type="primary" @click="handlePrintReport">
             <el-icon><Printer /></el-icon>打印报告
           </el-button>
-          <el-button type="success" @click="handleDownloadReport">
-            <el-icon><Download /></el-icon>下载PDF
-          </el-button>
         </span>
       </template>
     </el-dialog>
@@ -355,7 +284,7 @@
 
 <script>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { Search, Refresh, Edit, View, EditPen, Check, Promotion, User, Document, Files, CheckboxFilled, Printer, Download } from '@element-plus/icons-vue'
+import { Search, Refresh, Edit, View, EditPen, Check, Promotion, User, Document, Files, CheckboxFilled, Printer } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getReportList, getReportDetail, submitExaminationResults, generateReport, getPendingReports, getCompletedReports } from '@/api/doctor'
 
@@ -373,8 +302,7 @@ export default {
     Document,
     Files,
     CheckboxFilled,
-    Printer,
-    Download
+    Printer
   },
   setup() {
     const loading = ref(false)
@@ -510,67 +438,102 @@ export default {
     
     const handleSaveResults = async () => {
       try {
-        if (!checkItems.value.some(item => item.details && item.details.some(detail => detail.value))) {
-          ElMessage.warning('请先填写检查结果')
+        // 打印调试信息
+        console.log('checkItems:', checkItems.value);
+        
+        // 检查是否至少有一个检查结果或者结论
+        const hasCheckItemValues = checkItems.value.some(item => 
+          item.details && item.details.some(detail => detail.value && detail.value.trim() !== '')
+        );
+        
+        const hasConclusion = conclusion.value && conclusion.value.trim() !== '';
+        
+        console.log('hasCheckItemValues:', hasCheckItemValues, 'hasConclusion:', hasConclusion);
+        
+        // 如果既没有检查结果也没有结论，则提示用户
+        if (!hasCheckItemValues && !hasConclusion) {
+          ElMessage.warning('请填写检查结果或体检结论')
           return
         }
         
+        // 修正数据结构，确保与后端API匹配
         const data = {
           reportId: currentReport.value.id,
+          conclusion: conclusion.value,
           checkItems: checkItems.value.map(item => ({
             id: item.id,
             details: item.details.map(detail => ({
               id: detail.id,
-              value: detail.value,
-              isAbnormal: detail.isAbnormal
+              value: detail.value || '', // 确保undefined/null值被转换为空字符串
+              isAbnormal: detail.isAbnormal ? 1 : 0 // 确保使用整数而不是布尔值
             }))
-          })),
-          conclusion: conclusion.value
+          }))
         }
         
-        await submitExaminationResults(data)
-        ElMessage.success('保存体检结果成功')
-        resultDialogVisible.value = false
-        fetchReportList()
+        // 添加控制台日志，帮助调试
+        console.log('提交的数据:', JSON.stringify(data))
+        
+        const res = await submitExaminationResults(data)
+        if (res && res.code === 200) {
+          ElMessage.success('保存体检结果成功')
+          resultDialogVisible.value = false
+          fetchReportList()
+        } else {
+          ElMessage.error((res && res.msg) || '保存体检结果失败')
+        }
       } catch (error) {
         console.error('保存体检结果失败', error)
-        ElMessage.error('保存体检结果失败')
+        ElMessage.error(error.message || '保存体检结果失败')
       }
     }
     
     const handleGenerateReport = async () => {
       try {
-        if (!conclusion.value) {
+        if (!conclusion.value || conclusion.value.trim() === '') {
           ElMessage.warning('请填写体检结论')
           return
         }
         
-        if (!checkItems.value.some(item => item.details && item.details.some(detail => detail.value))) {
-          ElMessage.warning('请填写检查结果')
+        // 检查是否至少有一个检查结果
+        const hasCheckItemValues = checkItems.value.some(item => 
+          item.details && item.details.some(detail => detail.value && detail.value.trim() !== '')
+        );
+        
+        // 生成报告需要至少一个检查结果
+        if (!hasCheckItemValues) {
+          ElMessage.warning('请填写至少一项检查结果')
           return
         }
         
+        // 修正数据结构，确保与后端API匹配
         const data = {
           reportId: currentReport.value.id,
+          conclusion: conclusion.value,
           checkItems: checkItems.value.map(item => ({
             id: item.id,
             details: item.details.map(detail => ({
               id: detail.id,
-              value: detail.value,
-              isAbnormal: detail.isAbnormal
+              value: detail.value || '', // 确保undefined/null值被转换为空字符串
+              isAbnormal: detail.isAbnormal ? 1 : 0 // 确保使用整数而不是布尔值
             }))
-          })),
-          conclusion: conclusion.value
+          }))
         }
         
-        await generateReport(data)
-        ElMessage.success('生成体检报告成功')
-        resultDialogVisible.value = false
-        activeTab.value = 'completed'
-        fetchReportList()
+        // 添加控制台日志，帮助调试
+        console.log('生成报告的数据:', JSON.stringify(data))
+        
+        const res = await generateReport(data)
+        if (res && res.code === 200) {
+          ElMessage.success('生成体检报告成功')
+          resultDialogVisible.value = false
+          activeTab.value = 'completed'
+          fetchReportList()
+        } else {
+          ElMessage.error((res && res.msg) || '生成体检报告失败')
+        }
       } catch (error) {
         console.error('生成体检报告失败', error)
-        ElMessage.error('生成体检报告失败')
+        ElMessage.error(error.message || '生成体检报告失败')
       }
     }
     
@@ -631,11 +594,12 @@ export default {
       fetchReportList();
     };
     
+    // 此部分删除下载PDF相关函数
     // 下载PDF报告
-    const handleDownloadReport = () => {
-      ElMessage.success('报告下载中...');
-      // 实际实现根据后端API
-    };
+    // const handleDownloadReport = () => {
+    //   ElMessage.success('报告下载中...');
+    //   // 实际实现根据后端API
+    // };
     
     onMounted(() => {
       fetchReportList()
@@ -669,8 +633,8 @@ export default {
       handleGenerateReport,
       handlePrintReport,
       refreshData,
-      handleTabChange,
-      handleDownloadReport
+      handleTabChange
+      // 移除 handleDownloadReport
     }
   }
 }
