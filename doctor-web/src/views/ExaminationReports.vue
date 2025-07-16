@@ -202,9 +202,15 @@
             <h3><el-icon><Document /></el-icon>体检结论</h3>
           </div>
           <div class="panel-body">
-            <el-card class="conclusion-card" shadow="never">
-              <div class="conclusion-content">{{ currentReport.conclusion }}</div>
-          </el-card>
+            <el-form-item>
+              <el-input
+                v-model="conclusion"
+                type="textarea"
+                :rows="4"
+                placeholder="请输入体检结论..."
+                class="conclusion-input"
+              />
+            </el-form-item>
           </div>
         </div>
       </div>
