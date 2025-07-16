@@ -137,6 +137,9 @@
 import { appointmentApi } from '@/utils/api.js';
 import { cancelAppointment } from '@/api/appointment.js';
 
+// API 基础URL
+const API_BASE_URL = 'http://localhost:8888/api';
+
 export default {
 	data() {
 		return {
@@ -369,8 +372,103 @@ export default {
 			},
 			// 查看报告
 			viewReport(appointment) {
-				uni.navigateTo({
-					url: `/pages/report-detail/report-detail?appointmentId=${appointment.id}`
+				// 获取用户信息
+				const token = uni.getStorageSync('uniIdToken');
+				
+				if (!token) {
+					uni.showToast({
+						title: '请先登录',
+						icon: 'none'
+					});
+					return;
+				}
+				
+				// 先获取用户信息，然后根据订单ID获取报告ID
+				uni.request({
+					url: `${API_BASE_URL}/app/getLoginUserInfo`,
+					method: 'POST',
+					header: {
+						'Authorization': token,
+						'Content-Type': 'application/json'
+					},
+					success: (res) => {
+						console.log('获取用户信息响应：', res);
+						if (res.statusCode === 200 && res.data.code === 200) {
+							const userData = res.data.data;
+							
+							// 根据订单ID获取报告ID
+							uni.request({
+								url: `${API_BASE_URL}/app/report/getAppReportPage`,
+								method: 'POST',
+								header: {
+									'Authorization': token,
+									'Content-Type': 'application/json'
+								},
+								data: {
+									orderId: appointment.id,
+									pageIndex: 1,
+									pageSize: 1
+								},
+								success: (reportRes) => {
+									console.log('获取报告列表响应：', reportRes);
+									if (reportRes.statusCode === 200 && reportRes.data.code === 200) {
+										const reportList = reportRes.data.data.list;
+										if (reportList && reportList.length > 0) {
+											const report = reportList[0];
+											
+											// 构建跳转参数，使用报告ID
+											const params = {
+												id: report.id, // 使用报告ID而不是订单ID
+												personName: encodeURIComponent(userData.nickname || ''),
+												hospitalName: encodeURIComponent(appointment.hospitalName || ''),
+												examDate: encodeURIComponent(appointment.appointmentDate || ''),
+												patientGender: encodeURIComponent(userData.gender || ''),
+												patientAge: encodeURIComponent(userData.age || '')
+											};
+											
+											// 构建URL参数
+											const urlParams = Object.keys(params)
+												.map(key => `${key}=${params[key]}`)
+												.join('&');
+											
+											uni.navigateTo({
+												url: `/pages/report-detail/report-detail?${urlParams}`
+											});
+										} else {
+											uni.showToast({
+												title: '报告尚未生成',
+												icon: 'none'
+											});
+										}
+									} else {
+										uni.showToast({
+											title: '获取报告信息失败',
+											icon: 'none'
+										});
+									}
+								},
+								fail: (err) => {
+									console.error('获取报告信息失败：', err);
+									uni.showToast({
+										title: '网络错误，请重试',
+										icon: 'none'
+									});
+								}
+							});
+						} else {
+							uni.showToast({
+								title: '获取用户信息失败',
+								icon: 'none'
+							});
+						}
+					},
+					fail: (err) => {
+						console.error('获取用户信息失败：', err);
+						uni.showToast({
+							title: '网络错误，请重试',
+							icon: 'none'
+						});
+					}
 				});
 			},
 			// 立即预约

@@ -25,17 +25,17 @@
 						</view>
 						<view class="report-actions" style="position: relative;right: 0;">
 							<view>
-								<button class="action-btn primary" @click.stop="viewReport(item)">
-									<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
-									<text>详情</text>
-								</button>
+							<button class="action-btn primary" @click.stop="viewReport(item)">
+								<image src="/static/icon/look3.png" mode="aspectFit" class="btn-icon"></image>
+								<text>详情</text>
+							</button>
 							</view>
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
-
+		
 		<!-- 空状态 -->
 		<view class="empty-state" v-else-if="!loading">
 			<image class="empty-image" src="/static/images/empty-report.png" mode="aspectFit"></image>
@@ -74,7 +74,7 @@
 	import {
 		getLoginUserInfo
 	} from '@/api/user';
-
+	
 	export default {
 		data() {
 			return {
@@ -146,7 +146,7 @@
 					}
 				});
 			},
-
+			
 			// 获取所有报告并保存，前端分页
 			async getAllReports() {
 				this.loading = true;
@@ -162,41 +162,41 @@
 					if (res && res.success && res.data) {
 						const list = Array.isArray(res.data.list) ? res.data.list : [];
 						const reportListWithDetails = await Promise.all(list.map(async (item) => {
-							let packageName = item.packageName;
-							if (!packageName && item.orderId) {
-								try {
-									const appointmentRes = await getAppointmentDetail(item.orderId);
-									if (appointmentRes && appointmentRes.success && appointmentRes.data) {
-										packageName = appointmentRes.data.setmealName || '定制套餐';
-										return {
-											id: item.id,
-											orderId: item.orderId || '',
+								let packageName = item.packageName;
+								if (!packageName && item.orderId) {
+									try {
+										const appointmentRes = await getAppointmentDetail(item.orderId);
+										if (appointmentRes && appointmentRes.success && appointmentRes.data) {
+											packageName = appointmentRes.data.setmealName || '定制套餐';
+											return {
+												id: item.id,
+												orderId: item.orderId || '',
 											packageName,
-											reportDate: item.reportDate || item.createTime || '',
-											hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
-											personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+												reportDate: item.reportDate || item.createTime || '',
+												hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
+												personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
 											examDate: (appointmentRes.data.appointmentDate && appointmentRes.data.timeSlot) ?
 												`${appointmentRes.data.appointmentDate.slice(0, 10)} ${appointmentRes.data.timeSlot}` :
 												(item.examDate || ''),
-											adviceCount: item.adviceCount || 0,
-											patientGender: appointmentRes.data.patientGender || '',
-											patientAge: appointmentRes.data.patientAge || ''
-										};
+												adviceCount: item.adviceCount || 0,
+												patientGender: appointmentRes.data.patientGender || '',
+												patientAge: appointmentRes.data.patientAge || ''
+											};
 									}
 								} catch (error) {}
 							}
-							return {
-								id: item.id,
-								orderId: item.orderId || '',
+								return {
+									id: item.id,
+									orderId: item.orderId || '',
 								packageName: packageName || '未命名套餐',
-								reportDate: item.reportDate || item.createTime || '',
-								hospitalName: item.hospitalName || '',
-								personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
-								examDate: item.examDate || '',
-								adviceCount: item.adviceCount || 0,
-								patientGender: '',
-								patientAge: ''
-							};
+									reportDate: item.reportDate || item.createTime || '',
+									hospitalName: item.hospitalName || '',
+									personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+									examDate: item.examDate || '',
+									adviceCount: item.adviceCount || 0,
+									patientGender: '',
+									patientAge: ''
+								};
 						}));
 						this.allReports = reportListWithDetails;
 						this.total = this.allReports.length;
@@ -234,7 +234,7 @@
 					});
 				}
 			},
-
+			
 			// 分享报告
 			shareReport(report) {
 				uni.showToast({
@@ -247,7 +247,7 @@
 				uni.showLoading({
 					title: '下载中...'
 				});
-
+				
 				// 模拟下载
 				setTimeout(() => {
 					uni.hideLoading();
@@ -322,235 +322,235 @@
 </script>
 
 <style lang="scss">
-	@font-face {
-		font-family: texticons;
-		font-weight: normal;
-		font-style: normal;
-		src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
-	}
+@font-face {
+	font-family: texticons;
+	font-weight: normal;
+	font-style: normal;
+	src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
+}
 
-	.btn-icon {
-		width: 40rpx;
-		height: 40rpx;
-		margin-right: 10rpx;
-		vertical-align: middle;
-	}
+.btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
+  vertical-align: middle;
+}
 
-	.content {
-		background-color: #f5f5f5;
-		min-height: 100vh;
-	}
+.content {
+	background-color: #f5f5f5;
+	min-height: 100vh;
+}
 
-	.report-list {
-		padding: 20rpx;
-
-		.report-item {
-			background-color: #ffffff;
-			border-radius: 10rpx;
+.report-list {
+	padding: 20rpx;
+	
+	.report-item {
+		background-color: #ffffff;
+		border-radius: 10rpx;
+		margin-bottom: 20rpx;
+		padding: 30rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+		
+		.report-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
 			margin-bottom: 20rpx;
-			padding: 30rpx;
-			box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-
-			.report-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-bottom: 20rpx;
-
-				.report-title {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #333333;
-				}
-
-				.report-date {
-					font-size: 24rpx;
-					color: #999999;
-				}
+			
+			.report-title {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
 			}
-
-
-
-
-
-
-		}
-	}
-
-	.empty-state {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 100rpx 0;
-
-		.empty-image {
-			width: 200rpx;
-			height: 200rpx;
-			margin-bottom: 30rpx;
-		}
-
-		.empty-text {
-			font-size: 28rpx;
-			color: #999999;
-			margin-bottom: 40rpx;
-		}
-
-		.make-appointment-btn {
-			background-color: #1296db;
-			color: #ffffff;
-			font-size: 28rpx;
-			padding: 0 40rpx;
-			height: 80rpx;
-			line-height: 80rpx;
-			border-radius: 40rpx;
-
-			&::after {
-				border: none;
+			
+			.report-date {
+				font-size: 24rpx;
+				color: #999999;
 			}
 		}
-	}
+		
 
-	.beautify-report-item {
-		box-shadow: 0 6rpx 32rpx rgba(18, 150, 219, 0.08), 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
-		border-radius: 18rpx;
-		padding: 0;
-		margin-bottom: 28rpx;
-		overflow: hidden;
-	}
+		
 
-	.green-header {
-		background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
-		padding: 24rpx 28rpx;
-		border-radius: 18rpx 18rpx 0 0;
-		box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.2);
-	}
+		
 
-	.green-header-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8rpx;
 	}
+}
 
-	.package-name {
-		font-size: 36rpx;
-		font-weight: 700;
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 100rpx 0;
+	
+	.empty-image {
+		width: 200rpx;
+		height: 200rpx;
+		margin-bottom: 30rpx;
+	}
+	
+	.empty-text {
+		font-size: 28rpx;
+		color: #999999;
+		margin-bottom: 40rpx;
+	}
+	
+	.make-appointment-btn {
+		background-color: #1296db;
 		color: #ffffff;
-		text-align: center;
-		letter-spacing: 1rpx;
-	}
-
-	.report-date {
-		font-size: 24rpx;
-		color: rgba(255, 255, 255, 0.9);
-		font-weight: 400;
-		text-align: right;
-		align-self: flex-end;
-		width: 100%;
-	}
-
-	.light-green-header {
-		background: linear-gradient(135deg, #E8F5E8 0%, #F0F8F0 100%);
-		padding: 24rpx 28rpx;
-		border-radius: 0 0 18rpx 18rpx;
-		box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.1);
-		margin-top: -1rpx;
-	}
-
-	.light-green-header-content {
-		display: flex;
-		flex-direction: column;
-		gap: 16rpx;
-	}
-
-	.light-green-header .info-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
 		font-size: 28rpx;
-	}
-
-	.light-green-header .info-label {
-		color: #4CAF50;
-		font-weight: 600;
-		font-size: 26rpx;
-	}
-
-	.light-green-header .info-value {
-		color: #2E7D32;
-		font-weight: 500;
-		font-size: 28rpx;
-	}
-
-	.light-green-header .report-actions {
-		display: flex;
-		justify-content: flex-end;
-		margin-top: 20rpx;
-		padding-top: 20rpx;
-		border-top: 1px solid rgba(76, 175, 80, 0.2);
-	}
-
-	.light-green-header .action-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 24rpx;
-		padding: 0 20rpx;
-		height: 60rpx;
-		line-height: 1;
-		border-radius: 30rpx;
-		margin-left: 0;
-		background-color: rgba(255, 255, 255, 0.8);
-		color: #4CAF50;
-		border: 1px solid rgba(76, 175, 80, 0.3);
-		position: relative;
-		right: 0;
-
-		&.primary {
-			background-color: #4CAF50;
-			color: #ffffff;
-			border: 1px solid #4CAF50;
-		}
-
+		padding: 0 40rpx;
+		height: 80rpx;
+		line-height: 80rpx;
+		border-radius: 40rpx;
+		
 		&::after {
 			border: none;
 		}
 	}
+}
 
-	.beautify-header {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin-bottom: 18rpx;
+.beautify-report-item {
+		box-shadow: 0 6rpx 32rpx rgba(18, 150, 219, 0.08), 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+	border-radius: 18rpx;
+	padding: 0;
+	margin-bottom: 28rpx;
+	overflow: hidden;
+}
 
-		.title-center-group {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
+.green-header {
+	background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+	padding: 24rpx 28rpx;
+	border-radius: 18rpx 18rpx 0 0;
+	box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.2);
+}
 
-		.package-icon {
-			display: none;
-		}
+.green-header-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8rpx;
+}
 
-		.report-title {
-			font-size: 52rpx;
-			font-weight: 700;
-			color: #1296db;
-			letter-spacing: 1rpx;
-		}
+.package-name {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+	text-align: center;
+	letter-spacing: 1rpx;
+}
 
-		.report-date {
-			font-size: 26rpx;
-			color: #999;
-			font-weight: 400;
-			margin-top: 4rpx;
-			text-align: right;
-			align-self: flex-end;
-			width: 100%;
-		}
+.report-date {
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.9);
+	font-weight: 400;
+	text-align: right;
+	align-self: flex-end;
+	width: 100%;
+}
+
+.light-green-header {
+	background: linear-gradient(135deg, #E8F5E8 0%, #F0F8F0 100%);
+	padding: 24rpx 28rpx;
+	border-radius: 0 0 18rpx 18rpx;
+	box-shadow: 0 2rpx 8rpx rgba(76, 175, 80, 0.1);
+	margin-top: -1rpx;
+}
+
+.light-green-header-content {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+
+.light-green-header .info-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 28rpx;
+}
+
+.light-green-header .info-label {
+	color: #4CAF50;
+	font-weight: 600;
+	font-size: 26rpx;
+}
+
+.light-green-header .info-value {
+	color: #2E7D32;
+	font-weight: 500;
+	font-size: 28rpx;
+}
+
+.light-green-header .report-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 20rpx;
+	padding-top: 20rpx;
+	border-top: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.light-green-header .action-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24rpx;
+	padding: 0 20rpx;
+	height: 60rpx;
+	line-height: 1;
+	border-radius: 30rpx;
+		margin-left: 0;
+	background-color: rgba(255, 255, 255, 0.8);
+	color: #4CAF50;
+	border: 1px solid rgba(76, 175, 80, 0.3);
+		position: relative;
+		right: 0;
+	
+	&.primary {
+		background-color: #4CAF50;
+		color: #ffffff;
+		border: 1px solid #4CAF50;
 	}
+	
+	&::after {
+		border: none;
+	}
+}
+
+.beautify-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 18rpx;
+
+	.title-center-group {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.package-icon {
+		display: none;
+	}
+
+	.report-title {
+		font-size: 52rpx;
+		font-weight: 700;
+		color: #1296db;
+		letter-spacing: 1rpx;
+	}
+
+	.report-date {
+		font-size: 26rpx;
+		color: #999;
+		font-weight: 400;
+		margin-top: 4rpx;
+		text-align: right;
+		align-self: flex-end;
+		width: 100%;
+	}
+}
 
 	.pagination {
 		display: flex;
@@ -841,4 +841,4 @@
 			}
 		}
 	}
-</style>
+</style> 

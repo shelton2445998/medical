@@ -189,20 +189,6 @@
 							<text class="account-value">{{ userInfo.username }}</text>
 						</view>
 						<view class="account-item">
-							<text class="account-label">用户角色</text>
-							<text class="account-value">{{ getRoleText(userInfo.user_role_id) }}</text>
-						</view>
-						<view class="account-item">
-							<text class="account-label">账户状态</text>
-							<text class="account-value" :class="getStatusClass(userInfo.status)">
-								{{ getStatusText(userInfo.status) }}
-							</text>
-						</view>
-						<view class="account-item">
-							<text class="account-label">注册时间</text>
-							<text class="account-value">{{ formatTime(userInfo.register_time) }}</text>
-						</view>
-						<view class="account-item">
 							<text class="account-label">最后登录</text>
 							<text class="account-value">{{ formatTime(userInfo.last_login_time) }}</text>
 						</view>
@@ -447,25 +433,7 @@
 				return gender === 1 ? '男' : '女';
 			},
 			
-			// 获取状态文本
-			getStatusText(status) {
-				return status === 1 ? '正常' : '禁用';
-			},
-			
-			// 获取状态样式类
-			getStatusClass(status) {
-				return status === 1 ? 'status-normal' : 'status-disabled';
-			},
-			
-			// 获取角色文本
-			getRoleText(roleId) {
-				const roleMap = {
-					1: '普通用户',
-					2: 'VIP用户',
-					3: '管理员'
-				};
-				return roleMap[roleId] || '未知角色';
-			},
+
 			
 			// 格式化时间
 			formatTime(timeStr) {
@@ -1047,16 +1015,6 @@
 		font-size: 26rpx;
 		color: #333;
 		font-weight: 500;
-		
-		&.status-normal {
-			color: #28a745;
-			font-weight: bold;
-		}
-		
-		&.status-disabled {
-			color: #dc3545;
-			font-weight: bold;
-		}
 	}
 }
 
