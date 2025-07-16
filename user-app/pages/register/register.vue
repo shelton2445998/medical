@@ -31,7 +31,7 @@
             <input 
               class="form-input" 
               v-model="registerForm.username" 
-              placeholder="请输入用户名（至少5个字符）" 
+              placeholder="请输入用户名" 
               placeholder-class="input-placeholder"
             />
           </view>
@@ -120,9 +120,9 @@ export default {
         return false;
       }
       
-      if (this.registerForm.username.length < 5) {
+      if (!this.registerForm.username.trim()) {
         uni.showToast({
-          title: '用户名长度不能少于5个字符',
+          title: '请输入用户名',
           icon: 'none'
         });
         return false;

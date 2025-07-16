@@ -189,7 +189,15 @@
 					}
 				}
 				if (options.patientAge) {
-					this.reportInfo.age = decodeURIComponent(options.patientAge);
+					const ageValue = decodeURIComponent(options.patientAge);
+					// 确保年龄是有效数字
+					if (ageValue && ageValue !== 'null' && ageValue !== 'undefined' && ageValue !== '') {
+						this.reportInfo.age = parseInt(ageValue) || 25;
+					} else {
+						this.reportInfo.age = 25; // 默认年龄
+					}
+				} else {
+					this.reportInfo.age = 25; // 默认年龄
 				}
 				// 获取报告详情
 				this.getReportDetail();
