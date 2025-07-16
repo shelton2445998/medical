@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
  * App体检预约订单 控制器
@@ -96,6 +97,7 @@ public class AppOrdersController {
                             checkItemDepartmentMap.values().stream().distinct().collect(Collectors.toList()));
                     
                     // 为每个检查项创建report_item记录，并根据科室分配医生
+                    List<Long> createdItemIds = new ArrayList<>();
                     for (Long checkItemId : checkItemIdList) {
                         // 获取检查项对应的科室
                         Long departmentId = checkItemDepartmentMap.get(checkItemId);
@@ -103,12 +105,25 @@ public class AppOrdersController {
                         Long doctorId = departmentDoctorMap.get(departmentId);
                         
                         // 创建report_item记录
-                        reportItemService.createReportItemForCheckItem(
+                        Long reportItemId = reportItemService.createReportItemForCheckItem(
                                 reportId,
                                 result.getId(),
                                 result.getUserId(),
                                 checkItemId,
                                 doctorId);
+                        
+                        if (reportItemId != null) {
+                            createdItemIds.add(reportItemId);
+                        }
+                    }
+                    
+                    // 更新report表中的report_item_ids字段
+                    if (!createdItemIds.isEmpty()) {
+                        String reportItemIdsStr = createdItemIds.stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(","));
+                        
+                        reportItemService.updateReportItemIds(reportId, reportItemIdsStr);
                     }
                 }
             }

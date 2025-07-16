@@ -125,6 +125,15 @@ public interface ReportItemService extends IService<ReportItem> {
      * @return 是否更新成功
      */
     boolean updateReportItemDoctor(Long reportItemId, Long doctorId);
+    
+    /**
+     * 更新report表中的report_item_ids字段
+     *
+     * @param reportId 报告ID
+     * @param reportItemIds 报告项ID列表字符串
+     * @return 是否更新成功
+     */
+    boolean updateReportItemIds(Long reportId, String reportItemIds);
 
     /**
      * 获取医生待处理报告列表

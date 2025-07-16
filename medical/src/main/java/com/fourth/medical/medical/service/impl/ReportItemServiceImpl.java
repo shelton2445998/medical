@@ -350,7 +350,6 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
             reportItem.setUserId(userId);
             reportItem.setItemId(checkItemId);
             reportItem.setDoctorId(doctorId);
-            reportItem.setReportId(reportId);
             reportItem.setReportStatus(0); // 未生成状态
             
             // 插入数据库
@@ -361,6 +360,35 @@ public class ReportItemServiceImpl extends ServiceImpl<ReportItemMapper, ReportI
         } catch (Exception e) {
             log.error("创建检查项报告失败", e);
             throw new BusinessException("创建检查项报告失败");
+        }
+    }
+    
+    /**
+     * 更新report表中的report_item_ids字段
+     *
+     * @param reportId 报告ID
+     * @param reportItemIds 报告项ID列表字符串
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateReportItemIds(Long reportId, String reportItemIds) {
+        log.info("更新report表中的report_item_ids字段，报告ID：{}，报告项ID列表：{}", reportId, reportItemIds);
+        
+        try {
+            int rows = baseMapper.updateReportItemIds(reportId, reportItemIds);
+            boolean result = rows > 0;
+            
+            if (result) {
+                log.info("成功更新report表中的report_item_ids字段");
+            } else {
+                log.warn("更新report表中的report_item_ids字段失败，可能报告不存在");
+            }
+            
+            return result;
+        } catch (Exception e) {
+            log.error("更新report表中的report_item_ids字段失败", e);
+            throw new BusinessException("更新report表中的report_item_ids字段失败");
         }
     }
 }
