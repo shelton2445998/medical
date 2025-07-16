@@ -383,18 +383,18 @@ export default {
 					return;
 				}
 				
-				// 先获取用户信息，然后根据订单ID获取报告ID
+				// 先获取预约详情，然后根据订单ID获取报告ID
 				uni.request({
-					url: `${API_BASE_URL}/app/getLoginUserInfo`,
-					method: 'POST',
+					url: appointmentApi.getAppointmentDetail(appointment.id),
+					method: 'GET',
 					header: {
 						'Authorization': token,
 						'Content-Type': 'application/json'
 					},
-					success: (res) => {
-						console.log('获取用户信息响应：', res);
-						if (res.statusCode === 200 && res.data.code === 200) {
-							const userData = res.data.data;
+					success: (appointmentRes) => {
+						console.log('获取预约详情响应：', appointmentRes);
+						if (appointmentRes.statusCode === 200 && appointmentRes.data.code === 200) {
+							const appointmentDetail = appointmentRes.data.data;
 							
 							// 根据订单ID获取报告ID
 							uni.request({
@@ -416,14 +416,14 @@ export default {
 										if (reportList && reportList.length > 0) {
 											const report = reportList[0];
 											
-											// 构建跳转参数，使用报告ID
+											// 构建跳转参数，使用报告ID和预约详情中的年龄信息
 											const params = {
 												id: report.id, // 使用报告ID而不是订单ID
-												personName: encodeURIComponent(userData.nickname || ''),
-												hospitalName: encodeURIComponent(appointment.hospitalName || ''),
-												examDate: encodeURIComponent(appointment.appointmentDate || ''),
-												patientGender: encodeURIComponent(userData.gender || ''),
-												patientAge: encodeURIComponent(userData.age || '')
+												personName: encodeURIComponent(appointmentDetail.patientName || ''),
+												hospitalName: encodeURIComponent(appointmentDetail.hospitalName || ''),
+												examDate: encodeURIComponent(appointmentDetail.appointmentDate || ''),
+												patientGender: encodeURIComponent(appointmentDetail.patientGender || ''),
+												patientAge: encodeURIComponent(appointmentDetail.patientAge || '25')
 											};
 											
 											// 构建URL参数
@@ -457,13 +457,13 @@ export default {
 							});
 						} else {
 							uni.showToast({
-								title: '获取用户信息失败',
+								title: '获取预约详情失败',
 								icon: 'none'
 							});
 						}
 					},
 					fail: (err) => {
-						console.error('获取用户信息失败：', err);
+						console.error('获取预约详情失败：', err);
 						uni.showToast({
 							title: '网络错误，请重试',
 							icon: 'none'

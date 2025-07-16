@@ -77,10 +77,10 @@
 			...mapMutations(['login']),
 			// 登录
 			async bindLogin() {
-				if (this.account.length < 5) {
+				if (!this.account.trim()) {
 					uni.showToast({
 						icon: 'none',
-						title: '账号最短为 5 个字符'
+						title: '请输入用户名'
 					});
 					return;
 				}
