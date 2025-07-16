@@ -41,10 +41,11 @@
 		<view class="summary-card enhanced-card">
 			<view class="card-title">体检结果概要</view>
 			<view class="summary-content">
-				<view class="summary-item" :class="{'abnormal': reportInfo.abnormalCount > 0}">
+				<!-- 删除异常指标 -->
+				<!-- <view class="summary-item" :class="{'abnormal': reportInfo.abnormalCount > 0}">
 					<text class="summary-value highlight-abnormal">{{reportInfo.abnormalCount}}</text>
 					<text class="summary-label">异常指标</text>
-				</view>
+				</view> -->
 				<view class="summary-item">
 					<text class="summary-value">{{reportInfo.totalCount}}</text>
 					<text class="summary-label">检查项目</text>
@@ -59,13 +60,13 @@
 		<!-- 体检结果列表 -->
 		<view class="result-card enhanced-card">
 			<view class="card-title">体检结果</view>
-			<view class="filter-tabs">
+			<!-- 删除全部、异常tab -->
+			<!-- <view class="filter-tabs">
 				<view class="tab-item" v-for="(item, index) in filterOptions" :key="index" :class="{active: currentFilter === item.value}"
 				 @click="switchFilter(item.value)">
 					<text>{{item.label}}</text>
 				</view>
-			</view>
-
+			</view> -->
 			<!-- 体检项目列表 -->
 			<view class="result-list">
 				<view class="result-item" v-for="(item, index) in filteredResults" :key="index" :class="{'abnormal': item.isAbnormal, 'expanded': item.expanded}">
@@ -112,7 +113,7 @@
 		</view>
 
 		<!-- 底部操作栏 -->
-		<view class="bottom-actions enhanced-bottom">
+		<!-- <view class="bottom-actions enhanced-bottom">
 			<button class="action-btn" @click="shareReport">
 				<text class="iconfont icon-share"></text>
 				<text>分享</text>
@@ -125,7 +126,7 @@
 				<text class="iconfont icon-doctor"></text>
 				<text>在线咨询</text>
 			</button>
-		</view>
+		</view> -->
 	</view>
 </template>
 
