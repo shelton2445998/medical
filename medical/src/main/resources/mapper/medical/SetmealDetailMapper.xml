@@ -3,65 +3,81 @@
 <mapper namespace="com.fourth.medical.medical.mapper.SetmealDetailMapper">
 
     <select id="getSetmealDetailById" resultType="com.fourth.medical.medical.vo.SetmealDetailVo">
-        select *
-        from setmeal_detail
-        where id = #{id}
+        SELECT sd.*,
+               h.name AS hospitalName,
+               d.name AS departmentName
+        FROM setmeal_detail sd
+        LEFT JOIN hospital h ON sd.hospital_id = h.id
+        LEFT JOIN department d ON sd.department_id = d.id
+        WHERE sd.id = #{id}
     </select>
 
     <select id="getSetmealDetailPage" parameterType="com.fourth.medical.medical.query.SetmealDetailQuery"
             resultType="com.fourth.medical.medical.vo.SetmealDetailVo">
-        select *
-        from setmeal_detail
+        SELECT sd.*,
+               h.name AS hospitalName,
+               d.name AS departmentName
+        FROM setmeal_detail sd
+        LEFT JOIN hospital h ON sd.hospital_id = h.id
+        LEFT JOIN department d ON sd.department_id = d.id
         <where>
             <if test="setmealId != null">
-                and setmeal_id = #{setmealId}
+                AND sd.setmeal_id = #{setmealId}
             </if>
             <if test="hospitalId != null">
-                and hospital_id = #{hospitalId}
+                AND sd.hospital_id = #{hospitalId}
             </if>
             <if test="departmentId != null">
-                and department_id = #{departmentId}
+                AND sd.department_id = #{departmentId}
             </if>
             <if test="packageType != null">
-                and package_type = #{packageType}
+                AND sd.package_type = #{packageType}
             </if>
             <if test="status != null">
-                and status = #{status}
+                AND sd.status = #{status}
             </if>
             <if test="keyword != null and keyword != ''">
-                and (name like concat('%',#{keyword},'%') or description like concat('%',#{keyword},'%'))
+                AND (sd.name LIKE CONCAT('%',#{keyword},'%') OR sd.description LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
     </select>
 
     <select id="getAppSetmealDetailById" resultType="com.fourth.medical.medical.vo.AppSetmealDetailVo">
-        select *
-        from setmeal_detail
-        where id = #{id}
+        SELECT sd.*,
+               h.name AS hospitalName,
+               d.name AS departmentName
+        FROM setmeal_detail sd
+        LEFT JOIN hospital h ON sd.hospital_id = h.id
+        LEFT JOIN department d ON sd.department_id = d.id
+        WHERE sd.id = #{id}
     </select>
 
     <select id="getAppSetmealDetailPage" parameterType="com.fourth.medical.medical.query.AppSetmealDetailQuery"
             resultType="com.fourth.medical.medical.vo.AppSetmealDetailVo">
-        select *
-        from setmeal_detail
+        SELECT sd.*,
+               h.name AS hospitalName,
+               d.name AS departmentName
+        FROM setmeal_detail sd
+        LEFT JOIN hospital h ON sd.hospital_id = h.id
+        LEFT JOIN department d ON sd.department_id = d.id
         <where>
             <if test="setmealId != null">
-                and setmeal_id = #{setmealId}
+                AND sd.setmeal_id = #{setmealId}
             </if>
             <if test="hospitalId != null">
-                and hospital_id = #{hospitalId}
+                AND sd.hospital_id = #{hospitalId}
             </if>
             <if test="departmentId != null">
-                and department_id = #{departmentId}
+                AND sd.department_id = #{departmentId}
             </if>
             <if test="packageType != null">
-                and package_type = #{packageType}
+                AND sd.package_type = #{packageType}
             </if>
             <if test="status != null">
-                and status = #{status}
+                AND sd.status = #{status}
             </if>
             <if test="keyword != null and keyword != ''">
-                and (name like concat('%',#{keyword},'%') or description like concat('%',#{keyword},'%'))
+                AND (sd.name LIKE CONCAT('%',#{keyword},'%') OR sd.description LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
     </select>

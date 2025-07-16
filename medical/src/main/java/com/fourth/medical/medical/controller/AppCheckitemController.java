@@ -54,7 +54,9 @@ public class AppCheckitemController {
     @PostMapping("/getAppCheckitemPage")
     public ApiResult<AppCheckitemVo> getAppCheckitemPage(@Valid @RequestBody AppCheckitemQuery query) {
         log.info("获取App检查项分页列表：{}", query);
+        log.info("医院ID: {}, 科室ID: {}", query.getHospitalId(), query.getDepartmentId());
         Paging<AppCheckitemVo> paging = checkitemService.getAppCheckitemPage(query);
+        log.info("查询结果数量: {}", paging.getList().size());
         return ApiResult.success(paging);
     }
 

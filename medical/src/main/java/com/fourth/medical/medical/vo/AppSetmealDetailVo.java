@@ -52,8 +52,14 @@ public class AppSetmealDetailVo implements Serializable {
     @Schema(description = "所属医院ID")
     private Long hospitalId;
     
+    @Schema(description = "医院名称")
+    private String hospitalName;
+    
     @Schema(description = "所属科室ID")
     private Long departmentId;
+    
+    @Schema(description = "科室名称")
+    private String departmentName;
     
     @Schema(description = "套餐类型：1-基础，2-高级，3-专项")
     private Integer packageType;

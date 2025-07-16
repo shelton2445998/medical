@@ -79,7 +79,7 @@
             </view>
             <view class="info-row">
               <text class="info-label">患者性别</text>
-              <text class="info-value">{{ appointmentDetail.patientGender === 1 ? '男' : '女' }}</text>
+              <text class="info-value">{{ appointmentDetail.patientGender === 1 ? '男' : appointmentDetail.patientGender === 0 ? '女' : '未知' }}</text>
             </view>
             <view class="info-row">
               <text class="info-label">联系电话</text>

@@ -27,13 +27,18 @@
 
     <select id="getAppCheckitemPage" parameterType="com.fourth.medical.medical.query.AppCheckitemQuery"
             resultType="com.fourth.medical.medical.vo.AppCheckitemVo">
-        select *
-        from checkitem
+        SELECT c.*
+        FROM checkitem c
+        LEFT JOIN department d ON c.department_id = d.id
         <where>
-            <if test="keyword != null and keyword != ''">
-                and (name like concat('%',#{keyword},'%'))
+            <if test="hospitalId != null">
+                AND d.hospital_id = #{hospitalId}
+            </if>
+            <if test="departmentId != null">
+                AND c.department_id = #{departmentId}
             </if>
         </where>
+        ORDER BY c.id
     </select>
 
 </mapper>
