@@ -58,10 +58,6 @@
 		<!-- 分页组件 -->
 		<view class="pagination" v-if="reportList.length > 0 && totalPages > 1">
 			<view class="pagination-controls">
-				<view class="page-jump-row">
-					<input class="page-input" type="number" v-model.number="pendingInputPage" :min="1" :max="totalPages" @keyup.enter="jumpToInputPage" />
-					<view class="button jump" @click="jumpToInputPage">跳转</view>
-				</view>
 				<view class="page-btn-row">
 					<view class="button back" :class="{disabled: currentPage <= 1}" @click="currentPage > 1 && goToPage(currentPage - 1)">
 						上一页
