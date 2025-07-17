@@ -182,6 +182,8 @@
 					let genderValue = decodeURIComponent(options.patientGender);
 					if (genderValue === '1') {
 						this.reportInfo.gender = '男';
+					} else if (genderValue === '2') {
+						this.reportInfo.gender = '女';
 					} else if (genderValue === '0') {
 						this.reportInfo.gender = '女';
 					} else {

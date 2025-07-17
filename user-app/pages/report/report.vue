@@ -155,11 +155,25 @@
 						const list = Array.isArray(res.data.list) ? res.data.list : [];
 						const reportListWithDetails = await Promise.all(list.map(async (item) => {
 							let packageName = item.packageName;
+							// 处理性别逻辑：0转换为2，1保持为1，其它保持原值
+							let processedGender = '';
+							if (item.patientGender !== undefined && item.patientGender !== null) {
+								processedGender = item.patientGender === 0 ? '2' : item.patientGender === 1 ? '1' : '';
+							} else if (item.gender !== undefined && item.gender !== null) {
+								processedGender = item.gender === 0 ? '2' : item.gender === 1 ? '1' : '';
+							}
+							
 							if (!packageName && item.orderId) {
 								try {
 									const appointmentRes = await getAppointmentDetail(item.orderId);
 									if (appointmentRes && appointmentRes.success && appointmentRes.data) {
 										packageName = appointmentRes.data.setmealName || '定制套餐';
+										// 处理预约详情中的性别
+										let appointmentGender = '';
+										if (appointmentRes.data.patientGender !== undefined && appointmentRes.data.patientGender !== null) {
+											appointmentGender = appointmentRes.data.patientGender === 0 ? '2' : appointmentRes.data.patientGender === 1 ? '1' : '';
+										}
+										
 										return {
 											id: item.id,
 											orderId: item.orderId || '',
@@ -171,8 +185,8 @@
 												`${appointmentRes.data.appointmentDate.slice(0, 10)} ${appointmentRes.data.timeSlot}` :
 												(item.examDate || ''),
 											adviceCount: item.adviceCount || 0,
-											patientGender: appointmentRes.data.patientGender || '',
-											patientAge: appointmentRes.data.patientAge || ''
+											patientGender: appointmentGender || processedGender,
+											patientAge: appointmentRes.data.patientAge || item.patientAge || ''
 										};
 									}
 								} catch (error) {}
@@ -186,8 +200,8 @@
 								personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
 								examDate: item.examDate || '',
 								adviceCount: item.adviceCount || 0,
-								patientGender: '',
-								patientAge: ''
+								patientGender: processedGender,
+								patientAge: item.patientAge || ''
 							};
 						}));
 						this.allReports = reportListWithDetails;
@@ -255,8 +269,7 @@
 					personName: report.personName || '',
 					hospitalName: report.hospitalName || '',
 					examDate: report.examDate || '',
-					patientGender: report.patientGender !== undefined ? report.patientGender : (report.gender !== undefined ? report.gender :
-						''),
+					patientGender: report.patientGender,
 					patientAge: report.patientAge !== undefined ? report.patientAge : (report.age !== undefined ? report.age : '')
 				};
 				console.log('即将跳转到report-detail，传递的参数：', paramsObj);
