@@ -21,34 +21,6 @@
 				</view>
 			</view>
 			
-			<!-- 轮播图 -->
-			<view class="banner-section">
-				<swiper class="banner-swiper" circular indicator-dots autoplay interval="3000" duration="500" indicator-active-color="#0984e3">
-					<swiper-item v-for="(item, index) in bannerList" :key="index">
-						<view class="banner-item" @click="navigateTo(item.url)">
-							<image :src="item.image" mode="aspectFill" class="banner-image"></image>
-							<view class="banner-overlay">
-								<text class="banner-title">{{item.title}}</text>
-								<text class="banner-desc">{{item.desc}}</text>
-							</view>
-						</view>
-					</swiper-item>
-				</swiper>
-			</view>
-			
-			<!-- 快捷服务 -->
-			<view class="quick-service">
-				<view class="section-title">快捷服务</view>
-				<view class="service-grid">
-					<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
-						<view class="service-icon">
-							<text class="icon-symbol">{{item.icon}}</text>
-						</view>
-						<text class="service-name">{{item.name}}</text>
-					</view>
-				</view>
-			</view>
-			
 			<!-- 推荐医院 -->
 			<view class="section">
 				<view class="section-header">
