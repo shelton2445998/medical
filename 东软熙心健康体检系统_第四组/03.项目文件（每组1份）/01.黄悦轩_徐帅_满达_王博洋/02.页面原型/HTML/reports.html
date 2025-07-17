@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体检报告 - 熙心健康体检系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .report-list {
+            padding: 15px;
+        }
+
+        .report-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .report-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .report-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .report-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+        }
+
+        .active {
+            color: #007aff;
+        }
+
+        .tab-bar {
+            display: flex;
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tab-item {
+            padding: 8px 16px;
+            margin-right: 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .tab-active {
+            background: #007aff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>体检报告</h1>
+        </header>
+
+        <div class="tab-bar">
+            <div class="tab-item tab-active">全部</div>
+            <div class="tab-item">待完成</div>
+            <div class="tab-item">已完成</div>
+        </div>
+
+        <div class="report-list">
+            <div class="report-item">
+                <div class="report-header">
+                    <div class="report-title">全面体检套餐</div>
+                    <div class="report-date">2024-03-15</div>
+                </div>
+                <div>预约时间：2024-03-15 09:00</div>
+                <div class="report-status status-completed">已完成</div>
+            </div>
+
+            <div class="report-item">
+                <div class="report-header">
+                    <div class="report-title">基础体检套餐</div>
+                    <div class="report-date">2024-03-20</div>
+                </div>
+                <div>预约时间：2024-03-20 10:30</div>
+                <div class="report-status status-pending">待体检</div>
+            </div>
+
+            <div class="report-item">
+                <div class="report-header">
+                    <div class="report-title">高级体检套餐</div>
+                    <div class="report-date">2024-03-25</div>
+                </div>
+                <div>预约时间：2024-03-25 14:00</div>
+                <div class="report-status status-pending">待体检</div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <div>🏠</div>
+                <div>首页</div>
+            </a>
+            <a href="packages.html" class="nav-item">
+                <div>📦</div>
+                <div>套餐</div>
+            </a>
+            <a href="reports.html" class="nav-item active">
+                <div>📊</div>
+                <div>报告</div>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div>👤</div>
+                <div>我的</div>
+            </a>
+        </nav>
+    </div>
+</body>
+</html> 

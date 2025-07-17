@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体检套餐 - 熙心健康体检系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            padding: 15px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 20px;
+            margin: 10px 15px;
+        }
+
+        .package-list {
+            padding: 15px;
+        }
+
+        .package-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .package-image {
+            width: 80px;
+            height: 80px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .package-info {
+            flex: 1;
+        }
+
+        .package-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .package-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .package-price {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+        }
+
+        .active {
+            color: #007aff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>体检套餐</h1>
+        </header>
+
+        <div class="search-bar">
+            搜索套餐
+        </div>
+
+        <div class="package-list">
+            <div class="package-item">
+                <div class="package-image"></div>
+                <div class="package-info">
+                    <div class="package-title">基础体检套餐</div>
+                    <div class="package-desc">包含血常规、尿常规等基础检查项目</div>
+                    <div class="package-price">¥299</div>
+                </div>
+            </div>
+
+            <div class="package-item">
+                <div class="package-image"></div>
+                <div class="package-info">
+                    <div class="package-title">全面体检套餐</div>
+                    <div class="package-desc">包含心电图、B超等全面检查项目</div>
+                    <div class="package-price">¥599</div>
+                </div>
+            </div>
+
+            <div class="package-item">
+                <div class="package-image"></div>
+                <div class="package-info">
+                    <div class="package-title">高级体检套餐</div>
+                    <div class="package-desc">包含CT、核磁共振等高级检查项目</div>
+                    <div class="package-price">¥1299</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <div>🏠</div>
+                <div>首页</div>
+            </a>
+            <a href="packages.html" class="nav-item active">
+                <div>📦</div>
+                <div>套餐</div>
+            </a>
+            <a href="reports.html" class="nav-item">
+                <div>📊</div>
+                <div>报告</div>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <div>👤</div>
+                <div>我的</div>
+            </a>
+        </nav>
+    </div>
+</body>
+</html> 
