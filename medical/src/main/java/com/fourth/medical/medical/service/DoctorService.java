@@ -81,4 +81,14 @@ public interface DoctorService extends IService<Doctor> {
      */
     Paging<AppDoctorVo> getAppDoctorPage(AppDoctorQuery query);
 
+    /**
+     * 根据医院ID和部门ID查找医生
+     *
+     * @param hospitalId 医院ID
+     * @param departmentId 部门ID
+     * @return 医生列表
+     * @throws Exception
+     */
+    Object getDoctorByHospitalAndDepartment(Long hospitalId, Long departmentId);
+
 }

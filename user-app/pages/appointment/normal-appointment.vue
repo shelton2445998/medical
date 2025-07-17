@@ -794,15 +794,62 @@ export default {
           return;
         }
         
+        // 获取检查项目ID列表
+        const checkitemIds = this.selectedCheckitems.map(item => item.id).join(',');
+        console.log('选择的检查项目ID列表:', checkitemIds);
+        
+        let doctorId = 3001; // 默认医生ID
+        
+        // 如果有检查项目ID，则根据checkitem_ids查找对应的部门，再根据医院和部门查找医生
+        if (checkitemIds) {
+          try {
+            // 第一步：根据checkitem_ids获取部门信息
+            const departmentResponse = await get(checkitemApi.getDepartmentByCheckitemIds(checkitemIds));
+            console.log('部门信息响应:', departmentResponse);
+            
+            if (departmentResponse && departmentResponse.success && departmentResponse.data) {
+              const departmentId = departmentResponse.data.departmentId;
+              console.log('获取到的部门ID:', departmentId);
+              
+              // 第二步：根据医院ID和部门ID查找医生
+              const doctorResponse = await get(appointmentApi.getDoctorByHospitalAndDepartment(this.selectedHospital.id, departmentId));
+              console.log('医生信息响应:', doctorResponse);
+              
+              if (doctorResponse && doctorResponse.success && doctorResponse.data) {
+                // 检查返回的数据是数组还是单个对象
+                if (Array.isArray(doctorResponse.data)) {
+                  if (doctorResponse.data.length > 0) {
+                    doctorId = doctorResponse.data[0].id;
+                    console.log('根据医院和部门查找到的医生ID:', doctorId);
+                  } else {
+                    console.log('医生数组为空，使用默认医生ID:', doctorId);
+                  }
+                } else {
+                  // 单个医生对象
+                  doctorId = doctorResponse.data.id;
+                  console.log('根据医院和部门查找到的医生ID:', doctorId);
+                }
+              } else {
+                console.log('未找到匹配的医生，使用默认医生ID:', doctorId);
+              }
+            } else {
+              console.log('未获取到部门信息，使用默认医生ID:', doctorId);
+            }
+          } catch (error) {
+            console.error('查找医生过程中出错:', error);
+            console.log('使用默认医生ID:', doctorId);
+          }
+        }
+        
         // 构建预约数据
         const appointmentData = {
           setmealId: null, // 普通项目预约，套餐ID为空
           hospitalId: this.selectedHospital.id,
-          doctorId: 3001, // 默认医生ID
+          doctorId: doctorId, // 根据关联查询获取的医生ID
           familyMemberId: 1, // 默认家庭成员ID
           appointmentDate: this.selectedDate,
           appointmentTime: '上午(08:00-12:00)', // 默认时间段
-          checkitemIds: this.selectedCheckitems.map(item => item.id).join(','),
+          checkitemIds: checkitemIds,
           patientName: this.patientName,
           patientAge: parseInt(this.patientAge),
           patientGender: this.convertGenderToNumber(this.patientGender),

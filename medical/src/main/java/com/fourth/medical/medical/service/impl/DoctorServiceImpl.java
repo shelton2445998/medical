@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 医生 服务实现类
@@ -114,5 +115,41 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
         List<AppDoctorVo> list = doctorMapper.getAppDoctorPage(query);
         Paging<AppDoctorVo> paging = new Paging<>(list);
         return paging;
+    }
+
+    @Override
+    public Object getDoctorByHospitalAndDepartment(Long hospitalId, Long departmentId) {
+        log.info("根据医院ID和部门ID查找医生：hospitalId={}, departmentId={}", hospitalId, departmentId);
+        
+        if (hospitalId == null || departmentId == null) {
+            log.warn("医院ID或部门ID为空：hospitalId={}, departmentId={}", hospitalId, departmentId);
+            return null;
+        }
+        
+        try {
+            // 先查询所有医生，看看数据情况
+            List<Doctor> allDoctors = this.list();
+            log.info("数据库中所有医生数量：{}", allDoctors.size());
+            
+            // 过滤出符合条件的医生
+            List<Doctor> matchedDoctors = allDoctors.stream()
+                .filter(d -> hospitalId.equals(d.getHospitalId()) && departmentId.equals(d.getDepartmentId()))
+                .collect(Collectors.toList());
+            
+            log.info("符合条件的医生数量：{}", matchedDoctors.size());
+            for (Doctor doctor : matchedDoctors) {
+                log.info("找到医生：ID={}, 姓名={}, 医院ID={}, 部门ID={}", 
+                    doctor.getId(), doctor.getName(), doctor.getHospitalId(), doctor.getDepartmentId());
+            }
+            
+            // 调用Mapper查询医生信息
+            Object result = doctorMapper.getDoctorByHospitalAndDepartment(hospitalId, departmentId);
+            log.info("Mapper查询结果：{}", result);
+            return result;
+            
+        } catch (Exception e) {
+            log.error("根据医院ID和部门ID查找医生失败：", e);
+            return null;
+        }
     }
 }

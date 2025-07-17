@@ -51,4 +51,12 @@ public interface CheckitemMapper extends BaseMapper<Checkitem> {
      */
     List<AppCheckitemVo> getAppCheckitemPage(AppCheckitemQuery query);
 
+    /**
+     * 根据检查项ID列表获取部门信息
+     *
+     * @param checkitemIds 检查项ID列表
+     * @return 部门信息
+     */
+    Object getDepartmentByCheckitemIds(List<Long> checkitemIds);
+
 }

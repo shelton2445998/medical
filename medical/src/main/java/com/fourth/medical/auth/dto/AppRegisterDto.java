@@ -18,7 +18,6 @@ public class AppRegisterDto {
 
     @Schema(description = "用户名", example = "user123")
     @NotBlank(message = "用户名不能为空")
-    @Length(min = 5, message = "用户名长度不能少于5个字符")
     private String username;
 
     @Schema(description = "密码", example = "123456")

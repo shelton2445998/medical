@@ -48,6 +48,8 @@ export const appointmentApi = {
   deleteAppointment: (id) => `${API_BASE_URL}/app/appointment/delete/${id}`,
   // 获取医生列表
   getDoctorList: `${API_BASE_URL}/app/doctor/getAppDoctorPage`,
+  // 根据医院和部门查找医生
+  getDoctorByHospitalAndDepartment: (hospitalId, departmentId) => `${API_BASE_URL}/app/doctor/getDoctorByHospitalAndDepartment?hospitalId=${hospitalId}&departmentId=${departmentId}`,
 };
 
 // 检查项相关接口
@@ -58,6 +60,8 @@ export const checkitemApi = {
   getCheckitemDetail: (id) => `${API_BASE_URL}/app/checkitem/getAppCheckitem/${id}`,
   // 获取检查项明细列表
   getCheckitemDetailList: `${API_BASE_URL}/app/checkitemDetail/getAppCheckitemDetailPage`,
+  // 根据检查项ID获取部门信息
+  getDepartmentByCheckitemIds: (checkitemIds) => `${API_BASE_URL}/app/checkitem/getDepartmentByCheckitemIds?checkitemIds=${checkitemIds}`,
 };
 
 // 报告相关接口
