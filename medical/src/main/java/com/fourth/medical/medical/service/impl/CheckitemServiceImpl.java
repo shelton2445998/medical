@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * 检查项 服务实现类
@@ -90,6 +91,39 @@ public class CheckitemServiceImpl extends ServiceImpl<CheckitemMapper, Checkitem
         List<AppCheckitemVo> list = checkitemMapper.getAppCheckitemPage(query);
         Paging<AppCheckitemVo> paging = new Paging<>(list);
         return paging;
+    }
+
+    @Override
+    public Object getDepartmentByCheckitemIds(String checkitemIds) {
+        log.info("根据检查项ID列表获取部门信息：{}", checkitemIds);
+        
+        if (checkitemIds == null || checkitemIds.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // 将逗号分隔的ID字符串转换为ID列表
+            String[] idArray = checkitemIds.split(",");
+            List<Long> idList = new ArrayList<>();
+            for (String id : idArray) {
+                if (id.trim().length() > 0) {
+                    idList.add(Long.parseLong(id.trim()));
+                }
+            }
+            
+            if (idList.isEmpty()) {
+                return null;
+            }
+            
+            // 调用Mapper查询部门信息
+            Object result = checkitemMapper.getDepartmentByCheckitemIds(idList);
+            log.info("查询结果：{}", result);
+            return result;
+            
+        } catch (Exception e) {
+            log.error("根据检查项ID列表获取部门信息失败：", e);
+            return null;
+        }
     }
 
 }

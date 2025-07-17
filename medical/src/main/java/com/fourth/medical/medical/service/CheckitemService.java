@@ -81,4 +81,13 @@ public interface CheckitemService extends IService<Checkitem> {
      */
     Paging<AppCheckitemVo> getAppCheckitemPage(AppCheckitemQuery query);
 
+    /**
+     * 根据检查项ID列表获取部门信息
+     *
+     * @param checkitemIds 检查项ID列表，逗号分隔
+     * @return 部门信息
+     * @throws Exception
+     */
+    Object getDepartmentByCheckitemIds(String checkitemIds);
+
 }

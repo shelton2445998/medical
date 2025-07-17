@@ -58,4 +58,31 @@ public class AppDoctorController {
         return ApiResult.success(paging);
     }
 
+    /**
+     * 根据医院ID和部门ID查找医生
+     *
+     * @param hospitalId 医院ID
+     * @param departmentId 部门ID
+     * @return 医生列表
+     * @throws Exception
+     */
+    @Operation(summary = "根据医院ID和部门ID查找医生")
+    @GetMapping("/getDoctorByHospitalAndDepartment")
+    public ApiResult<Object> getDoctorByHospitalAndDepartment(@RequestParam String hospitalId, @RequestParam String departmentId) {
+        log.info("根据医院ID和部门ID查找医生：hospitalId={}, departmentId={}", hospitalId, departmentId);
+        
+        try {
+            Long hospitalIdLong = Long.parseLong(hospitalId);
+            Long departmentIdLong = Long.parseLong(departmentId);
+            
+            log.info("转换后的参数：hospitalId={}, departmentId={}", hospitalIdLong, departmentIdLong);
+            
+            Object result = doctorService.getDoctorByHospitalAndDepartment(hospitalIdLong, departmentIdLong);
+            return ApiResult.success(result);
+        } catch (NumberFormatException e) {
+            log.error("参数转换失败：hospitalId={}, departmentId={}", hospitalId, departmentId, e);
+            return ApiResult.fail("参数格式错误");
+        }
+    }
+
 }

@@ -243,7 +243,7 @@
 </template>
 
 <script>
-import { appointmentApi, hospitalApi, userApi } from '@/utils/api.js';
+import { appointmentApi, hospitalApi, userApi, checkitemApi } from '@/utils/api.js';
 import { post, get } from '@/utils/request.js';
 
 export default {
@@ -464,7 +464,7 @@ export default {
     closePayModal() {
       this.showPay = false;
     },
-    createOrder() {
+    async createOrder() {
       // 验证必需字段
       if (!this.selectedHospital || !this.selectedHospital.id) {
         uni.showToast({
@@ -474,8 +474,6 @@ export default {
         });
         return;
       }
-      
-
       
       if (!this.selectedDate) {
         uni.showToast({
@@ -498,86 +496,141 @@ export default {
       // 显示加载状态
       uni.showLoading({ title: '创建订单中...' });
       
-      // 构建App预约订单数据，对应后端AppOrdersDto结构
-      const orderData = {
-        setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID，普通项目预约时为null
-        hospitalId: this.selectedHospital.id, // 医院ID
-        doctorId: 3001, // 医生ID，默认3001
-        familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
-        appointmentDate: this.selectedDate, // 预约日期
-        appointmentTime: this.selectedTime, // 预约时间段
-        remark: this.remark || '', // 备注信息
-        checkitemIds: this.selectedPackage ? (this.selectedPackage.checkitemIds || '') : '', // 检查项ID列表
-        patientName: this.selectedPackage && this.selectedPackage.patientName ? this.selectedPackage.patientName : this.name, // 优先使用定制套餐中的患者姓名
-        patientAge: this.selectedPackage && this.selectedPackage.patientAge ? this.selectedPackage.patientAge : (parseInt(this.patientAge) || 0), // 优先使用定制套餐中的患者年龄
-        patientGender: this.selectedPackage && this.selectedPackage.patientGender ? this.selectedPackage.patientGender : this.convertGenderToNumber(this.patientGender || this.gender), // 优先使用定制套餐中的患者性别
-        patientPhone: this.selectedPackage && this.selectedPackage.patientPhone ? this.selectedPackage.patientPhone : (this.patientPhone || '') // 优先使用定制套餐中的患者手机号
-      };
-      
-      console.log('预约订单数据：', orderData);
-
-      console.log('套餐检查项目ID列表:', this.selectedPackage ? this.selectedPackage.checkitemIds : '无套餐');
-      
-      // 获取token
-      const token = uni.getStorageSync('uniIdToken');
-      
-      // 调用后端App预约接口创建订单
-      uni.request({
-        url: appointmentApi.createAppointment,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': token || ''
-        },
-        data: orderData,
-        success: (res) => {
-          console.log('预约接口响应：', res);
-          if (res.statusCode === 200 && res.data.code === 200) {
-            // 预约成功，创建订单
-            uni.hideLoading();
+      try {
+        // 获取检查项目ID列表
+        const checkitemIds = this.selectedPackage ? (this.selectedPackage.checkitemIds || '') : '';
+        console.log('套餐检查项目ID列表:', checkitemIds);
+        
+        let doctorId = 3001; // 默认医生ID
+        
+        // 如果有检查项目ID，则根据checkitem_ids查找对应的部门，再根据医院和部门查找医生
+        if (checkitemIds) {
+          try {
+            // 第一步：根据checkitem_ids获取部门信息
+            const departmentResponse = await get(checkitemApi.getDepartmentByCheckitemIds(checkitemIds));
+            console.log('部门信息响应:', departmentResponse);
             
-            // 存储订单信息，供支付页面使用
-            const orderInfo = res.data.data;
-            uni.setStorageSync('currentOrder', JSON.stringify(orderInfo));
-            
-            // 清除存储的医院、套餐和定制套餐信息
-            uni.removeStorageSync('selectedHospital');
-            uni.removeStorageSync('selectedPackage');
-            uni.removeStorageSync('customPackage');
-            
-            // 显示成功提示
-            uni.showToast({
-              title: '订单创建成功，即将跳转支付页面',
-              icon: 'success',
-              duration: 1500
-            });
-            
-            // 跳转到支付页面
-            setTimeout(() => {
-              uni.navigateTo({
-                url: '/pages/payment/payment'
+            if (departmentResponse && departmentResponse.success && departmentResponse.data) {
+              const departmentId = departmentResponse.data.departmentId;
+              console.log('获取到的部门ID:', departmentId);
+              
+              // 第二步：根据医院ID和部门ID查找医生
+              const doctorResponse = await get(appointmentApi.getDoctorByHospitalAndDepartment(this.selectedHospital.id, departmentId));
+              console.log('医生信息响应:', doctorResponse);
+              
+              if (doctorResponse && doctorResponse.success && doctorResponse.data) {
+                // 检查返回的数据是数组还是单个对象
+                if (Array.isArray(doctorResponse.data)) {
+                  if (doctorResponse.data.length > 0) {
+                    doctorId = doctorResponse.data[0].id;
+                    console.log('根据医院和部门查找到的医生ID:', doctorId);
+                  } else {
+                    console.log('医生数组为空，使用默认医生ID:', doctorId);
+                  }
+                } else {
+                  // 单个医生对象
+                  doctorId = doctorResponse.data.id;
+                  console.log('根据医院和部门查找到的医生ID:', doctorId);
+                }
+              } else {
+                console.log('未找到匹配的医生，使用默认医生ID:', doctorId);
+              }
+            } else {
+              console.log('未获取到部门信息，使用默认医生ID:', doctorId);
+            }
+          } catch (error) {
+            console.error('查找医生过程中出错:', error);
+            console.log('使用默认医生ID:', doctorId);
+          }
+        }
+        
+        // 构建App预约订单数据，对应后端AppOrdersDto结构
+        const orderData = {
+          setmealId: this.selectedPackage ? this.selectedPackage.id : null, // 套餐ID，普通项目预约时为null
+          hospitalId: this.selectedHospital.id, // 医院ID
+          doctorId: doctorId, // 根据关联查询获取的医生ID
+          familyMemberId: this.memberId || 1, // 家庭成员ID，如果没有则为1
+          appointmentDate: this.selectedDate, // 预约日期
+          appointmentTime: this.selectedTime, // 预约时间段
+          remark: this.remark || '', // 备注信息
+          checkitemIds: checkitemIds, // 检查项ID列表
+          patientName: this.selectedPackage && this.selectedPackage.patientName ? this.selectedPackage.patientName : this.name, // 优先使用定制套餐中的患者姓名
+          patientAge: this.selectedPackage && this.selectedPackage.patientAge ? this.selectedPackage.patientAge : (parseInt(this.patientAge) || 0), // 优先使用定制套餐中的患者年龄
+          patientGender: this.selectedPackage && this.selectedPackage.patientGender ? this.selectedPackage.patientGender : this.convertGenderToNumber(this.patientGender || this.gender), // 优先使用定制套餐中的患者性别
+          patientPhone: this.selectedPackage && this.selectedPackage.patientPhone ? this.selectedPackage.patientPhone : (this.patientPhone || '') // 优先使用定制套餐中的患者手机号
+        };
+        
+        console.log('预约订单数据：', orderData);
+        
+        // 获取token
+        const token = uni.getStorageSync('uniIdToken');
+        
+        // 调用后端App预约接口创建订单
+        uni.request({
+          url: appointmentApi.createAppointment,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/json',
+            'Authorization': token || ''
+          },
+          data: orderData,
+          success: (res) => {
+            console.log('预约接口响应：', res);
+            if (res.statusCode === 200 && res.data.code === 200) {
+              // 预约成功，创建订单
+              uni.hideLoading();
+              
+              // 存储订单信息，供支付页面使用
+              const orderInfo = res.data.data;
+              uni.setStorageSync('currentOrder', JSON.stringify(orderInfo));
+              
+              // 清除存储的医院、套餐和定制套餐信息
+              uni.removeStorageSync('selectedHospital');
+              uni.removeStorageSync('selectedPackage');
+              uni.removeStorageSync('customPackage');
+              
+              // 显示成功提示
+              uni.showToast({
+                title: '订单创建成功，即将跳转支付页面',
+                icon: 'success',
+                duration: 1500
               });
-            }, 1500);
-          } else {
-            // 预约失败
+              
+              // 跳转到支付页面
+              setTimeout(() => {
+                uni.navigateTo({
+                  url: '/pages/payment/payment'
+                });
+              }, 1500);
+            } else {
+              // 预约失败
+              uni.hideLoading();
+              uni.showToast({
+                title: res.data.msg || '创建订单失败，请重试',
+                icon: 'none',
+                duration: 2000
+              });
+            }
+          },
+          fail: (err) => {
+            console.error('预约接口调用失败：', err);
             uni.hideLoading();
             uni.showToast({
-              title: res.data.msg || '创建订单失败，请重试',
+              title: '网络错误，请检查网络连接',
               icon: 'none',
               duration: 2000
             });
           }
-        },
-        fail: (err) => {
-          console.error('预约接口调用失败：', err);
-          uni.hideLoading();
-          uni.showToast({
-            title: '网络错误，请检查网络连接',
-            icon: 'none',
-            duration: 2000
-          });
-        }
-      });
+        });
+      } catch (error) {
+        console.error('创建订单过程中出错:', error);
+        uni.hideLoading();
+        uni.showToast({
+          title: '创建订单失败，请重试',
+          icon: 'none',
+          duration: 2000
+        });
+      }
     },
     goBack() {
       // 清除存储的医院和套餐信息

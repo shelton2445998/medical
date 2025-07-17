@@ -42,4 +42,14 @@
         where mobile = #{mobile}
     </select>
 
+    <select id="getDoctorByHospitalAndDepartment" resultType="com.fourth.medical.medical.vo.AppDoctorVo">
+        SELECT d.*
+        FROM doctor d
+        WHERE d.hospital_id = #{hospitalId}
+        AND d.department_id = #{departmentId}
+        AND d.status = 1
+        ORDER BY d.id
+        LIMIT 10
+    </select>
+
 </mapper>

@@ -59,4 +59,13 @@ public interface DoctorMapper extends BaseMapper<Doctor> {
      */
     Doctor getDoctorByMobile(String mobile);
 
+    /**
+     * 根据医院ID和部门ID查找医生
+     *
+     * @param hospitalId 医院ID
+     * @param departmentId 部门ID
+     * @return 医生列表
+     */
+    Object getDoctorByHospitalAndDepartment(Long hospitalId, Long departmentId);
+
 }

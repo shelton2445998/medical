@@ -60,4 +60,19 @@ public class AppCheckitemController {
         return ApiResult.success(paging);
     }
 
+    /**
+     * 根据检查项ID列表获取部门信息
+     *
+     * @param checkitemIds 检查项ID列表，逗号分隔
+     * @return 部门信息
+     * @throws Exception
+     */
+    @Operation(summary = "根据检查项ID列表获取部门信息")
+    @GetMapping("/getDepartmentByCheckitemIds")
+    public ApiResult<Object> getDepartmentByCheckitemIds(@RequestParam String checkitemIds) {
+        log.info("根据检查项ID列表获取部门信息：{}", checkitemIds);
+        Object result = checkitemService.getDepartmentByCheckitemIds(checkitemIds);
+        return ApiResult.success(result);
+    }
+
 }
