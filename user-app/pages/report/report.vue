@@ -123,6 +123,20 @@
 				this.getAllReports(); // 获取用户信息失败也继续获取报告
 			});
 		},
+		// 页面显示时的生命周期函数
+		onShow() {
+			// 先清空数据，避免显示上一个用户的信息
+			this.allReports = [];
+			this.reportList = [];
+			this.total = 0;
+			this.totalPages = 0;
+			// 再异步获取新用户信息和报告
+			this.getUserInfo().then(() => {
+				this.getAllReports(); // 获取用户信息成功后获取报告
+			}).catch(error => {
+				this.getAllReports(); // 获取用户信息失败也继续获取报告
+			});
+		},
 		// 组件方法
 		methods: {
 			// 获取用户信息的异步方法
