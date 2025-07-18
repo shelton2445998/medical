@@ -1,3 +1,14 @@
+<!--
+  体检套餐列表页面组件
+  
+  展示所有可选择的体检套餐，支持套餐搜索、分类筛选、详情查看等功能
+  提供套餐价格、检查项目、适用人群等详细信息展示
+  支持套餐选择、详情查看、预约等交互功能
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<!-- 动态背景装饰 -->
@@ -132,9 +143,17 @@
 </template>
 
 <script>
-	import { get, packageApi } from '@/utils/request.js';
-	import { getCheckitemById, getCheckitemPage } from '@/api/report.js';
-	export default {
+/**
+ * 体检套餐列表页面逻辑
+ * 
+ * 处理套餐数据获取、搜索筛选、分类切换、套餐选择等功能
+ * 集成套餐信息展示和用户交互处理
+ */
+
+import { get, packageApi } from '@/utils/request.js';
+import { getCheckitemById, getCheckitemPage } from '@/api/report.js';
+
+export default {
 		data() {
 			return {
 				currentType: 0, // 0表示全部

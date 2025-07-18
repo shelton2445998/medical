@@ -55,6 +55,23 @@
           </picker>
         </view>
         
+        <!-- 预约时间 -->
+        <view class="form-item">
+          <view class="form-label">
+            <text class="label-icon">⏰</text>
+            <text>预约时间</text>
+          </view>
+          <picker :range="timeSlots" @change="onTimeChange">
+            <view class="form-picker">
+              <text class="picker-text" :class="{ 'placeholder': !selectedTime }">
+                {{ selectedTime || '请选择时间' }}
+              </text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+
+        </view>
+        
         <!-- 检查项选择 -->
         <view class="form-item">
           <view class="form-label">
@@ -295,6 +312,7 @@ export default {
       checkitemList: [], // 从后端获取的检查项列表
       selectedHospital: null,
       selectedDate: '',
+      selectedTime: '', // 新增：选择的预约时间
       selectedCheckitems: [], // 选中的检查项列表
       patientName: '',
       patientAge: '',
@@ -304,6 +322,7 @@ export default {
       isLoading: false,
       totalPrice: 0, // 总价格
       genderOptions: ['男', '女'],
+      timeSlots: ['上午(08:00-12:00)', '下午(14:00-18:00)', '晚上(19:00-22:00)'], // 新增：时间段选项
       // showCustomPackage: false, // 是否显示定制套餐界面
       // customPackageName: '', // 定制套餐名称
       // customPackageDescription: '' // 定制套餐描述
@@ -314,6 +333,7 @@ export default {
     isFormValid() {
       return this.selectedHospital && 
              this.selectedDate && 
+             this.selectedTime && // 新增：检查预约时间是否已选择
              this.selectedCheckitems.length > 0 && 
              this.patientName.trim() && 
              this.patientAge && 
@@ -638,6 +658,10 @@ export default {
     onDateChange(e) {
       this.selectedDate = e.detail.value;
     },
+    // 选择预约时间
+    onTimeChange(e) {
+      this.selectedTime = this.timeSlots[e.detail.value];
+    },
     // 选择检查项
     onCheckitemChange(e) {
       const index = e.detail.value;
@@ -848,7 +872,7 @@ export default {
           doctorId: doctorId, // 根据关联查询获取的医生ID
           familyMemberId: 1, // 默认家庭成员ID
           appointmentDate: this.selectedDate,
-          appointmentTime: '上午(08:00-12:00)', // 默认时间段
+          appointmentTime: this.selectedTime, // 使用选择的预约时间
           checkitemIds: checkitemIds,
           patientName: this.patientName,
           patientAge: parseInt(this.patientAge),
@@ -875,7 +899,7 @@ export default {
           patientGender: this.convertGenderToNumber(this.patientGender),
           patientPhone: this.patientPhone,
           appointmentDate: this.selectedDate,
-          appointmentTime: '上午(08:00-12:00)',
+          appointmentTime: this.selectedTime,
           doctorName: '张医生',
           checkitems: this.selectedCheckitems,
           remark: this.remark,
@@ -1226,6 +1250,33 @@ export default {
         font-size: 24rpx;
         color: #999999;
         transition: all 0.3s ease;
+      }
+    }
+    
+    // 时间选择器特殊样式
+    .form-item:nth-child(4) .form-picker {
+      background: linear-gradient(135deg, #f8f9ff, #ffffff);
+      border-color: #74b9ff;
+      box-shadow: 0 4rpx 12rpx rgba(116, 185, 255, 0.1);
+      
+      .picker-text {
+        font-weight: 500;
+        color: #0984e3;
+        
+        &.placeholder {
+          color: #74b9ff;
+        }
+      }
+      
+      .picker-arrow {
+        color: #74b9ff;
+      }
+      
+      &:hover {
+        background: linear-gradient(135deg, #e3f2fd, #ffffff);
+        border-color: #0984e3;
+        box-shadow: 0 6rpx 16rpx rgba(116, 185, 255, 0.2);
+        transform: translateY(-2rpx);
       }
     }
     
@@ -1910,4 +1961,8 @@ export default {
     transform: rotate(360deg);
   }
 }
+
+
+
+
 </style> 

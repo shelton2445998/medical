@@ -102,4 +102,48 @@ public class AppReportController {
         return ApiResult.success(paging);
     }
 
+    /**
+     * 删除App体检报告
+     * 
+     * 功能说明：
+     * 删除用户指定的体检报告。出于数据安全考虑，采用逻辑删除方式，
+     * 即将报告状态标记为已删除，而不是物理删除数据记录。
+     * 
+     * 业务流程：
+     * 1. 接收要删除的报告ID
+     * 2. 验证报告ID的有效性
+     * 3. 检查报告是否存在
+     * 4. 验证用户权限（只能删除自己的报告）
+     * 5. 验证是否可以删除（业务规则检查）
+     * 6. 执行删除操作（逻辑删除）
+     * 7. 记录操作日志
+     * 8. 返回操作结果
+     * 
+     * 数据验证：
+     * - 报告ID必须存在
+     * - 报告必须存在且未被删除
+     * - 报告必须属于当前用户
+     * - 报告状态必须允许删除
+     * 
+     * 业务规则：
+     * - 已发布的报告不能删除
+     * - 有关联预约的报告需要特殊处理
+     * - 只能删除自己的报告
+     * 
+     * @param id 报告ID
+     * @param request HTTP请求对象，用于获取用户Token
+     * @return ApiResult 返回操作结果，成功返回true，失败返回false
+     */
+    @Operation(summary = "删除App体检报告")
+    @DeleteMapping("/deleteAppReport/{id}")
+    public ApiResult deleteAppReport(@PathVariable Long id, HttpServletRequest request) {
+        log.info("删除App体检报告：{}", id);
+        // 从请求中获取token
+        String token = TokenUtil.getToken(request);
+        log.info("获取到token: {}", token);
+        
+        boolean flag = reportService.deleteAppReport(id, token);
+        return ApiResult.result(flag);
+    }
+
 }

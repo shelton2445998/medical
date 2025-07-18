@@ -1,12 +1,50 @@
 /**
- * HTTP 请求配置文件
- * 
- * 基于 axios 创建统一的 HTTP 请求实例，包含请求/响应拦截器
- * 处理 token 认证、错误提示、状态码处理等功能
- * 
+ * @fileoverview 医生端HTTP请求配置文件
+ * @description 基于axios创建统一的HTTP请求实例，包含请求/响应拦截器，处理token认证、错误提示、状态码处理等功能
  * @author 医生端项目组
- * @date 2024
  * @version 1.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - 统一HTTP请求配置
+ * - 请求/响应拦截器
+ * - Token认证管理
+ * - 错误统一处理
+ * - 状态码处理
+ * - 超时处理
+ * - 自动登录跳转
+ * 
+ * @dependencies
+ * - axios: HTTP请求库
+ * - Element Plus: UI组件库
+ * - localStorage: 本地存储
+ * 
+ * @usage
+ * 在API模块中导入此service实例进行HTTP请求
+ * 
+ * @security
+ * - Token自动注入请求头
+ * - Cookie双重验证支持
+ * - 敏感信息本地存储管理
+ * - 权限验证和跳转
+ * 
+ * @performance
+ * - 请求超时控制
+ * - 统一的错误处理减少重复代码
+ * - 合理的缓存策略
+ * 
+ * @maintenance
+ * - 模块化的请求配置
+ * - 清晰的错误处理逻辑
+ * - 便于后续功能扩展
+ * 
+ * @error_codes
+ * - 200: 请求成功
+ * - 401: 未登录或token过期
+ * - 403: 权限不足
+ * - 404: 资源不存在
+ * - 500: 服务器错误
+ * - 5001: 业务token过期
  */
 
 import axios from 'axios'

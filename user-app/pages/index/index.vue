@@ -1,3 +1,40 @@
+<!--
+  @fileoverview 用户端首页组件
+  @description 作为应用的主入口页面，提供医院搜索、轮播图展示、快捷服务入口、推荐医院、热门套餐、健康资讯等功能模块
+  @author 用户端项目组
+  @version 1.0.0
+  @since 2024-01-01
+  
+  @features
+  - 医院搜索功能
+  - 轮播图展示
+  - 快捷服务入口
+  - 推荐医院展示
+  - 热门套餐推荐
+  - 健康资讯展示
+  - 响应式布局
+  - 动态背景装饰
+  
+  @dependencies
+  - uni-app: 跨平台框架
+  - request: HTTP请求工具
+  - hospitalApi: 医院API
+  - packageApi: 套餐API
+  
+  @usage
+  作为应用首页，提供用户主要功能入口和内容展示
+  
+  @performance
+  - 图片懒加载
+  - 分页数据加载
+  - 缓存机制
+  - 响应式设计
+  
+  @maintenance
+  - 模块化组件设计
+  - 清晰的数据流
+  - 便于功能扩展
+-->
 <template>
 	<!-- 页面主容器 -->
 	<view class="content">
@@ -161,11 +198,18 @@
 </template>
 
 <script>
-	// 导入HTTP请求工具和API配置
-	import { get, hospitalApi, packageApi } from '@/utils/request.js';
-	
-	// 导出首页组件配置
-	export default {
+/**
+ * 首页组件逻辑
+ * 
+ * 处理页面数据加载、用户交互、导航跳转等功能
+ * 集成医院、套餐、资讯等数据的获取和展示
+ */
+
+// 导入HTTP请求工具和API配置
+import { get, hospitalApi, packageApi } from '@/utils/request.js';
+
+// 导出首页组件配置
+export default {
 		// 组件数据定义
 		data() {
 			return {

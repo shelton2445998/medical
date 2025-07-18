@@ -23,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fourth.medical.auth.util.LoginUtil;
+import com.fourth.medical.auth.vo.LoginVo;
+import org.apache.commons.lang3.StringUtils;
+import java.util.Date;
 
 /**
  * 体检报告总 服务实现类
@@ -133,36 +137,68 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createReportForOrder(Long orderId, Long userId, String checkitemIds) {
-        log.info("创建体检报告，订单ID：{}，用户ID：{}，检查项：{}", orderId, userId, checkitemIds);
+        log.info("为订单创建体检报告：orderId={}, userId={}, checkitemIds={}", orderId, userId, checkitemIds);
         
-        try {
-            // 先检查是否已经存在该订单的报告
-            List<Report> existingReports = baseMapper.selectList(
-                    new LambdaQueryWrapper<Report>()
-                            .eq(Report::getOrderId, orderId));
-            
-            if (existingReports != null && !existingReports.isEmpty()) {
-                // 如果存在多个报告，取第一个
-                Report existingReport = existingReports.get(0);
-                log.info("订单已存在报告，报告ID：{}", existingReport.getId());
-                return existingReport.getId();
-            }
-            
-            // 创建新的报告
-            Report report = new Report();
-            report.setOrderId(orderId);
-            report.setUserId(userId);
-            report.setCheckitemIds(checkitemIds);
-            report.setStatus(0);  // 未完成状态
-            
-            // 插入数据库
-            baseMapper.insert(report);
-            log.info("成功创建体检报告，报告ID：{}", report.getId());
-            
-            return report.getId();
-        } catch (Exception e) {
-            log.error("创建体检报告失败", e);
-            throw new BusinessException("创建体检报告失败");
+        // 创建报告对象
+        Report report = new Report();
+        report.setOrderId(orderId);
+        report.setUserId(userId);
+        report.setCheckitemIds(checkitemIds);
+        report.setStatus(0); // 初始状态：未完成
+        report.setCreateTime(new Date());
+        
+        // 保存报告
+        save(report);
+        
+        log.info("体检报告创建成功，报告ID：{}", report.getId());
+        return report.getId();
+    }
+
+    @Override
+    public boolean deleteAppReport(Long id, String token) {
+        log.info("删除App体检报告：id={}, token={}", id, token);
+        
+        if (id == null) {
+            throw new BusinessException("报告ID不能为空");
         }
+        
+        if (StringUtils.isBlank(token)) {
+            throw new BusinessException("用户未登录");
+        }
+        
+        // 获取用户信息 - 使用AppLoginUtil而不是LoginUtil
+        AppLoginVo appLoginVo = AppLoginUtil.getLoginVo(token);
+        if (appLoginVo == null) {
+            throw new BusinessException("无法获取用户信息，请重新登录");
+        }
+        
+        Long userId = appLoginVo.getUserId();
+        
+        // 查询报告信息
+        Report report = getById(id);
+        if (report == null) {
+            throw new BusinessException("报告不存在");
+        }
+        
+        // 验证报告是否属于当前用户
+        if (!userId.equals(report.getUserId())) {
+            throw new BusinessException("只能删除自己的报告");
+        }
+        
+        // 检查报告状态，已完成的报告不能删除
+        if (report.getStatus() != null && report.getStatus() == 1) {
+            throw new BusinessException("已完成的报告不能删除");
+        }
+        
+        // 执行删除操作（物理删除，因为Report表没有逻辑删除字段）
+        boolean result = removeById(id);
+        
+        if (result) {
+            log.info("App体检报告删除成功：id={}, userId={}", id, userId);
+        } else {
+            log.error("App体检报告删除失败：id={}, userId={}", id, userId);
+        }
+        
+        return result;
     }
 }

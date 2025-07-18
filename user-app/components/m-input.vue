@@ -1,3 +1,13 @@
+<!--
+  自定义输入框组件
+  
+  提供统一的输入框样式和功能，支持文本输入、密码输入、
+  清除按钮、密码可见切换等功能
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="m-input-view">
 		<input :focus="focus" :type="inputType" :value="value" @input="onInput" class="m-input-input" :placeholder="placeholder"
@@ -13,11 +23,18 @@
 </template>
 
 <script>
-	// 导入图标组件
-	import mIcon from './m-icon/m-icon.vue'
+/**
+ * 输入框组件逻辑
+ * 
+ * 处理输入框的各种交互功能，包括输入处理、焦点管理、
+ * 密码显示切换、内容清除等
+ */
 
-	// 导出输入框组件配置
-	export default {
+// 导入图标组件
+import mIcon from './m-icon/m-icon.vue'
+
+// 导出输入框组件配置
+export default {
 		// 注册子组件
 		components: {
 			mIcon // 注册图标组件

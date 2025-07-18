@@ -1,3 +1,14 @@
+<!--
+  医院列表页面组件
+  
+  展示所有可预约的医院信息，支持医院搜索、筛选、查看详情等功能
+  提供医院联系方式、地址信息、营业时间等详细信息展示
+  支持拨打电话、查看地图等交互功能
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<!-- 动态背景装饰 -->
@@ -74,10 +85,17 @@
 </template>
 
 <script>
-	import { get, hospitalApi } from '@/utils/request.js';
-	
-	// 导出医院列表页面组件配置
-	export default {
+/**
+ * 医院列表页面逻辑
+ * 
+ * 处理医院数据获取、搜索筛选、医院选择、地图导航等功能
+ * 集成医院信息展示和用户交互处理
+ */
+
+import { get, hospitalApi } from '@/utils/request.js';
+
+// 导出医院列表页面组件配置
+export default {
 		// 组件数据定义
 		data() {
 			return {

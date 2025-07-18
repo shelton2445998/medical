@@ -1,3 +1,13 @@
+<!--
+  体检预约页面组件
+  
+  提供体检预约的主要功能入口，包括医院搜索、推荐医院展示、
+  热门套餐推荐、预约流程说明、预约须知等功能模块
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<view class="main-content">
@@ -146,6 +156,13 @@
 </template>
 
 <script>
+/**
+ * 体检预约页面逻辑
+ * 
+ * 处理预约页面的数据加载、用户交互、导航跳转等功能
+ * 集成医院推荐、套餐推荐、预约流程展示等业务逻辑
+ */
+
 // 导入请求方法和API接口配置
 import { get, hospitalApi, packageApi } from '@/utils/request.js';
 

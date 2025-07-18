@@ -1,3 +1,14 @@
+<!--
+  用户中心页面组件
+  
+  提供用户个人信息展示、服务入口、健康管理、系统设置等功能
+  包含用户头像、基本信息、统计数据展示，以及各种功能模块的入口
+  支持登录状态管理、服务导航、系统设置等交互功能
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<!-- 动态背景装饰 -->
@@ -144,11 +155,18 @@
 </template>
 
 <script>
-	// 导入Vuex的mapState和mapMutations辅助函数
-	import { mapState, mapMutations } from 'vuex'
-	
-	// 导出用户中心页面组件配置
-	export default {
+/**
+ * 用户中心页面逻辑
+ * 
+ * 处理用户信息展示、登录状态管理、服务导航、系统设置等功能
+ * 集成用户数据管理和各种功能模块的入口处理
+ */
+
+// 导入Vuex的mapState和mapMutations辅助函数
+import { mapState, mapMutations } from 'vuex'
+
+// 导出用户中心页面组件配置
+export default {
 		// 组件数据
 		data() {
 			return {

@@ -1,3 +1,47 @@
+/**
+ * @fileoverview 用户端预约管理API模块
+ * @description 提供预约相关的所有API接口，包括预约列表、详情、创建和取消功能
+ * @author 医疗系统开发团队
+ * @version 1.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - 预约列表查询
+ * - 预约详情获取
+ * - 预约创建功能
+ * - 预约取消功能
+ * - 环境自适应配置
+ * - 统一错误处理
+ * 
+ * @dependencies
+ * - request: 统一请求工具
+ * - process.env: 环境变量
+ * 
+ * @usage
+ * 在页面组件中导入相关函数进行预约管理操作
+ * 
+ * @security
+ * - 环境隔离的API地址配置
+ * - 统一的请求认证机制
+ * - 参数验证和过滤
+ * 
+ * @performance
+ * - 环境自适应减少配置复杂度
+ * - 统一的请求工具提升复用性
+ * - 合理的API设计减少请求次数
+ * 
+ * @maintenance
+ * - 模块化的API组织
+ * - 清晰的函数命名
+ * - 便于后续功能扩展
+ * 
+ * @api_endpoints
+ * - GET /app/appointment/list: 获取预约列表
+ * - GET /app/appointment/detail/{id}: 获取预约详情
+ * - PUT /app/appointment/cancel/{id}: 取消预约
+ * - POST /app/appointment/create: 创建预约
+ */
+
 // 导入请求工具函数
 import { request } from '@/utils/request';
 // 判断是否为开发环境

@@ -1,8 +1,44 @@
 /**
- * 医生端应用程序主入口文件
- * 负责初始化 Vue 应用、配置全局组件、插件和路由
+ * @fileoverview 医生端应用程序主入口文件
+ * @description 负责初始化Vue3应用、配置Element Plus UI库、路由系统和全局组件
  * @author 医生端项目组
- * @date 2024
+ * @version 2.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - Vue3应用初始化配置
+ * - Element Plus UI组件库集成
+ * - 路由系统配置
+ * - 全局图标组件注册
+ * - 中文语言包配置
+ * - 浏览器兼容性处理
+ * 
+ * @dependencies
+ * - Vue3: 现代前端框架
+ * - Element Plus: UI组件库
+ * - Vue Router: 路由管理
+ * - Element Plus Icons: 图标库
+ * 
+ * @usage
+ * 此文件作为医生端Vue3项目的入口点，负责应用的启动和全局配置
+ * 
+ * @security
+ * - 通过console.error重写处理ResizeObserver错误，避免控制台信息泄露
+ * - 安全的全局组件注册机制
+ * 
+ * @performance
+ * - 使用Vue3 Composition API提升性能
+ * - 按需加载Element Plus组件
+ * - 全局图标组件预注册，避免重复导入
+ * 
+ * @compatibility
+ * - 处理ResizeObserver浏览器兼容性问题
+ * - 支持现代浏览器特性
+ * 
+ * @maintenance
+ * - 清晰的模块化导入结构
+ * - 便于后续添加全局插件和配置
+ * - 统一的错误处理机制
  */
 
 // 引入 Vue 3 的核心函数

@@ -1,3 +1,41 @@
+/**
+ * @fileoverview 用户端应用根组件
+ * @description 负责应用生命周期管理、全局状态管理、自动登录逻辑和全局样式定义
+ * @author 医疗系统开发团队
+ * @version 1.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - 应用生命周期管理(onLaunch, onShow, onHide)
+ * - Vuex状态管理集成
+ * - 自动登录功能
+ * - 全局样式和主题定义
+ * - 响应式布局工具类
+ * - 字体图标集成
+ * 
+ * @dependencies
+ * - Vuex: 状态管理
+ * - uni-app: 跨平台框架
+ * - iconfont: 字体图标库
+ * 
+ * @usage
+ * 作为uni-app项目的根组件，管理应用全局状态和样式
+ * 
+ * @security
+ * - 本地存储令牌验证
+ * - 安全的自动登录机制
+ * 
+ * @performance
+ * - CSS变量优化主题切换
+ * - 工具类复用减少重复代码
+ * - 字体图标减少HTTP请求
+ * 
+ * @maintenance
+ * - 模块化的样式组织
+ * - 统一的主题色彩管理
+ * - 便于后续功能扩展
+ */
+
 <script>
 	// 从vuex中导入mapState和mapMutations辅助函数
 	import {

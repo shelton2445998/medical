@@ -1,3 +1,14 @@
+<!--
+  我的预约页面组件
+  
+  展示用户的所有体检预约记录，支持按状态筛选、查看详情、取消预约等功能
+  提供预约状态管理、订单操作、报告查看等完整的预约生命周期管理
+  包含预约列表展示、状态筛选、操作按钮、空状态提示等功能模块
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<!-- 动态背景装饰 -->
@@ -134,8 +145,16 @@
 </template>
 
 <script>
+/**
+ * 我的预约页面逻辑
+ * 
+ * 处理预约列表获取、状态筛选、预约操作、订单管理等功能
+ * 集成预约数据管理和用户交互处理
+ */
+
 import { appointmentApi } from '@/utils/api.js';
 import { cancelAppointment } from '@/api/appointment.js';
+import { reportApi } from '@/utils/api.js'; // Added import for reportApi
 
 // API 基础URL
 const API_BASE_URL = 'http://localhost:8888/api';
@@ -323,46 +342,135 @@ export default {
 			deleteAppointment(appointment) {
 				uni.showModal({
 					title: '确认删除',
-					content: '确定要删除此订单吗？删除后无法恢复。',
+					content: '确定要删除此订单吗？删除后订单和对应的报告都将被删除，无法恢复。',
 					success: (res) => {
 						if (res.confirm) {
 							// 获取token
 							const token = uni.getStorageSync('uniIdToken');
 							
+							// 先查找对应的报告
 							uni.request({
-								url: appointmentApi.deleteAppointment(appointment.id),
-								method: 'DELETE',
+								url: `${API_BASE_URL}/app/report/getAppReportPage`,
+								method: 'POST',
 								header: {
 									'Authorization': token || '',
 									'Content-Type': 'application/json'
 								},
-								success: (res) => {
-									console.log('删除预约响应：', res);
-									if (res.statusCode === 200 && res.data.code === 200) {
-										// 从本地列表中移除
-										const index = this.appointments.findIndex(item => item.id === appointment.id);
-										if (index !== -1) {
-											this.appointments.splice(index, 1);
-											// 重新筛选
-											this.switchStatus(this.currentStatus);
+								data: {
+									orderId: appointment.id,
+									pageIndex: 1,
+									pageSize: 1
+								},
+								success: (reportRes) => {
+									console.log('获取报告列表响应：', reportRes);
+									
+									// 删除订单
+									uni.request({
+										url: appointmentApi.deleteAppointment(appointment.id),
+										method: 'DELETE',
+										header: {
+											'Authorization': token || '',
+											'Content-Type': 'application/json'
+										},
+										success: (orderRes) => {
+											console.log('删除预约响应：', orderRes);
+											if (orderRes.statusCode === 200 && orderRes.data.code === 200) {
+												// 如果找到对应的报告，也删除报告
+												if (reportRes.statusCode === 200 && reportRes.data.code === 200) {
+													const reportList = reportRes.data.data.list;
+													if (reportList && reportList.length > 0) {
+														const report = reportList[0];
+														
+														// 删除报告
+														uni.request({
+															url: reportApi.deleteReport(report.id),
+															method: 'DELETE',
+															header: {
+																'Authorization': token || '',
+																'Content-Type': 'application/json'
+															},
+															success: (deleteReportRes) => {
+																console.log('删除报告响应：', deleteReportRes);
+																if (deleteReportRes.statusCode === 200 && deleteReportRes.data.code === 200) {
+																	console.log('订单和报告删除成功');
+																} else {
+																	console.warn('报告删除失败：', deleteReportRes.data.msg);
+																}
+															},
+															fail: (err) => {
+																console.error('删除报告失败：', err);
+															}
+														});
+													}
+												}
+												
+												// 从本地列表中移除
+												const index = this.appointments.findIndex(item => item.id === appointment.id);
+												if (index !== -1) {
+													this.appointments.splice(index, 1);
+													// 重新筛选
+													this.switchStatus(this.currentStatus);
+												}
+												
+												uni.showToast({
+													title: '删除成功',
+													icon: 'success'
+												});
+											} else {
+												uni.showToast({
+													title: orderRes.data.msg || '删除失败',
+													icon: 'none'
+												});
+											}
+										},
+										fail: (err) => {
+											console.error('删除预约失败：', err);
+											uni.showToast({
+												title: '网络错误，请重试',
+												icon: 'none'
+											});
 										}
-										
-										uni.showToast({
-											title: '删除成功',
-											icon: 'success'
-										});
-									} else {
-										uni.showToast({
-											title: res.data.msg || '删除失败',
-											icon: 'none'
-										});
-									}
+									});
 								},
 								fail: (err) => {
-									console.error('删除预约失败：', err);
-									uni.showToast({
-										title: '网络错误，请重试',
-										icon: 'none'
+									console.error('获取报告信息失败：', err);
+									// 即使获取报告失败，也继续删除订单
+									uni.request({
+										url: appointmentApi.deleteAppointment(appointment.id),
+										method: 'DELETE',
+										header: {
+											'Authorization': token || '',
+											'Content-Type': 'application/json'
+										},
+										success: (orderRes) => {
+											console.log('删除预约响应：', orderRes);
+											if (orderRes.statusCode === 200 && orderRes.data.code === 200) {
+												// 从本地列表中移除
+												const index = this.appointments.findIndex(item => item.id === appointment.id);
+												if (index !== -1) {
+													this.appointments.splice(index, 1);
+													// 重新筛选
+													this.switchStatus(this.currentStatus);
+												}
+												
+												uni.showToast({
+													title: '删除成功',
+													icon: 'success'
+												});
+											} else {
+												uni.showToast({
+													title: orderRes.data.msg || '删除失败',
+													icon: 'none'
+												});
+											}
+										},
+										fail: (err) => {
+											console.error('删除预约失败：', err);
+											uni.showToast({
+												title: '网络错误，请重试',
+												icon: 'none'
+											});
+										}
 									});
 								}
 							});

@@ -1,4 +1,51 @@
-// 请求工具函数
+/**
+ * @fileoverview 用户端HTTP请求工具模块
+ * @description 提供统一的HTTP请求封装，包括GET、POST、PUT、DELETE等方法，集成请求/响应拦截器，统一处理token认证、错误处理、状态码处理等
+ * @author 用户端项目组
+ * @version 1.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - 统一HTTP请求封装
+ * - 请求/响应拦截器
+ * - Token认证管理
+ * - 错误统一处理
+ * - 状态码处理
+ * - 自动登录跳转
+ * - 跨平台兼容性
+ * 
+ * @dependencies
+ * - uni-app: 跨平台框架
+ * - service: 服务层模块
+ * - api: API配置模块
+ * 
+ * @usage
+ * 在页面组件中导入相关函数进行HTTP请求操作
+ * 
+ * @security
+ * - Token自动注入请求头
+ * - 401状态码自动跳转登录
+ * - 敏感信息保护
+ * - 权限验证处理
+ * 
+ * @performance
+ * - 统一的错误处理减少重复代码
+ * - 合理的缓存策略
+ * - 请求超时控制
+ * 
+ * @maintenance
+ * - 模块化的请求配置
+ * - 清晰的错误处理逻辑
+ * - 便于后续功能扩展
+ * 
+ * @error_handling
+ * - HTTP 200: 请求成功
+ * - HTTP 401: 未授权，自动跳转登录
+ * - Business Code 200: 业务成功
+ * - Business Success true: 业务成功
+ * - Network Error: 网络请求失败
+ */
+
 // 导入各种API接口配置
 import { hospitalApi, packageApi, appointmentApi, reportApi, userApi } from './api.js';
 // 导入服务层模块

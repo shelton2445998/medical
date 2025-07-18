@@ -1,3 +1,13 @@
+<!--
+  体检报告列表页面组件
+  
+  展示用户的体检报告列表，支持报告详情查看、分页浏览等功能
+  提供空状态提示和预约引导，集成用户信息获取和报告数据管理
+  
+  @author 用户端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
 	<view class="content">
 		<!-- 报告列表 -->
@@ -61,18 +71,25 @@
 </template>
 
 <script>
-	// 导入报告相关的API方法
-	import {
-		getAppReportPage, // 获取报告分页列表
-		getAppointmentDetail // 获取预约详情
-	} from '@/api/report';
-	// 导入用户相关的API方法
-	import {
-		getLoginUserInfo // 获取登录用户信息
-	} from '@/api/user';
+/**
+ * 体检报告页面逻辑
+ * 
+ * 处理报告列表展示、分页管理、用户信息获取、报告详情查看等功能
+ * 集成前端分页逻辑和用户数据管理
+ */
 
-	// 导出报告页面组件配置
-	export default {
+// 导入报告相关的API方法
+import {
+	getAppReportPage, // 获取报告分页列表
+	getAppointmentDetail // 获取预约详情
+} from '@/api/report';
+// 导入用户相关的API方法
+import {
+	getLoginUserInfo // 获取登录用户信息
+} from '@/api/user';
+
+// 导出报告页面组件配置
+export default {
 		// 组件数据
 		data() {
 			return {

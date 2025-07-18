@@ -1,3 +1,14 @@
+/**
+ * 用户服务层模块
+ * 
+ * 提供用户相关的业务逻辑处理，包括登录、注册、用户信息管理等功能
+ * 封装了与后端API的交互逻辑，提供统一的接口供页面组件调用
+ * 
+ * @author 用户端项目组
+ * @date 2024
+ * @version 1.0.0
+ */
+
 // 导入用户相关API接口
 import { userApi } from './utils/api.js';
 // 导入HTTP请求方法
@@ -5,7 +16,11 @@ import { post } from './utils/request.js';
 // 导入MD5加密库
 import md5 from 'md5';
 
-// 定义本地存储的键名常量
+/**
+ * 本地存储键名常量定义
+ * 
+ * 统一管理应用中使用的本地存储键名，避免硬编码
+ */
 // 管理账号信息的存储键
 const USERS_KEY = 'USERS_KEY';
 // 管理token的存储键

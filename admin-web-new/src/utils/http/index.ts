@@ -1,3 +1,18 @@
+/**
+ * @fileoverview HTTP请求工具模块
+ * @description 基于Axios封装的HTTP请求工具，提供统一的请求拦截、响应拦截和错误处理
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 统一的HTTP请求封装
+ * - 请求拦截器（自动添加Token）
+ * - 响应拦截器（统一错误处理）
+ * - Token过期自动跳转登录
+ * - 支持自定义请求/响应回调
+ * - 支持GET、POST、PUT、DELETE等请求方法
+ * - 统一的错误提示处理
+ */
 import Axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse, CustomParamsSerializer} from 'axios'
 import {stringify} from 'qs'
 import {ElMessage, ElMessageBox} from "element-plus";
@@ -8,6 +23,10 @@ import {ResultType} from "@/api/types";
 import {useUserStore} from "@/store/modules/user";
 import {router} from "@/router";
 
+/**
+ * Axios默认配置
+ * 设置请求超时时间、基础URL、请求头等
+ */
 const defaultConfig: AxiosRequestConfig = {
     // 请求超时时间
     timeout: 30000,
@@ -18,7 +37,10 @@ const defaultConfig: AxiosRequestConfig = {
     }
 };
 
-
+/**
+ * HTTP请求类
+ * 封装Axios实例，提供统一的请求处理逻辑
+ */
 class Http {
     constructor() {
         this.httpInterceptorsRequest();
@@ -31,7 +53,10 @@ class Http {
     /** 保存当前Axios实例对象 */
     private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
 
-    /** 请求拦截 */
+    /**
+     * 请求拦截器
+     * 在请求发送前自动添加Token等认证信息
+     */
     private httpInterceptorsRequest(): void {
         Http.axiosInstance.interceptors.request.use(
             async (config: any) => {
@@ -57,7 +82,10 @@ class Http {
         );
     }
 
-    /** 响应拦截 */
+    /**
+     * 响应拦截器
+     * 统一处理响应数据和错误情况
+     */
     private httpInterceptorsResponse(): void {
         const instance = Http.axiosInstance;
         instance.interceptors.response.use(
@@ -79,7 +107,14 @@ class Http {
         );
     }
 
-    /** 通用请求函数 */
+    /**
+     * 通用请求函数
+     * @param method 请求方法（GET、POST、PUT、DELETE等）
+     * @param url 请求URL
+     * @param param 请求参数配置
+     * @param axiosConfig 自定义Axios配置
+     * @returns Promise<T> 返回请求结果
+     */
     public request<T>(
         method: RequestMethods,
         url: string,
@@ -138,7 +173,13 @@ class Http {
         });
     }
 
-    /** 单独抽离的post工具函数 */
+    /**
+     * POST请求方法
+     * @param url 请求URL
+     * @param data 请求数据
+     * @param config 自定义配置
+     * @returns Promise<P> 返回请求结果
+     */
     public post<P>(
         url: string,
         data?: Record<string, any>,
@@ -147,7 +188,13 @@ class Http {
         return this.request<P>("post", url, {data}, config);
     }
 
-    /** 单独抽离的get工具函数 */
+    /**
+     * GET请求方法
+     * @param url 请求URL
+     * @param params 查询参数
+     * @param config 自定义配置
+     * @returns Promise<P> 返回请求结果
+     */
     public get<P>(
         url: string,
         params?: Record<string, any>,
@@ -156,7 +203,13 @@ class Http {
         return this.request<P>("get", url, {params}, config);
     }
 
-    /** 单独抽离的put工具函数 */
+    /**
+     * PUT请求方法
+     * @param url 请求URL
+     * @param data 请求数据
+     * @param config 自定义配置
+     * @returns Promise<P> 返回请求结果
+     */
     public put<P>(
         url: string,
         data?: Record<string, any>,
@@ -165,7 +218,12 @@ class Http {
         return this.request<P>("put", url, {data}, config);
     }
 
-    /** 单独抽离的delete工具函数 */
+    /**
+     * DELETE请求方法
+     * @param url 请求URL
+     * @param config 自定义配置
+     * @returns Promise<P> 返回请求结果
+     */
     public delete<P>(
         url: string,
         config?: PureHttpRequestConfig
@@ -174,4 +232,8 @@ class Http {
     }
 }
 
+/**
+ * 导出HTTP实例
+ * 供其他模块使用
+ */
 export const http = new Http();

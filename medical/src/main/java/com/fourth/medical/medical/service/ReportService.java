@@ -132,4 +132,13 @@ public interface ReportService extends IService<Report> {
      * @return 报告ID
      */
     Long createReportForOrder(Long orderId, Long userId, String checkitemIds);
+
+    /**
+     * 删除App体检报告
+     *
+     * @param id 报告ID
+     * @param token 用户令牌
+     * @return 删除结果
+     */
+    boolean deleteAppReport(Long id, String token);
 }

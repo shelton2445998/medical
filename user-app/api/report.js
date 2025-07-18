@@ -1,3 +1,54 @@
+/**
+ * @fileoverview 用户端体检报告管理API模块
+ * @description 提供体检报告相关的所有API接口，包括报告查询、详情获取、检查项管理和结论更新功能
+ * @author 医疗系统开发团队
+ * @version 1.0.0
+ * @since 2024-01-01
+ * 
+ * @features
+ * - 体检报告列表查询
+ * - 报告详情获取
+ * - 检查项管理
+ * - 结论更新功能
+ * - 分页查询支持
+ * - 预约关联查询
+ * 
+ * @dependencies
+ * - request: 统一请求工具
+ * - process.env: 环境变量
+ * 
+ * @usage
+ * 在页面组件中导入相关函数进行体检报告管理操作
+ * 
+ * @security
+ * - 用户权限验证
+ * - 数据访问控制
+ * - 敏感信息保护
+ * 
+ * @performance
+ * - 分页查询优化大数据量处理
+ * - 缓存机制减少重复请求
+ * - 合理的API设计提升响应速度
+ * 
+ * @maintenance
+ * - 模块化的API组织
+ * - 清晰的函数命名
+ * - 便于后续功能扩展
+ * 
+ * @api_endpoints
+ * - GET /app/reportItem/getCurrentUserReports: 获取用户报告列表
+ * - POST /app/reportItem/getCurrentUserReportItemPage: 获取报告分页
+ * - GET /app/reportItem/getReportDetail: 获取报告详情
+ * - POST /app/checkitem/getAppCheckitem/{id}: 获取检查项详情
+ * - POST /app/checkitem/getAppCheckitemPage: 获取检查项分页
+ * - GET /app/reportItem/getConclusion/{id}: 获取检查项结论
+ * - POST /app/reportItem/updateConclusion: 更新检查项结论
+ * - POST /app/report/getAppReport/{id}: 获取App报告详情
+ * - POST /app/report/getAppReportPage: 获取App报告分页
+ * - GET /app/appointment/detail/{id}: 获取预约详情
+ * - POST /app/reportItem/getAppReportItem/{id}: 获取App报告检查项
+ */
+
 // 导入请求工具函数
 import { request } from '@/utils/request';
 // 判断是否为开发环境
