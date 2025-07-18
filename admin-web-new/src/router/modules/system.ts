@@ -1,3 +1,7 @@
+/**
+ * 系统管理路由模块
+ * 定义系统管理相关的路由配置，包括用户管理、部门管理、角色管理、菜单管理等
+ */
 const Layout = () => import("@/layout/index.vue");
 
 export default {

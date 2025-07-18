@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 代码生成工具页面
+ * @description 提供基于数据库表结构的代码生成功能，包括表选择、代码预览、下载等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 数据库表列表展示
+ * - 表结构预览
+ * - 代码生成
+ * - 代码预览
+ * - 批量生成
+ * - 代码下载
+ * - 配置管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <!--    查询-->

@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 用户信息详情组件
+ * @description 用户个人信息查看和编辑组件，包含头像上传、基本信息修改等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户信息展示
+ * - 头像上传
+ * - 基本信息编辑
+ * - 表单验证
+ * - 信息保存
+ */
+-->
 <template>
   <el-form ref="formRef" :rules="rules" :model="userForm" label-width="90px">
     <el-row class="user-box">

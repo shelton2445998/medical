@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 医生管理页面
+ * @description 提供医院医生的管理功能，包括医生列表展示、搜索、新增、编辑、删除等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 医生列表展示
+ * - 关键字搜索功能
+ * - 新增/编辑医生
+ * - 删除医生
+ * - 分页显示
+ * - 医生状态管理
+ * - 科室关联管理
+ * - 职称管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="queryForm" label-width="80px">

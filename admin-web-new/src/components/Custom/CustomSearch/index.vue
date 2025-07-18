@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 自定义搜索组件
+ * @description 基于Element Plus封装的搜索表单组件，提供常用的搜索功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 动态表单字段
+ * - 多种输入类型支持
+ * - 搜索条件重置
+ * - 响应式布局
+ * - 快捷搜索
+ * - 高级搜索切换
+ */
+-->
 <template>
   <el-form :model="queryForm" label-width="90px">
     <el-row :gutter="20">

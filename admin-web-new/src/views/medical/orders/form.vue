@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 订单表单页面
+ * @description 提供体检预约订单的新增和编辑表单功能，包括表单验证、数据提交等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 订单信息表单
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 预约时间选择
+ * - 支付信息管理
+ * - 状态管理
+ */
+-->
 <template>
   <el-dialog :model-value="dialogData.isShow" :title="dialogData.id?'编辑':'新增'"
              @close="closeDialog" draggable>

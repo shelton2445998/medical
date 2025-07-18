@@ -1,38 +1,63 @@
+/**
+ * 枚举定义模块
+ * 定义项目中使用的各种枚举类型
+ */
+
+/**
+ * 时间计算类型枚举
+ * 用于时间加减计算的单位类型
+ */
 export enum computeDateType{
-    'year',
-    'month',
-    'day',
-    'hour',
-    'minute',
-    'second'
+    'year',     // 年
+    'month',    // 月
+    'day',      // 日
+    'hour',     // 小时
+    'minute',   // 分钟
+    'second'    // 秒
 }
 
-// 导出图片类型
+/**
+ * 图片文件类型枚举
+ * 定义允许的图片文件格式
+ */
 export enum imageType {
-    'jpeg',
-    'png',
-    'jpg'
+    'jpeg',     // JPEG格式
+    'png',      // PNG格式
+    'jpg'       // JPG格式
 }
 
-// 导出头像类型
+/**
+ * 头像文件类型枚举
+ * 定义允许的头像文件格式
+ */
 export enum headType {
-    'jpeg',
-    'png',
-    'jpg'
+    'jpeg',     // JPEG格式
+    'png',      // PNG格式
+    'jpg'       // JPG格式
 }
 
-// 导出excel类型
+/**
+ * Excel文件类型枚举
+ * 定义允许的Excel文件格式
+ */
 export enum excelType {
-    'xlsx',
-    'xls'
+    'xlsx',     // Excel 2007及以上格式
+    'xls'       // Excel 97-2003格式
 }
 
-// 导出word类型
+/**
+ * Word文件类型枚举
+ * 定义允许的Word文件格式
+ */
 export enum wordType {
-    'doc',
-    'docx'
+    'doc',      // Word 97-2003格式
+    'docx'      // Word 2007及以上格式
 }
-// 导出pdf类型
+
+/**
+ * PDF文件类型枚举
+ * 定义PDF文件格式
+ */
 export enum pdfType {
-    Pdf = 'pdf'
+    Pdf = 'pdf' // PDF格式
 }

@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 自定义图标输入框组件
+ * @description 带有图标的输入框组件，支持图标选择和预览功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 图标选择器
+ * - 图标预览
+ * - 输入框样式
+ * - 清空功能
+ * - 禁用状态
+ */
+-->
 <template>
   <el-popover
       placement="bottom"

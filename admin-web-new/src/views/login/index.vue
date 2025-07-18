@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 管理员登录页面
+ * @description 提供管理员登录功能，包括用户名密码验证、记住我功能、表单验证等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户名密码登录
+ * - 表单验证
+ * - 密码显示/隐藏切换
+ * - 记住我功能
+ * - 登录状态管理
+ * - 响应式设计
+ */
+-->
 <template>
   <div class="login-container">
     <div class="login-card">

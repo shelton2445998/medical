@@ -1,8 +1,15 @@
+/**
+ * 医疗管理路由模块
+ * 定义医疗管理相关的路由配置，包括套餐管理、项目详情、医生管理等
+ */
 import { RouteRecordRaw } from 'vue-router'
 
 const Layout = () => import('@/layout/index.vue')
 
-// 医疗模块路由
+/**
+ * 医疗模块路由配置
+ * 包含医疗业务相关的所有页面路由
+ */
 const medicalRoutes = {
   path: '/medical',
   name: 'Medical',

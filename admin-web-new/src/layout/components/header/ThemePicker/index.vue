@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 主题选择器组件
+ * @description 系统主题切换组件，支持多种主题模式的切换
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 主题模式切换
+ * - 颜色主题选择
+ * - 暗黑模式支持
+ * - 实时预览
+ * - 设置保存
+ */
+-->
 <template>
   <div class="header-bar__icon" @click="isShowDrawer=true">
     <i class="iconfont icon-biaoqianA01_pifu-46" title="配置"></i>

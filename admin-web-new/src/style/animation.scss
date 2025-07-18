@@ -1,25 +1,36 @@
-/** 通用动画
------------------------*/
+/**
+ * 动画效果样式文件
+ * 定义项目中使用的各种CSS动画效果
+ */
+
+/**
+ * 通用透明度动画
+ * 实现元素从透明到不透明的渐变效果
+ * 使用方式：animation: opacity-animation 0.3s ease;
+ */
 @keyframes opacity-animation {
   0% {
-    opacity: 0;
+    opacity: 0;        /* 起始状态：完全透明 */
   }
   100% {
-    opacity: 1;
+    opacity: 1;        /* 结束状态：完全不透明 */
   }
 }
 
-
-/** 404页面动画
------------------------*/
+/**
+ * 404页面动画
+ * 实现错误页面元素的入场动画效果
+ * 包含垂直移动和透明度变化
+ * 使用方式：animation: error-animation 0.5s ease-out;
+ */
 @keyframes error-animation {
   0% {
-    transform: translateY(60px);
-    opacity: 0;
+    transform: translateY(60px);  /* 起始状态：向下偏移60px */
+    opacity: 0;                   /* 起始状态：完全透明 */
   }
   100% {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateY(0);     /* 结束状态：回到原位 */
+    opacity: 1;                   /* 结束状态：完全不透明 */
   }
 }
 

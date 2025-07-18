@@ -1,58 +1,85 @@
-/* 全局样式 */
+/**
+ * 全局样式文件
+ * 
+ * 定义医生端应用的全局样式变量、通用样式和工具类
+ * 提供统一的设计系统和样式规范
+ * 
+ * @author 医生端项目组
+ * @date 2024
+ * @version 1.0.0
+ */
+
+/* ==================== CSS 变量定义 ==================== */
 :root {
-  /* 主色调 */
-  --primary-color: #3E7BFA;
-  --primary-light: #EBF2FF;
-  --primary-dark: #2E5ED9;
+  /* 主色调变量 - 用于品牌色彩统一 */
+  --primary-color: #3E7BFA;        /* 主要品牌色 */
+  --primary-light: #EBF2FF;        /* 主色浅色版 */
+  --primary-dark: #2E5ED9;         /* 主色深色版 */
   
-  /* 功能色 */
-  --success-color: #52C41A;
-  --success-light: #EDF9E8;
-  --warning-color: #FAAD14;
-  --warning-light: #FFF8E8;
-  --danger-color: #F5222D;
-  --danger-light: #FFF1F0;
-  --info-color: #8C8C8C;
+  /* 功能色变量 - 用于不同状态的颜色表示 */
+  --success-color: #52C41A;        /* 成功状态色 */
+  --success-light: #EDF9E8;        /* 成功状态浅色背景 */
+  --warning-color: #FAAD14;        /* 警告状态色 */
+  --warning-light: #FFF8E8;        /* 警告状态浅色背景 */
+  --danger-color: #F5222D;         /* 危险状态色 */
+  --danger-light: #FFF1F0;         /* 危险状态浅色背景 */
+  --info-color: #8C8C8C;           /* 信息状态色 */
   
-  /* 文字颜色 */
-  --text-primary: #262626;
-  --text-regular: #595959;
-  --text-secondary: #8C8C8C;
-  --text-placeholder: #BFBFBF;
+  /* 文字颜色变量 - 用于文本颜色层次 */
+  --text-primary: #262626;         /* 主要文本色 */
+  --text-regular: #595959;         /* 常规文本色 */
+  --text-secondary: #8C8C8C;       /* 次要文本色 */
+  --text-placeholder: #BFBFBF;     /* 占位文本色 */
   
-  /* 边框和背景 */
-  --border-color: #E8E8E8;
-  --border-light: #F0F0F0;
-  --background-color: #F5F7FA;
-  --background-light: #FAFAFA;
+  /* 边框和背景变量 - 用于界面结构 */
+  --border-color: #E8E8E8;         /* 边框颜色 */
+  --border-light: #F0F0F0;         /* 浅色边框 */
+  --background-color: #F5F7FA;     /* 主背景色 */
+  --background-light: #FAFAFA;     /* 浅色背景 */
   
-  /* 阴影 */
-  --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  /* 阴影变量 - 用于层次感 */
+  --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);  /* 轻微阴影 */
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);       /* 标准阴影 */
   
-  /* 尺寸 */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
+  /* 尺寸变量 - 用于统一圆角和间距 */
+  --border-radius-sm: 4px;         /* 小圆角 */
+  --border-radius-md: 8px;         /* 中等圆角 */
+  --border-radius-lg: 12px;        /* 大圆角 */
   
-  /* 动画 */
-  --transition-fast: 0.2s;
-  --transition-normal: 0.3s;
+  /* 动画变量 - 用于过渡效果 */
+  --transition-fast: 0.2s;         /* 快速过渡 */
+  --transition-normal: 0.3s;       /* 标准过渡 */
 }
 
+/* ==================== 基础样式 ==================== */
+
+/**
+ * 全局 body 样式
+ * 设置页面的基础外观和字体
+ */
 body {
   background-color: var(--background-color);
   color: var(--text-primary);
+  /* 使用系统字体栈，确保在不同平台上有良好的显示效果 */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   line-height: 1.5;
 }
 
-/* 布局类 */
+/* ==================== 布局类 ==================== */
+
+/**
+ * 页面容器样式
+ * 提供页面的基础内边距和高度
+ */
 .page-container {
   padding: 24px;
   height: 100%;
 }
 
+/**
+ * 页面头部样式
+ * 用于页面标题栏的布局
+ */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -60,6 +87,10 @@ body {
   margin-bottom: 24px;
 }
 
+/**
+ * 页面标题样式
+ * 用于页面主标题的显示
+ */
 .page-title {
   margin: 0;
   font-size: 24px;
@@ -68,13 +99,22 @@ body {
   line-height: 1.4;
 }
 
+/**
+ * 页面副标题样式
+ * 用于页面描述性文本的显示
+ */
 .page-subtitle {
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: 8px;
 }
 
-/* 卡片样式 */
+/* ==================== 卡片样式 ==================== */
+
+/**
+ * 自定义卡片样式
+ * 提供统一的卡片外观和交互效果
+ */
 .custom-card {
   border-radius: var(--border-radius-md);
   border: none;
@@ -82,68 +122,93 @@ body {
   transition: box-shadow var(--transition-normal);
 }
 
+/**
+ * 卡片悬停效果
+ * 增强卡片的交互反馈
+ */
 .custom-card:hover {
   box-shadow: var(--box-shadow);
 }
 
-/* 辅助类 */
-.text-primary { color: var(--primary-color); }
-.text-success { color: var(--success-color); }
-.text-warning { color: var(--warning-color); }
-.text-danger { color: var(--danger-color); }
-.text-info { color: var(--info-color); }
+/* ==================== 文字颜色辅助类 ==================== */
 
-.bg-primary { background-color: var(--primary-light); }
-.bg-success { background-color: var(--success-light); }
-.bg-warning { background-color: var(--warning-light); }
-.bg-danger { background-color: var(--danger-light); }
-.bg-light { background-color: var(--background-light); }
+.text-primary { color: var(--primary-color); }    /* 主色文字 */
+.text-success { color: var(--success-color); }    /* 成功状态文字 */
+.text-warning { color: var(--warning-color); }    /* 警告状态文字 */
+.text-danger { color: var(--danger-color); }      /* 危险状态文字 */
+.text-info { color: var(--info-color); }          /* 信息状态文字 */
 
-/* Flexbox 工具类 */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.flex-wrap { flex-wrap: wrap; }
-.flex-1 { flex: 1; }
+/* ==================== 背景色辅助类 ==================== */
+
+.bg-primary { background-color: var(--primary-light); }    /* 主色背景 */
+.bg-success { background-color: var(--success-light); }    /* 成功状态背景 */
+.bg-warning { background-color: var(--warning-light); }    /* 警告状态背景 */
+.bg-danger { background-color: var(--danger-light); }      /* 危险状态背景 */
+.bg-light { background-color: var(--background-light); }   /* 浅色背景 */
+
+/* ==================== Flexbox 工具类 ==================== */
+
+.flex { display: flex; }                          /* 弹性布局 */
+.flex-col { flex-direction: column; }             /* 垂直排列 */
+.items-center { align-items: center; }            /* 垂直居中对齐 */
+.justify-center { justify-content: center; }      /* 水平居中对齐 */
+.justify-between { justify-content: space-between; } /* 两端对齐 */
+.flex-wrap { flex-wrap: wrap; }                   /* 允许换行 */
+.flex-1 { flex: 1; }                              /* 占用剩余空间 */
+
+/**
+ * 完全居中对齐
+ * 同时实现水平和垂直居中
+ */
 .flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 间距类 */
-.m-0 { margin: 0; }
-.mt-10 { margin-top: 10px; }
-.mb-10 { margin-bottom: 10px; }
-.mt-20 { margin-top: 20px; }
-.mb-20 { margin-bottom: 20px; }
-.ml-10 { margin-left: 10px; }
-.mr-10 { margin-right: 10px; }
-.p-0 { padding: 0; }
-.p-10 { padding: 10px; }
-.p-20 { padding: 20px; }
+/* ==================== 间距工具类 ==================== */
 
-/* 文字工具类 */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.font-bold { font-weight: 600; }
-.font-normal { font-weight: normal; }
+/* 外边距工具类 */
+.m-0 { margin: 0; }                               /* 无外边距 */
+.mt-10 { margin-top: 10px; }                      /* 上外边距 10px */
+.mb-10 { margin-bottom: 10px; }                   /* 下外边距 10px */
+.mt-20 { margin-top: 20px; }                      /* 上外边距 20px */
+.mb-20 { margin-bottom: 20px; }                   /* 下外边距 20px */
+.ml-10 { margin-left: 10px; }                     /* 左外边距 10px */
+.mr-10 { margin-right: 10px; }                    /* 右外边距 10px */
+
+/* 内边距工具类 */
+.p-0 { padding: 0; }                              /* 无内边距 */
+.p-10 { padding: 10px; }                          /* 内边距 10px */
+.p-20 { padding: 20px; }                          /* 内边距 20px */
+
+/* ==================== 文字工具类 ==================== */
+
+.text-center { text-align: center; }              /* 文字居中 */
+.text-right { text-align: right; }                /* 文字右对齐 */
+.font-bold { font-weight: 600; }                  /* 粗体文字 */
+.font-normal { font-weight: normal; }             /* 正常粗细文字 */
+
+/**
+ * 文本截断样式
+ * 当文本过长时显示省略号
+ */
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* 交互类 */
-.cursor-pointer { cursor: pointer; }
-.transition { transition: all var(--transition-normal); }
+/* ==================== 交互工具类 ==================== */
 
-/* 其他工具类 */
-.full-height { height: 100%; }
-.rounded { border-radius: var(--border-radius-md); }
-.rounded-full { border-radius: 50%; }
-.border { border: 1px solid var(--border-color); }
-.shadow { box-shadow: var(--box-shadow-light); }
-.shadow-lg { box-shadow: var(--box-shadow); } 
+.cursor-pointer { cursor: pointer; }              /* 鼠标指针样式 */
+.transition { transition: all var(--transition-normal); } /* 过渡动画 */
+
+/* ==================== 其他工具类 ==================== */
+
+.full-height { height: 100%; }                    /* 全高度 */
+.rounded { border-radius: var(--border-radius-md); } /* 圆角边框 */
+.rounded-full { border-radius: 50%; }             /* 圆形 */
+.border { border: 1px solid var(--border-color); } /* 边框 */
+.shadow { box-shadow: var(--box-shadow-light); }  /* 轻微阴影 */
+.shadow-lg { box-shadow: var(--box-shadow); }     /* 较强阴影 */ 

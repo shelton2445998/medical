@@ -1,12 +1,26 @@
+<!--
+  医生工作台页面组件
+  
+  提供医生工作台的概览信息，包括今日排班、待处理报告、最近体检报告等
+  为医生提供快速了解工作状态的入口
+  
+  @author 医生端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
   <div class="dashboard-container">
+    <!-- 头部区域 -->
     <div class="header-section">
+      <!-- 欢迎信息区域 -->
       <div class="welcome-section">
         <h2 class="page-title">医生工作台</h2>
         <div class="welcome-message">
           欢迎回来，<span class="doctor-name">{{ doctorName }}</span>！今天是<span class="current-date">{{ currentDate }}</span>
         </div>
       </div>
+      
+      <!-- 时间显示区域 -->
       <div class="date-time-section">
         <div class="time">{{ currentTime }}</div>
       </div>
@@ -14,6 +28,7 @@
     
     <!-- 摘要信息卡片 -->
     <div class="summary-cards">
+      <!-- 今日排班卡片 -->
       <div class="summary-card">
         <div class="summary-icon" :class="{'active': stats.hasTodaySchedule}">
           <el-icon><calendar /></el-icon>
@@ -26,6 +41,7 @@
         </div>
       </div>
       
+      <!-- 待处理报告卡片 -->
       <div class="summary-card">
         <div class="summary-icon report-icon">
           <el-icon><document /></el-icon>
@@ -36,6 +52,7 @@
         </div>
       </div>
       
+      <!-- 本月体检报告卡片 -->
       <div class="summary-card">
         <div class="summary-icon month-icon">
           <el-icon><data-analysis /></el-icon>
@@ -49,8 +66,9 @@
     
     <!-- 主要内容区域 -->
     <el-row :gutter="24" class="main-content">
+      <!-- 左侧区域 -->
       <el-col :xs="24" :sm="24" :md="16" :lg="16" class="left-section">
-        <!-- 最近体检报告 -->
+        <!-- 最近体检报告卡片 -->
         <el-card shadow="hover" class="dash-card recent-reports-card">
           <template #header>
             <div class="card-header">
@@ -58,21 +76,32 @@
               <el-button text @click="$router.push('/reports')">查看全部</el-button>
             </div>
           </template>
+          
+          <!-- 空数据状态 -->
           <div v-if="recentReports.length === 0" class="empty-data">
             <el-empty description="暂无最近的体检报告"></el-empty>
           </div>
+          
+          <!-- 体检报告列表 -->
           <el-table v-else :data="recentReports" style="width: 100%" class="custom-table">
+            <!-- 患者姓名列 -->
             <el-table-column prop="patientName" label="患者姓名" width="120">
               <template #default="scope">
                 <span class="patient-name">{{ scope.row.patientName }}</span>
               </template>
             </el-table-column>
+            
+            <!-- 检查项目列 -->
             <el-table-column prop="itemName" label="检查项目" />
+            
+            <!-- 日期列 -->
             <el-table-column prop="createTime" label="日期" width="180">
               <template #default="scope">
                 {{ formatDate(scope.row.createTime) }}
               </template>
             </el-table-column>
+            
+            <!-- 状态列 -->
             <el-table-column prop="status" label="状态" width="100">
               <template #default="scope">
                 <el-tag :type="scope.row.conclusion ? 'success' : 'warning'" effect="light" size="small">
@@ -84,6 +113,7 @@
         </el-card>
       </el-col>
       
+      <!-- 右侧区域 -->
       <el-col :xs="24" :sm="24" :md="8" :lg="8" class="right-section">
         <!-- 今日工作卡片 -->
         <el-card shadow="hover" class="dash-card today-work-card">
@@ -92,6 +122,8 @@
               <span>今日工作</span>
             </div>
           </template>
+          
+          <!-- 工作时间线 -->
           <div class="work-timeline">
             <div class="timeline-item" v-for="(item, index) in workItems" :key="index">
               <div class="timeline-item-dot" :class="item.type"></div>
@@ -101,6 +133,7 @@
               </div>
             </div>
             
+            <!-- 空数据状态 -->
             <div v-if="workItems.length === 0" class="empty-data">
               <el-empty description="今日暂无安排"></el-empty>
             </div>
@@ -115,9 +148,13 @@
               <el-button text>全部</el-button>
             </div>
           </template>
+          
+          <!-- 空数据状态 -->
           <div v-if="notices.length === 0" class="empty-data">
             <el-empty description="暂无系统通知"></el-empty>
           </div>
+          
+          <!-- 通知列表 -->
           <div v-else class="notice-list">
             <div v-for="(notice, index) in notices" :key="index" class="notice-item">
               <div class="notice-content">
@@ -131,6 +168,7 @@
       </el-col>
     </el-row>
 
+    <!-- 工作台页脚 -->
     <div class="dashboard-footer">
       <div class="update-info">数据最后更新：{{ lastUpdateTime }}</div>
     </div>
@@ -138,39 +176,70 @@
 </template>
 
 <script>
+/**
+ * 医生工作台页面逻辑
+ * 
+ * 处理工作台数据获取、时钟显示、统计信息等功能
+ */
+
+// 导入 Vue 3 组合式API相关函数
 import { ref, onMounted, computed, onUnmounted } from 'vue'
+// 导入API接口函数
 import { getDoctorDashboard } from '@/api/doctor'
+// 导入路由相关函数
 import { useRouter } from 'vue-router'
+// 导入 Element Plus 组件
 import { ElMessage } from 'element-plus'
+// 导入 Element Plus 图标组件
 import { Calendar, Document, DataAnalysis } from '@element-plus/icons-vue'
 
+/**
+ * 医生工作台组件导出
+ * 
+ * 定义组件的基本信息和逻辑
+ */
 export default {
   name: 'DashboardView',
+  // 注册使用的图标组件
   components: {
     Calendar,
     Document,
     DataAnalysis
   },
   setup() {
+    // 路由实例
     const router = useRouter()
-    const loading = ref(false)
-    const doctorName = ref('')
-    const lastUpdateTime = ref(new Date().toLocaleTimeString())
+    
+    // 基础状态
+    const loading = ref(false)                                        // 加载状态
+    const doctorName = ref('')                                        // 医生姓名
+    const lastUpdateTime = ref(new Date().toLocaleTimeString())       // 最后更新时间
+    
+    /**
+     * 统计信息响应式对象
+     * 
+     * 存储工作台的各项统计数据
+     */
     const stats = ref({
-      pendingReports: 0,
-      hasTodaySchedule: false,
-      monthReports: 0
+      pendingReports: 0,      // 待处理报告数量
+      hasTodaySchedule: false, // 今日是否有排班
+      monthReports: 0         // 本月体检报告数量
     })
     
-    // 时钟
-    const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))
-    const clockTimer = ref(null)
+    // 时钟相关
+    const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }))  // 当前时间
+    const clockTimer = ref(null)                                      // 时钟定时器
     
-    // 数据
-    const recentReports = ref([])
-    const workItems = ref([])
-    const notices = ref([])
+    // 数据列表
+    const recentReports = ref([])                                     // 最近体检报告
+    const workItems = ref([])                                         // 今日工作项
+    const notices = ref([])                                           // 系统通知
 
+    /**
+     * 当前日期计算属性
+     * 
+     * 格式化当前日期为中文格式
+     */
     const currentDate = computed(() => {
       const date = new Date();
       const year = date.getFullYear();
@@ -181,18 +250,37 @@ export default {
       return `${year}年${month}月${day}日 星期${weekday}`;
     })
 
-    // 格式化日期
+    /**
+     * 格式化日期
+     * 
+     * 将日期字符串格式化为 YYYY-MM-DD 格式
+     * 
+     * @param {string} dateString - 日期字符串
+     * @returns {string} 格式化后的日期
+     */
     const formatDate = (dateString) => {
       if (!dateString) return '-';
       const date = new Date(dateString);
       return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}`;
     }
     
+    /**
+     * 数字补零
+     * 
+     * 将单位数字前面补零
+     * 
+     * @param {number} num - 要补零的数字
+     * @returns {string} 补零后的字符串
+     */
     const padZero = (num) => {
       return num < 10 ? `0${num}` : num;
     }
 
-    // 从localStorage读取医生姓名
+    /**
+     * 从localStorage读取医生姓名
+     * 
+     * 读取本地存储中的医生信息并设置姓名
+     */
     const readDoctorName = () => {
       const doctorInfoStr = localStorage.getItem('doctorInfo')
       if (doctorInfoStr) {
@@ -207,28 +295,38 @@ export default {
       }
     }
 
-    // 更新时钟
+    /**
+     * 更新时钟
+     * 
+     * 更新当前时间显示
+     */
     const updateClock = () => {
       currentTime.value = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     }
 
+    /**
+     * 获取工作台数据
+     * 
+     * 从服务器获取工作台的统计数据和报告列表
+     */
     const fetchDashboardData = async () => {
       loading.value = true
       try {
         const res = await getDoctorDashboard()
         if (res.code === 200) {
-          // 确保后端返回了所有需要的字段
+          // 确保后端返回了所有需要的字段，设置统计数据
           stats.value = {
             pendingReports: res.data.pendingReports || 0,
             hasTodaySchedule: res.data.hasTodaySchedule || false,
             monthReports: res.data.monthReports || 0
           }
           
-          // 这里可以添加其他数据的处理
+          // 处理最近体检报告数据
           if (res.data.recentReports) {
             recentReports.value = res.data.recentReports;
           }
           
+          // 更新数据更新时间
           lastUpdateTime.value = new Date().toLocaleTimeString()
         }
       } catch (error) {
@@ -247,6 +345,11 @@ export default {
       }
     }
 
+    /**
+     * 组件挂载时的初始化逻辑
+     * 
+     * 初始化医生姓名、加载数据、启动时钟和自动刷新
+     */
     onMounted(() => {
       // 读取医生姓名
       readDoctorName()
@@ -258,7 +361,7 @@ export default {
       updateClock()
       clockTimer.value = setInterval(updateClock, 60000) // 每分钟更新一次
       
-      // 设置自动刷新
+      // 设置自动刷新（每5分钟）
       const refreshInterval = setInterval(fetchDashboardData, 5 * 60 * 1000)
       
       // 组件卸载时清除定时器
@@ -268,6 +371,7 @@ export default {
       })
     })
 
+    // 返回模板需要的数据和方法
     return {
       loading,
       stats,
@@ -284,27 +388,57 @@ export default {
 }
 </script>
 
+<!--
+  医生工作台页面样式
+  
+  定义工作台页面的视觉设计和布局
+  使用 SCSS 语法编写样式
+-->
 <style scoped lang="scss">
+/* ==================== 页面容器样式 ==================== */
+
+/**
+ * 工作台页面主容器
+ * 
+ * 提供页面的基础布局和背景
+ */
 .dashboard-container {
-  padding: 24px;
-  background-color: var(--background-color);
-  min-height: calc(100vh - 84px);
-  position: relative;
+  padding: 24px;                                   /* 内边距 */
+  background-color: var(--background-color);       /* 背景色 */
+  min-height: calc(100vh - 84px);                  /* 最小高度 */
+  position: relative;                              /* 相对定位 */
 }
 
+/* ==================== 头部区域样式 ==================== */
+
+/**
+ * 头部区域样式
+ * 
+ * 包含欢迎信息和时间显示
+ */
 .header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
+  display: flex;                                   /* 弹性布局 */
+  justify-content: space-between;                  /* 两端对齐 */
+  align-items: center;                             /* 垂直居中 */
+  margin-bottom: 32px;                             /* 底部边距 */
   
+  /**
+   * 欢迎信息区域样式
+   * 
+   * 显示页面标题和欢迎消息
+   */
   .welcome-section {
+    /**
+     * 页面标题样式
+     * 
+     * 工作台页面的主标题
+     */
     .page-title {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--text-primary);
-      line-height: 1.4;
+      margin: 0;                                   /* 无边距 */
+      font-size: 24px;                            /* 字体大小 */
+      font-weight: 600;                            /* 字体粗细 */
+      color: var(--text-primary);                 /* 主要文本颜色 */
+      line-height: 1.4;                           /* 行高 */
     }
     
     .welcome-message {

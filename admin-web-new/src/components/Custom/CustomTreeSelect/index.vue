@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 自定义树选择器组件
+ * @description 基于Element Plus Tree和Select封装的树形选择器组件
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 树形数据选择
+ * - 搜索功能
+ * - 多选支持
+ * - 展开/收起控制
+ * - 自定义节点内容
+ * - 懒加载支持
+ */
+-->
 <template>
   <el-tree-select v-model="data.value" filterable clearable :check-strictly="true" :props="defaultConfig" :data="options||data.options" :placeholder="placeholder"/>
 </template>

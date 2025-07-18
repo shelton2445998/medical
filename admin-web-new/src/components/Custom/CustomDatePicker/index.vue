@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 自定义日期选择器组件
+ * @description 基于Element Plus DatePicker封装的日期选择器组件，提供统一的日期选择功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 日期选择
+ * - 日期范围选择
+ * - 时间选择
+ * - 格式化显示
+ * - 快捷选择
+ * - 禁用日期设置
+ */
+-->
 <template>
   <el-date-picker
       v-model="data.value"

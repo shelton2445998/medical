@@ -1,3 +1,7 @@
+/**
+ * 仪表盘路由模块
+ * 定义首页和仪表盘相关的路由配置
+ */
 const Layout = () => import("@/layout/index.vue");
 
 export default [
@@ -17,7 +21,7 @@ export default [
                 meta: {
                     title: "首页",
                     icon: 'House',
-                    isHome: true
+                    isHome: true  // 标记为首页
                 }
             }
         ]

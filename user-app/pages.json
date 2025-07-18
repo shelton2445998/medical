@@ -3,7 +3,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "熙康健康",
+				"navigationBarTitleText": "东软熙心健康",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white",
 				"enablePullDownRefresh": true
@@ -20,7 +20,7 @@
 		{
 			"path": "pages/login/login",
 			"style": {
-				"navigationBarTitleText": "登录",
+				"navigationBarTitleText": "东软熙心健康",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white"
 			}
@@ -28,7 +28,7 @@
 		{
 			"path": "pages/register/register",
 			"style": {
-				"navigationBarTitleText": "注册",
+				"navigationBarTitleText": "东软熙心健康",
 				"navigationBarBackgroundColor": "#0984e3",
 				"navigationBarTextStyle": "white"
 			}
@@ -310,7 +310,7 @@
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "white",
-		"navigationBarTitleText": "沈阳云医院",
+		"navigationBarTitleText": "东软熙心健康",
 		"navigationBarBackgroundColor": "#0984e3",
 		"backgroundColor": "#F8F8F8"
 	},

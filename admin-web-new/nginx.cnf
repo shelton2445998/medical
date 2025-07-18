@@ -1,13 +1,24 @@
+# Nginx 配置文件
+# 用于 Vue 单页应用的 Nginx 服务器配置
+
 server {
+    # 监听 80 端口
     listen 80;
 
+    # 根路径配置
     location / {
+        # 设置静态文件根目录
         root /usr/share/nginx/html;
+        # 默认首页文件
         index index.html index.htm;
+        # 配置 Vue Router 的 history 模式
+        # 所有不存在的路径都重定向到 index.html
         try_files $uri $uri/ /index.html;
     }
 
+    # 错误页面配置
     error_page 500 502 503 504 /50x.html;
+    # 错误页面文件位置
     location = /50x.html {
         root /usr/share/nginx/html;
     }

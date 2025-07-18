@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 科室管理页面
+ * @description 提供医院科室的增删改查功能，包括列表展示、搜索、新增、编辑、删除等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 科室列表展示
+ * - 关键字搜索功能
+ * - 新增/编辑科室
+ * - 删除科室
+ * - 分页显示
+ * - 批量操作
+ * - 状态管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="queryForm" label-width="80px">

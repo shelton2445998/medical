@@ -1,3 +1,20 @@
+<!--
+@name: 预约详情页面
+@description: 显示体检预约的详细信息，包括预约状态、患者信息、预约时间等
+@author: 医疗系统开发团队
+@created: 2024年医疗系统开发
+@features:
+- 显示预约状态（待支付、已支付、已完成、已取消）
+- 显示患者基本信息（姓名、年龄、性别、联系方式）
+- 显示预约详细信息（预约日期、时间、科室等）
+- 支持取消预约功能
+- 支持跳转到支付页面
+- 动态背景效果和加载状态显示
+@页面路径: /pages/appointment-detail/appointment-detail
+@参数说明:
+- id: 预约ID，用于获取预约详情
+-->
+
 <template>
   <view class="content">
     <!-- 动态背景装饰 -->
@@ -9,14 +26,20 @@
     </view>
     
     <view class="main-content">
-      <!-- 页面头部 -->
+      <!-- 
+        页面头部
+        显示页面标题和描述信息
+      -->
       <view class="page-header">
         <view class="header-icon">📋</view>
         <view class="header-title">预约详情</view>
         <view class="header-desc">查看您的体检预约详细信息</view>
       </view>
       
-      <!-- 加载状态 -->
+      <!-- 
+        加载状态
+        当数据加载中时显示加载提示
+      -->
       <view class="loading-container" v-if="loading">
         <view class="loading-card">
           <view class="loading-icon">⏳</view>
@@ -24,7 +47,10 @@
         </view>
       </view>
       
-      <!-- 错误状态 -->
+      <!-- 
+        错误状态
+        当数据加载失败时显示错误信息和重试按钮
+      -->
       <view class="error-container" v-else-if="error">
         <view class="error-card">
           <view class="error-icon">❌</view>
@@ -36,9 +62,15 @@
         </view>
       </view>
       
-      <!-- 预约详情内容 -->
+      <!-- 
+        预约详情内容
+        显示预约的详细信息，包括状态、患者信息、预约信息等
+      -->
       <view v-else-if="appointmentDetail" class="detail-content">
-        <!-- 状态卡片 -->
+        <!-- 
+          状态卡片
+          显示预约的基本状态信息
+        -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">📊</view>
@@ -62,7 +94,10 @@
           </view>
         </view>
         
-        <!-- 患者信息卡片 -->
+        <!-- 
+          患者信息卡片
+          显示患者的基本信息
+        -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">👤</view>
@@ -88,7 +123,10 @@
           </view>
         </view>
         
-        <!-- 预约信息卡片 -->
+        <!-- 
+          预约信息卡片
+          显示预约的详细信息
+        -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">📅</view>
@@ -101,86 +139,55 @@
             </view>
             <view class="info-row">
               <text class="info-label">预约时间</text>
-              <text class="info-value">{{ appointmentDetail.timeSlot }}</text>
+              <text class="info-value">{{ appointmentDetail.appointmentTime }}</text>
             </view>
             <view class="info-row">
-              <text class="info-label">医院名称</text>
+              <text class="info-label">体检套餐</text>
+              <text class="info-value">{{ appointmentDetail.packageName }}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">体检医院</text>
               <text class="info-value">{{ appointmentDetail.hospitalName }}</text>
             </view>
             <view class="info-row">
-              <text class="info-label">医生姓名</text>
-              <text class="info-value">{{ appointmentDetail.doctorName || '待分配' }}</text>
-            </view>
-          </view>
-        </view>
-        
-        <!-- 套餐信息卡片 -->
-        <view class="detail-card" v-if="appointmentDetail.setmealName">
-          <view class="card-header">
-            <view class="card-icon">📋</view>
-            <view class="card-title">套餐信息</view>
-          </view>
-          <view class="info-section">
-            <view class="info-row">
-              <text class="info-label">套餐名称</text>
-              <text class="info-value">{{ appointmentDetail.setmealName }}</text>
-            </view>
-            <view class="info-row">
               <text class="info-label">套餐价格</text>
-              <text class="info-value price">¥{{ appointmentDetail.price }}</text>
-            </view>
-            <view class="info-row">
-              <text class="info-label">订单金额</text>
-              <text class="info-value price">¥{{ appointmentDetail.amount }}</text>
+              <text class="info-value price">￥{{ appointmentDetail.packagePrice }}</text>
             </view>
           </view>
         </view>
         
-        <!-- 备注信息卡片 -->
-        <view class="detail-card" v-if="appointmentDetail.remark">
-          <view class="card-header">
-            <view class="card-icon">📝</view>
-            <view class="card-title">备注信息</view>
+        <!-- 
+          操作按钮区域
+          根据预约状态显示不同的操作按钮
+        -->
+        <view class="action-section">
+          <!-- 待支付状态：显示取消和支付按钮 -->
+          <view v-if="appointmentDetail.status === 1" class="action-buttons">
+            <button class="btn btn-cancel" @click="cancelAppointment">
+              <text class="btn-icon">❌</text>
+              <text>取消预约</text>
+            </button>
+            <button class="btn btn-pay" @click="goToPayment">
+              <text class="btn-icon">💳</text>
+              <text>立即支付</text>
+            </button>
           </view>
-          <view class="info-section">
-            <view class="info-row">
-              <text class="info-label">备注内容</text>
-              <text class="info-value">{{ appointmentDetail.remark }}</text>
-            </view>
+          
+          <!-- 已支付状态：显示取消按钮 -->
+          <view v-else-if="appointmentDetail.status === 2" class="action-buttons">
+            <button class="btn btn-cancel" @click="cancelAppointment">
+              <text class="btn-icon">❌</text>
+              <text>取消预约</text>
+            </button>
           </view>
-        </view>
-        
-        <!-- 操作按钮 -->
-        <view class="action-buttons">
-          <!-- 待支付状态显示支付按钮 -->
-          <button 
-            class="action-btn pay-btn" 
-            v-if="appointmentDetail.status === 1"
-            @click="goToPayment"
-          >
-            <text class="btn-icon">💳</text>
-            <text>立即支付</text>
-          </button>
           
-          <!-- 待支付状态显示取消预约按钮 -->
-          <button 
-            class="action-btn danger-btn" 
-            v-if="appointmentDetail.status === 1"
-            @click="cancelAppointment"
-          >
-            <text class="btn-icon">❌</text>
-            <text>取消预约</text>
-          </button>
-          
-          <!-- 其他状态显示返回按钮 -->
-          <button 
-            class="action-btn primary-btn" 
-            v-if="appointmentDetail.status !== 1"
-            @click="goBack"
-          >
-            <text class="btn-icon">←</text>
-            <text>返回列表</text>
-          </button>
+          <!-- 其他状态：显示返回按钮 -->
+          <view v-else class="action-buttons">
+            <button class="btn btn-back" @click="goBack">
+              <text class="btn-icon">🔙</text>
+              <text>返回列表</text>
+            </button>
+          </view>
         </view>
       </view>
     </view>
@@ -188,19 +195,34 @@
 </template>
 
 <script>
-import { get } from '@/utils/request.js';
-import { appointmentApi } from '@/utils/api.js';
+// 引入API接口
+import { get } from '@/utils/request';
+import appointmentApi from '@/api/appointment';
 
 export default {
+  name: 'AppointmentDetail',
+  
+  /**
+   * 组件数据
+   * @returns {Object} 组件数据对象
+   */
   data() {
     return {
+      // 预约ID
       appointmentId: null,
+      // 预约详情数据
       appointmentDetail: null,
-      loading: true,
+      // 加载状态
+      loading: false,
+      // 错误信息
       error: null
     }
   },
   
+  /**
+   * 页面加载时的处理
+   * @param {Object} options 页面参数
+   */
   onLoad(options) {
     if (options.id) {
       this.appointmentId = options.id;
@@ -212,7 +234,10 @@ export default {
   },
   
   methods: {
-    // 加载预约详情
+    /**
+     * 加载预约详情
+     * 调用API获取预约的详细信息
+     */
     async loadAppointmentDetail() {
       try {
         this.loading = true;
@@ -240,7 +265,11 @@ export default {
       }
     },
     
-    // 获取状态名称
+    /**
+     * 获取状态名称
+     * @param {number} status 状态码
+     * @returns {string} 状态名称
+     */
     getStatusName(status) {
       const statusMap = {
         0: '已取消',
@@ -251,14 +280,21 @@ export default {
       return statusMap[status] || '未知状态';
     },
     
-    // 格式化日期
+    /**
+     * 格式化日期
+     * @param {string} dateStr 日期字符串
+     * @returns {string} 格式化后的日期
+     */
     formatDate(dateStr) {
       if (!dateStr) return '未知';
       const date = new Date(dateStr);
       return date.toLocaleDateString('zh-CN');
     },
     
-    // 取消预约
+    /**
+     * 取消预约
+     * 显示确认对话框，确认后调用取消预约API
+     */
     async cancelAppointment() {
       try {
         uni.showModal({
@@ -299,7 +335,10 @@ export default {
       }
     },
     
-    // 跳转到支付页面
+    /**
+     * 跳转到支付页面
+     * 将当前订单信息存储到本地存储，然后跳转到支付页面
+     */
     goToPayment() {
       // 将订单信息存储到本地，供支付页面使用
       uni.setStorageSync('currentOrder', JSON.stringify(this.appointmentDetail));
@@ -310,7 +349,10 @@ export default {
       });
     },
     
-    // 返回列表
+    /**
+     * 返回列表
+     * 返回上一页
+     */
     goBack() {
       uni.navigateBack();
     }
@@ -319,6 +361,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+/* 
+  页面整体样式
+  设置渐变背景和基本布局
+*/
 .content {
   background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
   min-height: 100vh;
@@ -327,6 +373,7 @@ export default {
   position: relative;
   overflow: hidden;
   
+  /* 背景动画效果 */
   &::before {
     content: '';
     position: absolute;
@@ -352,6 +399,10 @@ export default {
   }
 }
 
+/* 
+  动态背景装饰
+  添加浮动的装饰性元素
+*/
 .floating-shapes {
   position: absolute;
   top: 0;
@@ -412,12 +463,20 @@ export default {
   }
 }
 
+/* 
+  主要内容区域
+  设置内容的定位和层级
+*/
 .main-content {
   padding: 20rpx 40rpx 0 40rpx;
   position: relative;
   z-index: 1;
 }
 
+/* 
+  页面头部样式
+  设置标题和描述的样式
+*/
 .page-header {
   text-align: center;
   margin-bottom: 40rpx;
@@ -450,6 +509,10 @@ export default {
   }
 }
 
+/* 
+  加载状态样式
+  显示加载中的提示信息
+*/
 .loading-container {
   display: flex;
   align-items: center;
@@ -478,6 +541,10 @@ export default {
   }
 }
 
+/* 
+  错误状态样式
+  显示错误信息和重试按钮
+*/
 .error-container {
   display: flex;
   align-items: center;
@@ -534,10 +601,18 @@ export default {
   }
 }
 
+/* 
+  详情内容样式
+  设置详情内容的动画效果
+*/
 .detail-content {
   animation: fadeInUp 0.8s ease-out;
 }
 
+/* 
+  详情卡片样式
+  设置信息卡片的样式和交互效果
+*/
 .detail-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24rpx;
@@ -598,32 +673,38 @@ export default {
       .info-label {
         font-size: 28rpx;
         color: #666666;
-        font-weight: 500;
+        flex: 1;
       }
       
       .info-value {
         font-size: 28rpx;
         color: #333333;
-        font-weight: bold;
+        font-weight: 500;
+        text-align: right;
         
         &.status {
-          padding: 6rpx 16rpx;
+          padding: 8rpx 16rpx;
           border-radius: 20rpx;
-          font-size: 24rpx;
           font-weight: bold;
+          font-size: 24rpx;
+          
+          &.status-0 {
+            background: #ff5a5f;
+            color: #ffffff;
+          }
           
           &.status-1 {
-            background: linear-gradient(135deg, #ffa726, #ff9800);
+            background: #fd9644;
             color: #ffffff;
           }
           
           &.status-2 {
-            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            background: #0984e3;
             color: #ffffff;
           }
           
           &.status-3 {
-            background: linear-gradient(135deg, #42a5f5, #2196f3);
+            background: #20bf6b;
             color: #ffffff;
           }
         }
@@ -631,178 +712,108 @@ export default {
         &.price {
           color: #ff5a5f;
           font-weight: bold;
+          font-size: 32rpx;
         }
       }
     }
   }
 }
 
-.action-buttons {
-  display: flex;
-  gap: 20rpx;
+/* 
+  操作按钮区域样式
+  设置操作按钮的样式和布局
+*/
+.action-section {
   margin-top: 40rpx;
-  animation: fadeInUp 0.8s ease-out 0.2s both;
   
-  .action-btn {
-    flex: 1;
-    height: 88rpx;
-    border-radius: 44rpx;
-    font-size: 28rpx;
-    font-weight: bold;
+  .action-buttons {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    border: none;
+    gap: 20rpx;
     
-    .btn-icon {
-      font-size: 24rpx;
-      margin-right: 10rpx;
-    }
-    
-    &.primary-btn {
-      background: linear-gradient(135deg, #0984e3, #74b9ff);
-      color: #ffffff;
-      box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+    .btn {
+      flex: 1;
+      height: 88rpx;
+      border: none;
+      border-radius: 44rpx;
+      font-size: 28rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
       
-      &:hover {
-        transform: translateY(-2rpx);
-        box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.4);
+      .btn-icon {
+        font-size: 24rpx;
+        margin-right: 10rpx;
       }
-    }
-    
-    &.secondary-btn {
-      background: rgba(255, 255, 255, 0.9);
-      color: #0984e3;
-      border: 2rpx solid #0984e3;
       
       &:hover {
-        background: rgba(9, 132, 227, 0.1);
-        transform: translateY(-2rpx);
-        box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
+        transform: translateY(-4rpx);
+        box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
       }
-    }
-    
-    &.danger-btn {
-      background: linear-gradient(135deg, #ff7675, #fd79a8);
-      color: #ffffff;
-      box-shadow: 0 8rpx 24rpx rgba(255, 118, 117, 0.3);
       
-      &:hover {
-        transform: translateY(-2rpx);
-        box-shadow: 0 12rpx 32rpx rgba(255, 118, 117, 0.4);
+      &.btn-cancel {
+        background: linear-gradient(135deg, #ff5a5f, #ff7675);
+        color: #ffffff;
       }
-    }
-    
-    &.pay-btn {
-      background: linear-gradient(135deg, #00b894, #00cec9);
-      color: #ffffff;
-      box-shadow: 0 8rpx 24rpx rgba(0, 184, 148, 0.3);
       
-      &:hover {
-        transform: translateY(-2rpx);
-        box-shadow: 0 12rpx 32rpx rgba(0, 184, 148, 0.4);
+      &.btn-pay {
+        background: linear-gradient(135deg, #0984e3, #74b9ff);
+        color: #ffffff;
+      }
+      
+      &.btn-back {
+        background: linear-gradient(135deg, #636e72, #74b9ff);
+        color: #ffffff;
       }
     }
   }
 }
 
-// 动画定义
-@keyframes float {
-  0% {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: 0.8;
-  }
-  25% {
-    transform: translateY(-20px) translateX(20px) scale(1.1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: 0.8;
-  }
-  75% {
-    transform: translateY(20px) translateX(-20px) scale(1.1);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: 0.8;
-  }
-}
-
+/* 
+  动画效果定义
+  定义各种动画效果
+*/
 @keyframes flow {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(180deg); }
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translateX(-100%);
-  }
-  50% {
-    opacity: 0.6;
-    transform: translateX(100%);
-  }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
 }
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-30px) rotate(120deg); }
+  66% { transform: translateY(-15px) rotate(240deg); }
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10rpx);
-  }
-  60% {
-    transform: translateY(-5rpx);
-  }
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style> 

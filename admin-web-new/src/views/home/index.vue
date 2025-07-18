@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 管理后台首页
+ * @description 显示系统概览信息，包括统计数据、图表展示、快速操作等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 系统欢迎界面
+ * - 统计数据卡片展示
+ * - 预约趋势图表
+ * - 待办事项列表
+ * - 快速操作按钮
+ * - 实时数据刷新
+ * - 响应式布局
+ */
+-->
 <template>
   <div class="home-container">
     <div class="welcome-section">

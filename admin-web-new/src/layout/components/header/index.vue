@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 页面头部组件
+ * @description 系统布局的头部组件，包含用户信息、通知、主题切换等功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户信息展示
+ * - 通知功能
+ * - 主题切换
+ * - 标签页管理
+ * - 响应式设计
+ */
+-->
 <template>
   <div>
     <div class="header__box">

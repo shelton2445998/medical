@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 通知组件
+ * @description 系统通知中心组件，展示系统消息和用户通知
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 通知列表展示
+ * - 未读消息提醒
+ * - 消息分类
+ * - 标记已读
+ * - 通知清空
+ * - 实时更新
+ */
+-->
 <template>
     <el-popover
         :width="300"

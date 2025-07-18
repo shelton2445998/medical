@@ -1,3 +1,17 @@
+<!--
+/**
+ * @fileoverview 404 错误页面
+ * @description 当用户访问不存在的页面时显示的错误页面
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 友好的错误提示
+ * - 返回首页按钮
+ * - 动画效果
+ * - 响应式设计
+ */
+-->
 <template>
   <el-card shadow="never" style="height:100%">
     <div class="error layout-padding">

@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 代码生成配置页面
+ * @description 提供代码生成工具的配置管理功能，包括模板配置、路径配置、包名配置等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 代码生成配置管理
+ * - 模板配置
+ * - 输出路径配置
+ * - 包名配置
+ * - 数据库连接配置
+ * - 配置保存与加载
+ * - 配置导入导出
+ * - 配置验证
+ */
+-->
 <template>
   <el-card shadow="never">
     <el-form class="mt20 ml10 mr10" :model="form" ref="formRef" :rules="rules" label-width="160px">

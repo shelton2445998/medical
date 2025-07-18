@@ -1,10 +1,24 @@
+<!--
+  预约管理页面组件
+  
+  提供预约信息的查询、查看、状态管理功能
+  支持按日期、患者姓名、状态筛选预约记录
+  可以查看预约详情、更新预约状态
+  
+  @author 医生端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
   <div class="appointments-container">
+    <!-- 页面标题 -->
     <h2 class="page-title">预约管理</h2>
     
     <!-- 搜索区域 -->
     <el-card class="mb-20">
+      <!-- 搜索表单 -->
       <el-form :inline="true" :model="searchForm" class="search-form">
+        <!-- 预约日期范围选择 -->
         <el-form-item label="预约日期">
           <el-date-picker
             v-model="searchForm.date"
@@ -16,14 +30,17 @@
             value-format="YYYY-MM-DD"
           />
         </el-form-item>
+        <!-- 患者姓名搜索 -->
         <el-form-item label="患者姓名">
           <el-input v-model="searchForm.patientName" placeholder="请输入患者姓名" clearable />
         </el-form-item>
+        <!-- 状态筛选 -->
         <el-form-item label="状态">
           <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
             <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
+        <!-- 搜索按钮 -->
         <el-form-item>
           <el-button type="primary" @click="handleSearch">查询</el-button>
           <el-button @click="resetSearch">重置</el-button>
@@ -33,6 +50,7 @@
     
     <!-- 预约列表 -->
     <el-card>
+      <!-- 卡片头部 -->
       <template #header>
         <div class="card-header">
           <span>预约列表</span>
@@ -42,26 +60,39 @@
           </el-button-group>
         </div>
       </template>
+      
+      <!-- 预约信息表格 -->
       <el-table :data="appointmentsList" style="width: 100%" v-loading="loading">
+        <!-- 预约编号列 -->
         <el-table-column prop="id" label="预约编号" width="120" />
+        <!-- 患者姓名列 -->
         <el-table-column prop="userName" label="患者姓名" width="100" />
+        <!-- 联系电话列 -->
         <el-table-column prop="userPhone" label="联系电话" width="130" />
+        <!-- 套餐名称列 -->
         <el-table-column prop="setmealName" label="套餐名称" width="150" />
+        <!-- 医院名称列 -->
         <el-table-column prop="hospitalName" label="医院名称" width="150" />
+        <!-- 医生姓名列 -->
         <el-table-column prop="doctorName" label="医生" width="100" />
+        <!-- 预约日期列 -->
         <el-table-column prop="appointmentDate" label="预约日期" width="120">
           <template #default="scope">
             {{ formatDate(scope.row.appointmentDate) }}
           </template>
         </el-table-column>
+        <!-- 预约时段列 -->
         <el-table-column prop="timeSlot" label="预约时段" width="120" />
+        <!-- 状态列 -->
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)">{{ getStatusLabel(scope.row.status) }}</el-tag>
           </template>
         </el-table-column>
+        <!-- 操作列 -->
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
+            <!-- 确认预约按钮 -->
             <el-button 
               v-if="scope.row.status === 1" 
               type="primary" 
@@ -70,6 +101,7 @@
             >
               确认
             </el-button>
+            <!-- 完成预约按钮 -->
             <el-button 
               v-if="scope.row.status === 2" 
               type="success" 
@@ -78,6 +110,7 @@
             >
               完成
             </el-button>
+            <!-- 取消预约按钮 -->
             <el-button 
               v-if="[1, 2].includes(scope.row.status)" 
               type="danger" 
@@ -86,6 +119,7 @@
             >
               取消
             </el-button>
+            <!-- 查看详情按钮 -->
             <el-button 
               type="info" 
               size="small" 
@@ -96,7 +130,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <!-- 分页 -->
+      <!-- 分页区域 -->
       <div class="pagination-container">
         <el-pagination
           background
@@ -117,6 +151,7 @@
       v-model="detailDialogVisible"
       width="500px"
     >
+      <!-- 详情描述列表 -->
       <el-descriptions :column="1" border>
         <el-descriptions-item label="预约编号">{{ currentAppointment.appointmentId }}</el-descriptions-item>
         <el-descriptions-item label="患者姓名">{{ currentAppointment.patientName }}</el-descriptions-item>
@@ -132,6 +167,7 @@
         <el-descriptions-item label="创建时间">{{ currentAppointment.createTime }}</el-descriptions-item>
         <el-descriptions-item v-if="currentAppointment.remark" label="备注">{{ currentAppointment.remark }}</el-descriptions-item>
       </el-descriptions>
+      <!-- 对话框底部按钮 -->
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="detailDialogVisible = false">关 闭</el-button>
@@ -145,6 +181,7 @@
       v-model="cancelDialogVisible"
       width="400px"
     >
+      <!-- 取消原因表单 -->
       <el-form :model="cancelForm" ref="cancelFormRef">
         <el-form-item label="取消原因" prop="reason" :rules="[{ required: true, message: '请输入取消原因', trigger: 'blur' }]">
           <el-input
@@ -155,6 +192,7 @@
           />
         </el-form-item>
       </el-form>
+      <!-- 取消对话框底部按钮 -->
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="cancelDialogVisible = false">取 消</el-button>
@@ -166,10 +204,24 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElRouter } from 'element-plus'
-import { getAppointmentList } from '@/api/doctor' // 导入API方法
+/**
+ * 预约管理页面逻辑
+ * 
+ * 处理预约信息的查询、状态更新、详情查看等功能
+ */
 
+// 导入 Vue 3 组合式API相关函数
+import { ref, reactive, onMounted } from 'vue'
+// 导入 Element Plus 组件
+import { ElMessage, ElMessageBox, ElRouter } from 'element-plus'
+// 导入API方法
+import { getAppointmentList } from '@/api/doctor'
+
+/**
+ * 预约管理组件导出
+ * 
+ * 定义组件的基本信息和逻辑
+ */
 export default {
   name: 'AppointmentsView',
   setup() {
@@ -177,22 +229,38 @@ export default {
     const loading = ref(false)
     const patientLoading = ref(false)
     
-    // 分页参数（与文档一致：pageNum、pageSize）
-    const currentPage = ref(1)
-    const pageSize = ref(10)
-    const total = ref(0)
+    /**
+     * 分页参数
+     * 
+     * 控制预约列表的分页显示
+     */
+    const currentPage = ref(1)         // 当前页码
+    const pageSize = ref(10)           // 每页显示数量
+    const total = ref(0)               // 总记录数
     
-    // 搜索表单
+    /**
+     * 搜索表单响应式对象
+     * 
+     * 存储搜索条件的表单数据
+     */
     const searchForm = reactive({
-      date: [], // 日期范围
-      patientName: '',
-      status: ''
+      date: [],          // 日期范围
+      patientName: '',   // 患者姓名
+      status: ''         // 预约状态
     })
     
-    // 预约列表
+    /**
+     * 预约列表数据
+     * 
+     * 存储从服务器获取的预约信息列表
+     */
     const appointmentsList = ref([])
     
-    // 科室列表
+    /**
+     * 科室选项列表
+     * 
+     * 用于显示科室名称的映射
+     */
     const departments = [
       { value: 'internal', label: '内科' },
       { value: 'surgery', label: '外科' },
@@ -205,13 +273,21 @@ export default {
       { value: 'neurology', label: '神经科' }
     ]
     
-    // 预约时段
+    /**
+     * 预约时段选项列表
+     * 
+     * 用于显示时段名称的映射
+     */
     const timeSlots = [
       { value: 'morning', label: '上午(8:00-12:00)' },
       { value: 'afternoon', label: '下午(14:00-18:00)' }
     ]
     
-    // 状态选项（与后端状态一致）
+    /**
+     * 状态选项列表
+     * 
+     * 用于搜索筛选和状态显示
+     */
     const statusOptions = [
       { value: 0, label: '已取消' },
       { value: 1, label: '待支付' },
@@ -219,49 +295,82 @@ export default {
       { value: 3, label: '已完成' }
     ]
     
-    // 详情对话框
+    /**
+     * 详情对话框相关状态
+     * 
+     * 控制预约详情对话框的显示和数据
+     */
     const detailDialogVisible = ref(false)
     const currentAppointment = reactive({
-      appointmentId: '',
-      patientName: '',
-      patientPhone: '',
-      department: '',
-      doctorName: '',
-      appointmentDate: '',
-      timeSlot: '',
-      symptoms: '',
-      status: '',
-      createTime: '',
-      remark: ''
+      appointmentId: '',    // 预约ID
+      patientName: '',      // 患者姓名
+      patientPhone: '',     // 患者电话
+      department: '',       // 科室
+      doctorName: '',       // 医生姓名
+      appointmentDate: '',  // 预约日期
+      timeSlot: '',         // 时段
+      symptoms: '',         // 症状描述
+      status: '',           // 状态
+      createTime: '',       // 创建时间
+      remark: ''            // 备注
     })
     
-    // 取消预约相关
+    /**
+     * 取消预约相关状态
+     * 
+     * 控制取消预约对话框和表单数据
+     */
     const cancelDialogVisible = ref(false)
     const cancelFormRef = ref(null)
     const cancelForm = reactive({
-      appointmentId: '',
-      reason: ''
+      appointmentId: '',    // 预约ID
+      reason: ''            // 取消原因
     })
     const pendingStatusUpdate = ref({}) // 临时存储待取消的预约信息
     
-    // 初始化
+    /**
+     * 组件挂载时的初始化
+     * 
+     * 页面加载时自动获取预约列表
+     */
     onMounted(() => {
       fetchAppointmentsList()
     })
     
-    // 获取科室名称
+    /**
+     * 获取科室名称
+     * 
+     * 根据科室值获取对应的显示名称
+     * 
+     * @param {string} value - 科室值
+     * @returns {string} 科室名称
+     */
     const getDepartmentLabel = (value) => {
       const dept = departments.find(d => d.value === value)
       return dept ? dept.label : value
     }
     
-    // 获取时段名称
+    /**
+     * 获取时段名称
+     * 
+     * 根据时段值获取对应的显示名称
+     * 
+     * @param {string} value - 时段值
+     * @returns {string} 时段名称
+     */
     const getTimeSlotLabel = (value) => {
       const slot = timeSlots.find(s => s.value === value)
       return slot ? slot.label : value
     }
     
-    // 获取状态标签
+    /**
+     * 获取状态标签
+     * 
+     * 根据状态值获取对应的显示文本
+     * 
+     * @param {number} status - 状态值
+     * @returns {string} 状态名称
+     */
     const getStatusLabel = (status) => {
       const statusMap = {
         0: '已取消',
@@ -272,7 +381,14 @@ export default {
       return statusMap[status] || '未知'
     }
     
-    // 获取状态类型
+    /**
+     * 获取状态类型
+     * 
+     * 根据状态值获取对应的Element Plus标签类型
+     * 
+     * @param {number} status - 状态值
+     * @returns {string} 标签类型
+     */
     const getStatusType = (status) => {
       const statusTypeMap = {
         0: 'info',
@@ -283,7 +399,11 @@ export default {
       return statusTypeMap[status] || 'info'
     }
     
-    // 获取预约列表（修正URL和分页参数）
+    /**
+     * 获取预约列表
+     * 
+     * 从服务器获取预约信息列表，支持分页和搜索
+     */
     const fetchAppointmentsList = async () => {
       loading.value = true
       try {
@@ -324,7 +444,11 @@ export default {
       }
     }
     
-    // 模拟预约数据
+    /**
+     * 模拟预约数据
+     * 
+     * 在网络请求失败时提供模拟数据
+     */
     const mockAppointmentsList = () => {
       appointmentsList.value = [
         {
@@ -368,13 +492,21 @@ export default {
       total.value = 2
     }
     
-    // 搜索
+    /**
+     * 搜索处理函数
+     * 
+     * 根据搜索条件重新获取预约列表
+     */
     const handleSearch = () => {
       currentPage.value = 1
       fetchAppointmentsList()
     }
     
-    // 重置搜索
+    /**
+     * 重置搜索条件
+     * 
+     * 清空所有搜索条件并重新加载数据
+     */
     const resetSearch = () => {
       searchForm.date = []
       searchForm.patientName = ''
@@ -383,20 +515,40 @@ export default {
       fetchAppointmentsList()
     }
     
-    // 页码变化
+    /**
+     * 页码变化处理
+     * 
+     * 分页器页码改变时的处理函数
+     * 
+     * @param {number} val - 新的页码
+     */
     const handleCurrentChange = (val) => {
       currentPage.value = val
       fetchAppointmentsList()
     }
     
-    // 每页条数变化
+    /**
+     * 每页条数变化处理
+     * 
+     * 分页器每页条数改变时的处理函数
+     * 
+     * @param {number} val - 新的每页条数
+     */
     const handleSizeChange = (val) => {
       pageSize.value = val
       currentPage.value = 1
       fetchAppointmentsList()
     }
     
-    // 统一处理预约状态更新（使用文档中的状态更新接口）
+    /**
+     * 统一处理预约状态更新
+     * 
+     * 处理预约状态的更新，包括确认、完成、取消等操作
+     * 
+     * @param {Object} row - 预约数据对象
+     * @param {number} targetStatus - 目标状态值
+     * @param {boolean} needReason - 是否需要填写原因
+     */
     const updateAppointmentStatus = (row, targetStatus, needReason = false) => {
       if (needReason) {
         // 取消预约需要原因，先记录待处理的预约
@@ -440,7 +592,11 @@ export default {
       }).catch(() => {})
     }
     
-    // 确认取消预约（带原因）
+    /**
+     * 确认取消预约
+     * 
+     * 验证取消原因并提交取消请求
+     */
     const confirmCancel = () => {
       if (!cancelFormRef.value) return
       
@@ -470,24 +626,46 @@ export default {
       })
     }
     
-    // 查看预约详情
+    /**
+     * 查看预约详情
+     * 
+     * 显示预约的详细信息对话框
+     * 
+     * @param {Object} row - 预约数据对象
+     */
     const viewAppointment = (row) => {
       Object.assign(currentAppointment, row)
       detailDialogVisible.value = true
     }
     
-    // 导出预约数据（文档中未定义，保留功能但提示待实现）
+    /**
+     * 导出预约数据
+     * 
+     * 导出预约列表到Excel文件
+     */
     const exportAppointments = () => {
       ElMessage.success('导出预约数据功能待实现（需后端提供对应接口）')
     }
 
-    // 格式化日期
+    /**
+     * 格式化日期
+     * 
+     * 将日期字符串格式化为 YYYY-MM-DD 格式
+     * 
+     * @param {string} dateStr - 日期字符串
+     * @returns {string} 格式化后的日期
+     */
     const formatDate = (dateStr) => {
       if (!dateStr) return ''
       const date = new Date(dateStr)
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     }
     
+    /**
+     * 返回模板需要的数据和方法
+     * 
+     * 将所有响应式数据和方法暴露给模板使用
+     */
     return {
       loading,
       currentPage,
@@ -521,25 +699,83 @@ export default {
 }
 </script>
 
+<!--
+  预约管理页面样式
+  
+  定义预约管理页面的视觉设计和布局
+  使用 scoped 限制样式作用域
+-->
 <style scoped>
+/**
+ * 页面主容器样式
+ * 
+ * 设置页面的基础间距
+ */
 .appointments-container {
   padding: 20px;
 }
 
+/**
+ * 搜索表单样式
+ * 
+ * 设置搜索表单的布局和换行
+ */
 .search-form {
   display: flex;
   flex-wrap: wrap;
 }
 
+/**
+ * 卡片头部样式
+ * 
+ * 设置卡片头部的布局和对齐方式
+ */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+/**
+ * 分页容器样式
+ * 
+ * 设置分页组件的位置和间距
+ */
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+/**
+ * 通用边距样式
+ * 
+ * 设置组件的底部边距
+ */
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+/**
+ * 页面标题样式
+ * 
+ * 设置页面主标题的外观
+ */
+.page-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+/**
+ * 对话框底部样式
+ * 
+ * 设置对话框底部按钮的布局
+ */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>

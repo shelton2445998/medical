@@ -18,17 +18,40 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
- * 检查项 控制器
- *
+ * 体检项目管理控制器
+ * 
+ * 功能说明：
+ * 本控制器负责管理体检系统中的各种体检项目，包括项目的基本信息管理、
+ * 项目分类管理、项目状态控制等功能。体检项目是构成体检套餐的基本单元，
+ * 也是医院提供体检服务的核心内容。
+ * 
+ * 主要功能：
+ * 1. 体检项目基础管理 - 项目的增删改查
+ * 2. 项目分类管理 - 按照医学分类组织项目
+ * 3. 项目状态管理 - 控制项目的可用性
+ * 4. 项目定价管理 - 设置项目的收费标准
+ * 5. 项目关联管理 - 管理项目与套餐、科室的关系
+ * 
+ * 业务特点：
+ * - 支持多种体检项目类型（血液检查、影像检查、功能检查等）
+ * - 灵活的项目分类和标签管理
+ * - 完整的项目生命周期管理
+ * - 严格的权限控制和操作日志记录
+ * 
  * @author fourth
  * @since 2025-07-09
+ * @version 1.0
  */
-@Slf4j
-@RestController
-@Tag(name = "检查项")
-@RequestMapping("/admin/check-item")
+@Slf4j  // 自动生成日志对象
+@RestController  // REST控制器注解
+@Tag(name = "检查项")  // Swagger文档标签
+@RequestMapping("/admin/check-item")  // 请求路径映射
 public class CheckitemController {
 
+    /**
+     * 体检项目服务接口
+     * 提供体检项目的业务逻辑处理功能
+     */
     @Autowired
     private CheckitemService checkitemService;
 

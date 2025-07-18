@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 操作日志页面
+ * @description 提供系统操作日志的查看功能，包括日志列表展示、搜索、详情查看等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 操作日志列表展示
+ * - 多条件搜索功能
+ * - 日志详情查看
+ * - 分页显示
+ * - 日志排序功能
+ * - 执行时间统计
+ * - 操作状态显示
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <!--    查询-->

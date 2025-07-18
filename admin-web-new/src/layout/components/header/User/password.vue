@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 密码修改组件
+ * @description 用户密码修改组件，包含原密码验证、新密码设置等功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 原密码验证
+ * - 新密码设置
+ * - 密码确认
+ * - 密码强度验证
+ * - 表单验证
+ */
+-->
 <template>
   <el-form ref="pswFormRef" :rules="pswRules" :model="pswData" label-width="90px">
     <el-row class="user-box">

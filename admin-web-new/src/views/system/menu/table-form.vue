@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 菜单表单页面
+ * @description 提供菜单的新增和编辑表单功能，包括菜单类型选择、图标选择、权限配置等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 菜单信息表单
+ * - 菜单类型选择
+ * - 图标选择器
+ * - 权限配置
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 表单重置
+ */
+-->
 <template>
   <div v-if="dialogData.isShow">
     <el-dialog :model-value="true" destroy-on-close :title="dialogData.title" @close="closeDialog" width="600px">

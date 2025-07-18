@@ -1,6 +1,28 @@
+<!--
+@name: 医院详情页面
+@description: 显示医院的详细信息，包括基本信息、联系方式、介绍、体检套餐、医院环境、用户评价等
+@author: 医疗系统开发团队
+@created: 2024年医疗系统开发
+@features:
+- 显示医院基本信息（名称、评分、标签）
+- 展示医院联系方式（电话、地址）
+- 支持一键拨打电话和导航功能
+- 显示医院介绍和图片
+- 展示体检套餐列表
+- 显示医院环境图片
+- 展示用户评价信息
+- 支持预约功能
+@页面路径: /pages/hospital-detail/hospital-detail
+@参数说明:
+- id: 医院ID，用于获取医院详情
+-->
+
 <template>
 	<view class="content">
-		<!-- 动态背景装饰 -->
+		<!-- 
+			动态背景装饰
+			添加浮动的装饰性元素增强视觉效果
+		-->
 		<view class="floating-shapes">
 			<view class="shape shape-1"></view>
 			<view class="shape shape-2"></view>
@@ -9,7 +31,10 @@
 		</view>
 		
 		<view class="main-content">
-			<!-- 医院封面图 -->
+			<!-- 
+				医院封面图片区域
+				显示医院横幅图片和基本信息
+			-->
 			<view class="hospital-banner-section">
 				<image class="hospital-banner" src="/static/images/hospital1.jpg" mode="aspectFill"></image>
 				<view class="banner-overlay">
@@ -23,7 +48,10 @@
 				</view>
 			</view>
 			
-			<!-- 医院基本信息卡片 -->
+			<!-- 
+				医院基本信息卡片
+				显示医院标签等基本信息
+			-->
 			<view class="hospital-info-card">
 				<view class="card-header">
 					<view class="header-icon">🏥</view>
@@ -34,13 +62,17 @@
 				</view>
 			</view>
 			
-			<!-- 医院联系信息卡片 -->
+			<!-- 
+				医院联系信息卡片
+				显示医院电话和地址，支持一键拨打和导航
+			-->
 			<view class="contact-card">
 				<view class="card-header">
 					<view class="header-icon">📞</view>
 					<view class="header-title">联系信息</view>
 				</view>
 				<view class="contact-content">
+					<!-- 电话联系项 -->
 					<view class="contact-item" @click="makePhoneCall(hospital.phone)">
 						<view class="contact-icon">📞</view>
 						<view class="contact-detail">
@@ -51,6 +83,7 @@
 							<text class="arrow-icon">→</text>
 						</view>
 					</view>
+					<!-- 地址导航项 -->
 					<view class="contact-item" @click="openLocation(hospital.latitude, hospital.longitude)">
 						<view class="contact-icon">📍</view>
 						<view class="contact-detail">
@@ -64,7 +97,10 @@
 				</view>
 			</view>
 			
-			<!-- 医院介绍卡片 -->
+			<!-- 
+				医院介绍卡片
+				显示医院详细介绍文本和相关图片
+			-->
 			<view class="intro-card">
 				<view class="card-header">
 					<view class="header-icon">📋</view>
@@ -72,6 +108,7 @@
 				</view>
 				<view class="intro-content">
 					<text class="intro-text">{{hospital.introduction}}</text>
+					<!-- 医院图片展示 -->
 					<view class="hospital-images" v-if="hospital.images && hospital.images.length > 0">
 						<image 
 							v-for="(img, index) in hospital.images" 
@@ -85,7 +122,10 @@
 				</view>
 			</view>
 			
-			<!-- 体检套餐卡片 -->
+			<!-- 
+				体检套餐卡片
+				显示医院提供的体检套餐列表
+			-->
 			<view class="package-card">
 				<view class="card-header">
 					<view class="header-left">
@@ -100,6 +140,7 @@
 					</view>
 				</view>
 				<view class="package-content">
+					<!-- 套餐列表项 -->
 					<view class="package-item" v-for="(item, index) in packageList" :key="index" @click="selectPackage(item)">
 						<view class="package-info">
 							<text class="package-name">{{item.name}}</text>
@@ -114,7 +155,10 @@
 				</view>
 			</view>
 			
-			<!-- 医院环境卡片 -->
+			<!-- 
+				医院环境卡片
+				展示医院环境图片，支持横向滚动
+			-->
 			<view class="environment-card">
 				<view class="card-header">
 					<view class="header-icon">🏢</view>
@@ -134,7 +178,10 @@
 				</view>
 			</view>
 			
-			<!-- 用户评价卡片 -->
+			<!-- 
+				用户评价卡片
+				显示用户对医院的评价和评分
+			-->
 			<view class="reviews-card">
 				<view class="card-header">
 					<view class="header-icon">⭐</view>
@@ -150,25 +197,33 @@
 									<text class="review-time">{{item.time}}</text>
 								</view>
 							</view>
-							<view class="review-rating">
-								<text class="star" v-for="n in item.rating" :key="n">⭐</text>
-								<text class="star-empty" v-for="n in 5-item.rating" :key="n+5">☆</text>
+							<!-- 评分星级 -->
+							<view class="rating-stars">
+								<text class="star" v-for="i in 5" :key="i" :class="{ active: i <= item.rating }">★</text>
 							</view>
 						</view>
 						<text class="review-content">{{item.content}}</text>
 					</view>
 				</view>
-				<view class="empty-reviews" v-else>
-					<text class="empty-text">暂无评价</text>
+				<!-- 暂无评价提示 -->
+				<view class="no-reviews" v-else>
+					<text class="no-reviews-text">暂无用户评价</text>
 				</view>
 			</view>
 		</view>
 		
-		<!-- 底部按钮 -->
+		<!-- 
+			底部操作栏
+			提供预约和导航功能
+		-->
 		<view class="bottom-actions">
-			<button class="action-btn appointment-btn" @click="goToAppointment">
+			<button class="action-btn secondary" @click="openLocation(hospital.latitude, hospital.longitude)">
+				<text class="btn-icon">📍</text>
+				<text>导航</text>
+			</button>
+			<button class="action-btn primary" @click="goToAppointment">
 				<text class="btn-icon">📅</text>
-				<text class="btn-text">立即预约</text>
+				<text>立即预约</text>
 			</button>
 		</view>
 	</view>
@@ -176,29 +231,30 @@
 
 <script>
 	export default {
+		name: 'HospitalDetail',
+		
+		/**
+		 * 组件数据
+		 * @returns {Object} 组件数据对象
+		 */
 		data() {
 			return {
+				// 医院基本信息
 				hospital: {
-					id: 1,
-					name: '沈阳市云医院-和平分院',
-					tags: ['三甲', '综合医院'],
-					rating: '4.8',
-					phone: '024-12345678',
-					address: '沈阳市和平区南京南街61号',
-					latitude: 41.805699,
-					longitude: 123.431436,
-					introduction: '沈阳市云医院-和平分院是一所集医疗、教学、科研、预防、保健、康复为一体的大型综合性三级甲等医院。医院占地面积5万平方米，建筑面积10万平方米，开放床位800张，拥有各类先进医疗设备2000余台（套），其中包括3.0T核磁共振、64排128层CT、直线加速器、伽马刀等大型医疗设备。医院设有临床科室40个，医技科室12个，专科特色突出，综合实力雄厚。',
-					images: [
-						'/static/images/hospital1.jpg',
-						'/static/images/hospital2.jpg'
-					],
-					environment: [
-						'/static/images/hospital-env1.jpg',
-						'/static/images/hospital-env2.jpg',
-						'/static/images/hospital-env3.jpg'
-					]
+					id: '',
+					name: '',
+					tags: [],
+					rating: '',
+					phone: '',
+					address: '',
+					latitude: 0,
+					longitude: 0,
+					introduction: '',
+					images: [],
+					environment: []
 				},
 				
+				// 体检套餐列表
 				packageList: [
 					{
 						id: 1,
@@ -215,6 +271,8 @@
 						originalPrice: '899'
 					}
 				],
+				
+				// 用户评价列表
 				reviewList: [
 					{
 						id: 1,
@@ -235,17 +293,25 @@
 				]
 			}
 		},
+		
+		/**
+		 * 页面加载时的处理
+		 * @param {Object} options 页面参数
+		 */
 		onLoad(options) {
 			// 获取医院ID
 			const hospitalId = options.id;
 			// 根据ID获取医院详情
 			this.getHospitalDetail(hospitalId);
 		},
+		
 		methods: {
-			// 获取医院详情
+			/**
+			 * 获取医院详情
+			 * @param {string} id 医院ID
+			 */
 			async getHospitalDetail(id) {
 				try {
-					// 这里可以替换为实际的API调用
 					console.log('获取医院详情，ID：', id);
 					
 					// 模拟根据ID获取医院详情
@@ -349,66 +415,6 @@
 								'/static/images/hospital-env2.jpg',
 								'/static/images/hospital-env3.jpg'
 							]
-						},
-						2: {
-							id: 2,
-							name: '沈阳市云医院-沈河分院',
-							tags: ['三甲', '综合医院'],
-							rating: '4.6',
-							phone: '024-87654321',
-							address: '沈阳市沈河区北站路36号',
-							latitude: 41.812977,
-							longitude: 123.445235,
-							introduction: '沈阳市云医院-沈河分院是沈河区重点医疗机构，拥有先进的医疗设备和专业的医疗团队。医院专注于提供高质量的医疗服务，包括体检、治疗、康复等全方位医疗服务。',
-							images: [
-								'/static/images/hospital2.jpg',
-								'/static/images/hospital3.jpg'
-							],
-							environment: [
-								'/static/images/hospital-env1.jpg',
-								'/static/images/hospital-env2.jpg',
-								'/static/images/hospital-env3.jpg'
-							]
-						},
-						3: {
-							id: 3,
-							name: '内蒙古自治区人民医院',
-							tags: ['三甲', '综合医院'],
-							rating: '4.7',
-							phone: '0471-3283999',
-							address: '内蒙古呼和浩特市昭乌达路20号',
-							latitude: 40.8429,
-							longitude: 111.7494,
-							introduction: '内蒙古自治区人民医院是内蒙古自治区规模最大、技术力量最雄厚的综合性三级甲等医院，是内蒙古自治区医疗、教学、科研、预防、保健、康复中心。',
-							images: [
-								'/static/images/hospital3.jpg',
-								'/static/images/hospital4.jpg'
-							],
-							environment: [
-								'/static/images/hospital-env1.jpg',
-								'/static/images/hospital-env2.jpg',
-								'/static/images/hospital-env3.jpg'
-							]
-						},
-						4: {
-							id: 4,
-							name: '内蒙古医科大学附属医院',
-							tags: ['三甲', '综合医院'],
-							rating: '4.5',
-							phone: '0471-3451120',
-							address: '呼和浩特市回民区通道北路1号',
-							latitude: 40.8429,
-							longitude: 111.7494,
-							introduction: '内蒙古医科大学附属医院是一所集医疗、教学、科研、预防、保健、康复为一体的综合性三级甲等医院，是内蒙古医科大学的主要临床教学基地。',
-							images: [
-								'/static/images/hospital4.jpg',
-								'/static/images/hospital1.jpg'
-							],
-							environment: [
-								'/static/images/hospital-env1.jpg',
-								'/static/images/hospital-env2.jpg',
-								'/static/images/hospital-env3.jpg'
-							]
 						}
 					};
 					
@@ -431,13 +437,22 @@
 					});
 				}
 			},
-			// 拨打电话
+			
+			/**
+			 * 拨打电话
+			 * @param {string} phone 电话号码
+			 */
 			makePhoneCall(phone) {
 				uni.makePhoneCall({
 					phoneNumber: phone
 				});
 			},
-			// 打开地图
+			
+			/**
+			 * 打开地图导航
+			 * @param {number} latitude 纬度
+			 * @param {number} longitude 经度
+			 */
 			openLocation(latitude, longitude) {
 				uni.openLocation({
 					latitude: latitude,
@@ -447,21 +462,33 @@
 					scale: 18
 				});
 			},
-			// 预览医院图片
+			
+			/**
+			 * 预览医院图片
+			 * @param {number} index 图片索引
+			 */
 			previewImage(index) {
 				uni.previewImage({
 					current: index,
 					urls: this.hospital.images
 				});
 			},
-			// 预览环境图片
+			
+			/**
+			 * 预览环境图片
+			 * @param {number} index 图片索引
+			 */
 			previewEnvironment(index) {
 				uni.previewImage({
 					current: index,
 					urls: this.hospital.environment
 				});
 			},
-			// 选择套餐
+			
+			/**
+			 * 选择套餐
+			 * @param {Object} pkg 套餐对象
+			 */
 			selectPackage(pkg) {
 				// 存储选择的医院信息
 				uni.setStorageSync('selectedHospital', JSON.stringify(this.hospital));
@@ -474,13 +501,20 @@
 					url: '/pages/appointment/appointment-flow'
 				});
 			},
-			// 页面跳转
+			
+			/**
+			 * 页面跳转
+			 * @param {string} url 跳转地址
+			 */
 			navigateTo(url) {
 				uni.navigateTo({
 					url: url
 				});
 			},
-			// 跳转到预约页面
+			
+			/**
+			 * 跳转到预约页面
+			 */
 			goToAppointment() {
 				// 存储选择的医院信息
 				uni.setStorageSync('selectedHospital', JSON.stringify(this.hospital));
@@ -495,21 +529,29 @@
 </script>
 
 <style lang="scss">
+/* 
+	页面整体样式
+	设置页面背景和基本布局
+*/
 .content {
 	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 	min-height: 100vh;
 	padding-bottom: 120rpx;
-	position: relative; /* For floating shapes */
-	overflow: hidden; /* Hide overflow for floating shapes */
+	position: relative;
+	overflow: hidden;
 }
 
+/* 
+	浮动装饰元素
+	增强页面视觉效果
+*/
 .floating-shapes {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	z-index: -1; /* Ensure shapes are behind content */
+	z-index: -1;
 	
 	.shape {
 		position: absolute;
@@ -551,201 +593,223 @@
 	}
 }
 
+/* 
+	主要内容区域
+	设置内容的布局和间距
+*/
 .main-content {
-	padding: 20rpx; /* Adjust padding for main content */
+	position: relative;
+	z-index: 1;
 }
 
+/* 
+	医院横幅区域
+	显示医院主图和基本信息
+*/
 .hospital-banner-section {
 	position: relative;
-	margin-bottom: 20rpx;
+	height: 400rpx;
+	border-radius: 20rpx;
+	overflow: hidden;
+	margin: 20rpx;
 	
 	.hospital-banner {
 		width: 100%;
-		height: 400rpx;
-		border-radius: 15rpx;
-		overflow: hidden;
-		box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.1);
+		height: 100%;
 	}
 	
 	.banner-overlay {
 		position: absolute;
-		top: 0;
+		bottom: 0;
 		left: 0;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.2));
-		border-radius: 15rpx;
-		display: flex;
-		justify-content: center;
-		align-items: flex-end;
-		padding-bottom: 40rpx;
-	}
-	
-	.banner-content {
-		text-align: center;
-		color: #ffffff;
+		right: 0;
+		background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+		padding: 40rpx 30rpx 30rpx 30rpx;
 		
-		.banner-title {
-			font-size: 48rpx;
-			font-weight: bold;
-			margin-bottom: 10rpx;
-			text-shadow: 2rpx 2rpx 4rpx rgba(0, 0, 0, 0.5);
-		}
-		
-		.banner-rating {
-			display: flex;
-			align-items: baseline;
-			font-size: 30rpx;
-			color: #ffc107; /* Gold color for rating */
-			text-shadow: 1rpx 1rpx 2rpx rgba(0, 0, 0, 0.5);
+		.banner-content {
+			color: white;
 			
-			.rating-score {
-				font-size: 40rpx;
+			.banner-title {
+				font-size: 36rpx;
 				font-weight: bold;
-				margin-right: 10rpx;
+				margin-bottom: 10rpx;
 			}
 			
-			.rating-text {
-				font-size: 28rpx;
-				color: #ffffff;
+			.banner-rating {
+				display: flex;
+				align-items: center;
+				gap: 10rpx;
+				
+				.rating-score {
+					font-size: 32rpx;
+					font-weight: bold;
+					color: #ffd700;
+				}
+				
+				.rating-text {
+					font-size: 24rpx;
+					color: rgba(255, 255, 255, 0.8);
+				}
 			}
 		}
 	}
 }
 
+/* 
+	通用卡片样式
+	统一的卡片样式设置
+*/
 .hospital-info-card,
 .contact-card,
 .intro-card,
 .package-card,
 .environment-card,
 .reviews-card {
-	background-color: #ffffff;
-	border-radius: 15rpx;
+	background: white;
+	border-radius: 20rpx;
+	margin: 20rpx;
 	padding: 30rpx;
-	margin-bottom: 20rpx;
-	box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.08);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
 	
 	.card-header {
 		display: flex;
 		align-items: center;
-		margin-bottom: 20rpx;
+		justify-content: space-between;
+		margin-bottom: 30rpx;
+		
+		.header-left {
+			display: flex;
+			align-items: center;
+		}
 		
 		.header-icon {
-			font-size: 40rpx;
+			font-size: 32rpx;
 			margin-right: 15rpx;
-			color: #1296db; /* Primary color for icons */
+			color: #0984e3;
 		}
 		
 		.header-title {
-			font-size: 36rpx;
+			font-size: 32rpx;
 			font-weight: bold;
-			color: #333333;
-			position: relative;
-			padding-left: 20rpx;
-			
-			&::before {
-				content: '';
-				position: absolute;
-				left: 0;
-				top: 50%;
-				transform: translateY(-50%);
-				width: 6rpx;
-				height: 30rpx;
-				background-color: #1296db;
-				border-radius: 3rpx;
+			color: #333;
+		}
+		
+		.header-right {
+			.more-btn {
+				display: flex;
+				align-items: center;
+				gap: 5rpx;
+				color: #0984e3;
+				font-size: 24rpx;
+				
+				.arrow-icon {
+					font-size: 20rpx;
+				}
 			}
 		}
 	}
 }
 
+/* 
+	医院标签样式
+	显示医院特色标签
+*/
 .hospital-tags {
 	display: flex;
 	flex-wrap: wrap;
-	margin-bottom: 20rpx;
+	gap: 15rpx;
 	
 	.tag {
+		background: linear-gradient(135deg, #0984e3, #74b9ff);
+		color: white;
+		padding: 10rpx 20rpx;
+		border-radius: 25rpx;
 		font-size: 24rpx;
-		color: #1296db;
-		background-color: rgba(18, 150, 219, 0.1);
-		padding: 8rpx 16rpx;
-		border-radius: 10rpx;
-		margin-right: 10rpx;
-		margin-bottom: 10rpx;
 		font-weight: bold;
 	}
 }
 
+/* 
+	联系信息样式
+	显示电话和地址信息
+*/
 .contact-content {
 	.contact-item {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 15rpx 0;
-		border-bottom: 1px solid #f5f5f5;
+		padding: 20rpx 0;
+		border-bottom: 1px solid #f0f0f0;
 		
 		&:last-child {
 			border-bottom: none;
 		}
 		
 		.contact-icon {
-			font-size: 36rpx;
-			color: #1296db;
-			margin-right: 15rpx;
+			font-size: 28rpx;
+			margin-right: 20rpx;
+			color: #0984e3;
 		}
 		
 		.contact-detail {
 			flex: 1;
 			
 			.contact-label {
-				font-size: 26rpx;
-				color: #666666;
+				display: block;
+				font-size: 24rpx;
+				color: #666;
 				margin-bottom: 5rpx;
 			}
 			
 			.contact-text {
 				font-size: 28rpx;
-				color: #333333;
-				font-weight: bold;
+				color: #333;
 			}
 		}
 		
 		.contact-arrow {
-			font-size: 32rpx;
-			color: #999999;
-			margin-left: 10rpx;
+			.arrow-icon {
+				font-size: 24rpx;
+				color: #0984e3;
+			}
 		}
 	}
 }
 
+/* 
+	医院介绍样式
+	显示医院介绍文本和图片
+*/
 .intro-content {
 	.intro-text {
 		font-size: 28rpx;
-		color: #666666;
 		line-height: 1.6;
-		margin-bottom: 20rpx;
+		color: #333;
+		margin-bottom: 30rpx;
 	}
 	
 	.hospital-images {
 		display: flex;
-		flex-wrap: wrap;
+		gap: 15rpx;
 		
 		.hospital-image {
-			width: 220rpx;
-			height: 165rpx;
-			margin-right: 15rpx;
-			margin-bottom: 15rpx;
-			border-radius: 8rpx;
+			width: 150rpx;
+			height: 150rpx;
+			border-radius: 10rpx;
 		}
 	}
 }
 
+/* 
+	套餐列表样式
+	显示体检套餐信息
+*/
 .package-content {
 	.package-item {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		padding: 20rpx 0;
-		border-bottom: 1px solid #f5f5f5;
+		justify-content: space-between;
+		padding: 25rpx 0;
+		border-bottom: 1px solid #f0f0f0;
 		
 		&:last-child {
 			border-bottom: none;
@@ -755,334 +819,196 @@
 			flex: 1;
 			
 			.package-name {
+				display: block;
 				font-size: 30rpx;
 				font-weight: bold;
-				color: #333333;
+				color: #333;
 				margin-bottom: 10rpx;
 			}
 			
 			.package-desc {
+				display: block;
 				font-size: 24rpx;
-				color: #666666;
-				margin-bottom: 10rpx;
-				display: -webkit-box;
-				-webkit-box-orient: vertical;
-				-webkit-line-clamp: 2;
-				overflow: hidden;
-				text-overflow: ellipsis;
+				color: #666;
+				margin-bottom: 15rpx;
 			}
 			
 			.package-price-box {
 				display: flex;
-				align-items: baseline;
+				align-items: center;
+				gap: 15rpx;
 				
 				.package-price {
 					font-size: 32rpx;
 					font-weight: bold;
-					color: #ff5a5f;
-					margin-right: 10rpx;
+					color: #ff4757;
 				}
 				
 				.package-original-price {
 					font-size: 24rpx;
-					color: #999999;
+					color: #999;
 					text-decoration: line-through;
 				}
 			}
 		}
 		
 		.package-btn {
-			width: 120rpx;
-			height: 60rpx;
-			line-height: 60rpx;
-			text-align: center;
-			background-color: #1296db;
-			color: #ffffff;
+			background: linear-gradient(135deg, #0984e3, #74b9ff);
+			color: white;
+			padding: 15rpx 30rpx;
+			border-radius: 25rpx;
 			font-size: 26rpx;
-			border-radius: 30rpx;
+			font-weight: bold;
 		}
 	}
 }
 
+/* 
+	环境图片样式
+	显示医院环境图片
+*/
 .environment-content {
 	.environment-scroll {
 		white-space: nowrap;
 		
 		.environment-image {
-			display: inline-block;
-			width: 280rpx;
-			height: 180rpx;
+			width: 200rpx;
+			height: 150rpx;
+			border-radius: 10rpx;
 			margin-right: 15rpx;
-			border-radius: 8rpx;
+			display: inline-block;
 		}
 	}
 }
 
+/* 
+	用户评价样式
+	显示用户评价信息
+*/
 .reviews-content {
 	.review-item {
-		margin-bottom: 30rpx;
+		padding: 25rpx 0;
+		border-bottom: 1px solid #f0f0f0;
 		
 		&:last-child {
-			margin-bottom: 0;
+			border-bottom: none;
 		}
 		
 		.reviewer-info {
 			display: flex;
 			align-items: center;
+			justify-content: space-between;
 			margin-bottom: 15rpx;
 			
-			.reviewer-avatar {
-				width: 60rpx;
-				height: 60rpx;
-				border-radius: 50%;
-				margin-right: 15rpx;
-			}
-			
-			.reviewer-text {
-				flex: 1;
+			.reviewer-detail {
+				display: flex;
+				align-items: center;
 				
-				.reviewer-name {
-					font-size: 28rpx;
-					color: #333333;
-					margin-bottom: 5rpx;
+				.reviewer-avatar {
+					width: 60rpx;
+					height: 60rpx;
+					border-radius: 50%;
+					margin-right: 15rpx;
 				}
 				
-				.review-time {
-					font-size: 22rpx;
-					color: #999999;
+				.reviewer-text {
+					.reviewer-name {
+						display: block;
+						font-size: 28rpx;
+						font-weight: bold;
+						color: #333;
+						margin-bottom: 5rpx;
+					}
+					
+					.review-time {
+						font-size: 24rpx;
+						color: #666;
+					}
 				}
 			}
 			
-			.review-rating {
+			.rating-stars {
 				.star {
 					font-size: 24rpx;
-					color: #ff9500; /* Gold color for stars */
-				}
-				
-				.star-empty {
-					font-size: 24rpx;
-					color: #dddddd; /* Gray color for empty stars */
+					color: #ddd;
+					margin-right: 2rpx;
+					
+					&.active {
+						color: #ffd700;
+					}
 				}
 			}
 		}
 		
 		.review-content {
 			font-size: 26rpx;
-			color: #666666;
 			line-height: 1.6;
+			color: #333;
 		}
 	}
 }
 
-.empty-reviews {
+/* 
+	无评价提示样式
+*/
+.no-reviews {
 	text-align: center;
-	padding: 40rpx 0;
-	color: #999999;
-	font-size: 28rpx;
+	padding: 50rpx 0;
+	
+	.no-reviews-text {
+		font-size: 28rpx;
+		color: #999;
+	}
 }
 
+/* 
+	底部操作栏样式
+	固定在底部的操作按钮
+*/
 .bottom-actions {
 	position: fixed;
+	bottom: 0;
 	left: 0;
 	right: 0;
-	bottom: 0;
-	padding: 20rpx;
-	background-color: #ffffff;
-	box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-	z-index: 10; /* Ensure it's above floating shapes */
+	background: white;
+	padding: 20rpx 30rpx;
+	box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+	display: flex;
+	gap: 20rpx;
 	
 	.action-btn {
-		height: 90rpx;
-		line-height: 90rpx;
-		background: linear-gradient(to right, #1296db, #007bff); /* Gradient background */
-		color: #ffffff;
-		font-size: 32rpx;
-		border-radius: 45rpx;
+		flex: 1;
+		height: 88rpx;
+		border: none;
+		border-radius: 44rpx;
+		font-size: 28rpx;
+		font-weight: bold;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.1);
-		
-		&::after {
-			border: none;
-		}
 		
 		.btn-icon {
-			font-size: 36rpx;
+			font-size: 24rpx;
 			margin-right: 10rpx;
 		}
 		
-		.btn-text {
-			font-weight: bold;
+		&.secondary {
+			background: #f8f9fa;
+			color: #0984e3;
+		}
+		
+		&.primary {
+			background: linear-gradient(135deg, #0984e3, #74b9ff);
+			color: white;
 		}
 	}
 }
 
-/* 卡片头部样式 */
-.card-header {
-	display: flex;
-	align-items: center;
-	margin-bottom: 20rpx;
-	
-	.header-left {
-		display: flex;
-		align-items: center;
-		flex: 1;
-	}
-	
-	.header-right {
-		display: flex;
-		align-items: center;
-	}
-	
-	.header-icon {
-		font-size: 40rpx;
-		margin-right: 15rpx;
-		color: #1296db;
-	}
-	
-	.header-title {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: #333333;
-		position: relative;
-		padding-left: 20rpx;
-		
-		&::before {
-			content: '';
-			position: absolute;
-			left: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			width: 6rpx;
-			height: 30rpx;
-			background-color: #1296db;
-			border-radius: 3rpx;
-		}
-	}
-	
-	.more-btn {
-		display: flex;
-		align-items: center;
-		font-size: 26rpx;
-		color: #999999;
-		
-		.arrow-icon {
-			font-size: 24rpx;
-			margin-left: 5rpx;
-		}
-	}
-}
-
-/* 套餐内容样式 */
-.package-content {
-	.package-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20rpx 0;
-		border-bottom: 1px solid #f5f5f5;
-		
-		&:last-child {
-			border-bottom: none;
-		}
-		
-		.package-info {
-			flex: 1;
-			
-			.package-name {
-				font-size: 30rpx;
-				font-weight: bold;
-				color: #333333;
-				margin-bottom: 8rpx;
-			}
-			
-			.package-desc {
-				font-size: 24rpx;
-				color: #666666;
-				margin-bottom: 10rpx;
-			}
-			
-			.package-price-box {
-				display: flex;
-				align-items: baseline;
-				
-				.package-price {
-					font-size: 32rpx;
-					font-weight: bold;
-					color: #ff5a5f;
-					margin-right: 10rpx;
-				}
-				
-				.package-original-price {
-					font-size: 24rpx;
-					color: #999999;
-					text-decoration: line-through;
-				}
-			}
-		}
-		
-		.package-btn {
-			background-color: #1296db;
-			color: #ffffff;
-			padding: 10rpx 20rpx;
-			border-radius: 20rpx;
-			font-size: 24rpx;
-		}
-	}
-}
-
-/* 评价者信息样式 */
-.reviewer-detail {
-	display: flex;
-	align-items: center;
-	flex: 1;
-	
-	.reviewer-avatar {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		margin-right: 15rpx;
-	}
-	
-	.reviewer-text {
-		flex: 1;
-		
-		.reviewer-name {
-			font-size: 28rpx;
-			color: #333333;
-			margin-bottom: 5rpx;
-			display: block;
-		}
-		
-		.review-time {
-			font-size: 22rpx;
-			color: #999999;
-			display: block;
-		}
-	}
-}
-
+/* 
+	动画效果定义
+*/
 @keyframes float {
-	0% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
-	25% {
-		transform: translateY(-10px) translateX(10px) scale(1.05);
-		opacity: 0.9;
-	}
-	50% {
-		transform: translateY(5px) translateX(-5px) scale(1.02);
-		opacity: 1;
-	}
-	75% {
-		transform: translateY(-5px) translateX(5px) scale(1.03);
-		opacity: 0.9;
-	}
-	100% {
-		transform: translateY(0) translateX(0) scale(1);
-		opacity: 0.8;
-	}
+	0%, 100% { transform: translateY(0px); }
+	50% { transform: translateY(-20px); }
 }
 </style> 

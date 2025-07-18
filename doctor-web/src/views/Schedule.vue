@@ -1,8 +1,21 @@
+<!--
+  排班管理页面组件
+  
+  提供医生排班的管理功能，包括排班的查看、新增、编辑、删除
+  以周视图的形式展示排班信息，支持按周切换查看
+  可以管理排班时间、预约人数等信息
+  
+  @author 医生端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
   <div class="schedule-container">
+    <!-- 页面头部 -->
     <div class="page-header">
       <h2>排班管理</h2>
       <div class="action-buttons">
+        <!-- 新增排班按钮 -->
         <el-button type="primary" @click="handleAddSchedule">
           <el-icon><Plus /></el-icon> 新增排班
         </el-button>
@@ -10,7 +23,9 @@
     </div>
 
     <el-card>
+      <!-- 过滤器容器 -->
       <div class="filter-container">
+        <!-- 周导航 -->
         <div class="week-navigation">
           <el-button type="default" @click="prevWeek">
             <el-icon><ArrowLeft /></el-icon> 上一周
@@ -20,15 +35,19 @@
             下一周 <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
+        <!-- 刷新按钮 -->
         <el-button type="primary" @click="fetchScheduleData">刷新</el-button>
       </div>
 
+      <!-- 周日历 -->
       <div class="week-calendar">
+        <!-- 周标题 -->
         <div class="week-header">
           <div v-for="(day, index) in weekDays" :key="index" class="week-day-header">
             {{ day.dayOfWeek }}<br>{{ day.dateStr }}
           </div>
         </div>
+        <!-- 周内容 -->
         <div class="week-body">
           <div 
             v-for="(day, index) in weekDays" 
@@ -40,11 +59,13 @@
             }"
             @click="selectDay(day.fullDate)"
           >
+            <!-- 排班项目迷你视图 -->
             <div v-for="schedule in getSchedulesByDate(day.fullDate)" :key="schedule.id" class="schedule-item-mini">
               <span :class="{ 'disabled-schedule': schedule.status === false }">
                 {{ schedule.timeSlot.substring(0, 2) }} ({{ schedule.reservedNumber }}/{{ schedule.maxNumber }})
               </span>
             </div>
+            <!-- 无排班提示 -->
             <div v-if="getSchedulesByDate(day.fullDate).length === 0" class="no-schedule-mini">
               无排班
             </div>

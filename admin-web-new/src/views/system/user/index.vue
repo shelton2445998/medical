@@ -1,3 +1,23 @@
+<!--
+/**
+ * @fileoverview 用户管理页面
+ * @description 提供系统用户的增删改查功能，包括用户列表、权限管理、状态控制等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户列表展示
+ * - 角色筛选功能
+ * - 状态筛选功能
+ * - 关键字搜索
+ * - 新增/编辑用户
+ * - 删除用户
+ * - 重置密码
+ * - 用户状态管理
+ * - 分页显示
+ * - 批量操作
+ */
+-->
 <template>
   <div class="page-container">
     <div class="page-header">

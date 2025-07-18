@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 系统设置页面
+ * @description 提供系统基础配置的管理功能，包括系统名称、标题、Logo、版权信息等设置
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 系统基础信息配置
+ * - 系统Logo上传
+ * - 版权信息设置
+ * - 备案号设置
+ * - 配置保存功能
+ * - 表单重置功能
+ * - 配置验证
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="formData" label-width="120px" ref="formRef">

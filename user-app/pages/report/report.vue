@@ -61,37 +61,44 @@
 </template>
 
 <script>
+	// 导入报告相关的API方法
 	import {
-		getAppReportPage,
-		getAppointmentDetail
+		getAppReportPage, // 获取报告分页列表
+		getAppointmentDetail // 获取预约详情
 	} from '@/api/report';
+	// 导入用户相关的API方法
 	import {
-		getLoginUserInfo
+		getLoginUserInfo // 获取登录用户信息
 	} from '@/api/user';
 
+	// 导出报告页面组件配置
 	export default {
+		// 组件数据
 		data() {
 			return {
-				allReports: [], // 保存所有报告
-				reportList: [], // 当前页显示的报告
-				error: null,
+				allReports: [], // 保存所有报告数据
+				reportList: [], // 当前页显示的报告列表
+				error: null, // 错误信息
 				userInfo: null, // 存储用户信息
 				// 分页相关数据
-				currentPage: 1,
-				pageSize: 5, // 每页5个报告
-				total: 0,
-				totalPages: 0,
-				hasMore: true,
+				currentPage: 1, // 当前页码
+				pageSize: 5, // 每页显示5个报告
+				total: 0, // 总报告数
+				totalPages: 0, // 总页数
+				hasMore: true, // 是否还有更多数据
 				inputPage: 1, // 当前页显示
-				pendingInputPage: 1 // 用户输入
+				pendingInputPage: 1 // 用户输入的页码
 			}
 		},
+		// 计算属性
 		computed: {
-			// 计算可见的页码
+			// 计算可见的页码列表
 			visiblePages() {
-				const pages = [];
+				const pages = []; // 页码数组
 				const maxVisible = 5; // 最多显示5个页码
+				// 计算起始页码，确保当前页在中间
 				let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+				// 计算结束页码
 				let end = Math.min(this.totalPages, start + maxVisible - 1);
 
 				// 调整start，确保显示maxVisible个页码
@@ -99,63 +106,79 @@
 					start = Math.max(1, end - maxVisible + 1);
 				}
 
+				// 生成页码数组
 				for (let i = start; i <= end; i++) {
 					pages.push(i);
 				}
 
-				return pages;
+				return pages; // 返回可见页码数组
 			}
 		},
+		// 页面加载时的生命周期函数
 		onLoad() {
 			// 先获取用户信息，然后再获取所有报告
 			this.getUserInfo().then(() => {
-				this.getAllReports();
+				this.getAllReports(); // 获取用户信息成功后获取报告
 			}).catch(error => {
-				this.getAllReports();
+				this.getAllReports(); // 获取用户信息失败也继续获取报告
 			});
 		},
+		// 组件方法
 		methods: {
-			// 获取用户信息
+			// 获取用户信息的异步方法
 			async getUserInfo() {
 				return new Promise(async (resolve, reject) => {
 					try {
+						// 调用API获取登录用户信息
 						const res = await getLoginUserInfo();
 						if (res && res.success && res.data) {
+							// 获取成功，保存用户信息
 							this.userInfo = res.data;
-							resolve(this.userInfo);
+							resolve(this.userInfo); // 解析Promise
 						} else {
+							// 获取失败，显示错误提示
 							uni.showToast({
-								title: '获取用户信息失败',
-								icon: 'none'
+								title: '获取用户信息失败', // 错误提示
+								icon: 'none' // 不显示图标
 							});
-							reject(new Error('获取用户信息失败'));
+							reject(new Error('获取用户信息失败')); // 拒绝Promise
 						}
 					} catch (error) {
+						// 捕获异常，显示错误提示
 						uni.showToast({
-							title: '获取用户信息失败',
-							icon: 'none'
+							title: '获取用户信息失败', // 错误提示
+							icon: 'none' // 不显示图标
 						});
-						reject(error);
+						reject(error); // 拒绝Promise
 					}
 				});
 			},
 
-			// 获取所有报告并保存，前端分页
+			/**
+			 * 获取所有报告并保存，前端分页的异步方法
+			 * 从服务器获取用户的所有体检报告，并处理数据格式
+			 */
 			async getAllReports() {
-				this.error = null;
+				this.error = null; // 清空错误信息
 				try {
+					// 构建查询参数
 					const query = {
-						pageNum: 1,
-						pageSize: 9999, // 一次性获取所有
-						userId: this.userInfo ?.id
+						pageNum: 1, // 页码，从第1页开始
+						pageSize: 9999, // 一次性获取所有数据（前端分页）
+						userId: this.userInfo ?.id // 用户ID，如果userInfo存在则使用其id
 					};
+					// 调用API获取报告分页数据
 					const res = await getAppReportPage(query);
-					console.log('API返回数据:', res);
+					console.log('API返回数据:', res); // 输出API返回数据用于调试
+					
+					// 检查API响应是否成功
 					if (res && res.success && res.data) {
-						const list = Array.isArray(res.data.list) ? res.data.list : [];
+						// 获取成功，处理数据
+						const list = Array.isArray(res.data.list) ? res.data.list : []; // 确保list是数组
+						// 使用Promise.all并行处理每个报告项，补充详细信息
 						const reportListWithDetails = await Promise.all(list.map(async (item) => {
-							let packageName = item.packageName;
-							// 处理性别逻辑：0转换为2，1保持为1，其它保持原值
+							let packageName = item.packageName; // 套餐名称
+							// 处理性别逻辑：0转换为2（女性），1保持为1（男性），其它保持原值
 							let processedGender = '';
 							if (item.patientGender !== undefined && item.patientGender !== null) {
 								processedGender = item.patientGender === 0 ? '2' : item.patientGender === 1 ? '1' : '';
@@ -163,41 +186,47 @@
 								processedGender = item.gender === 0 ? '2' : item.gender === 1 ? '1' : '';
 							}
 							
+							// 如果没有套餐名称但有订单ID，尝试从预约详情获取
 							if (!packageName && item.orderId) {
 								try {
+									// 获取预约详情
 									const appointmentRes = await getAppointmentDetail(item.orderId);
 									if (appointmentRes && appointmentRes.success && appointmentRes.data) {
-										packageName = appointmentRes.data.setmealName || '定制套餐';
+										packageName = appointmentRes.data.setmealName || '定制套餐'; // 设置套餐名称
 										// 处理预约详情中的性别
 										let appointmentGender = '';
 										if (appointmentRes.data.patientGender !== undefined && appointmentRes.data.patientGender !== null) {
 											appointmentGender = appointmentRes.data.patientGender === 0 ? '2' : appointmentRes.data.patientGender === 1 ? '1' : '';
 										}
 										
+										// 返回完整的报告信息
 										return {
-											id: item.id,
-											orderId: item.orderId || '',
-											packageName,
-											reportDate: item.reportDate || item.createTime || '',
-											hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '',
-											personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+											id: item.id, // 报告ID
+											orderId: item.orderId || '', // 订单ID
+											packageName, // 套餐名称
+											reportDate: item.reportDate || item.createTime || '', // 报告日期
+											hospitalName: appointmentRes.data.hospitalName || item.hospitalName || '', // 医院名称
+											personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户', // 体检人姓名
 											examDate: (appointmentRes.data.appointmentDate && appointmentRes.data.timeSlot) ?
 												`${appointmentRes.data.appointmentDate.slice(0, 10)} ${appointmentRes.data.timeSlot}` :
-												(item.examDate || ''),
-											adviceCount: item.adviceCount || 0,
-											patientGender: appointmentGender || processedGender,
-											patientAge: appointmentRes.data.patientAge || item.patientAge || ''
+												(item.examDate || ''), // 体检日期
+											adviceCount: item.adviceCount || 0, // 建议数量
+											patientGender: appointmentGender || processedGender, // 患者性别
+											patientAge: appointmentRes.data.patientAge || item.patientAge || '' // 患者年龄
 										};
 									}
-								} catch (error) {}
+								} catch (error) {
+									// 获取预约详情失败，继续处理
+								}
 							}
+							// 返回基础报告信息
 							return {
-								id: item.id,
-								orderId: item.orderId || '',
-								packageName: packageName || '未命名套餐',
-								reportDate: item.reportDate || item.createTime || '',
-								hospitalName: item.hospitalName || '',
-								personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户',
+								id: item.id, // 报告ID
+								orderId: item.orderId || '', // 订单ID
+								packageName: packageName || '未命名套餐', // 套餐名称
+								reportDate: item.reportDate || item.createTime || '', // 报告日期
+								hospitalName: item.hospitalName || '', // 医院名称
+								personName: item.personName || (this.userInfo ? this.userInfo.nickname : '') || '未知用户', // 体检人姓名
 								examDate: item.examDate || '',
 								adviceCount: item.adviceCount || 0,
 								patientGender: processedGender,
@@ -222,46 +251,66 @@
 				}
 			},
 
-			// 根据页码设置当前显示的报告
+			/**
+			 * 根据页码设置当前显示的报告
+			 * 实现前端分页功能，从所有报告中截取指定页面的数据
+			 * @param {Number} page - 要显示的页码
+			 */
 			setReportListByPage(page) {
-				this.currentPage = page;
-				const start = (page - 1) * this.pageSize;
-				const end = start + this.pageSize;
-				this.reportList = this.allReports.slice(start, end);
-				this.inputPage = page;
+				this.currentPage = page; // 设置当前页码
+				const start = (page - 1) * this.pageSize; // 计算开始索引
+				const end = start + this.pageSize; // 计算结束索引
+				this.reportList = this.allReports.slice(start, end); // 从所有报告中截取当前页的数据
+				this.inputPage = page; // 更新输入框显示的页码
 				this.pendingInputPage = page; // 保证输入框和当前页同步
+				
 				// 切换页码后回到顶部（立即显示）
 				if (typeof uni !== 'undefined' && uni.pageScrollTo) {
 					uni.pageScrollTo({
-						scrollTop: 0,
-						duration: 0
+						scrollTop: 0, // 滚动到顶部
+						duration: 0 // 立即滚动，无动画
 					});
 				}
 			},
 
-			// 分享报告
+			/**
+			 * 分享报告方法
+			 * 用于分享体检报告给其他用户（功能开发中）
+			 * @param {Object} report - 要分享的报告对象
+			 */
 			shareReport(report) {
 				uni.showToast({
-					title: '分享功能开发中',
-					icon: 'none'
+					title: '分享功能开发中', // 提示信息
+					icon: 'none' // 不显示图标
 				});
 			},
-			// 下载报告
+			
+			/**
+			 * 下载报告方法
+			 * 用于下载体检报告文件（目前为模拟下载）
+			 * @param {Object} report - 要下载的报告对象
+			 */
 			downloadReport(report) {
+				// 显示加载提示
 				uni.showLoading({
-					title: '下载中...'
+					title: '下载中...' // 加载提示文本
 				});
 
-				// 模拟下载
+				// 模拟下载过程（实际项目中应调用下载API）
 				setTimeout(() => {
-					uni.hideLoading();
+					uni.hideLoading(); // 隐藏加载提示
 					uni.showToast({
-						title: '下载成功',
-						icon: 'success'
+						title: '下载成功', // 成功提示
+						icon: 'success' // 成功图标
 					});
-				}, 2000);
+				}, 2000); // 2秒后完成模拟下载
 			},
-			// 查看报告详情
+			
+			/**
+			 * 查看报告详情方法
+			 * 跳转到报告详情页面并传递相关参数
+			 * @param {Object} report - 要查看的报告对象
+			 */
 			viewReport(report) {
 				// 传递reportId等参数
 				const paramsObj = {

@@ -144,309 +144,348 @@
 </template>
 
 <script>
+	// 导入Vuex的mapState和mapMutations辅助函数
 	import { mapState, mapMutations } from 'vuex'
 	
+	// 导出用户中心页面组件配置
 	export default {
+		// 组件数据
 		data() {
 			return {
+				// 用户信息对象
 				userInfo: {
-					avatar: '/static/img/logo.png',
-					id: '',
-					appointmentCount: 0,
-					reportCount: 0,
-					favoriteCount: 0
+					avatar: '/static/img/logo.png', // 用户头像，默认为logo
+					id: '', // 用户ID
+					appointmentCount: 0, // 预约数量
+					reportCount: 0, // 报告数量
+					favoriteCount: 0 // 收藏数量
 				},
+				// 服务列表配置
 				serviceList: [
 					{
-						name: '我的预约',
-						icon: '/static/images/icons/icon-appointment.png',
-						url: '/pages/my-appointment/my-appointment',
-						implemented: true
+						name: '我的预约', // 服务名称
+						icon: '/static/images/icons/icon-appointment.png', // 服务图标
+						url: '/pages/my-appointment/my-appointment', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '体检报告',
-						icon: '/static/images/icons/icon-report.png',
-						url: '/pages/report/report',
-						implemented: true
+						name: '体检报告', // 服务名称
+						icon: '/static/images/icons/icon-report.png', // 服务图标
+						url: '/pages/report/report', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '健康档案',
-						icon: '/static/images/icons/icon-record.png',
-						url: '/pages/health-record/health-record',
-						implemented: true
+						name: '健康档案', // 服务名称
+						icon: '/static/images/icons/icon-record.png', // 服务图标
+						url: '/pages/health-record/health-record', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '个人信息',
-						icon: '/static/images/icons/icon-profile.png',
-						url: '/pages/member-profile/member-profile',
-						implemented: true
+						name: '个人信息', // 服务名称
+						icon: '/static/images/icons/icon-profile.png', // 服务图标
+						url: '/pages/member-profile/member-profile', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '在线咨询',
-						icon: '/static/images/icons/icon-consult.png',
-						url: '/pages/consult/consult',
-						implemented: true
+						name: '在线咨询', // 服务名称
+						icon: '/static/images/icons/icon-consult.png', // 服务图标
+						url: '/pages/consult/consult', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '我的收藏',
-						icon: '/static/images/icons/icon-favorite.png',
-						url: '/pages/favorite/favorite',
-						implemented: true
+						name: '我的收藏', // 服务名称
+						icon: '/static/images/icons/icon-favorite.png', // 服务图标
+						url: '/pages/favorite/favorite', // 跳转路径
+						implemented: true // 是否已实现
 					}
 				],
+				// 健康管理菜单列表
 				healthMenuList: [
 					{
-						name: '健康评估',
-						icon: '/static/images/icons/icon-assessment.png',
-						url: '/pages/health-assessment/health-assessment',
-						implemented: true
+						name: '健康评估', // 菜单名称
+						icon: '/static/images/icons/icon-assessment.png', // 菜单图标
+						url: '/pages/health-assessment/health-assessment', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '健康指标',
-						icon: '/static/images/icons/icon-indicator.png',
-						url: '/pages/health-indicator/health-indicator',
-						implemented: true
+						name: '健康指标', // 菜单名称
+						icon: '/static/images/icons/icon-indicator.png', // 菜单图标
+						url: '/pages/health-indicator/health-indicator', // 跳转路径
+						implemented: true // 是否已实现
 					},
 					{
-						name: '健康档案',
-						icon: '/static/images/icons/icon-record.png',
-						url: '/pages/health-record/health-record',
-						implemented: true
+						name: '健康档案', // 菜单名称
+						icon: '/static/images/icons/icon-record.png', // 菜单图标
+						url: '/pages/health-record/health-record', // 跳转路径
+						implemented: true // 是否已实现
 					}
 				]
 			}
 		},
+		// 计算属性
 		computed: {
+			// 从Vuex中映射状态
 			...mapState(['hasLogin', 'forcedLogin', 'userName'])
 		},
+		// 页面显示时的生命周期函数
 		onShow() {
-			// 如果已登录，获取用户信息
+			// 如果已登录，获取用户信息和统计数据
 			if (this.hasLogin) {
-				this.getUserInfo();
-				this.getUserCounts();
+				this.getUserInfo(); // 获取用户基本信息
+				this.getUserCounts(); // 获取用户统计数据
 			}
 		},
+		// 组件方法
 		methods: {
+			// 从Vuex中映射logout方法
 			...mapMutations(['logout']),
-			// 获取用户信息
+			
+			// 获取用户信息的方法
 			getUserInfo() {
-				// 获取token
+				// 从本地存储获取token
 				const token = uni.getStorageSync('uniIdToken');
 				
+				// 如果没有token，无法获取用户信息
 				if (!token) {
 					console.log('未找到token，无法获取用户信息');
 					return;
 				}
 				
-				// 使用API配置中的地址
+				// 根据环境设置API基础URL
 				const API_BASE_URL = process.env.NODE_ENV === 'development' 
-					? 'http://localhost:8888/api' 
-					: 'http://39.104.57.236:8888/api';
+					? 'http://localhost:8888/api' // 开发环境
+					: 'http://39.104.57.236:8888/api'; // 生产环境
 				
+				// 发起请求获取用户信息
 				uni.request({
-					url: `${API_BASE_URL}/app/getLoginUserInfo`,
-					method: 'POST',
+					url: `${API_BASE_URL}/app/getLoginUserInfo`, // 请求URL
+					method: 'POST', // 请求方法
 					header: {
-						'Authorization': token,
-						'Content-Type': 'application/json'
+						'Authorization': token, // 授权头
+						'Content-Type': 'application/json' // 内容类型
 					},
 					success: (res) => {
+						// 请求成功回调
 						console.log('获取用户信息响应：', res);
 						if (res.statusCode === 200 && res.data.code === 200) {
-							const userData = res.data.data;
-							this.userInfo.id = userData.userId;
-							this.userInfo.avatar = userData.head || '/static/img/logo.png';
+							// 请求成功且业务成功
+							const userData = res.data.data; // 获取用户数据
+							this.userInfo.id = userData.userId; // 设置用户ID
+							this.userInfo.avatar = userData.head || '/static/img/logo.png'; // 设置头像
 							// 可以设置其他用户信息
 							console.log('用户信息更新成功：', this.userInfo);
 						} else {
+							// 业务失败
 							console.error('获取用户信息失败：', res.data);
-							// 如果服务器返回错误，显示提示
+							// 显示错误提示
 							uni.showToast({
-								title: '获取用户信息失败',
-								icon: 'none'
+								title: '获取用户信息失败', // 错误提示
+								icon: 'none' // 不显示图标
 							});
 						}
 					},
 					fail: (err) => {
+						// 请求失败回调
 						console.error('获取用户信息网络错误：', err);
-						// 网络错误时显示提示
+						// 显示网络错误提示
 						uni.showToast({
-							title: '网络连接失败，请检查服务器状态',
-							icon: 'none',
-							duration: 3000
+							title: '网络连接失败，请检查服务器状态', // 错误提示
+							icon: 'none', // 不显示图标
+							duration: 3000 // 显示时长3秒
 						});
 					}
 				});
 			},
-			// 获取用户数量统计
+			
+			// 获取用户数量统计的方法
 			getUserCounts() {
-				// 获取token
+				// 从本地存储获取token
 				const token = uni.getStorageSync('uniIdToken');
 				
+				// 如果没有token，无法获取统计信息
 				if (!token) {
 					console.log('未找到token，无法获取用户统计信息');
 					return;
 				}
 				
-				// 使用API配置中的地址
+				// 根据环境设置API基础URL
 				const API_BASE_URL = process.env.NODE_ENV === 'development' 
-					? 'http://localhost:8888/api' 
-					: 'http://39.104.57.236:8888/api';
+					? 'http://localhost:8888/api' // 开发环境
+					: 'http://39.104.57.236:8888/api'; // 生产环境
 				
 				// 获取体检预约列表
 				uni.request({
-					url: `${API_BASE_URL}/app/appointment/list`,
-					method: 'GET',
+					url: `${API_BASE_URL}/app/appointment/list`, // 请求URL
+					method: 'GET', // 请求方法
 					header: {
-						'Authorization': token,
-						'Content-Type': 'application/json'
+						'Authorization': token, // 授权头
+						'Content-Type': 'application/json' // 内容类型
 					},
 					data: {
-						pageIndex: 1,
-						pageSize: 1000 // 获取所有数据
+						pageIndex: 1, // 页码
+						pageSize: 1000 // 每页大小，获取所有数据
 					},
 					success: (res) => {
+						// 请求成功回调
 						console.log('获取预约列表响应：', res);
 						if (res.statusCode === 200 && res.data.code === 200) {
-							// 根据列表长度设置数量
-							const appointmentList = res.data.data?.list || res.data.data || [];
-							this.userInfo.appointmentCount = appointmentList.length;
+							// 请求成功且业务成功
+							const appointmentList = res.data.data?.list || res.data.data || []; // 获取预约列表
+							this.userInfo.appointmentCount = appointmentList.length; // 设置预约数量
 						} else {
-							// 如果接口失败，使用模拟数据
+							// 如果接口失败，使用默认值
 							this.userInfo.appointmentCount = 0;
 						}
 					},
 					fail: (err) => {
+						// 请求失败回调
 						console.error('获取预约列表失败：', err);
-						// 使用模拟数据
+						// 使用默认值
 						this.userInfo.appointmentCount = 0;
 					}
 				});
 				
 				// 获取体检报告列表
 				uni.request({
-					url: `${API_BASE_URL}/app/report/getAppReportPage`,
-					method: 'POST',
+					url: `${API_BASE_URL}/app/report/getAppReportPage`, // 请求URL
+					method: 'POST', // 请求方法
 					header: {
-						'Authorization': token,
-						'Content-Type': 'application/json'
+						'Authorization': token, // 授权头
+						'Content-Type': 'application/json' // 内容类型
 					},
 					data: {
-						pageIndex: 1,
-						pageSize: 1000 // 获取所有数据
+						pageIndex: 1, // 页码
+						pageSize: 1000 // 每页大小，获取所有数据
 					},
 					success: (res) => {
+						// 请求成功回调
 						console.log('获取报告列表响应：', res);
 						if (res.statusCode === 200 && res.data.code === 200) {
-							// 根据列表长度设置数量
-							const reportList = res.data.data?.list || res.data.data || [];
-							this.userInfo.reportCount = reportList.length;
+							// 请求成功且业务成功
+							const reportList = res.data.data?.list || res.data.data || []; // 获取报告列表
+							this.userInfo.reportCount = reportList.length; // 设置报告数量
 						} else {
-							// 如果接口失败，使用模拟数据
+							// 如果接口失败，使用默认值
 							this.userInfo.reportCount = 0;
 						}
 					},
 					fail: (err) => {
+						// 请求失败回调
 						console.error('获取报告列表失败：', err);
-						// 使用模拟数据
+						// 使用默认值
 						this.userInfo.reportCount = 0;
 					}
 				});
 				
-				// 收藏医生数量（模拟数据）
-				this.userInfo.favoriteCount = 3; // 使用模拟数据
+				// 收藏医生数量（使用模拟数据）
+				this.userInfo.favoriteCount = 3; // 设置模拟数据
 			},
-			// 页面跳转
+			
+			// 页面跳转方法
 			navigateTo(url) {
 				console.log('准备跳转到:', url);
 				
 				// 如果未登录且不是登录页，先跳转到登录页
 				if (!this.hasLogin && url !== '/pages/login/login') {
 					uni.navigateTo({
-						url: '/pages/login/login'
+						url: '/pages/login/login' // 登录页面路径
 					});
-					return;
+					return; // 终止执行
 				}
 				
-				// 检查是否是tabBar页面
+				// 定义tabBar页面列表
 				const tabBarPages = [
-					'/pages/index/index',
-					'/pages/appointment/appointment',
-					'/pages/report/report',
-					'/pages/user/user'
+					'/pages/index/index', // 首页
+					'/pages/appointment/appointment', // 预约页
+					'/pages/report/report', // 报告页
+					'/pages/user/user' // 用户页
 				];
 				
+				// 检查是否是tabBar页面
 				if (tabBarPages.includes(url)) {
 					// 使用switchTab跳转到tabBar页面
 					uni.switchTab({
-						url: url,
+						url: url, // 目标页面路径
 						success: () => {
+							// 跳转成功回调
 							console.log('tabBar页面跳转成功:', url);
 						},
 						fail: (err) => {
+							// 跳转失败回调
 							console.error('tabBar页面跳转失败:', err);
 							uni.showToast({
-								title: '页面跳转失败',
-								icon: 'none'
+								title: '页面跳转失败', // 错误提示
+								icon: 'none' // 不显示图标
 							});
 						}
 					});
 				} else {
 					// 使用navigateTo跳转到普通页面
 					uni.navigateTo({
-						url: url,
+						url: url, // 目标页面路径
 						success: () => {
+							// 跳转成功回调
 							console.log('页面跳转成功:', url);
 						},
 						fail: (err) => {
+							// 跳转失败回调
 							console.error('页面跳转失败:', err);
 							console.error('失败URL:', url);
 							
 							// 检查是否是页面不存在
 							if (err.errMsg && err.errMsg.includes('not found')) {
+								// 显示功能开发中提示
 								uni.showModal({
-									title: '功能开发中',
-									content: '该功能正在开发中，敬请期待！',
-									showCancel: false,
-									confirmText: '知道了'
+									title: '功能开发中', // 标题
+									content: '该功能正在开发中，敬请期待！', // 内容
+									showCancel: false, // 不显示取消按钮
+									confirmText: '知道了' // 确认按钮文字
 								});
 							} else {
+								// 显示通用错误提示
 								uni.showToast({
-									title: '页面跳转失败',
-									icon: 'none'
+									title: '页面跳转失败', // 错误提示
+									icon: 'none' // 不显示图标
 								});
 							}
 						}
 					});
 				}
 			},
-			// 登录
+			
+			// 登录方法
 			bindLogin() {
+				// 跳转到登录页面
 				uni.navigateTo({
-					url: '../login/login',
+					url: '../login/login', // 登录页面路径
 				});
 			},
-			// 退出登录
+			
+			// 退出登录方法
 			bindLogout() {
+				// 显示确认对话框
 				uni.showModal({
-					title: '提示',
-					content: '确定要退出登录吗？',
+					title: '提示', // 对话框标题
+					content: '确定要退出登录吗？', // 对话框内容
 					success: (res) => {
+						// 用户确认后执行
 						if (res.confirm) {
-							this.logout();
-							uni.removeStorageSync('uniIdToken');
-							uni.removeStorageSync('username');
+							this.logout(); // 调用Vuex的logout方法
+							uni.removeStorageSync('uniIdToken'); // 清除token
+							uni.removeStorageSync('username'); // 清除用户名
+							// 重置用户信息
 							this.userInfo = {
-								avatar: '',
-								id: '',
-								appointmentCount: 0,
-								reportCount: 0,
-								favoriteCount: 0
+								avatar: '', // 清空头像
+								id: '', // 清空ID
+								appointmentCount: 0, // 重置预约数量
+								reportCount: 0, // 重置报告数量
+								favoriteCount: 0 // 重置收藏数量
 							};
 							
+							// 如果需要强制登录，跳转到登录页
 							if (this.forcedLogin) {
 								uni.reLaunch({
-									url: '../login/login',
+									url: '../login/login', // 登录页面路径
 								});
 							}
 						}

@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 字典类型弹窗组件
+ * @description 提供字典类型的新增和编辑表单功能，包括表单验证、数据提交等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 字典类型信息表单
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 类型编码管理
+ * - 备注信息
+ * - 系统类型保护
+ */
+-->
 <template>
   <div v-if="isShow">
     <el-dialog width="500px" :model-value="true" destroy-on-close :title="title" @close="closeDialog">

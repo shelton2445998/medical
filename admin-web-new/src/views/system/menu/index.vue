@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 菜单管理页面
+ * @description 提供系统菜单的增删改查功能，包括菜单树展示、权限管理、状态控制等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 菜单树形展示
+ * - 菜单类型筛选
+ * - 状态筛选
+ * - 新增/编辑菜单
+ * - 删除菜单
+ * - 菜单排序
+ * - 权限控制
+ * - 状态管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="queryForm" label-width="90px">

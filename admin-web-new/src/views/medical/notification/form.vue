@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 通知表单页面
+ * @description 提供系统通知的新增和编辑表单功能，包括表单验证、数据提交等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 通知信息表单
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 通知类型选择
+ * - 已读状态管理
+ * - 用户医生关联
+ */
+-->
 <template>
   <el-dialog :model-value="dialogData.isShow" :title="dialogData.id?'编辑':'新增'"
              @close="closeDialog" draggable>

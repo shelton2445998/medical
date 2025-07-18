@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 自定义级联选择器组件
+ * @description 基于Element Plus Cascader封装的级联选择器组件，支持多级数据选择
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 多级数据选择
+ * - 懒加载支持
+ * - 搜索功能
+ * - 自定义显示格式
+ * - 可清空选择
+ * - 禁用状态
+ */
+-->
 <template>
   <el-cascader v-model="data.value" clearable :props="defaultConfig" :show-all-levels="false"
                :options="options||data.options"

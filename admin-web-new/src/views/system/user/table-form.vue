@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 用户表单页面
+ * @description 提供用户信息的新增和编辑表单功能，包括表单验证、角色选择、数据提交等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户信息表单
+ * - 角色选择
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 表单重置
+ * - 用户友好的反馈
+ */
+-->
 <template>
   <div v-if="dialogData.isShow">
     <el-dialog :model-value="true" destroy-on-close :title="dialogData.title" @close="closeDialog">

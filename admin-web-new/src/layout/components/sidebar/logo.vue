@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 侧边栏Logo组件
+ * @description 侧边栏顶部Logo展示组件，包含系统标识和名称
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - Logo图片展示
+ * - 系统名称显示
+ * - 折叠状态适配
+ * - 点击跳转首页
+ * - 响应式设计
+ */
+-->
 <template>
   <div class="logo-box" :class="{'width':configure.isCollapse}">
     <div v-if="configure.isCollapse" class="logo-content">

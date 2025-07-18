@@ -1,9 +1,19 @@
+<!--
+  医生端登录页面组件
+  
+  提供医生用户登录功能，包含表单验证、登录逻辑处理
+  具有美观的UI设计和动画效果
+  
+  @author 医生端项目组
+  @date 2024
+  @version 1.0.0
+-->
 <template>
   <div class="login-container">
     <!-- 医疗系统背景图 -->
     <div class="bg-image"></div>
     
-    <!-- 动态背景装饰层 -->
+    <!-- 动态背景装饰层 - 提供视觉层次和美观效果 -->
     <div class="bg-decoration">
       <div class="bg-circle circle-1"></div>
       <div class="bg-circle circle-2"></div>
@@ -15,7 +25,7 @@
     <!-- 登录表单容器 -->
     <div class="login-box">
 		
-      <!-- 品牌Logo区域 - 圆形logo处理 -->
+      <!-- 品牌Logo区域 - 展示系统标识和名称 -->
       <div class="brand-area">
         <div class="logo">
           <!-- 圆形logo图片 -->
@@ -25,13 +35,15 @@
         <div class="subtitle">医疗预约管理系统</div>
       </div>
       
+      <!-- 演示模式提示（已注释） -->
       <!-- <div class="demo-tip">
         <el-icon class="tip-icon"><InfoFilled /></el-icon>
         <span>演示模式：API不可用时，可使用任意手机号和密码登录</span>
       </div> -->
       
-      <!-- 登录表单 -->
+      <!-- 登录表单 - 包含手机号和密码输入 -->
       <el-form :model="loginForm" :rules="loginRules" ref="loginFormRef" class="login-form">
+        <!-- 手机号输入框 -->
         <el-form-item prop="mobile">
           <el-input 
             v-model="loginForm.mobile" 
@@ -40,6 +52,8 @@
             class="form-input"
           ></el-input>
         </el-form-item>
+        
+        <!-- 密码输入框 -->
         <el-form-item prop="password">
           <el-input 
             v-model="loginForm.password" 
@@ -50,11 +64,13 @@
           ></el-input>
         </el-form-item>
         
+        <!-- 表单操作区域 -->
         <div class="form-actions">
           <el-checkbox v-model="rememberMe" class="remember-checkbox">记住密码</el-checkbox>
           <el-link type="primary" class="forgot-link" :underline="false">忘记密码?</el-link>
         </div>
         
+        <!-- 登录按钮 -->
         <el-form-item>
           <el-button 
             type="primary" 
@@ -70,6 +86,7 @@
         </el-form-item>
       </el-form>
       
+      <!-- 登录页脚信息 -->
       <div class="login-footer">
         <div class="copyright">© 2025 医疗预约管理系统 版权所有</div>
         <div class="security-info">
@@ -82,33 +99,66 @@
 </template>
 
 <script>
-// 脚本部分保持不变
+/**
+ * 登录页面逻辑
+ * 
+ * 处理用户登录验证、表单提交、状态管理等功能
+ */
+
+// 导入 Vue 3 组合式API相关函数
 import { ref, reactive } from 'vue'
+// 导入路由相关函数
 import { useRouter } from 'vue-router'
+// 导入 Element Plus 消息提示组件
 import { ElMessage } from 'element-plus'
+// 导入 axios 进行HTTP请求
 import axios from 'axios'
+// 导入 Element Plus 图标组件
 import { Hospital, InfoFilled, Shield } from '@element-plus/icons-vue'
 
+// 后端API基础地址配置
 const BACKEND_BASE_URL = 'http://localhost:8888'
+
+// 创建axios实例，配置基础URL和认证信息
 const request = axios.create({
   baseURL: BACKEND_BASE_URL,
-  withCredentials: true
+  withCredentials: true  // 支持跨域请求携带cookie
 })
 
+/**
+ * 登录页面组件导出
+ * 
+ * 定义组件的基本信息和组合式API逻辑
+ */
 export default {
   name: 'LoginView',
   components: { Hospital, InfoFilled, Shield },
   setup() {
+    // 路由实例，用于页面跳转
     const router = useRouter()
+    
+    // 表单引用，用于表单验证
     const loginFormRef = ref(null)
-    const loading = ref(false)
-    const rememberMe = ref(false)
+    
+    // 登录状态管理
+    const loading = ref(false)          // 登录中状态
+    const rememberMe = ref(false)       // 记住密码状态
 
+    /**
+     * 登录表单数据
+     * 
+     * 包含用户输入的手机号和密码
+     */
     const loginForm = reactive({
-      mobile: '',
-      password: ''
+      mobile: '',     // 手机号
+      password: ''    // 密码
     })
 
+    /**
+     * 表单验证规则
+     * 
+     * 定义手机号和密码的验证规则
+     */
     const loginRules = {
       mobile: [
         { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -120,32 +170,48 @@ export default {
       ]
     }
 
+    /**
+     * 处理登录逻辑
+     * 
+     * 验证表单、发送登录请求、处理响应结果
+     */
     const handleLogin = () => {
       if (!loginFormRef.value) return
       
+      // 验证表单
       loginFormRef.value.validate(async (valid) => {
         if (valid) {
           try {
             loading.value = true
+            
+            // 发送登录请求
             const { data: res } = await request.post('/api/doctor/login', loginForm)
             
             if (res.code === 200) {
+              // 登录成功，保存token和用户信息
               localStorage.setItem('doctorToken', res.data.token)
+              
               if (res.data.doctorInfo) {
                 localStorage.setItem('doctorInfo', JSON.stringify(res.data.doctorInfo))
+                
+                // 处理记住密码功能
                 if (rememberMe.value) {
                   localStorage.setItem('rememberedMobile', loginForm.mobile)
                 } else {
                   localStorage.removeItem('rememberedMobile')
                 }
               }
+              
               ElMessage.success('登录成功')
+              // 跳转到工作台页面
               router.push('/home/dashboard')
             } else {
               ElMessage.error(res.message || '登录失败，请检查手机号和密码')
             }
           } catch (error) {
+            // 错误处理
             console.error('登录出错：', error)
+            
             if (error.response?.status === 404) {
               ElMessage.error('接口不存在，请检查路径是否正确')
             } else if (error.message.includes('Network Error')) {
@@ -160,6 +226,11 @@ export default {
       })
     }
 
+    /**
+     * 初始化表单
+     * 
+     * 如果之前选择了记住密码，则自动填充手机号
+     */
     const initForm = () => {
       const rememberedMobile = localStorage.getItem('rememberedMobile')
       if (rememberedMobile) {
@@ -168,8 +239,10 @@ export default {
       }
     }
     
+    // 组件初始化时调用
     initForm()
 
+    // 返回模板需要的数据和方法
     return {
       loginFormRef,
       loginForm,
@@ -182,31 +255,51 @@ export default {
 }
 </script>
 
+<!--
+  登录页面样式
+  
+  定义登录页面的视觉设计和交互效果
+  包含响应式设计和动画效果
+-->
 <style scoped>
-/* 基础容器样式 */
+/* ==================== 基础容器样式 ==================== */
+
+/**
+ * 登录页面主容器
+ * 
+ * 提供全屏布局和居中对齐
+ */
 .login-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  background: inherit;
+  height: 100vh;              /* 全屏高度 */
+  display: flex;              /* 弹性布局 */
+  justify-content: center;    /* 水平居中 */
+  align-items: center;        /* 垂直居中 */
+  position: relative;         /* 相对定位，为子元素提供定位基准 */
+  overflow: hidden;           /* 隐藏超出部分 */
+  background: inherit;        /* 继承父元素背景 */
 }
 
-/* 医疗系统背景图样式 */
+/* ==================== 背景样式 ==================== */
+
+/**
+ * 医疗系统背景图样式
+ * 
+ * 提供页面背景图片和渐变遮罩效果
+ */
 .bg-image {
-  position: absolute;
+  position: absolute;         /* 绝对定位 */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  /* 使用医疗相关的背景图片 */
   background-image: url('https://ts1.tc.mm.bing.net/th/id/R-C.45adb4a35bc45f4066564f64c7e95b9e?rik=hj9vuhsfmtEnpQ&riu=http%3a%2f%2fseopic.699pic.com%2fphoto%2f50046%2f2979.jpg_wh1200.jpg&ehk=j9ibHicjwtZ7WKASI1IYOM6ankqf3fiVzP7kjnno%2ffU%3d&risl=&pid=ImgRaw&r=0');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: -2;
+  background-size: cover;     /* 覆盖整个容器 */
+  background-position: center;/* 居中显示 */
+  background-repeat: no-repeat; /* 不重复 */
+  z-index: -2;               /* 层级最低 */
   
+  /* 渐变遮罩层 */
   &::after {
     content: '';
     position: absolute;
@@ -214,6 +307,7 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
+    /* 淡蓝色渐变遮罩，提升视觉层次 */
     background: linear-gradient(135deg, rgba(240, 248, 255, 0.4), rgba(245, 249, 250, 0.4));
   }
 }

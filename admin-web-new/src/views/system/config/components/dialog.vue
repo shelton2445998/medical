@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 配置弹窗组件
+ * @description 提供配置的新增和编辑表单功能，包括表单验证、数据提交等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 配置信息表单
+ * - 表单验证
+ * - 数据提交
+ * - 编辑模式支持
+ * - 配置类型选择
+ * - 状态管理
+ * - 备注信息
+ */
+-->
 <template>
   <div v-if="isShow">
     <el-dialog width="500px" :model-value="true" destroy-on-close :title="title" @close="closeDialog">

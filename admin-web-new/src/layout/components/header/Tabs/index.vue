@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 标签页组件
+ * @description 页面标签页管理组件，提供页面标签的增删改查功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 标签页展示
+ * - 标签页切换
+ * - 标签页关闭
+ * - 标签页排序
+ * - 右键菜单
+ * - 快捷操作
+ */
+-->
 <template>
   <el-tabs
       v-model="activeKey"

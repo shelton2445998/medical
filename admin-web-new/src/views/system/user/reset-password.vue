@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 用户重置密码页面
+ * @description 提供管理员重置用户密码的功能，包括表单验证、密码确认等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 重置密码表单
+ * - 密码强度验证
+ * - 密码确认验证
+ * - 表单提交
+ * - 用户友好的反馈
+ */
+-->
 <template>
   <el-dialog width="400px" :model-value="pswData.isShow" destroy-on-close title="重置密码" @closed="closePswDialog">
     <el-form :model="pswData" ref="pswFormRef" :rules="pswRules" label-width="90px">

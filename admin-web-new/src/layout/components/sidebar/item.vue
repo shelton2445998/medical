@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 侧边栏菜单项组件
+ * @description 侧边栏单个菜单项组件，支持图标、文本、子菜单等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 菜单项展示
+ * - 图标支持
+ * - 子菜单支持
+ * - 激活状态
+ * - 点击跳转
+ * - 权限控制
+ */
+-->
 <template>
   <el-sub-menu v-if="menu?.children" :index="menu.path">
     <template #title>

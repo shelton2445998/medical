@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 通知管理页面
+ * @description 提供系统通知的管理功能，包括通知列表展示、搜索、新增、编辑、删除等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 通知列表展示
+ * - 关键字搜索功能
+ * - 新增/编辑通知
+ * - 删除通知
+ * - 分页显示
+ * - 通知类型管理
+ * - 已读状态管理
+ * - 用户关联管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="queryForm" label-width="80px">

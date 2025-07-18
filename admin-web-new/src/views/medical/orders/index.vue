@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 订单管理页面
+ * @description 提供体检预约订单的管理功能，包括订单列表展示、搜索、新增、编辑、删除等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 订单列表展示
+ * - 关键字搜索功能
+ * - 新增/编辑订单
+ * - 删除订单
+ * - 分页显示
+ * - 订单状态管理
+ * - 支付信息管理
+ * - 预约时间管理
+ */
+-->
 <template>
   <el-card shadow="never" class="card-box">
     <el-form :model="queryForm" label-width="80px">

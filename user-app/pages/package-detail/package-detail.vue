@@ -1,6 +1,26 @@
+<!--
+ * @file package-detail.vue
+ * @description 体检套餐详情页面 - 展示套餐详细信息、检查项目、医院信息、用户评价等
+ * @author 医疗系统开发团队
+ * @features 
+ *   - 套餐基本信息展示（价格、描述、标签）
+ *   - 医院信息展示和选择
+ *   - 检查项目分类展示
+ *   - 适用人群和预约须知
+ *   - 用户评价展示
+ *   - 在线咨询和预约功能
+ * @parameters 
+ *   - id: 套餐ID（从路由参数获取）
+ * @dependencies 
+ *   - @/utils/request.js: HTTP请求工具
+ *   - @/utils/api.js: API接口定义
+ * @version 1.0.0
+ * @date 2024-01-01
+-->
+
 <template>
 	<view class="content">
-		<!-- 动态背景装饰 -->
+		<!-- 动态背景装饰 - 增加页面视觉效果 -->
 		<view class="floating-shapes">
 			<view class="shape shape-1"></view>
 			<view class="shape shape-2"></view>
@@ -9,22 +29,23 @@
 		</view>
 		
 		<view class="main-content">
-		<!-- 套餐封面图 -->
+			<!-- 套餐封面图 - 展示套餐名称和价格信息 -->
 			<view class="package-banner-section">
-		<image class="package-banner" src="/static/images/package1.jpg" mode="aspectFill"></image>
+				<image class="package-banner" src="/static/images/package1.jpg" mode="aspectFill"></image>
 				<view class="banner-overlay">
 					<view class="banner-content">
 						<text class="banner-title">{{packageInfo.name}}</text>
 						<view class="banner-price">
 							<text class="price-symbol">¥</text>
 							<text class="price-value">{{packageInfo.price}}</text>
+							<!-- 显示原价（如果有折扣） -->
 							<text class="price-original" v-if="packageInfo.originalPrice && packageInfo.originalPrice > packageInfo.price">¥{{packageInfo.originalPrice}}</text>
-				</view>
+						</view>
 					</view>
 				</view>
 			</view>
 			
-			<!-- 加载状态提示 -->
+			<!-- 加载状态提示 - 数据加载时显示 -->
 			<view class="loading-card" v-if="loading">
 				<view class="loading-content">
 					<view class="loading-spinner"></view>
@@ -32,21 +53,23 @@
 				</view>
 			</view>
 			
-			<!-- 套餐基本信息卡片 -->
+			<!-- 套餐基本信息卡片 - 展示套餐标签和详细描述 -->
 			<view class="package-info-card" v-if="!loading && !error">
 				<view class="card-header">
 					<view class="header-icon">🏥</view>
 					<view class="header-title">套餐信息</view>
-			</view>
-			<view class="package-tags">
-				<text class="tag" v-for="(tag, index) in packageInfo.tags" :key="index">{{tag}}</text>
-			</view>
+				</view>
+				<!-- 套餐标签列表 -->
+				<view class="package-tags">
+					<text class="tag" v-for="(tag, index) in packageInfo.tags" :key="index">{{tag}}</text>
+				</view>
+				<!-- 套餐详细描述 -->
 				<view class="package-desc">
 					<text class="desc-text">{{packageInfo.description}}</text>
 				</view>
-		</view>
+			</view>
 		
-			<!-- 医院信息卡片 -->
+			<!-- 医院信息卡片 - 展示已选择的体检医院信息 -->
 			<view class="hospital-card" v-if="!loading && !error && packageInfo.hospitalName" @click="goToHospitalDetail">
 				<view class="card-header">
 					<view class="header-left">
@@ -54,10 +77,12 @@
 						<view class="header-title">体检医院</view>
 					</view>
 					<view class="header-right">
+						<!-- 更换医院按钮 -->
 						<button class="change-hospital-btn" @click.stop="selectHospital">更换医院</button>
 					</view>
 				</view>
 				<view class="hospital-content">
+					<!-- 医院图片 -->
 					<image class="hospital-image" :src="packageInfo.hospitalImage || '/static/images/hospital1.jpg'" mode="aspectFill"></image>
 					<view class="hospital-detail">
 						<text class="hospital-name">{{packageInfo.hospitalName || '未指定医院'}}</text>
@@ -66,13 +91,14 @@
 							<text class="address-text">{{packageInfo.hospitalAddress || '地址信息待完善'}}</text>
 						</view>
 					</view>
+					<!-- 箭头指示器 -->
 					<view class="hospital-arrow">
 						<text class="arrow-icon">→</text>
 					</view>
 				</view>
 			</view>
 		
-		<!-- 医院信息为空时的提示 -->
+		<!-- 医院信息为空时的提示 - 引导用户选择医院 -->
 		<view class="hospital-empty-card" v-if="!loading && !error && !packageInfo.hospitalName">
 			<view class="card-header">
 				<view class="header-icon">🏥</view>
@@ -81,46 +107,50 @@
 			<view class="empty-content">
 				<text class="empty-text">该套餐暂未指定体检医院</text>
 				<text class="empty-desc">您可以在预约时选择体检医院</text>
+				<!-- 选择医院按钮 -->
 				<button class="select-hospital-btn" @click="selectHospital">选择医院</button>
 			</view>
 		</view>
 		
-			<!-- 检查项目卡片 -->
+			<!-- 检查项目卡片 - 按类别展示套餐包含的检查项目 -->
 			<view class="checkitems-card" v-if="!loading && !error">
 				<view class="card-header">
 					<view class="header-icon">🔬</view>
 					<view class="header-title">检查项目</view>
+					<!-- 项目总数显示 -->
 					<view class="header-count">共{{checkItems && checkItems.length ? checkItems.length : 0}}项</view>
-			</view>
+				</view>
 				<view class="checkitems-content">
+					<!-- 按类别分组显示检查项目 -->
 					<view class="category-section" v-for="(category, categoryIndex) in categoryItems || []" :key="categoryIndex">
-					<view class="category-header">
-						<text class="category-name">{{category.name}}</text>
-						<text class="category-count">{{category.items && category.items.length ? category.items.length : 0}}项</text>
-					</view>
+						<view class="category-header">
+							<text class="category-name">{{category.name}}</text>
+							<text class="category-count">{{category.items && category.items.length ? category.items.length : 0}}项</text>
+						</view>
 						<view class="items-list">
+							<!-- 单个检查项目 -->
 							<view class="item-item" v-for="(item, itemIndex) in (category.items || [])" :key="itemIndex">
 								<view class="item-icon">🔍</view>
 								<view class="item-info">
-							<text class="item-name">{{item.name}}</text>
-							<text class="item-desc">{{item.desc}}</text>
+									<text class="item-name">{{item.name}}</text>
+									<text class="item-desc">{{item.desc}}</text>
 								</view>
+							</view>
 						</view>
 					</view>
 				</view>
 			</view>
-		</view>
 		
-			<!-- 适用人群卡片 -->
+			<!-- 适用人群卡片 - 展示套餐适合的人群范围 -->
 			<view class="suitable-card" v-if="!loading && !error">
 				<view class="card-header">
 					<view class="header-icon">👥</view>
 					<view class="header-title">适用人群</view>
-			</view>
+				</view>
 				<view class="suitable-content">
 					<text class="suitable-text">{{packageInfo.suitablePeople}}</text>
+				</view>
 			</view>
-		</view>
 		
 			<!-- 预约须知卡片 -->
 			<view class="notice-card" v-if="!loading && !error">
@@ -486,15 +516,25 @@
 				checkItems: [] // 存储从后端获取的检查项目详细信息
 			}
 		},
+		// 计算属性定义
 		computed: {
-			// 计算折扣
+			/**
+			 * 计算折扣的计算属性
+			 * 根据原价和现价计算折扣力度
+			 * @returns {String} 折扣信息（如 "7.5"）
+			 */
 			discount() {
 				if (this.packageInfo.originalPrice) {
 					return (this.packageInfo.price / this.packageInfo.originalPrice * 10).toFixed(1);
 				}
-				return '10.0';
+				return '10.0'; // 默认无折扣
 			},
-			// 按类别分组的检查项目
+			
+			/**
+			 * 按类别分组的检查项目计算属性
+			 * 将检查项目按部门/类别进行分组
+			 * @returns {Array} 分组后的检查项目数组
+			 */
 			categoryItems() {
 				const categories = {};
 				if (this.checkItems && Array.isArray(this.checkItems)) {
@@ -508,29 +548,39 @@
 							};
 						}
 						categories[category].items.push({
-							name: item.name,
-							desc: item.description || '暂无描述',
-							price: item.price,
-							id: item.id
+							name: item.name, // 检查项目名称
+							desc: item.description || '暂无描述', // 检查项目描述
+							price: item.price, // 检查项目价格
+							id: item.id // 检查项目ID
 						});
 					});
 				}
 				return Object.values(categories);
 			},
-			// 检查数据是否已加载
+			
+			/**
+			 * 检查数据是否已加载的计算属性
+			 * 用于判断套餐详情是否加载完成
+			 * @returns {Boolean} 是否已加载
+			 */
 			isDataLoaded() {
 				return this.packageInfo.id > 0 && this.packageInfo.name !== '加载中...';
 			}
 		},
+		/**
+		 * 页面加载时的生命周期钩子
+		 * 获取套餐详情数据并初始化页面
+		 * @param {Object} options - 页面参数对象
+		 */
 		async onLoad(options) {
 			// 清理可能冲突的存储数据
 			uni.removeStorageSync('currentPackage');
 			
 			if (options && options.id) {
 				try {
-					this.loading = true;
-					this.error = false;
-					this.errorMessage = '';
+					this.loading = true; // 开始加载状态
+					this.error = false; // 重置错误状态
+					this.errorMessage = ''; // 清空错误信息
 					
 					// 直接调用套餐详情接口
 					const result = await get(packageApi.getPackageDetail(options.id));
@@ -570,16 +620,16 @@
 						
 						// 设置套餐信息，确保所有字段都有值
 						this.packageInfo = {
-							id: result.data.id,
-							name: result.data.name || '套餐名称',
+							id: result.data.id, // 套餐ID
+							name: result.data.name || '套餐名称', // 套餐名称
 							price: result.data.discountPrice || result.data.price || 0, // 显示优惠价格
 							originalPrice: result.data.price || 0, // 显示原价
-							tags: result.data.tags || [],
-							description: packageDescription || '套餐详细介绍',
-							suitablePeople: suitableCrowd || '适用人群信息',
+							tags: result.data.tags || [], // 套餐标签
+							description: packageDescription || '套餐详细介绍', // 套餐描述
+							suitablePeople: suitableCrowd || '适用人群信息', // 适用人群
 							checkItems: result.data.checkitemIds || '', // 保存检查项目ID字符串
-							notices: notices.length > 0 ? notices : ['预约须知信息'],
-							reviews: reviews.length > 0 ? reviews : [],
+							notices: notices.length > 0 ? notices : ['预约须知信息'], // 预约须知
+							reviews: reviews.length > 0 ? reviews : [], // 用户评价
 							// 医院信息（从本地存储获取或使用默认值）
 							hospitalName: '',
 							hospitalAddress: '',
@@ -596,8 +646,8 @@
 					}
 				} catch (e) {
 					console.error('加载套餐详情失败:', e);
-					this.error = true;
-					this.errorMessage = e.message || '加载套餐详情失败';
+					this.error = true; // 设置错误状态
+					this.errorMessage = e.message || '加载套餐详情失败'; // 设置错误信息
 					uni.showToast({ title: '加载套餐详情失败', icon: 'none' });
 				} finally {
 					this.loading = false;

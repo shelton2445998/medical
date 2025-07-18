@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 主内容区域组件
+ * @description 系统主要内容展示区域，包含路由视图和页面切换功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 路由视图展示
+ * - 页面切换动画
+ * - 缓存管理
+ * - 响应式布局
+ * - 内容区域适配
+ */
+-->
 <template>
   <section class="app-main">
     <router-view>

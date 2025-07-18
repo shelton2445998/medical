@@ -1,3 +1,19 @@
+<!--
+/**
+ * @fileoverview 侧边栏组件
+ * @description 系统左侧导航栏组件，包含菜单导航和折叠功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 菜单导航
+ * - 折叠/展开功能
+ * - 多级菜单支持
+ * - 路由跳转
+ * - 权限控制
+ * - 响应式设计
+ */
+-->
 <template>
   <div class="menu-vertical-box">
     <el-scrollbar height="100%">

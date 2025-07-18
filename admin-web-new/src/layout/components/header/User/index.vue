@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 用户信息组件
+ * @description 头部用户信息展示和操作组件，包含用户头像、姓名、下拉菜单等
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户头像展示
+ * - 用户信息显示
+ * - 下拉菜单
+ * - 用户设置
+ * - 退出登录
+ */
+-->
 <template>
   <div>
     <el-dropdown trigger="click">

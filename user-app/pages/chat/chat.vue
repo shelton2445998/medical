@@ -92,125 +92,205 @@
 </template>
 
 <script>
+// 导入AI聊天相关的API接口配置
 import { chatApi } from '@/utils/api.js'
+// 导入HTTP请求方法
 import { post, get } from '@/utils/request.js'
 
+// 导出AI聊天页面组件配置
 export default {
+  // 组件数据定义
   data() {
     return {
+      /**
+       * 聊天消息列表
+       * @type {Array} 包含所有聊天消息的数组
+       */
       messages: [],
+      
+      /**
+       * 用户输入的消息内容
+       * @type {String} 当前输入框中的文本
+       */
       inputMessage: '',
+      
+      /**
+       * AI是否正在输入状态标志
+       * @type {Boolean} 控制AI输入提示的显示
+       */
       isTyping: false,
+      
+      /**
+       * 滚动视图的滚动位置
+       * @type {Number} 用于控制聊天消息列表的滚动位置
+       */
       scrollTop: 0,
+      
+      /**
+       * 滚动到指定元素的ID
+       * @type {String} 用于自动滚动到最新消息
+       */
       scrollIntoView: '',
+      
+      /**
+       * 加载状态标志
+       * @type {Boolean} 控制加载提示的显示
+       */
       loading: false
     }
   },
   
+  /**
+   * 页面加载时的生命周期钩子
+   * 在页面加载时自动加载聊天历史记录
+   */
   onLoad() {
     this.loadChatHistory()
   },
   
+  // 组件方法定义
   methods: {
-    // 发送消息
+    /**
+     * 发送消息方法
+     * 处理用户发送消息的逻辑，包括输入验证、消息发送和AI回复
+     */
     async sendMessage() {
+      // 检查输入内容是否为空或AI正在输入
       if (!this.inputMessage.trim() || this.isTyping) {
         return
       }
       
+      // 获取用户输入的消息内容并清空输入框
       const userMessage = this.inputMessage.trim()
       this.inputMessage = ''
       
-      // 添加用户消息
+      // 将用户消息添加到消息列表
       this.addMessage(userMessage, true)
       
-      // 显示AI正在输入
+      // 设置AI正在输入状态并滚动到底部
       this.isTyping = true
       this.scrollToBottom()
       
       try {
-        // 调用后端API
+        // 调用后端API发送消息
         const response = await post(chatApi.sendMessage, {
           message: userMessage
         })
         
+        // 检查响应状态
         if (response.code === 200) {
-          // 添加AI回复
+          // 添加AI回复消息
           this.addMessage(response.data, false)
         } else {
+          // 添加错误提示消息
           this.addMessage('抱歉，我暂时无法回答您的问题，请稍后再试。', false)
         }
       } catch (error) {
+        // 处理网络错误
         console.error('发送消息失败:', error)
         this.addMessage('抱歉，网络连接出现问题，请检查网络后重试。', false)
       } finally {
+        // 结束AI输入状态并滚动到底部
         this.isTyping = false
         this.scrollToBottom()
       }
     },
     
-    // 添加消息到列表
+    /**
+     * 添加消息到列表方法
+     * @param {String} content - 消息内容
+     * @param {Boolean} isUser - 是否为用户消息
+     */
     addMessage(content, isUser) {
       this.messages.push({
-        content: content,
-        isUser: isUser,
-        time: this.getCurrentTime()
+        content: content, // 消息内容
+        isUser: isUser, // 是否为用户消息
+        time: this.getCurrentTime() // 消息时间
       })
     },
     
-    // 滚动到底部
+    /**
+     * 滚动到底部方法
+     * 在发送消息后自动滚动到最新消息位置
+     */
     scrollToBottom() {
       this.$nextTick(() => {
+        // 使用uni-app的选择器查询API获取聊天消息容器的高度
         const query = uni.createSelectorQuery().in(this)
         query.select('.chat-messages').boundingClientRect(data => {
           if (data) {
+            // 设置滚动位置为容器高度，实现滚动到底部
             this.scrollTop = data.height
           }
         }).exec()
       })
     },
     
-    // 获取当前时间
+    /**
+     * 获取当前时间方法
+     * @returns {String} 格式化的时间字符串 (HH:mm)
+     */
     getCurrentTime() {
       const now = new Date()
+      // 获取小时并补零
       const hours = now.getHours().toString().padStart(2, '0')
+      // 获取分钟并补零
       const minutes = now.getMinutes().toString().padStart(2, '0')
       return `${hours}:${minutes}`
     },
     
-    // 加载聊天历史
+    /**
+     * 加载聊天历史记录方法
+     * 从服务器获取用户的历史聊天记录
+     */
     async loadChatHistory() {
       try {
+        // 调用获取聊天历史的API
         const response = await get(chatApi.getChatHistory)
+        
+        // 检查响应状态和数据
         if (response.code === 200 && response.data) {
+          // 将服务器返回的历史记录转换为本地消息格式
           this.messages = response.data.map(item => ({
-            content: item.content,
-            isUser: item.isUser,
-            time: item.time
+            content: item.content, // 消息内容
+            isUser: item.isUser, // 是否为用户消息
+            time: item.time // 消息时间
           }))
         }
       } catch (error) {
+        // 处理加载历史记录失败的情况
         console.error('加载聊天历史失败:', error)
       }
     },
     
-    // 清空聊天记录
+    /**
+     * 清空聊天记录方法
+     * 显示确认对话框，用户确认后清空所有聊天记录
+     */
     async clearChat() {
+      // 显示确认对话框
       uni.showModal({
-        title: '确认清空',
-        content: '确定要清空所有聊天记录吗？',
+        title: '确认清空', // 对话框标题
+        content: '确定要清空所有聊天记录吗？', // 对话框内容
         success: async (res) => {
+          // 用户点击确认按钮
           if (res.confirm) {
             try {
+              // 调用清空聊天记录的API
               const response = await post(chatApi.clearChatHistory)
+              
+              // 检查API响应状态
               if (response.code === 200) {
+                // 清空本地消息列表
                 this.messages = []
+                // 显示成功提示
                 uni.showToast({
                   title: '聊天记录已清空',
                   icon: 'success'
                 })
               }
             } catch (error) {
+              // 处理清空失败的情况
               console.error('清空聊天记录失败:', error)
               uni.showToast({
                 title: '清空失败',
@@ -222,9 +302,13 @@ export default {
       })
     },
     
-    // 加载更多消息
+    /**
+     * 加载更多消息方法
+     * 当用户滚动到顶部时触发，可以用于加载更多历史消息
+     */
     loadMoreMessages() {
       // 这里可以实现加载更多历史消息的逻辑
+      // 例如：分页加载更早的聊天记录
       console.log('加载更多消息')
     }
   }

@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 自定义表格组件
+ * @description 基于Element Plus Table封装的增强型表格组件，提供常用的表格功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 列配置管理
+ * - 排序功能
+ * - 筛选功能
+ * - 分页支持
+ * - 选择行功能
+ * - 操作列支持
+ * - 响应式设计
+ */
+-->
 <template>
   <div>
     <!--    表格-->

@@ -1,44 +1,70 @@
-// 主题色变量
-$primary-color: #409eff;
-$primary-light-color: #ecf5ff;
-$primary-dark-color: #3a8ee6;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
-$info-color: #909399;
+/**
+ * 样式变量定义文件
+ * 定义项目中使用的所有CSS变量，包括颜色、间距、阴影等
+ */
 
-// 文字颜色
-$text-primary: #303133;
-$text-regular: #606266;
-$text-secondary: #909399;
-$text-placeholder: #c0c4cc;
+/**
+ * 主题色变量
+ * 定义系统的主要颜色方案
+ */
+$primary-color: #409eff;        /* 主要颜色 */
+$primary-light-color: #ecf5ff;  /* 主要颜色浅色版本 */
+$primary-dark-color: #3a8ee6;   /* 主要颜色深色版本 */
+$success-color: #67c23a;        /* 成功状态颜色 */
+$warning-color: #e6a23c;        /* 警告状态颜色 */
+$danger-color: #f56c6c;         /* 危险状态颜色 */
+$info-color: #909399;           /* 信息状态颜色 */
 
-// 边框颜色
-$border-base: #dcdfe6;
-$border-light: #e4e7ed;
-$border-lighter: #ebeef5;
-$border-extra-light: #f2f6fc;
+/**
+ * 文字颜色变量
+ * 定义不同层级的文字颜色
+ */
+$text-primary: #303133;         /* 主要文字颜色 */
+$text-regular: #606266;         /* 常规文字颜色 */
+$text-secondary: #909399;       /* 次要文字颜色 */
+$text-placeholder: #c0c4cc;     /* 占位符文字颜色 */
 
-// 背景颜色
-$bg-base: #f5f7fa;
-$bg-light: #fafafa;
-$bg-lighter: #fbfbfb;
+/**
+ * 边框颜色变量
+ * 定义不同层级的边框颜色
+ */
+$border-base: #dcdfe6;          /* 基础边框颜色 */
+$border-light: #e4e7ed;         /* 浅色边框颜色 */
+$border-lighter: #ebeef5;       /* 更浅的边框颜色 */
+$border-extra-light: #f2f6fc;   /* 极浅的边框颜色 */
 
-// 间距
-$spacing-mini: 4px;
-$spacing-small: 8px;
-$spacing-base: 16px;
-$spacing-large: 24px;
-$spacing-xl: 32px;
+/**
+ * 背景颜色变量
+ * 定义不同层级的背景颜色
+ */
+$bg-base: #f5f7fa;              /* 基础背景颜色 */
+$bg-light: #fafafa;             /* 浅色背景颜色 */
+$bg-lighter: #fbfbfb;           /* 更浅的背景颜色 */
 
-// 阴影
-$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-$box-shadow-base: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
-$box-shadow-dark: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .12);
+/**
+ * 间距变量
+ * 定义统一的间距规范
+ */
+$spacing-mini: 4px;             /* 最小间距 */
+$spacing-small: 8px;            /* 小间距 */
+$spacing-base: 16px;            /* 基础间距 */
+$spacing-large: 24px;           /* 大间距 */
+$spacing-xl: 32px;              /* 超大间距 */
 
-// 圆角
-$border-radius-base: 4px;
-$border-radius-small: 2px;
-$border-radius-large: 8px;
-$border-radius-round: 20px;
-$border-radius-circle: 50%;
+/**
+ * 阴影变量
+ * 定义不同层级的阴影效果
+ */
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);  /* 浅色阴影 */
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);  /* 基础阴影 */
+$box-shadow-dark: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .12);  /* 深色阴影 */
+
+/**
+ * 圆角变量
+ * 定义统一的圆角规范
+ */
+$border-radius-base: 4px;       /* 基础圆角 */
+$border-radius-small: 2px;      /* 小圆角 */
+$border-radius-large: 8px;      /* 大圆角 */
+$border-radius-round: 20px;     /* 圆形圆角 */
+$border-radius-circle: 50%;     /* 圆形 */

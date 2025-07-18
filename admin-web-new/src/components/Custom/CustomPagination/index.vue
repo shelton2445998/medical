@@ -1,3 +1,18 @@
+<!--
+/**
+ * @fileoverview 自定义分页组件
+ * @description 基于Element Plus Pagination封装的分页组件，提供统一的分页功能
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 分页信息显示
+ * - 页码切换
+ * - 每页条数选择
+ * - 跳转到指定页
+ * - 响应式设计
+ */
+-->
 <template>
   <div class="pagination-box">
     <el-pagination

@@ -1,33 +1,49 @@
+/**
+ * 全局样式入口文件
+ * 定义基础样式重置和全局样式，并导入所有样式模块
+ */
+
+/**
+ * 全局样式重置
+ * 清除浏览器默认样式，确保跨浏览器一致性
+ */
 *{
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  list-style: none;
+  padding: 0;                    /* 清除默认内边距 */
+  margin: 0;                     /* 清除默认外边距 */
+  box-sizing: border-box;        /* 使用边框盒模型 */
+  list-style: none;              /* 清除列表样式 */
 }
 
+/**
+ * 基础容器样式
+ * 定义应用容器的基本样式和字体配置
+ */
 body,html,#app {
-  place-items: center;
+  place-items: center;           /* 居中对齐 */
   font-family: Helvetica Neue,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  overflow: hidden;
-  position: relative;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-  height: 100%;
-  width: 100%;
-  color: #3C3D3E;
+  font-weight: 400;              /* 正常字体粗细 */
+  font-size: 14px;               /* 基础字体大小 */
+  overflow: hidden;              /* 隐藏溢出内容 */
+  position: relative;            /* 相对定位 */
+  font-synthesis: none;          /* 禁用字体合成 */
+  text-rendering: optimizeLegibility;  /* 优化文本渲染 */
+  -webkit-font-smoothing: antialiased;  /* 抗锯齿字体渲染 */
+  -moz-osx-font-smoothing: grayscale;   /* Firefox字体平滑 */
+  -webkit-text-size-adjust: 100%;       /* 文本大小调整 */
+  height: 100%;                  /* 全高 */
+  width: 100%;                   /* 全宽 */
+  color: #3C3D3E;               /* 默认文本颜色 */
 }
 
-
-@import "element";
-@import "variables";
-@import "basic";
-@import "common";
-@import "theme";
-@import "animation";
+/**
+ * 样式模块导入
+ * 按依赖顺序导入各个样式模块
+ */
+@import "element";              /* Element Plus组件样式 */
+@import "variables";            /* 样式变量 */
+@import "basic";                /* 基础样式 */
+@import "common";               /* 通用样式 */
+@import "theme";                /* 主题样式 */
+@import "animation";            /* 动画样式 */
 
 

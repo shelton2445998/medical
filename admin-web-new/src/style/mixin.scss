@@ -1,14 +1,29 @@
+/**
+ * 样式混合器文件
+ * 定义可重用的样式混合器，提高样式代码的复用性
+ */
+
+/**
+ * 自定义滚动条样式混合器
+ * 提供统一的滚动条样式，适用于需要美化滚动条的容器
+ * 使用方式：@include scrollBar;
+ */
 @mixin scrollBar {
+  /* 滚动条轨道样式 */
   ::-webkit-scrollbar-track-piece {
-    background-color: transparent;
+    background-color: transparent;  /* 透明背景 */
   }
+  
+  /* 滚动条主体样式 */
   ::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
-    background-color: transparent;
+    width: 7px;                     /* 垂直滚动条宽度 */
+    height: 7px;                    /* 水平滚动条高度 */
+    background-color: transparent;  /* 透明背景 */
   }
+  
+  /* 滚动条滑块样式 */
   ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background-color: hsla(220, 4%, 58%, .3);
+    border-radius: 5px;                           /* 圆角 */
+    background-color: hsla(220, 4%, 58%, .3);    /* 半透明灰色背景 */
   }
 }

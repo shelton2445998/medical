@@ -1,3 +1,7 @@
+/**
+ * 基础路由配置
+ * 包含登录、404错误页面、医院管理、预约管理等基础路由
+ */
 export default [
     {
         path: "/login",
@@ -15,6 +19,7 @@ export default [
             title: "404",
         }
     },
+    // 医院管理模块路由
     {
         path: '/hospital',
         name: 'Hospital',
@@ -41,6 +46,7 @@ export default [
             },
         ]
     },
+    // 预约管理模块路由
     {
         path: '/appointment',
         name: 'Appointment',

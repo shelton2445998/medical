@@ -1,13 +1,22 @@
+/**
+ * 全局类型声明文件
+ * 定义项目中使用的全局类型和接口
+ */
 import type {RouteComponent} from "vue-router";
 
 /**
  * 全局类型声明
  */
 declare global {
+    /**
+     * 可空类型定义
+     * 表示一个类型可以为null或undefined
+     */
     declare type NullType<T> = T | null | undefined;
 
     /**
-     * @description 路由配置表
+     * 路由配置表接口
+     * 定义主路由的配置结构
      */
     interface RouteConfigsTable {
         /** 路由地址 `必填` */
@@ -18,6 +27,7 @@ declare global {
         component?: RouteComponent;
         /** 路由重定向 `可选` */
         redirect?: string;
+        /** 路由元信息 `可选` */
         meta?: {
             /** 菜单名称`必填` */
             title: string;
@@ -35,7 +45,8 @@ declare global {
     }
 
     /**
-     * @description 子路由配置表
+     * 子路由配置表接口
+     * 定义子路由的配置结构
      */
     interface RouteChildrenConfigsTable {
         /** 子路由地址 `必填` */
@@ -46,6 +57,7 @@ declare global {
         redirect?: string;
         /** 按需加载组件 `可选` */
         component?: RouteComponent;
+        /** 路由元信息 `可选` */
         meta?: {
             /** 菜单名称`必填` */
             title: string;
@@ -63,15 +75,19 @@ declare global {
     }
 
     /**
-     * @description tableData
-     * */
+     * 表格数据类型接口
+     * 定义表格数据的结构
+     */
     interface TableDataType {
-        data:any[]
+        data: any[]  // 表格数据数组
     }
 
-    // 声明文件，定义全局变量
+    /**
+     * 窗口对象扩展
+     * 为window对象添加自定义属性
+     */
     declare interface Window {
-        nextLoading: boolean;
+        nextLoading: boolean;  // 全局loading状态
     }
 }
 

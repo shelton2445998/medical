@@ -76,18 +76,25 @@
 <script>
 	import { get, hospitalApi } from '@/utils/request.js';
 	
+	// 导出医院列表页面组件配置
 	export default {
+		// 组件数据定义
 		data() {
 			return {
-				searchKeyword: '',
-				hospitals: [],
-				filteredHospitals: [],
-				loading: false,
-				memberId: null,
-				memberName: '',
-				fromPackage: false
+				searchKeyword: '', // 搜索关键词
+				hospitals: [], // 所有医院列表
+				filteredHospitals: [], // 过滤后的医院列表
+				loading: false, // 加载状态
+				memberId: null, // 家庭成员ID
+				memberName: '', // 家庭成员姓名
+				fromPackage: false // 是否从套餐详情页跳转过来
 			}
 		},
+		
+		/**
+		 * 页面加载时的生命周期钩子
+		 * 获取页面参数并初始化数据
+		 */
 		onLoad(options) {
 			// 获取家庭成员信息
 			if (options.memberId) {
@@ -103,30 +110,38 @@
 			// 获取医院列表数据
 			this.getHospitalList();
 		},
+		
+		// 组件方法定义
 		methods: {
-			// 获取医院列表
+			/**
+			 * 获取医院列表的异步方法
+			 * 从服务器获取医院数据并处理格式化
+			 */
 			async getHospitalList() {
-				this.loading = true;
+				this.loading = true; // 开始加载
 				
 				try {
+					// 调用API获取医院列表
 					const result = await get(hospitalApi.getHospitalList, {
-						keyword: '',
-						pageIndex: 1,
-						pageSize: 20
+						keyword: '', // 搜索关键词
+						pageIndex: 1, // 页码
+						pageSize: 20 // 每页数量
 					});
 					console.log('医院接口返回', result);
+					
 					// 兼容后端ApiResult<Paging<AppHospitalVo>>结构
 					if (result && result.data && result.data.list) {
-						this.hospitals = result.data.list;
+						this.hospitals = result.data.list; // 分页数据格式
 					} else if (result && result.data && Array.isArray(result.data)) {
-						this.hospitals = result.data;
+						this.hospitals = result.data; // 数组格式
 					} else if (result && result.records) {
-						this.hospitals = result.records;
+						this.hospitals = result.records; // 记录格式
 					} else if (Array.isArray(result)) {
-						this.hospitals = result;
+						this.hospitals = result; // 直接数组
 					} else {
-						this.hospitals = [];
+						this.hospitals = []; // 默认空数组
 					}
+					
 					// 处理医院数据，确保有默认图片和必要字段
 					this.hospitals.forEach((hospital, index) => {
 						const defaultImages = [
@@ -135,18 +150,19 @@
 							'/static/images/hospital3.jpg',
 							'/static/images/hospital4.jpg'
 						];
-						hospital.image = defaultImages[index % defaultImages.length];
-						if (!hospital.tag) hospital.tag = '三甲';
-						if (!hospital.address) hospital.address = '地址信息待完善';
-						if (!hospital.time) hospital.time = '上午8:00-12:00，下午14:00-17:00';
-						if (!hospital.phone) hospital.phone = '400-123-4567';
+						hospital.image = defaultImages[index % defaultImages.length]; // 设置默认图片
+						if (!hospital.tag) hospital.tag = '三甲'; // 设置默认标签
+						if (!hospital.address) hospital.address = '地址信息待完善'; // 设置默认地址
+						if (!hospital.time) hospital.time = '上午8:00-12:00，下午14:00-17:00'; // 设置默认时间
+						if (!hospital.phone) hospital.phone = '400-123-4567'; // 设置默认电话
 						if (!hospital.latitude || !hospital.longitude) {
+							// 设置默认坐标（沈阳市中心）
 							hospital.latitude = 41.805699;
 							hospital.longitude = 123.431541;
 						}
 					});
 					console.log('最终医院列表', this.hospitals);
-					this.filteredHospitals = this.hospitals;
+					this.filteredHospitals = this.hospitals; // 初始化过滤列表
 				} catch (error) {
 					// 如果接口失败，使用测试数据
 					this.hospitals = [
@@ -205,30 +221,40 @@
 					this.loading = false;
 				}
 			},
-			// 搜索医院
+			/**
+			 * 搜索医院的异步方法
+			 * 根据关键词搜索医院，如果关键词为空则重新获取全部医院
+			 */
 			async searchHospitals() {
+				// 如果搜索关键词为空，重新获取全部医院
 				if (!this.searchKeyword.trim()) {
 					this.getHospitalList();
 					return;
 				}
+				
 				try {
+					// 调用API搜索医院
 					const result = await get(hospitalApi.getHospitalList, {
-						keyword: this.searchKeyword.trim(),
-						pageIndex: 1,
-						pageSize: 20
+						keyword: this.searchKeyword.trim(), // 搜索关键词
+						pageIndex: 1, // 页码
+						pageSize: 20 // 每页数量
 					});
 					console.log('搜索医院接口返回', result);
+					
+					// 兼容多种返回格式
 					if (result && result.data && result.data.list) {
-						this.hospitals = result.data.list;
+						this.hospitals = result.data.list; // 分页数据格式
 					} else if (result && result.data && Array.isArray(result.data)) {
-						this.hospitals = result.data;
+						this.hospitals = result.data; // 数组格式
 					} else if (result && result.records) {
-						this.hospitals = result.records;
+						this.hospitals = result.records; // 记录格式
 					} else if (Array.isArray(result)) {
-						this.hospitals = result;
+						this.hospitals = result; // 直接数组
 					} else {
-						this.hospitals = [];
+						this.hospitals = []; // 默认空数组
 					}
+					
+					// 处理医院数据，设置默认图片和字段
 					this.hospitals.forEach((hospital, index) => {
 						const defaultImages = [
 							'/static/images/hospital1.jpg',
@@ -255,9 +281,13 @@
 					});
 				}
 			},
-			// 选择医院
+			/**
+			 * 选择医院的方法
+			 * 处理用户选择医院的逻辑，存储医院信息并跳转
+			 * @param {Object} hospital - 选中的医院对象
+			 */
 			selectHospital(hospital) {
-				// 存储选择的医院信息
+				// 存储选择的医院信息到本地存储
 				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
 				
 				// 如果是从套餐详情页面跳转过来的，则返回到套餐详情页面
@@ -278,6 +308,7 @@
 						}
 					}
 					
+					// 返回上一页
 					uni.navigateBack({
 						delta: 1
 					});
@@ -295,23 +326,37 @@
 					url: selectUrl
 				});
 			},
-			// 拨打电话
+			
+			/**
+			 * 拨打电话的方法
+			 * 调用系统拨号功能
+			 * @param {String} phone - 电话号码
+			 */
 			callHospital(phone) {
 				uni.makePhoneCall({
 					phoneNumber: phone
 				});
 			},
-			// 打开地图
+			
+			/**
+			 * 打开地图的方法
+			 * 在系统地图中显示医院位置
+			 * @param {Object} hospital - 医院对象
+			 */
 			openMap(hospital) {
 				uni.openLocation({
-					latitude: hospital.latitude,
-					longitude: hospital.longitude,
-					name: hospital.name,
-					address: hospital.address,
-					scale: 18
+					latitude: hospital.latitude, // 纬度
+					longitude: hospital.longitude, // 经度
+					name: hospital.name, // 位置名称
+					address: hospital.address, // 地址
+					scale: 18 // 缩放级别
 				});
 			},
-			// 返回上一页
+			
+			/**
+			 * 返回上一页的方法
+			 * 使用uni.navigateBack返回上一页
+			 */
 			goBack() {
 				uni.navigateBack();
 			}

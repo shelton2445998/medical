@@ -1,29 +1,39 @@
 <template>
+	<!-- 页面主容器 -->
 	<view class="content">
 		<!-- 动态背景装饰 -->
 		<view class="floating-shapes">
+			<!-- 装饰形状1 -->
 			<view class="shape shape-1"></view>
+			<!-- 装饰形状2 -->
 			<view class="shape shape-2"></view>
+			<!-- 装饰形状3 -->
 			<view class="shape shape-3"></view>
+			<!-- 装饰形状4 -->
 			<view class="shape shape-4"></view>
 		</view>
 		
+		<!-- 页面主内容 -->
 		<view class="main-content">
 			
 			<!-- 顶部搜索栏 -->
 			<view class="search-section">
 				<view class="search-box">
+					<!-- 搜索图标 -->
 					<text class="search-icon">🔍</text>
+					<!-- 搜索输入框 -->
 					<input type="text" placeholder="搜索医院、体检套餐" v-model="searchKeyword" @input="searchHospitals" />
 				</view>
 			</view>
 
-			<!-- 轮播图 -->
+			<!-- 轮播图区域 -->
 			<view class="banner-section">
 				<swiper class="banner-swiper" circular indicator-dots autoplay interval="3000" duration="500" indicator-active-color="#0984e3">
 					<swiper-item v-for="(item, index) in bannerList" :key="index">
 						<view class="banner-item" @click="navigateTo(item.url)">
+							<!-- 轮播图图片 -->
 							<image :src="item.image" mode="aspectFill" class="banner-image"></image>
+							<!-- 轮播图遮罩层 -->
 							<view class="banner-overlay">
 								<text class="banner-title">健康体检</text>
 								<text class="banner-desc">专业医疗团队为您服务</text>
@@ -33,15 +43,17 @@
 				</swiper>
 			</view>
 
-			<!-- 快捷服务 -->
+			<!-- 快捷服务区域 -->
 			<view class="quick-service">
 				<view class="service-header">
 					<text class="section-title">快捷服务</text>
+					<!-- 布局切换按钮 -->
 					<view class="layout-toggle" @click="toggleLayout">
 						<text class="toggle-text">{{ layoutMode === 2 ? '2列' : '4列' }}</text>
 						<text class="toggle-icon">🔄</text>
 					</view>
 				</view>
+				<!-- 服务网格 -->
 				<view class="service-grid" :class="{ 'service-grid-four': layoutMode === 4 }">
 					<view class="service-item" v-for="(item, index) in serviceList" :key="index" @click="navigateTo(item.url)">
 						<view class="service-icon">
@@ -52,15 +64,17 @@
 				</view>
 			</view>
 
-			<!-- 推荐医院 -->
+			<!-- 推荐医院区域 -->
 			<view class="section">
 				<view class="section-header">
 					<text class="section-title">推荐医院</text>
+					<!-- 更多按钮 -->
 					<view class="more" @click="navigateTo('/pages/hospital/hospital')">
 						<text>更多</text>
 						<text class="more-icon">→</text>
 					</view>
 				</view>
+				<!-- 医院列表 -->
 				<view class="hospital-list">
 					<view class="hospital-item" v-for="(item, index) in hospitalList.slice(0, 3)" :key="index" @click="selectHospital(item)">
 						<view class="hospital-image">
@@ -88,15 +102,17 @@
 				</view>
 			</view>
 
-			<!-- 推荐套餐 -->
+			<!-- 推荐套餐区域 -->
 			<view class="section">
 				<view class="section-header">
 					<text class="section-title">热门套餐</text>
+					<!-- 更多按钮 -->
 					<view class="more" @click="navigateTo('/pages/package/package')">
 						<text>更多</text>
 						<text class="more-icon">→</text>
 					</view>
 				</view>
+				<!-- 套餐列表 -->
 				<view class="package-list">
 					<view class="package-item" v-for="(item, index) in recommendPackages" :key="index" @click="selectPackage(item)">
 						<view class="package-image">
@@ -114,15 +130,17 @@
 				</view>
 			</view>
 
-			<!-- 健康资讯 -->
+			<!-- 健康资讯区域 -->
 			<view class="section">
 				<view class="section-header">
 					<text class="section-title">健康资讯</text>
+					<!-- 更多按钮 -->
 					<view class="more" @click="navigateTo('/pages/news/news')">
 						<text>更多</text>
 						<text class="more-icon">→</text>
 					</view>
 				</view>
+				<!-- 资讯列表 -->
 				<view class="news-list">
 					<view class="news-item" v-for="(item, index) in newsList" :key="index" @click="viewNews(item)">
 						<view class="news-image">
@@ -143,59 +161,64 @@
 </template>
 
 <script>
+	// 导入HTTP请求工具和API配置
 	import { get, hospitalApi, packageApi } from '@/utils/request.js';
 	
+	// 导出首页组件配置
 	export default {
+		// 组件数据定义
 		data() {
 			return {
 				// 搜索关键词
 				searchKeyword: '',
 				// 医院加载状态
 				hospitalLoading: false,
-				// 医院列表
+				// 医院列表数据
 				hospitalList: [],
-				// 基础数据
+				// 轮播图数据
 				bannerList: [{
-						image: '/static/images/banner1.jpg',
-						url: '/pages/package/package'
+						image: '/static/images/banner1.jpg', // 轮播图1
+						url: '/pages/package/package' // 点击跳转到套餐页面
 					},
 					{
-						image: '/static/images/banner2.jpg',
-						url: '/pages/news/news'
+						image: '/static/images/banner2.jpg', // 轮播图2
+						url: '/pages/news/news' // 点击跳转到资讯页面
 					},
 					{
-						image: '/static/images/banner3.jpg',
-						url: '/pages/appointment/appointment'
+						image: '/static/images/banner3.jpg', // 轮播图3
+						url: '/pages/appointment/appointment' // 点击跳转到预约页面
 					}
 				],
+				// 快捷服务数据
 				serviceList: [{
-						name: '体检预约',
-						icon: '/static/images/icon-appointment.png',
-						url: '/pages/appointment/appointment'
+						name: '体检预约', // 服务名称
+						icon: '/static/images/icon-appointment.png', // 服务图标
+						url: '/pages/appointment/appointment' // 点击跳转链接
 					},
 					{
-						name: '体检报告',
-						icon: '/static/images/icon-report.png',
-						url: '/pages/report/report'
+						name: '体检报告', // 服务名称
+						icon: '/static/images/icon-report.png', // 服务图标
+						url: '/pages/report/report' // 点击跳转链接
 					},
 					{
-						name: '我的预约',
-						icon: '/static/images/icon-my-appointment.png',
-						url: '/pages/my-appointment/my-appointment'
+						name: '我的预约', // 服务名称
+						icon: '/static/images/icon-my-appointment.png', // 服务图标
+						url: '/pages/my-appointment/my-appointment' // 点击跳转链接
 					},
 					{
-						name: '在线咨询',
-						icon: '/static/images/icon-consult.png',
-						url: '/pages/consult/consult'
+						name: '在线咨询', // 服务名称
+						icon: '/static/images/icon-consult.png', // 服务图标
+						url: '/pages/consult/consult' // 点击跳转链接
 					}
 				],
+				// 套餐列表数据
 				packageList: [{
-						id: 1,
-						name: '标准体检套餐',
-						image: '/static/images/package1.jpg',
-						description: '适合25-45岁人群，包含血常规、尿常规、肝功能等基础检查',
-						price: '299',
-						originalPrice: '399'
+						id: 1, // 套餐ID
+						name: '标准体检套餐', // 套餐名称
+						image: '/static/images/package1.jpg', // 套餐图片
+						description: '适合25-45岁人群，包含血常规、尿常规、肝功能等基础检查', // 套餐描述
+						price: '299', // 套餐价格
+						originalPrice: '399' // 原价
 					},
 					{
 						id: 2,
@@ -206,6 +229,7 @@
 						originalPrice: '899'
 					}
 				],
+				// 资讯列表数据
 				newsList: [{
 						id: 1,
 						title: '每天一个苹果，医生远离我？水果的健康真相',
@@ -234,40 +258,61 @@
 						url: 'https://www.163.com/dy/article/I6JGCGOQ0552CRD4.html'
 					}
 				],
+				// 推荐套餐数据
 				recommendPackages: [],
 				// 布局模式 (2 或 4)
 				layoutMode: 2,
 			}
 		},
-		// 页面标题配置
+		/**
+		 * 页面加载时的生命周期钩子
+		 * 设置页面标题并获取推荐数据
+		 */
 		onLoad() {
 			// 设置页面标题
 			uni.setNavigationBarTitle({
-				title: '熙康健康'
+				title: '东软熙心健康'
 			});
 			
-			// 页面加载时获取推荐医院
+			// 页面加载时获取推荐医院和套餐数据
 			this.getRecommendHospitals();
 			this.getRecommendPackages();
 		},
+		
+		/**
+		 * 页面显示时的生命周期钩子
+		 * 确保页面标题正确设置
+		 */
+		onShow() {
+			// 确保页面标题正确设置
+			uni.setNavigationBarTitle({
+				title: '东软熙心健康'
+			});
+		},
+		// 组件方法定义
 		methods: {
-			// 获取推荐医院列表
+			/**
+			 * 获取推荐医院列表的异步方法
+			 * 从服务器获取推荐医院数据，如果失败则使用测试数据
+			 */
 			async getRecommendHospitals() {
-				this.hospitalLoading = true;
+				this.hospitalLoading = true; // 开始加载状态
 				console.log('开始获取推荐医院...');
 				
 				try {
+					// 调用API获取推荐医院列表
 					const result = await get(hospitalApi.getRecommendHospitals);
 					console.log('医院接口返回结果:', result);
 					
-					// 检查返回的数据结构
+					// 检查返回的数据结构并处理
 					if (result && result.data) {
-						this.hospitalList = result.data;
+						this.hospitalList = result.data; // 标准返回格式
 					} else if (Array.isArray(result)) {
-						this.hospitalList = result;
+						this.hospitalList = result; // 直接返回数组
 					} else {
-						this.hospitalList = [];
+						this.hospitalList = []; // 数据格式异常时设为空数组
 					}
+					
 					// 处理医院数据，确保有默认图片和标签
 					this.hospitalList.forEach((hospital, index) => {
 						// 设置默认图片（使用多张图片循环）
@@ -288,6 +333,7 @@
 					console.log('处理后的医院列表:', this.hospitalList);
 				} catch (error) {
 					// 如果接口失败，使用测试数据
+					console.error('获取推荐医院失败:', error);
 					this.hospitalList = [
 						{
 							id: 1,
@@ -309,36 +355,41 @@
 						icon: 'none'
 					});
 				} finally {
-					this.hospitalLoading = false;
+					this.hospitalLoading = false; // 结束加载状态
 				}
 			},
 			
-			// 搜索医院
+			/**
+			 * 搜索医院的异步方法
+			 * 根据关键词搜索医院，如果关键词为空则重新获取推荐医院
+			 */
 			async searchHospitals() {
+				// 如果搜索关键词为空，重新获取推荐医院
 				if (!this.searchKeyword.trim()) {
-					// 如果搜索关键词为空，重新获取推荐医院
 					this.getRecommendHospitals();
 					return;
 				}
 				
 				try {
+					// 调用API搜索医院列表
 					const result = await get(hospitalApi.getHospitalList, {
-						keyword: this.searchKeyword.trim(),
-						pageIndex: 1,
-						pageSize: 10
+						keyword: this.searchKeyword.trim(), // 搜索关键词
+						pageIndex: 1, // 页码
+						pageSize: 10 // 每页数量
 					});
 					
 					// 检查返回的数据结构
 					let hospitalData = null;
 					if (result && result.data) {
-						hospitalData = result.data;
+						hospitalData = result.data; // 标准返回格式
 					} else if (result && result.records) {
-						hospitalData = result;
+						hospitalData = result; // 直接返回记录
 					}
 					
+					// 如果有有效数据，则处理医院列表
 					if (hospitalData && hospitalData.records) {
 						this.hospitalList = hospitalData.records;
-						// 处理医院数据
+						// 处理医院数据，添加默认图片和标签
 						this.hospitalList.forEach((hospital, index) => {
 							// 设置默认图片（使用多张图片循环）
 							const defaultImages = [
@@ -357,6 +408,8 @@
 						});
 					}
 				} catch (error) {
+					// 搜索失败时显示错误提示
+					console.error('搜索医院失败:', error);
 					uni.showToast({
 						title: error.message || '搜索医院失败',
 						icon: 'none'
@@ -364,8 +417,13 @@
 				}
 			},
 			
+			/**
+			 * 页面导航方法
+			 * 根据不同的URL进行页面跳转，支持H5和App端的差异化处理
+			 * @param {String} url - 要跳转的页面URL
+			 */
 			navigateTo(url) {
-				// 如果是 tabBar 页面，改用 switchTab
+				// 如果是体检报告页面，进行特殊处理
 				if (url === '/pages/report/report') {
 					// 体检报告跳转到指定URL
 					// #ifdef H5
@@ -387,22 +445,29 @@
 					});
 					// #endif
 				} else {
+					// 其他页面使用普通跳转
 					uni.navigateTo({ url });
 				}
 			},
+			/**
+			 * 选择医院的方法
+			 * 处理用户点击医院的逻辑，存储医院信息并跳转到医院详情页
+			 * @param {Object} hospital - 选中的医院对象
+			 */
 			selectHospital(hospital) {
 				console.log('点击医院:', hospital);
 				
-				// 显示提示
+				// 显示加载提示
 				uni.showToast({
 					title: '正在跳转...',
 					icon: 'loading',
 					duration: 1000
 				});
 				
-				// 存储选择的医院信息
+				// 存储选择的医院信息到本地，供后续页面使用
 				uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
 				
+				// 跳转到医院详情页面
 				uni.navigateTo({
 					url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}`,
 					success: () => {
@@ -417,13 +482,26 @@
 					}
 				});
 			},
+			
+			/**
+			 * 选择套餐的方法
+			 * 处理用户点击套餐的逻辑，跳转到套餐详情页
+			 * @param {Object} pkg - 选中的套餐对象
+			 */
 			selectPackage(pkg) {
 				uni.navigateTo({
 					url: `/pages/package-detail/package-detail?id=${pkg.id}`
 				});
 			},
+			
+			/**
+			 * 查看新闻的方法
+			 * 处理用户点击新闻的逻辑，根据新闻类型跳转到不同页面
+			 * @param {Object} news - 选中的新闻对象
+			 */
 			viewNews(news) {
 				if (news.url) {
+					// 如果新闻有外部链接，则在WebView中打开
 					uni.showLoading({
 						title: '加载中...'
 					});
@@ -435,46 +513,55 @@
 						}
 					});
 				} else {
+					// 如果是内部新闻，则跳转到新闻详情页
 					uni.navigateTo({
 						url: `/pages/news-detail/news-detail?id=${news.id}`
 					});
 				}
 			},
+			/**
+			 * 获取推荐套餐的异步方法
+			 * 从服务器获取推荐套餐数据，如果失败则使用测试数据
+			 */
 			async getRecommendPackages() {
 				try {
 					console.log('开始获取推荐套餐...');
+					// 调用API获取推荐套餐列表
 					const result = await get(packageApi.getRecommendPackages);
 					console.log('推荐套餐接口返回结果:', result);
 					
+					// 检查标准返回格式
 					if (result && result.data) {
 						this.recommendPackages = result.data.map((item, index) => ({
-							id: item.id,
-							name: item.name,
-							price: item.price || 0,
-							description: item.description || '',
-							tags: item.tags || [],
-							image: `/static/images/package${(index % 4) + 1}.jpg`
+							id: item.id, // 套餐ID
+							name: item.name, // 套餐名称
+							price: item.price || 0, // 套餐价格
+							description: item.description || '', // 套餐描述
+							tags: item.tags || [], // 套餐标签
+							image: `/static/images/package${(index % 4) + 1}.jpg` // 默认图片
 						}));
 						console.log('处理后的推荐套餐数据:', this.recommendPackages);
 					} else if (Array.isArray(result)) {
-						// 如果直接返回数组
+						// 如果直接返回数组格式
 						this.recommendPackages = result.map((item, index) => ({
-							id: item.id,
-							name: item.name,
-							price: item.price || 0,
-							description: item.description || '',
-							tags: item.tags || [],
-							image: `/static/images/package${(index % 4) + 1}.jpg`
+							id: item.id, // 套餐ID
+							name: item.name, // 套餐名称
+							price: item.price || 0, // 套餐价格
+							description: item.description || '', // 套餐描述
+							tags: item.tags || [], // 套餐标签
+							image: `/static/images/package${(index % 4) + 1}.jpg` // 默认图片
 						}));
 						console.log('处理后的推荐套餐数据:', this.recommendPackages);
 					} else {
+						// 数据格式异常，设置为空数组
 						console.log('接口返回数据格式异常:', result);
 						this.recommendPackages = [];
 					}
 				} catch (e) {
+					// 获取失败，使用测试数据
 					console.error('获取推荐套餐失败:', e);
 					this.recommendPackages = [];
-					// 使用测试数据
+					// 使用测试数据作为备用
 					this.recommendPackages = [
 						{
 							id: 4001,
@@ -493,7 +580,11 @@
 					];
 				}
 			},
-			// 切换布局模式
+			
+			/**
+			 * 切换布局模式的方法
+			 * 在2列和4列布局之间切换
+			 */
 			toggleLayout() {
 				this.layoutMode = this.layoutMode === 2 ? 4 : 2;
 			}

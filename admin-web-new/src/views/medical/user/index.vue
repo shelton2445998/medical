@@ -1,3 +1,21 @@
+<!--
+/**
+ * @fileoverview 医疗用户管理页面
+ * @description 提供医疗系统中用户的管理功能，包括用户列表展示、搜索、新增、编辑、删除、重置密码等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 用户列表展示
+ * - 多条件搜索（用户名、手机号、状态）
+ * - 新增/编辑用户
+ * - 删除用户
+ * - 重置用户密码
+ * - 分页显示
+ * - 角色管理
+ * - 状态管理
+ */
+-->
 <template>
   <div class="container">
     <el-card shadow="never" class="card-box">

@@ -171,11 +171,20 @@
 				this.selectedHospital = JSON.parse(hospitalInfo);
 			}
 		},
+		// 组件方法定义
 		methods: {
+			/**
+			 * 获取套餐列表的异步方法
+			 * 从服务器获取套餐数据并格式化
+			 */
 			async getPackageList() {
 				try {
+					// 调用API获取套餐列表
 					const result = await get(packageApi.getPackageList, { pageIndex: 1, pageSize: 20 });
+					
+					// 检查响应数据格式
 					if (result && result.data && result.data.list) {
+						// 格式化套餐数据
 						this.packages = result.data.list.map((item, index) => {
 							// 计算检查项目数量
 							let checkitemCount = 0;
@@ -184,66 +193,95 @@
 							}
 							
 							return {
-								id: item.id,
-								name: item.name,
-								type: item.type || 1,
-								price: item.price || 0,
-								discountPrice: item.discountPrice || item.price || 0,
-								description: item.description || '',
-								checkitemIds: item.checkitemIds || '',
-								checkitemCount: checkitemCount,
+								id: item.id, // 套餐ID
+								name: item.name, // 套餐名称
+								type: item.type || 1, // 套餐类型，默认为1
+								price: item.price || 0, // 套餐价格
+								discountPrice: item.discountPrice || item.price || 0, // 折扣价格
+								description: item.description || '', // 套餐描述
+								checkitemIds: item.checkitemIds || '', // 检查项目ID列表
+								checkitemCount: checkitemCount, // 检查项目数量
 								// 移除详细信息，只在详情页显示
 								// suitableCrowd: item.suitableCrowd || '适合一般人群',
 								// appointmentNotice: item.appointmentNotice || '请按医院要求准备',
-								sold: item.sold || 0,
-								recommend: item.recommend || false,
-								popular: item.popular || false,
-								new: item.new || false
+								sold: item.sold || 0, // 销售数量
+								recommend: item.recommend || false, // 是否推荐
+								popular: item.popular || false, // 是否热门
+								new: item.new || false // 是否新品
 							};
 						});
 					} else {
-						this.packages = [];
+						this.packages = []; // 无数据时设为空数组
 					}
+					// 初始化过滤后的套餐列表
 					this.filteredPackages = this.packages;
 				} catch (e) {
+					// 捕获异常并显示错误提示
+					console.error('获取套餐列表失败:', e);
 					uni.showToast({ title: '获取套餐失败', icon: 'none' });
 				}
 			},
 			
 
-			// 切换套餐类型
+			/**
+			 * 切换套餐类型的方法
+			 * 更新当前选中的套餐类型并应用筛选
+			 * @param {Number} typeId - 套餐类型ID
+			 */
 			switchType(typeId) {
 				this.currentType = typeId;
 				this.applyFilters();
 			},
-			// 搜索输入
+			
+			/**
+			 * 搜索输入处理方法
+			 * 当用户输入搜索关键词时触发筛选
+			 */
 			onSearchInput() {
 				this.applyFilters();
 			},
-			// 清除搜索
+			
+			/**
+			 * 清除搜索的方法
+			 * 清空搜索关键词并重新应用筛选
+			 */
 			clearSearch() {
 				this.searchKeyword = '';
 				this.applyFilters();
 			},
-			// 切换筛选标签
+			
+			/**
+			 * 切换筛选标签的方法
+			 * 添加或移除筛选条件
+			 * @param {String} filterValue - 筛选值
+			 */
 			toggleFilter(filterValue) {
 				const index = this.activeFilters.indexOf(filterValue);
 				if (index > -1) {
+					// 如果已存在，则移除
 					this.activeFilters.splice(index, 1);
 				} else {
+					// 如果不存在，则添加
 					this.activeFilters.push(filterValue);
 				}
 				this.applyFilters();
 			},
-			// 重置筛选
+			
+			/**
+			 * 重置筛选的方法
+			 * 清空所有筛选条件并恢复显示所有套餐
+			 */
 			resetFilters() {
-				this.currentType = 0;
-				this.searchKeyword = '';
+				this.currentType = 0; // 重置为显示全部类型
+				this.searchKeyword = ''; // 清空搜索关键词
 				this.applyFilters();
 			},
-			// 应用筛选
+			/**
+			 * 应用筛选的方法
+			 * 根据当前的筛选条件过滤套餐列表
+			 */
 			applyFilters() {
-				let filtered = [...this.packages];
+				let filtered = [...this.packages]; // 复制原始套餐列表
 				
 				// 按类型筛选
 				if (this.currentType !== 0) {
@@ -259,16 +297,28 @@
 					);
 				}
 				
+				// 更新过滤后的套餐列表
 				this.filteredPackages = filtered;
 			},
-			// 获取类型名称
+			
+			/**
+			 * 获取类型名称的方法
+			 * 根据类型ID获取对应的类型名称
+			 * @param {Number} typeId - 套餐类型ID
+			 * @returns {String} 类型名称
+			 */
 			getTypeName(typeId) {
 				const type = this.packageTypes.find(item => item.id === typeId);
 				return type ? type.name : '';
 			},
-			// 选择套餐
+			
+			/**
+			 * 选择套餐的方法
+			 * 存储选择的套餐信息并跳转到预约流程页面
+			 * @param {Object} pkg - 选中的套餐对象
+			 */
 			selectPackage(pkg) {
-				// 存储选择的套餐信息
+				// 存储选择的套餐信息到本地，供后续页面使用
 				uni.setStorageSync('selectedPackage', JSON.stringify(pkg));
 				
 				// 构建跳转URL，包含家庭成员信息
@@ -282,7 +332,12 @@
 					url: flowUrl
 				});
 			},
-			// 查看套餐详情
+			
+			/**
+			 * 查看套餐详情的方法
+			 * 跳转到套餐详情页面
+			 * @param {Object} pkg - 套餐对象
+			 */
 			showPackageDetail(pkg) {
 				uni.navigateTo({
 					url: `/pages/package-detail/package-detail?id=${pkg.id}`,
@@ -298,16 +353,31 @@
 					}
 				});
 			},
-			// 返回上一页
+			/**
+			 * 返回上一页的方法
+			 * 使用uni.navigateBack返回上一页
+			 */
 			goBack() {
 				uni.navigateBack();
 			},
-			// 获取折扣文本
+			
+			/**
+			 * 获取折扣文本的方法
+			 * 根据原价和折扣价计算折扣力度
+			 * @param {Object} item - 套餐对象
+			 * @returns {String} 折扣文本
+			 */
 			getDiscountText(item) {
 				const discount = (item.discountPrice / item.price * 10).toFixed(1);
 				return discount + '折';
 			},
-			// 获取套餐摘要
+			
+			/**
+			 * 获取套餐摘要的方法
+			 * 提供套餐的简洁描述信息
+			 * @param {Object} item - 套餐对象
+			 * @returns {String} 套餐摘要
+			 */
 			getPackageSummary(item) {
 				if (item.description) {
 					// 限制描述长度，提供简洁的摘要

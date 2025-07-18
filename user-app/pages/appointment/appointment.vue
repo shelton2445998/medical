@@ -146,57 +146,69 @@
 </template>
 
 <script>
+// 导入请求方法和API接口配置
 import { get, hospitalApi, packageApi } from '@/utils/request.js';
+
+// 导出预约页面组件配置
 export default {
+	// 组件数据
 	data() {
 		return {
+			// 轮播图数据列表
 			bannerList: [
 				{ 
-					image: '/static/images/banner1.jpg', 
-					url: '/pages/package/package',
-					title: '专业体检套餐',
-					desc: '全面健康检查，专业医疗团队'
+					image: '/static/images/banner1.jpg', // 轮播图图片
+					url: '/pages/package/package', // 跳转路径
+					title: '专业体检套餐', // 标题
+					desc: '全面健康检查，专业医疗团队' // 描述
 				},
 				{ 
-					image: '/static/images/banner2.jpg', 
-					url: '/pages/news/news',
-					title: '健康资讯',
-					desc: '最新健康资讯，科学养生知识'
+					image: '/static/images/banner2.jpg', // 轮播图图片
+					url: '/pages/news/news', // 跳转路径
+					title: '健康资讯', // 标题
+					desc: '最新健康资讯，科学养生知识' // 描述
 				},
 				{ 
-					image: '/static/images/banner3.jpg', 
-					url: '/pages/appointment/appointment',
-					title: '在线预约',
-					desc: '便捷预约服务，快速体检安排'
+					image: '/static/images/banner3.jpg', // 轮播图图片
+					url: '/pages/appointment/appointment', // 跳转路径
+					title: '在线预约', // 标题
+					desc: '便捷预约服务，快速体检安排' // 描述
 				}
 			],
+			// 服务类型列表
 			serviceList: [
-				{ name: '全身体检', icon: '🏥', url: '/pages/package/package?type=full' },
-				{ name: '男性体检', icon: '👨', url: '/pages/package/package?type=male' },
-				{ name: '女性体检', icon: '👩', url: '/pages/package/package?type=female' },
-				{ name: '老年体检', icon: '👴', url: '/pages/package/package?type=elder' },
-				{ name: '儿童体检', icon: '👶', url: '/pages/package/package?type=child' }
+				{ name: '全身体检', icon: '🏥', url: '/pages/package/package?type=full' }, // 全身体检服务
+				{ name: '男性体检', icon: '👨', url: '/pages/package/package?type=male' }, // 男性体检服务
+				{ name: '女性体检', icon: '👩', url: '/pages/package/package?type=female' }, // 女性体检服务
+				{ name: '老年体检', icon: '👴', url: '/pages/package/package?type=elder' }, // 老年体检服务
+				{ name: '儿童体检', icon: '👶', url: '/pages/package/package?type=child' } // 儿童体检服务
 			],
-			hospitalList: [],
-			packageList: [],
+			hospitalList: [], // 医院列表
+			packageList: [], // 套餐列表
+			// 预约须知列表
 			noticeList: [
-				'体检前一天请清淡饮食，避免辛辣、油腻食物',
-				'体检当天请空腹，禁食8-12小时',
-				'体检前一天晚上请保证充足睡眠',
-				'体检当天请携带身份证等有效证件',
-				'体检报告一般在3-5个工作日出具，可在APP查看'
+				'体检前一天请清淡饮食，避免辛辣、油腻食物', // 饮食注意事项
+				'体检当天请空腹，禁食8-12小时', // 空腹要求
+				'体检前一天晚上请保证充足睡眠', // 睡眠要求
+				'体检当天请携带身份证等有效证件', // 证件要求
+				'体检报告一般在3-5个工作日出具，可在APP查看' // 报告时间说明
 			]
 		}
 	},
+	// 页面加载时的生命周期函数
 	onLoad() {
-		this.getRecommendHospitals();
-		this.getRecommendPackages();
+		this.getRecommendHospitals(); // 获取推荐医院
+		this.getRecommendPackages(); // 获取推荐套餐
 	},
+	// 组件方法
 	methods: {
+		// 获取推荐医院的异步方法
 		async getRecommendHospitals() {
 			try {
+				// 调用API获取推荐医院列表
 				const result = await get(hospitalApi.getRecommendHospitals);
 				if (result && result.data) {
+					// 处理医院数据，只显示前3个医院
 					this.hospitalList = result.data.slice(0, 3).map((hospital, index) => {
 						const defaultImages = [
 							'/static/images/hospital1.jpg',
@@ -218,38 +230,68 @@ export default {
 				this.hospitalList = [];
 			}
 		},
+		/**
+		 * 获取推荐套餐的异步方法
+		 * 从服务器获取推荐的体检套餐列表并处理数据
+		 */
 		async getRecommendPackages() {
 			try {
+				// 调用API获取推荐套餐列表
 				const result = await get(packageApi.getRecommendPackages);
+				
+				// 检查响应数据是否存在
 				if (result && result.data) {
+					// 处理套餐数据，添加默认图片和格式化信息
 					this.packageList = result.data.map((item, index) => ({
-						id: item.id,
-						name: item.name,
-						price: item.price || 0,
-						originalPrice: item.originalPrice || item.price || 0,
-						description: item.description || '',
-						tags: item.tags || [],
-						image: `/static/images/package${(index % 4) + 1}.jpg`
+						id: item.id, // 套餐ID
+						name: item.name, // 套餐名称
+						price: item.price || 0, // 套餐价格，默认为0
+						originalPrice: item.originalPrice || item.price || 0, // 原价，默认为当前价格
+						description: item.description || '', // 套餐描述，默认为空
+						tags: item.tags || [], // 套餐标签，默认为空数组
+						image: `/static/images/package${(index % 4) + 1}.jpg` // 根据索引循环使用默认图片
 					}));
 				} else {
+					// 如果没有数据，设置为空数组
 					this.packageList = [];
 				}
 			} catch (e) {
+				// 捕获错误，设置为空数组
+				console.error('获取推荐套餐失败:', e);
 				this.packageList = [];
 			}
 		},
+		/**
+		 * 页面导航方法
+		 * 封装uni.navigateTo方法，用于页面跳转
+		 * @param {String} url - 要跳转的页面URL
+		 */
 		navigateTo(url) {
 			uni.navigateTo({ url });
 		},
+		
+		/**
+		 * 选择医院方法
+		 * 处理用户选择医院的逻辑，存储医院信息并跳转到医院详情页
+		 * @param {Object} hospital - 选中的医院对象
+		 */
 		selectHospital(hospital) {
-			// 存储选择的医院信息
+			// 将选择的医院信息存储到本地存储中，供后续页面使用
 			uni.setStorageSync('selectedHospital', JSON.stringify(hospital));
 			
+			// 跳转到医院详情页面，并传递医院ID参数
 			uni.navigateTo({ 
 				url: `/pages/hospital-detail/hospital-detail?id=${hospital.id}` 
 			});
 		},
+		
+		/**
+		 * 选择套餐方法
+		 * 处理用户选择体检套餐的逻辑，跳转到套餐详情页
+		 * @param {Object} pkg - 选中的套餐对象
+		 */
 		selectPackage(pkg) {
+			// 跳转到套餐详情页面，并传递套餐ID参数
 			uni.navigateTo({ url: `/pages/package-detail/package-detail?id=${pkg.id}` });
 		}
 	}

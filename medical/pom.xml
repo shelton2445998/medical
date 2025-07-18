@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Maven项目配置文件 - 医疗管理系统
+========================================
+本文件定义了医疗管理系统的Maven项目配置信息，包括：
+- 项目基本信息（groupId、artifactId、version等）
+- 依赖管理（Spring Boot、MyBatis-Plus、MySQL等）
+- 构建配置（插件配置、编译设置等）
+- 开发者信息和许可证信息
+
+系统基于Spring Boot 2.7.18版本构建，提供医疗预约、用户管理、体检报告等功能。
+========================================
+-->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- Maven POM模型版本，固定为4.0.0 -->
     <modelVersion>4.0.0</modelVersion>
+    
+    <!-- 
+    父项目配置
+    继承Spring Boot官方的starter-parent，自动管理依赖版本和插件配置
+    -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -9,14 +27,22 @@
         <relativePath/>
     </parent>
 
-	<groupId>io.geekidea.boot</groupId>
-	<artifactId>spring-boot-plus</artifactId>
-    <version>2.7.18</version>
+    <!-- 
+    项目基本信息配置
+    定义项目的Maven坐标和基本描述信息
+    -->
+    <groupId>io.geekidea.boot</groupId> <!-- 项目组织标识 -->
+    <artifactId>spring-boot-plus</artifactId> <!-- 项目标识符 -->
+    <version>2.7.18</version> <!-- 项目版本号 -->
 
-	<name>spring-boot-plus</name>
-    <description>spring-boot-plus</description>
-    <url>https://github.com/geekidea/spring-boot-plus</url>
+    <name>spring-boot-plus</name> <!-- 项目名称 -->
+    <description>spring-boot-plus</description> <!-- 项目描述 -->
+    <url>https://github.com/geekidea/spring-boot-plus</url> <!-- 项目主页 -->
 
+    <!-- 
+    开源许可证信息
+    本项目采用MIT许可证，允许自由使用、修改和分发
+    -->
     <licenses>
         <license>
             <name>MIT License</name>
@@ -24,6 +50,10 @@
         </license>
     </licenses>
 
+    <!-- 
+    开发者信息配置
+    记录项目主要开发者和维护者的联系信息
+    -->
     <developers>
         <developer>
             <id>spring-boot-plus</id>
@@ -34,177 +64,476 @@
         </developer>
     </developers>
 
+    <!-- 
+    项目属性配置
+    定义项目编译和运行时的关键参数
+    -->
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>1.8</java.version> <!-- 指定Java版本为1.8 -->
     </properties>
 
+    <!-- 
+    项目依赖配置
+    定义项目运行所需的所有外部库和框架
+    ========================================
+    依赖分类说明：
+    1. Spring Boot核心依赖 - 提供Web、AOP、数据访问等基础功能
+    2. 数据库相关依赖 - MySQL驱动、MyBatis-Plus等
+    3. 工具类依赖 - Apache Commons、Hutool等
+    4. 文档和监控依赖 - Knife4j、Swagger等
+    5. 其他业务依赖 - 文件上传、ID生成器等
+    ========================================
+    -->
     <dependencies>
+        <!-- 
+        Spring Boot Web启动器
+        提供Web应用开发的基础功能，包括：
+        - Spring MVC框架
+        - 嵌入式Tomcat服务器
+        - JSON序列化支持
+        - RESTful API支持
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        
+        <!-- 
+        Spring Boot AOP启动器
+        提供面向切面编程支持，用于：
+        - 日志记录
+        - 事务管理
+        - 权限控制
+        - 性能监控
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+        
+        <!-- 
+        Spring Boot JDBC启动器
+        提供数据库连接和基础数据访问功能：
+        - 数据源配置
+        - 数据库连接池
+        - JDBC模板支持
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
+        
+        <!-- 
+        Spring Boot Redis启动器
+        提供Redis缓存支持，用于：
+        - 用户会话存储
+        - 数据缓存
+        - 分布式锁
+        - 消息队列
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        
+        <!-- 
+        Spring Boot配置处理器
+        在编译时生成配置元数据，提供：
+        - 配置文件自动补全
+        - 配置项类型检查
+        - IDE集成支持
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+        
+        <!-- 
+        Spring Boot数据校验启动器
+        提供数据校验功能，支持：
+        - JSR-303/JSR-349规范
+        - 请求参数校验
+        - 实体字段校验
+        - 自定义校验规则
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        
+        <!-- 
+        Spring Boot测试启动器
+        提供单元测试和集成测试支持，包括：
+        - JUnit 5测试框架
+        - Mockito模拟框架
+        - Spring Test集成
+        - 测试数据库支持
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!-- 
+        MySQL数据库驱动
+        提供MySQL数据库连接支持，版本8.0.33具有以下特性：
+        - 支持MySQL 8.0新特性
+        - 改进的性能和安全性
+        - 完整的字符集支持
+        - SSL连接支持
+        -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
+        
+        <!-- 
+        Apache Commons连接池
+        提供高性能的对象池实现，用于：
+        - 数据库连接池
+        - Redis连接池
+        - 线程池管理
+        -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
+        
+        <!-- 
+        Lombok代码生成工具
+        通过注解自动生成常用方法，减少样板代码：
+        - @Data: 自动生成getter/setter
+        - @Builder: 构建者模式
+        - @Slf4j: 日志对象
+        - @NoArgsConstructor/@AllArgsConstructor: 构造函数
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        
+        <!-- 
+        MyBatis-Plus启动器
+        提供MyBatis-Plus ORM框架支持，包括：
+        - 代码生成器
+        - 自动Mapper
+        - 分页插件
+        - 通用Service
+        -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.4.1</version>
         </dependency>
+        
+        <!-- 
+        MyBatis-Plus测试启动器
+        提供MyBatis-Plus的测试支持，包括：
+        - 数据库测试配置
+        - 模拟数据源
+        - 测试事务管理
+        -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter-test</artifactId>
             <version>3.5.4.1</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- 
+        MyBatis-Plus代码生成器
+        提供自动代码生成功能，用于：
+        - 生成Entity实体类
+        - 生成Mapper接口
+        - 生成Service层代码
+        - 生成Controller层代码
+        -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-generator</artifactId>
             <version>3.5.4.1</version>
         </dependency>
+        
+        <!-- 
+        Apache Velocity模板引擎
+        为MyBatis-Plus代码生成器提供模板支持：
+        - 自定义代码模板
+        - 模板变量替换
+        - 灵活的代码生成规则
+        -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
             <version>2.3</version>
         </dependency>
+        
+        <!-- 
+        PageHelper分页插件
+        提供数据库分页查询功能：
+        - 物理分页（非内存分页）
+        - 支持多种数据库
+        - 自动分页SQL生成
+        - 分页信息统计
+        -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>2.0.0</version>
         </dependency>
+        
+        <!-- 
+        Knife4j API文档工具
+        提供优雅的API文档生成和展示：
+        - 基于OpenAPI 3.0规范
+        - 美观的文档界面
+        - 在线API测试功能
+        - 接口调试工具
+        -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
             <version>4.3.0</version>
         </dependency>
+        
+        <!-- 
+        Apache Commons Lang3工具库
+        提供常用的Java工具类：
+        - 字符串操作工具
+        - 数组操作工具
+        - 日期时间工具
+        - 数字处理工具
+        -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.14.0</version>
         </dependency>
+        
+        <!-- 
+        Apache Commons Collections4工具库
+        提供集合操作的扩展功能：
+        - 集合工具类
+        - 特殊集合实现
+        - 集合转换工具
+        - 集合过滤和处理
+        -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        
+        <!-- 
+        Commons IO工具库
+        提供文件和IO操作的工具类：
+        - 文件读写工具
+        - 流操作工具
+        - 文件监控功能
+        - 路径处理工具
+        -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.15.0</version>
         </dependency>
+        
+        <!-- 
+        Commons Codec编解码工具库
+        提供常用的编解码功能：
+        - Base64编解码
+        - MD5/SHA等摘要算法
+        - URL编解码
+        - 十六进制转换
+        -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.16.0</version>
         </dependency>
+        
+        <!-- 
+        Apache Commons Text工具库
+        提供高级文本处理功能：
+        - 字符串转义处理
+        - 文本相似度计算
+        - 字符串模板处理
+        - 文本生成工具
+        -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
             <version>1.11.0</version>
         </dependency>
+        
+        <!-- 
+        阿里巴巴FastJSON2 JSON处理库
+        提供高性能的JSON序列化和反序列化：
+        - 快速JSON解析
+        - 对象转JSON
+        - 支持复杂对象结构
+        - 内存效率优化
+        -->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
             <version>2.0.42</version>
         </dependency>
+        
+        <!-- 
+        Google Guava工具库
+        提供Google开发的核心Java工具类：
+        - 集合工具类
+        - 缓存实现
+        - 并发工具
+        - 字符串处理
+        -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>32.1.3-jre</version>
         </dependency>
+        
+        <!-- 
+        Hutool Java工具库
+        提供丰富的Java工具类集合：
+        - 日期时间工具
+        - 加密解密工具
+        - HTTP客户端
+        - 文件操作工具
+        -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.23</version>
         </dependency>
+        
+        <!-- 
+        阿里巴巴EasyExcel工具库
+        提供Excel文件读写功能：
+        - 大文件Excel处理
+        - 内存优化
+        - 多种数据格式支持
+        - 模板导出功能
+        -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
             <version>3.3.3</version>
         </dependency>
+        
+        <!-- 
+        IP2Region IP地址库
+        提供IP地址地理位置查询功能：
+        - 离线IP地址查询
+        - 支持IPv4和IPv6
+        - 高性能查询
+        - 准确的地理位置信息
+        -->
         <dependency>
             <groupId>org.lionsoul</groupId>
             <artifactId>ip2region</artifactId>
             <version>2.7.0</version>
         </dependency>
+        
+        <!-- 
+        JetBrains注解库
+        提供代码质量检查注解：
+        - @NotNull/@Nullable空值检查
+        - @Contract契约注解
+        - IDE代码分析支持
+        - 编译时检查
+        -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
+        
+        <!-- 
+        雪花算法ID生成器
+        提供分布式唯一ID生成功能：
+        - 高性能ID生成
+        - 分布式环境支持
+        - 时间戳有序
+        - 避免ID冲突
+        -->
         <dependency>
             <groupId>com.github.yitter</groupId>
             <artifactId>yitter-idgenerator</artifactId>
             <version>1.0.6</version>
         </dependency>
+        
+        <!-- 
+        阿里云OSS SDK
+        提供阿里云对象存储服务支持：
+        - 文件上传下载
+        - 图片处理
+        - 访问权限控制
+        - CDN加速
+        -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.17.2</version>
         </dependency>
+        
+        <!-- 
+        OSHI系统监控库
+        提供系统硬件和操作系统信息：
+        - CPU使用率监控
+        - 内存使用监控
+        - 磁盘空间监控
+        - 系统进程信息
+        -->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>6.4.1</version>
         </dependency>
 
-
     </dependencies>
 
+    <!-- 
+    Maven构建配置
+    定义项目的构建流程和相关插件配置
+    -->
     <build>
+        <!-- 设置最终打包文件名为项目artifactId -->
         <finalName>${project.artifactId}</finalName>
+        
+        <!-- 构建插件配置 -->
         <plugins>
+            <!-- 
+            Spring Boot Maven插件
+            提供Spring Boot应用程序的构建支持：
+            - 打包为可执行jar
+            - 运行应用程序
+            - 生成构建信息
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!-- 打包时跳过测试 -->
+            
+            <!-- 
+            Maven Surefire测试插件
+            用于控制单元测试的执行：
+            - 跳过测试执行（提高构建速度）
+            - 忽略测试失败（确保构建成功）
+            - 适用于持续集成环境
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-                    <skipTests>true</skipTests>
-                    <testFailureIgnore>true</testFailureIgnore>
+                    <skipTests>true</skipTests> <!-- 跳过测试执行 -->
+                    <testFailureIgnore>true</testFailureIgnore> <!-- 忽略测试失败 -->
                 </configuration>
             </plugin>
         </plugins>

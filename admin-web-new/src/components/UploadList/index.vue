@@ -1,3 +1,20 @@
+<!--
+/**
+ * @fileoverview 上传列表组件
+ * @description 提供上传文件的列表展示功能，包括文件预览、删除、下载等操作
+ * @author 医疗预约系统开发团队
+ * @version 1.0.0
+ * @created 2024-01-01
+ * @features
+ * - 文件列表展示
+ * - 文件预览功能
+ * - 文件删除功能
+ * - 文件下载功能
+ * - 文件状态显示
+ * - 文件大小显示
+ * - 上传进度显示
+ */
+-->
 <template>
   <el-upload
       :before-upload="beforeUpload"
