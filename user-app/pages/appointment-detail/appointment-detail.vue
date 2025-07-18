@@ -24,33 +24,24 @@
       <view class="shape shape-3"></view>
       <view class="shape shape-4"></view>
     </view>
-    
+
     <view class="main-content">
-      <!-- 
-        页面头部
-        显示页面标题和描述信息
-      -->
+      <!-- 页面头部 -->
       <view class="page-header">
         <view class="header-icon">📋</view>
         <view class="header-title">预约详情</view>
         <view class="header-desc">查看您的体检预约详细信息</view>
       </view>
-      
-      <!-- 
-        加载状态
-        当数据加载中时显示加载提示
-      -->
+
+      <!-- 加载状态 -->
       <view class="loading-container" v-if="loading">
         <view class="loading-card">
           <view class="loading-icon">⏳</view>
           <view class="loading-text">正在加载预约详情...</view>
         </view>
       </view>
-      
-      <!-- 
-        错误状态
-        当数据加载失败时显示错误信息和重试按钮
-      -->
+
+      <!-- 错误状态 -->
       <view class="error-container" v-else-if="error">
         <view class="error-card">
           <view class="error-icon">❌</view>
@@ -61,16 +52,10 @@
           </button>
         </view>
       </view>
-      
-      <!-- 
-        预约详情内容
-        显示预约的详细信息，包括状态、患者信息、预约信息等
-      -->
+
+      <!-- 预约详情内容 -->
       <view v-else-if="appointmentDetail" class="detail-content">
-        <!-- 
-          状态卡片
-          显示预约的基本状态信息
-        -->
+        <!-- 状态卡片 -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">📊</view>
@@ -93,11 +78,8 @@
             </view>
           </view>
         </view>
-        
-        <!-- 
-          患者信息卡片
-          显示患者的基本信息
-        -->
+
+        <!-- 患者信息卡片 -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">👤</view>
@@ -122,11 +104,8 @@
             </view>
           </view>
         </view>
-        
-        <!-- 
-          预约信息卡片
-          显示预约的详细信息
-        -->
+
+        <!-- 预约信息卡片 -->
         <view class="detail-card">
           <view class="card-header">
             <view class="card-icon">📅</view>
@@ -139,55 +118,86 @@
             </view>
             <view class="info-row">
               <text class="info-label">预约时间</text>
-              <text class="info-value">{{ appointmentDetail.appointmentTime }}</text>
+              <text class="info-value">{{ appointmentDetail.timeSlot }}</text>
             </view>
             <view class="info-row">
-              <text class="info-label">体检套餐</text>
-              <text class="info-value">{{ appointmentDetail.packageName }}</text>
-            </view>
-            <view class="info-row">
-              <text class="info-label">体检医院</text>
+              <text class="info-label">医院名称</text>
               <text class="info-value">{{ appointmentDetail.hospitalName }}</text>
             </view>
             <view class="info-row">
-              <text class="info-label">套餐价格</text>
-              <text class="info-value price">￥{{ appointmentDetail.packagePrice }}</text>
+              <text class="info-label">医生姓名</text>
+              <text class="info-value">{{ appointmentDetail.doctorName || '待分配' }}</text>
             </view>
           </view>
         </view>
-        
-        <!-- 
-          操作按钮区域
-          根据预约状态显示不同的操作按钮
-        -->
-        <view class="action-section">
-          <!-- 待支付状态：显示取消和支付按钮 -->
-          <view v-if="appointmentDetail.status === 1" class="action-buttons">
-            <button class="btn btn-cancel" @click="cancelAppointment">
-              <text class="btn-icon">❌</text>
-              <text>取消预约</text>
-            </button>
-            <button class="btn btn-pay" @click="goToPayment">
-              <text class="btn-icon">💳</text>
-              <text>立即支付</text>
-            </button>
+
+        <!-- 套餐信息卡片 -->
+        <view class="detail-card" v-if="appointmentDetail.setmealName">
+          <view class="card-header">
+            <view class="card-icon">📋</view>
+            <view class="card-title">套餐信息</view>
           </view>
-          
-          <!-- 已支付状态：显示取消按钮 -->
-          <view v-else-if="appointmentDetail.status === 2" class="action-buttons">
-            <button class="btn btn-cancel" @click="cancelAppointment">
-              <text class="btn-icon">❌</text>
-              <text>取消预约</text>
-            </button>
+          <view class="info-section">
+            <view class="info-row">
+              <text class="info-label">套餐名称</text>
+              <text class="info-value">{{ appointmentDetail.setmealName }}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">套餐价格</text>
+              <text class="info-value price">¥{{ appointmentDetail.price }}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">订单金额</text>
+              <text class="info-value price">¥{{ appointmentDetail.amount }}</text>
+            </view>
           </view>
-          
-          <!-- 其他状态：显示返回按钮 -->
-          <view v-else class="action-buttons">
-            <button class="btn btn-back" @click="goBack">
-              <text class="btn-icon">🔙</text>
-              <text>返回列表</text>
-            </button>
+        </view>
+
+        <!-- 备注信息卡片 -->
+        <view class="detail-card" v-if="appointmentDetail.remark">
+          <view class="card-header">
+            <view class="card-icon">📝</view>
+            <view class="card-title">备注信息</view>
           </view>
+          <view class="info-section">
+            <view class="info-row">
+              <text class="info-label">备注内容</text>
+              <text class="info-value">{{ appointmentDetail.remark }}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-buttons">
+          <!-- 待支付状态显示支付按钮 -->
+          <button
+              class="action-btn pay-btn"
+              v-if="appointmentDetail.status === 1"
+              @click="goToPayment"
+          >
+            <text class="btn-icon">💳</text>
+            <text>立即支付</text>
+          </button>
+
+          <!-- 待支付状态显示取消预约按钮 -->
+          <button
+              class="action-btn danger-btn"
+              v-if="appointmentDetail.status === 1"
+              @click="cancelAppointment"
+          >
+            <text class="btn-icon">❌</text>
+            <text>取消预约</text>
+          </button>
+
+          <!-- 其他状态显示返回按钮 -->
+          <button
+              class="action-btn primary-btn"
+              v-if="appointmentDetail.status !== 1"
+              @click="goBack"
+          >
+            <text class="btn-icon">←</text>
+            <text>返回列表</text>
+          </button>
         </view>
       </view>
     </view>
@@ -195,34 +205,19 @@
 </template>
 
 <script>
-// 引入API接口
-import { get } from '@/utils/request';
-import appointmentApi from '@/api/appointment';
+import { get } from '@/utils/request.js';
+import { appointmentApi } from '@/utils/api.js';
 
 export default {
-  name: 'AppointmentDetail',
-  
-  /**
-   * 组件数据
-   * @returns {Object} 组件数据对象
-   */
   data() {
     return {
-      // 预约ID
       appointmentId: null,
-      // 预约详情数据
       appointmentDetail: null,
-      // 加载状态
-      loading: false,
-      // 错误信息
+      loading: true,
       error: null
     }
   },
-  
-  /**
-   * 页面加载时的处理
-   * @param {Object} options 页面参数
-   */
+
   onLoad(options) {
     if (options.id) {
       this.appointmentId = options.id;
@@ -232,24 +227,21 @@ export default {
       this.loading = false;
     }
   },
-  
+
   methods: {
-    /**
-     * 加载预约详情
-     * 调用API获取预约的详细信息
-     */
+    // 加载预约详情
     async loadAppointmentDetail() {
       try {
         this.loading = true;
         this.error = null;
-        
+
         console.log('开始获取预约详情，ID:', this.appointmentId);
         console.log('API地址:', appointmentApi.getAppointmentDetail(this.appointmentId));
-        
+
         const result = await get(appointmentApi.getAppointmentDetail(this.appointmentId));
-        
+
         console.log('预约详情API响应:', result);
-        
+
         if (result && result.code === 200) {
           this.appointmentDetail = result.data;
           console.log('预约详情数据:', this.appointmentDetail);
@@ -264,12 +256,8 @@ export default {
         this.loading = false;
       }
     },
-    
-    /**
-     * 获取状态名称
-     * @param {number} status 状态码
-     * @returns {string} 状态名称
-     */
+
+    // 获取状态名称
     getStatusName(status) {
       const statusMap = {
         0: '已取消',
@@ -279,22 +267,15 @@ export default {
       };
       return statusMap[status] || '未知状态';
     },
-    
-    /**
-     * 格式化日期
-     * @param {string} dateStr 日期字符串
-     * @returns {string} 格式化后的日期
-     */
+
+    // 格式化日期
     formatDate(dateStr) {
       if (!dateStr) return '未知';
       const date = new Date(dateStr);
       return date.toLocaleDateString('zh-CN');
     },
-    
-    /**
-     * 取消预约
-     * 显示确认对话框，确认后调用取消预约API
-     */
+
+    // 取消预约
     async cancelAppointment() {
       try {
         uni.showModal({
@@ -303,17 +284,17 @@ export default {
           success: async (res) => {
             if (res.confirm) {
               uni.showLoading({ title: '正在取消...' });
-              
+
               const result = await get(appointmentApi.cancelAppointment(this.appointmentId));
-              
+
               uni.hideLoading();
-              
+
               if (result && result.code === 200) {
                 uni.showToast({
                   title: '取消成功',
                   icon: 'success'
                 });
-                
+
                 // 重新加载详情
                 this.loadAppointmentDetail();
               } else {
@@ -334,25 +315,19 @@ export default {
         });
       }
     },
-    
-    /**
-     * 跳转到支付页面
-     * 将当前订单信息存储到本地存储，然后跳转到支付页面
-     */
+
+    // 跳转到支付页面
     goToPayment() {
       // 将订单信息存储到本地，供支付页面使用
       uni.setStorageSync('currentOrder', JSON.stringify(this.appointmentDetail));
-      
+
       // 跳转到支付页面
       uni.navigateTo({
         url: '/pages/payment/payment'
       });
     },
-    
-    /**
-     * 返回列表
-     * 返回上一页
-     */
+
+    // 返回列表
     goBack() {
       uni.navigateBack();
     }
@@ -361,10 +336,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/* 
-  页面整体样式
-  设置渐变背景和基本布局
-*/
 .content {
   background: linear-gradient(135deg, #0984e3 0%, #74b9ff 50%, #0984e3 100%);
   min-height: 100vh;
@@ -372,8 +343,7 @@ export default {
   padding-bottom: 40rpx;
   position: relative;
   overflow: hidden;
-  
-  /* 背景动画效果 */
+
   &::before {
     content: '';
     position: absolute;
@@ -385,7 +355,7 @@ export default {
     animation: flow 20s linear infinite;
     pointer-events: none;
   }
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -399,10 +369,6 @@ export default {
   }
 }
 
-/* 
-  动态背景装饰
-  添加浮动的装饰性元素
-*/
 .floating-shapes {
   position: absolute;
   top: 0;
@@ -419,7 +385,7 @@ export default {
     filter: blur(50px);
     animation: float 15s infinite ease-in-out;
     transition: all 0.3s ease;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -463,36 +429,28 @@ export default {
   }
 }
 
-/* 
-  主要内容区域
-  设置内容的定位和层级
-*/
 .main-content {
   padding: 20rpx 40rpx 0 40rpx;
   position: relative;
   z-index: 1;
 }
 
-/* 
-  页面头部样式
-  设置标题和描述的样式
-*/
 .page-header {
   text-align: center;
   margin-bottom: 40rpx;
   animation: fadeInDown 0.8s ease-out;
-  
+
   .header-icon {
     font-size: 80rpx;
     margin-bottom: 20rpx;
     animation: bounce 2s infinite;
     transition: all 0.3s ease;
-    
+
     &:hover {
       transform: scale(1.2);
     }
   }
-  
+
   .header-title {
     font-size: 44rpx;
     font-weight: bold;
@@ -501,7 +459,7 @@ export default {
     text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
   }
-  
+
   .header-desc {
     font-size: 28rpx;
     color: rgba(255, 255, 255, 0.8);
@@ -509,16 +467,12 @@ export default {
   }
 }
 
-/* 
-  加载状态样式
-  显示加载中的提示信息
-*/
 .loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 100rpx 0;
-  
+
   .loading-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 24rpx;
@@ -527,13 +481,13 @@ export default {
     backdrop-filter: blur(10rpx);
     text-align: center;
     animation: fadeInUp 0.8s ease-out;
-    
+
     .loading-icon {
       font-size: 80rpx;
       margin-bottom: 30rpx;
       animation: spin 2s linear infinite;
     }
-    
+
     .loading-text {
       font-size: 28rpx;
       color: #666666;
@@ -541,16 +495,12 @@ export default {
   }
 }
 
-/* 
-  错误状态样式
-  显示错误信息和重试按钮
-*/
 .error-container {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 100rpx 0;
-  
+
   .error-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 24rpx;
@@ -559,20 +509,20 @@ export default {
     backdrop-filter: blur(10rpx);
     text-align: center;
     animation: fadeInUp 0.8s ease-out;
-    
+
     .error-icon {
       font-size: 80rpx;
       margin-bottom: 30rpx;
       animation: pulse 2s infinite;
     }
-    
+
     .error-text {
       font-size: 28rpx;
       color: #ff5a5f;
       margin-bottom: 40rpx;
       display: block;
     }
-    
+
     .retry-btn {
       background: linear-gradient(135deg, #0984e3, #74b9ff);
       color: #ffffff;
@@ -587,12 +537,12 @@ export default {
       margin: 0 auto;
       transition: all 0.3s ease;
       box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
-      
+
       &:hover {
         transform: translateY(-4rpx);
         box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.4);
       }
-      
+
       .btn-icon {
         font-size: 24rpx;
         margin-right: 10rpx;
@@ -601,18 +551,10 @@ export default {
   }
 }
 
-/* 
-  详情内容样式
-  设置详情内容的动画效果
-*/
 .detail-content {
   animation: fadeInUp 0.8s ease-out;
 }
 
-/* 
-  详情卡片样式
-  设置信息卡片的样式和交互效果
-*/
 .detail-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24rpx;
@@ -622,26 +564,26 @@ export default {
   backdrop-filter: blur(10rpx);
   transition: all 0.3s ease;
   animation: fadeInUp 0.8s ease-out;
-  
+
   &:hover {
     transform: translateY(-4rpx);
     box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
   }
-  
+
   .card-header {
     display: flex;
     align-items: center;
     margin-bottom: 30rpx;
     padding-bottom: 20rpx;
     border-bottom: 2rpx solid rgba(9, 132, 227, 0.1);
-    
+
     .card-icon {
       font-size: 40rpx;
       margin-right: 20rpx;
       color: #0984e3;
       transition: all 0.3s ease;
     }
-    
+
     .card-title {
       font-size: 32rpx;
       font-weight: bold;
@@ -649,7 +591,7 @@ export default {
       transition: all 0.3s ease;
     }
   }
-  
+
   .info-section {
     .info-row {
       display: flex;
@@ -658,162 +600,226 @@ export default {
       padding: 15rpx 0;
       border-bottom: 1rpx solid #f0f0f0;
       transition: all 0.3s ease;
-      
+
       &:last-child {
         border-bottom: none;
       }
-      
+
       &:hover {
         background: rgba(9, 132, 227, 0.05);
         border-radius: 8rpx;
         padding-left: 10rpx;
         padding-right: 10rpx;
       }
-      
+
       .info-label {
         font-size: 28rpx;
         color: #666666;
-        flex: 1;
+        font-weight: 500;
       }
-      
+
       .info-value {
         font-size: 28rpx;
         color: #333333;
-        font-weight: 500;
-        text-align: right;
-        
+        font-weight: bold;
+
         &.status {
-          padding: 8rpx 16rpx;
+          padding: 6rpx 16rpx;
           border-radius: 20rpx;
-          font-weight: bold;
           font-size: 24rpx;
-          
-          &.status-0 {
-            background: #ff5a5f;
-            color: #ffffff;
-          }
-          
+          font-weight: bold;
+
           &.status-1 {
-            background: #fd9644;
+            background: linear-gradient(135deg, #ffa726, #ff9800);
             color: #ffffff;
           }
-          
+
           &.status-2 {
-            background: #0984e3;
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
             color: #ffffff;
           }
-          
+
           &.status-3 {
-            background: #20bf6b;
+            background: linear-gradient(135deg, #42a5f5, #2196f3);
             color: #ffffff;
           }
         }
-        
+
         &.price {
           color: #ff5a5f;
           font-weight: bold;
-          font-size: 32rpx;
         }
       }
     }
   }
 }
 
-/* 
-  操作按钮区域样式
-  设置操作按钮的样式和布局
-*/
-.action-section {
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
   margin-top: 40rpx;
-  
-  .action-buttons {
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+
+  .action-btn {
+    flex: 1;
+    height: 88rpx;
+    border-radius: 44rpx;
+    font-size: 28rpx;
+    font-weight: bold;
     display: flex;
-    gap: 20rpx;
-    
-    .btn {
-      flex: 1;
-      height: 88rpx;
-      border: none;
-      border-radius: 44rpx;
-      font-size: 28rpx;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
-      
-      .btn-icon {
-        font-size: 24rpx;
-        margin-right: 10rpx;
-      }
-      
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: none;
+
+    .btn-icon {
+      font-size: 24rpx;
+      margin-right: 10rpx;
+    }
+
+    &.primary-btn {
+      background: linear-gradient(135deg, #0984e3, #74b9ff);
+      color: #ffffff;
+      box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.3);
+
       &:hover {
-        transform: translateY(-4rpx);
-        box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+        transform: translateY(-2rpx);
+        box-shadow: 0 12rpx 32rpx rgba(9, 132, 227, 0.4);
       }
-      
-      &.btn-cancel {
-        background: linear-gradient(135deg, #ff5a5f, #ff7675);
-        color: #ffffff;
+    }
+
+    &.secondary-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #0984e3;
+      border: 2rpx solid #0984e3;
+
+      &:hover {
+        background: rgba(9, 132, 227, 0.1);
+        transform: translateY(-2rpx);
+        box-shadow: 0 8rpx 24rpx rgba(9, 132, 227, 0.2);
       }
-      
-      &.btn-pay {
-        background: linear-gradient(135deg, #0984e3, #74b9ff);
-        color: #ffffff;
+    }
+
+    &.danger-btn {
+      background: linear-gradient(135deg, #ff7675, #fd79a8);
+      color: #ffffff;
+      box-shadow: 0 8rpx 24rpx rgba(255, 118, 117, 0.3);
+
+      &:hover {
+        transform: translateY(-2rpx);
+        box-shadow: 0 12rpx 32rpx rgba(255, 118, 117, 0.4);
       }
-      
-      &.btn-back {
-        background: linear-gradient(135deg, #636e72, #74b9ff);
-        color: #ffffff;
+    }
+
+    &.pay-btn {
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      color: #ffffff;
+      box-shadow: 0 8rpx 24rpx rgba(0, 184, 148, 0.3);
+
+      &:hover {
+        transform: translateY(-2rpx);
+        box-shadow: 0 12rpx 32rpx rgba(0, 184, 148, 0.4);
       }
     }
   }
 }
 
-/* 
-  动画效果定义
-  定义各种动画效果
-*/
+// 动画定义
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-20px) translateX(20px) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(20px) translateX(-20px) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.8;
+  }
+}
+
 @keyframes flow {
-  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-  50% { transform: translate(-50%, -50%) rotate(180deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes shimmer {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-30px) rotate(120deg); }
-  66% { transform: translateY(-15px) rotate(240deg); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10rpx);
+  }
+  60% {
+    transform: translateY(-5rpx);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
-</style> 
+</style>
