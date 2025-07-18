@@ -6,6 +6,8 @@ import com.fourth.medical.auth.annotation.Permission;
 // 导入登录工具类，用于获取当前登录用户信息
 import com.fourth.medical.auth.util.LoginUtil;
 // 导入业务异常类，用于处理业务逻辑异常
+import com.fourth.medical.common.enums.SysLogType;
+import com.fourth.medical.framework.annotation.Log;
 import com.fourth.medical.framework.exception.BusinessException;
 // 导入分页工具类，用于处理分页查询结果
 import com.fourth.medical.framework.page.Paging;
@@ -464,28 +466,26 @@ public class SysUserController {
     /**
      * 修改个人信息
      *
-     * @param sysUserUpdateProfileDto
-     * @return
-     * @throws Exception
+     * @param dto 个人信息
+     * @return 操作结果
      */
-    @PutMapping("/profile")
+    @PostMapping("/update-profile")
     @Operation(summary = "修改个人信息")
-    public ApiResult updateProfile(@Valid @RequestBody SysUserUpdateProfileDto sysUserUpdateProfileDto) {
-        boolean flag = sysUserService.updateProfile(sysUserUpdateProfileDto);
+    public ApiResult updateProfile(@Valid @RequestBody SysUserUpdateProfileDto dto) {
+        boolean flag = sysUserService.updateProfile(dto);
         return ApiResult.result(flag);
     }
 
     /**
      * 修改用户密码
      *
-     * @param sysUserUpdatePasswordDto
-     * @return
-     * @throws Exception
+     * @param dto 密码修改信息
+     * @return 操作结果
      */
-    @PutMapping("/password")
+    @PostMapping("/update-password")
     @Operation(summary = "修改用户密码")
-    public ApiResult updatePassword(@Valid @RequestBody SysUserUpdatePasswordDto sysUserUpdatePasswordDto) {
-        boolean flag = sysUserService.updatePassword(sysUserUpdatePasswordDto);
+    public ApiResult updatePassword(@Valid @RequestBody SysUserUpdatePasswordDto dto) {
+        boolean flag = sysUserService.updatePassword(dto);
         return ApiResult.result(flag);
     }
 

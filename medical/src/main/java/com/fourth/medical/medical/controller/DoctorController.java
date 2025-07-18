@@ -6,6 +6,7 @@ import com.fourth.medical.framework.annotation.Log;
 import com.fourth.medical.framework.page.Paging;
 import com.fourth.medical.framework.response.ApiResult;
 import com.fourth.medical.medical.dto.DoctorDto;
+import com.fourth.medical.medical.dto.DoctorUpdatePasswordDto;
 import com.fourth.medical.medical.query.DoctorQuery;
 import com.fourth.medical.medical.service.DoctorService;
 import com.fourth.medical.medical.vo.DoctorVo;
@@ -330,6 +331,36 @@ public class DoctorController {
         log.info("获取医生分页列表：{}", query);
         Paging<DoctorVo> paging = doctorService.getDoctorPage(query);
         return ApiResult.success(paging);
+    }
+
+    /**
+     * 修改医生密码
+     * 
+     * 功能说明：
+     * 允许医生修改自己的登录密码，需要提供原密码和新密码。
+     * 
+     * 业务流程：
+     * 1. 验证原密码是否正确
+     * 2. 检查新密码的合法性
+     * 3. 加密新密码
+     * 4. 更新密码
+     * 5. 记录操作日志
+     * 
+     * 安全要求：
+     * - 必须验证原密码
+     * - 新密码需要符合复杂度要求
+     * - 密码加密存储
+     * 
+     * @param dto 密码修改信息
+     * @return 操作结果
+     */
+    @Log(type = SysLogType.UPDATE)
+    @Operation(summary = "修改密码")
+    @PutMapping("/password")
+    public ApiResult updatePassword(@Valid @RequestBody DoctorUpdatePasswordDto dto) {
+        log.info("医生修改密码");
+        boolean flag = doctorService.updatePassword(dto);
+        return ApiResult.result(flag);
     }
 
 }

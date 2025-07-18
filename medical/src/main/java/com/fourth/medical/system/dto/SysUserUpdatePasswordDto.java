@@ -2,33 +2,31 @@ package com.fourth.medical.system.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 /**
- * 修改系统用户密码
+ * 系统用户修改密码DTO
  *
- * @author geekidea
- * @date 2023/6/24
- **/
+ * @author fourth
+ * @since 2025-07-18
+ */
 @Data
-@Schema(description = "修改系统用户密码")
+@Schema(description = "系统用户修改密码DTO")
 public class SysUserUpdatePasswordDto {
 
-    @Schema(description = "旧密码")
-    @NotNull(message = "旧密码不能为空")
-    @Length(min = 32, max = 32, message = "旧密码长度不符合要求")
+    @Schema(description = "用户ID")
+    private String id;
+
+    @NotBlank(message = "原密码不能为空")
+    @Schema(description = "原密码")
     private String oldPassword;
 
+    @NotBlank(message = "新密码不能为空")
     @Schema(description = "新密码")
-    @NotNull(message = "新密码不能为空")
-    @Length(min = 32, max = 32, message = "新密码长度不符合要求")
     private String password;
 
-    @Schema(description = "确认新密码")
-    @NotNull(message = "确认新密码不能为空")
-    @Length(min = 32, max = 32, message = "确认新密码长度不符合要求")
+    @NotBlank(message = "确认密码不能为空")
+    @Schema(description = "确认密码")
     private String confirmPassword;
-
 }

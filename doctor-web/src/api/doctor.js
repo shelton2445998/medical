@@ -520,14 +520,11 @@ export function updateReport(data) {
 // ==================== 安全管理相关接口 ====================
 
 /**
- * 修改个人密码接口
- * 
- * 医生修改登录密码
+ * 修改医生密码
  * 
  * @param {Object} data - 密码修改数据
  * @param {string} data.oldPassword - 原密码
  * @param {string} data.newPassword - 新密码
- * @param {string} data.confirmPassword - 确认密码
  * @returns {Promise} 返回修改结果
  */
 export function updatePassword(data) {

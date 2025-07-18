@@ -267,34 +267,25 @@ export default {
       email: ''           // 邮箱
     })
 
-    /**
-     * 修改密码表单数据
-     * 
-     * 包含原密码、新密码和确认密码字段
-     */
+    // 密码表单数据
     const passwordForm = reactive({
-      oldPassword: '',    // 原密码
-      newPassword: '',    // 新密码
-      confirmPassword: '' // 确认密码
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     })
 
-    /**
-     * 密码表单校验规则
-     * 
-     * 定义密码修改表单的验证规则
-     */
+    // 密码表单验证规则
     const passwordRules = {
       oldPassword: [
         { required: true, message: '请输入原密码', trigger: 'blur' }
       ],
       newPassword: [
         { required: true, message: '请输入新密码', trigger: 'blur' },
-        { min: 6, message: '密码长度不少于6个字符', trigger: 'blur' }
+        { min: 6, message: '密码长度不能小于6个字符', trigger: 'blur' }
       ],
       confirmPassword: [
         { required: true, message: '请再次输入新密码', trigger: 'blur' },
         {
-          // 自定义验证器：确保两次输入的密码一致
           validator: (rule, value, callback) => {
             if (value !== passwordForm.newPassword) {
               callback(new Error('两次输入的密码不一致'))
@@ -408,6 +399,8 @@ export default {
             passwordForm.oldPassword = ''
             passwordForm.newPassword = ''
             passwordForm.confirmPassword = ''
+            // 重置表单验证状态
+            passwordFormRef.value.resetFields()
           } catch (error) {
             console.error('修改密码失败：', error)
             ElMessage.error(error.message || '修改密码失败，请稍后重试')

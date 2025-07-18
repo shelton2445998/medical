@@ -8,6 +8,7 @@ import com.fourth.medical.medical.query.DoctorQuery;
 import com.fourth.medical.medical.vo.DoctorVo;
 import com.fourth.medical.medical.query.AppDoctorQuery;
 import com.fourth.medical.medical.vo.AppDoctorVo;
+import com.fourth.medical.medical.dto.DoctorUpdatePasswordDto;
 
 
 /**
@@ -90,5 +91,14 @@ public interface DoctorService extends IService<Doctor> {
      * @throws Exception
      */
     Object getDoctorByHospitalAndDepartment(Long hospitalId, Long departmentId);
+
+    /**
+     * 医生修改密码
+     *
+     * @param dto 密码修改信息
+     * @return 是否修改成功
+     * @throws Exception
+     */
+    boolean updatePassword(DoctorUpdatePasswordDto dto);
 
 }

@@ -1,6 +1,7 @@
 package com.fourth.medical.medical.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fourth.medical.auth.util.LoginUtil;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.page.OrderByItem;
 import com.fourth.medical.framework.page.OrderMapping;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.fourth.medical.medical.dto.DoctorUpdatePasswordDto;
 
 /**
  * 医生 服务实现类
@@ -152,4 +154,38 @@ public class DoctorServiceImpl extends ServiceImpl<DoctorMapper, Doctor> impleme
             return null;
         }
     }
+
+    @Override
+    public boolean updatePassword(DoctorUpdatePasswordDto dto) {
+        // 获取当前登录医生的ID
+        Long doctorId = LoginUtil.getUserId();
+        if (doctorId == null) {
+            throw new BusinessException("未登录或登录已过期");
+        }
+
+        // 获取医生信息
+        Doctor doctor = getById(doctorId);
+        if (doctor == null) {
+            throw new BusinessException("医生不存在");
+        }
+
+        // 验证原密码
+        String dbPassword = doctor.getPassword();
+        String dbSalt = doctor.getSalt();
+        String oldPassword = dto.getOldPassword();
+        String encryptOldPassword = PasswordUtil.encrypt(oldPassword, dbSalt);
+        
+        if (!dbPassword.equals(encryptOldPassword)) {
+            throw new BusinessException("原密码错误");
+        }
+
+        // 加密新密码
+        String newPassword = dto.getNewPassword();
+        String encryptNewPassword = PasswordUtil.encrypt(newPassword, dbSalt);
+
+        // 更新密码
+        doctor.setPassword(encryptNewPassword);
+        return updateById(doctor);
+    }
+
 }

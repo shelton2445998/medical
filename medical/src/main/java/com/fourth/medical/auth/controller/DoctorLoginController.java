@@ -18,6 +18,7 @@ import com.fourth.medical.common.constant.LoginConstant;
 // 导入框架响应结果类，用于统一API响应格式
 import com.fourth.medical.framework.response.ApiResult;
 // 导入医生报告服务接口，用于获取报告相关数据
+import com.fourth.medical.medical.dto.DoctorUpdateProfileDto;
 import com.fourth.medical.medical.service.DoctorReportService;
 // 导入医生排班服务接口，用于获取排班相关数据
 import com.fourth.medical.medical.service.DoctorScheduleService;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
 // 导入Servlet HTTP请求接口
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +56,7 @@ import javax.validation.Valid;
 import java.util.List;
 // 导入Java日期类
 import java.time.LocalDate;
+import com.fourth.medical.auth.dto.DoctorUpdatePasswordDto;
 
 /**
  * 医生端登录控制器
@@ -422,4 +425,56 @@ public class DoctorLoginController {
         
         return ApiResult.success(dashboardVo);
     }
+
+    /**
+     * 修改医生密码
+     * 
+     * 功能说明：
+     * 允许医生修改自己的登录密码，需要提供原密码和新密码。
+     * 
+     * 业务流程：
+     * 1. 验证原密码是否正确
+     * 2. 检查新密码的合法性
+     * 3. 加密新密码
+     * 4. 更新密码
+     * 5. 记录操作日志
+     * 
+     * 安全要求：
+     * - 必须验证原密码
+     * - 新密码需要符合复杂度要求
+     * - 密码加密存储
+     * 
+     * @param dto 密码修改信息
+     * @return 操作结果
+     */
+    @PutMapping("/password")
+    @Operation(summary = "修改医生密码")
+    public ApiResult<Boolean> updatePassword(@Valid @RequestBody DoctorUpdatePasswordDto dto) {
+        log.info("医生修改密码");
+        boolean flag = doctorLoginService.updatePassword(dto);
+        return ApiResult.result(flag);
+    }
+
+    /**
+     * 修改个人信息
+     * 
+     * 功能说明：
+     * 允许医生修改自己的个人信息，包括基本信息和专业信息。
+     * 
+     * 业务流程：
+     * 1. 验证医生登录状态
+     * 2. 更新个人信息
+     * 3. 记录操作日志
+     * 
+     * @param dto 个人信息
+     * @return 操作结果
+     */
+    @PostMapping("/profile")
+    @Operation(summary = "修改个人信息")
+    public ApiResult updateProfile(@Valid @RequestBody DoctorUpdateProfileDto dto) {
+        log.info("医生修改个人信息");
+        boolean flag = doctorLoginService.updateProfile(dto);
+        return ApiResult.result(flag);
+    }
+
 } 

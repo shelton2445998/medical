@@ -114,52 +114,65 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return handleUpdatePassword(userId, password);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean updateProfile(SysUserUpdateProfileDto sysUserUpdateProfileDto) {
-        Long id = LoginUtil.getUserId();
-        SysUser sysUser = getById(id);
-        if (sysUser == null) {
-            throw new BusinessException("用户信息不存在");
+    public boolean updateProfile(SysUserUpdateProfileDto dto) {
+        // 获取当前登录用户的ID
+        Long userId = LoginUtil.getUserId();
+        if (userId == null) {
+            throw new BusinessException("未登录或登录已过期");
         }
-        LambdaUpdateWrapper<SysUser> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.set(SysUser::getNickname, sysUserUpdateProfileDto.getNickname());
-        lambdaUpdateWrapper.set(SysUser::getPhone, sysUserUpdateProfileDto.getPhone());
-        lambdaUpdateWrapper.set(SysUser::getEmail, sysUserUpdateProfileDto.getEmail());
-        lambdaUpdateWrapper.set(SysUser::getHead, sysUserUpdateProfileDto.getHead());
-        lambdaUpdateWrapper.eq(SysUser::getId, id);
-        boolean flag = update(lambdaUpdateWrapper);
-        return flag;
+
+        // 获取用户信息
+        SysUser sysUser = getById(userId);
+        if (sysUser == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 更新用户信息
+        sysUser.setNickname(dto.getNickname());
+        sysUser.setPhone(dto.getPhone());
+        sysUser.setEmail(dto.getEmail());
+        sysUser.setHead(dto.getHead());
+        
+        return updateById(sysUser);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean updatePassword(SysUserUpdatePasswordDto sysUserUpdatePasswordDto) {
-        Long id = LoginUtil.getUserId();
-        SysUser sysUser = getById(id);
-        if (sysUser == null) {
-            throw new BusinessException("用户信息不存在");
+    public boolean updatePassword(SysUserUpdatePasswordDto dto) {
+        // 获取当前登录用户的ID
+        Long userId = LoginUtil.getUserId();
+        if (userId == null) {
+            throw new BusinessException("未登录或登录已过期");
         }
-        // 验证旧密码
+
+        // 获取用户信息
+        SysUser sysUser = getById(userId);
+        if (sysUser == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 验证原密码
         String dbPassword = sysUser.getPassword();
         String dbSalt = sysUser.getSalt();
-        String oldPassword = sysUserUpdatePasswordDto.getOldPassword();
+        String oldPassword = dto.getOldPassword();
         String encryptOldPassword = PasswordUtil.encrypt(oldPassword, dbSalt);
+        
         if (!dbPassword.equals(encryptOldPassword)) {
-            throw new BusinessException("旧密码错误");
+            throw new BusinessException("原密码错误");
         }
+
         // 验证两次密码是否一致
-        String password = sysUserUpdatePasswordDto.getPassword();
-        String confirmPassword = sysUserUpdatePasswordDto.getConfirmPassword();
-        if (!password.equals(confirmPassword)) {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new BusinessException("两次输入的密码不一致");
         }
-        // 新密码不能与旧密码一致
-        String newPassword = PasswordUtil.encrypt(password, dbSalt);
-        if (dbPassword.equals(newPassword)) {
-            throw new BusinessException("新密码不能与旧密码一致");
-        }
-        return handleUpdatePassword(id, password);
+
+        // 加密新密码
+        String newPassword = dto.getPassword();
+        String encryptNewPassword = PasswordUtil.encrypt(newPassword, dbSalt);
+
+        // 更新密码
+        sysUser.setPassword(encryptNewPassword);
+        return updateById(sysUser);
     }
 
     @Override

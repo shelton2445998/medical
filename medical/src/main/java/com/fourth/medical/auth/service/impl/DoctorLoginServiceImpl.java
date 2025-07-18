@@ -1,6 +1,7 @@
 package com.fourth.medical.auth.service.impl;
 
 import com.fourth.medical.auth.dto.DoctorLoginDto;
+import com.fourth.medical.auth.dto.DoctorUpdatePasswordDto;
 import com.fourth.medical.auth.service.DoctorLoginService;
 import com.fourth.medical.auth.service.LoginRedisService;
 import com.fourth.medical.auth.util.LoginUtil;
@@ -10,6 +11,7 @@ import com.fourth.medical.auth.vo.LoginVo;
 import com.fourth.medical.common.enums.SystemType;
 import com.fourth.medical.framework.exception.BusinessException;
 import com.fourth.medical.framework.exception.LoginException;
+import com.fourth.medical.medical.dto.DoctorUpdateProfileDto;
 import com.fourth.medical.medical.entity.Doctor;
 import com.fourth.medical.medical.mapper.DoctorMapper;
 import com.fourth.medical.system.mapper.SysMenuMapper;
@@ -158,6 +160,86 @@ public class DoctorLoginServiceImpl implements DoctorLoginService {
         }
     }
     
+    @Override
+    public boolean updatePassword(DoctorUpdatePasswordDto dto) {
+        // 从Token中获取登录信息
+        String token = TokenUtil.getToken();
+        if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+            throw new BusinessException("未登录或登录已过期");
+        }
+
+        // 从Redis中获取登录信息
+        LoginVo loginVo = LoginUtil.getLoginVo(token);
+        if (loginVo == null) {
+            throw new BusinessException("未登录或登录已过期");
+        }
+
+        // 设置到ThreadLocal中
+        com.fourth.medical.auth.cache.LoginCache.set(loginVo);
+
+        // 获取医生信息
+        Doctor doctor = doctorMapper.selectById(loginVo.getUserId());
+        if (doctor == null) {
+            throw new BusinessException("医生不存在");
+        }
+
+        // 验证原密码
+        String dbPassword = doctor.getPassword();
+        String dbSalt = doctor.getSalt();
+        String oldPassword = dto.getOldPassword();
+        String encryptOldPassword = PasswordUtil.encrypt(oldPassword, dbSalt);
+        
+        if (!dbPassword.equals(encryptOldPassword)) {
+            throw new BusinessException("原密码错误");
+        }
+
+        // 加密新密码
+        String newPassword = dto.getNewPassword();
+        String encryptNewPassword = PasswordUtil.encrypt(newPassword, dbSalt);
+
+        // 更新密码
+        doctor.setPassword(encryptNewPassword);
+        int rows = doctorMapper.updateById(doctor);
+
+        return rows > 0;
+    }
+
+    @Override
+    public boolean updateProfile(DoctorUpdateProfileDto dto) {
+        // 从Token中获取登录信息
+        String token = TokenUtil.getToken();
+        if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+            throw new BusinessException("未登录或登录已过期");
+        }
+
+        // 从Redis中获取登录信息
+        LoginVo loginVo = LoginUtil.getLoginVo(token);
+        if (loginVo == null) {
+            throw new BusinessException("未登录或登录已过期");
+        }
+
+        // 设置到ThreadLocal中
+        com.fourth.medical.auth.cache.LoginCache.set(loginVo);
+
+        // 获取医生信息
+        Doctor doctor = doctorMapper.selectById(loginVo.getUserId());
+        if (doctor == null) {
+            throw new BusinessException("医生不存在");
+        }
+
+        // 更新医生信息
+        doctor.setName(dto.getName());
+        doctor.setMobile(dto.getPhone());
+        doctor.setEmail(dto.getEmail());
+        doctor.setGender(dto.getGender() == 1);  // 转换为Boolean类型
+        doctor.setAvatarUrl(dto.getAvatar());
+        doctor.setTitle(dto.getTitle());
+        doctor.setIntroduction(dto.getIntroduction());
+
+        int rows = doctorMapper.updateById(doctor);
+        return rows > 0;
+    }
+
     /**
      * 获取医生权限编码列表
      * 
