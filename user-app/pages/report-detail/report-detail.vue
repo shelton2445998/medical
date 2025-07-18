@@ -654,253 +654,194 @@
 </script>
 
 <style lang="scss">
-	/* 
-		页面整体样式
-		设置页面基本布局和背景色
-	*/
-	.content {
-		min-height: 100vh;
-		background: #f5f7fa;
-		padding: 20rpx 30rpx;
+	@font-face {
+		font-family: texticons;
+		font-weight: normal;
+		font-style: normal;
+		src: url('https://at.alicdn.com/t/font_984210_5cs13ndgqsn.ttf') format('truetype');
 	}
 
-	/* 
-		增强卡片样式
-		统一的卡片容器样式，提供阴影和圆角效果
-	*/
+	.content {
+		background: linear-gradient(135deg, #e0e7ff 0%, #f5f5f5 100%);
+		min-height: 100vh;
+		padding-bottom: 120rpx;
+	}
+
+	// 卡片增强
 	.enhanced-card {
 		background: #fff;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		margin-bottom: 20rpx;
-		box-shadow: 0 4rpx 16rpx rgba(18, 150, 219, 0.08);
+		margin: 24rpx 16rpx;
+		padding: 36rpx 28rpx;
+		border-radius: 18rpx;
+		box-shadow: 0 6rpx 32rpx rgba(18, 150, 219, 0.08), 0 1rpx 4rpx rgba(0,0,0,0.04);
+		transition: box-shadow 0.2s;
 	}
 
-	/* 
-		报告信息卡片样式
-		显示报告基本信息的卡片样式
-	*/
 	.report-info-card {
-		background: linear-gradient(135deg, #fff 0%, #f8fbff 100%);
-		border: 1px solid #e6f3ff;
-		
-		.report-title {
+		border: 1px solid #e3eaf2;
+	}
+
+	.summary-card, .result-card, .advice-card {
+	}
+
+	.card-title {
+		font-size: 34rpx;
+		font-weight: 700;
+		color: #222;
+		margin-bottom: 22rpx;
+		position: relative;
+		padding-left: 24rpx;
+		letter-spacing: 1rpx;
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 8rpx;
+			height: 36rpx;
+			background: linear-gradient(180deg, #1296db 0%, #6ec6ff 100%);
+			border-radius: 4rpx;
+		}
+	}
+
+	.summary-content {
+		display: flex;
+		background: #f3f8fd;
+		border-radius: 12rpx;
+		padding: 24rpx 0;
+		box-shadow: 0 2rpx 8rpx rgba(18, 150, 219, 0.04);
+		.summary-item {
+			flex: 1;
 			text-align: center;
-			margin-bottom: 30rpx;
-			
-			.package-name {
-				font-size: 36rpx;
-				font-weight: 700;
-				color: #1296db;
-				margin-left: 10rpx;
+			position: relative;
+			&:not(:last-child)::after {
+				content: '';
+				position: absolute;
+				right: 0;
+				top: 20%;
+				height: 60%;
+				width: 1px;
+				background: #e3eaf2;
 			}
-			
-			.report-date {
-				font-size: 24rpx;
-				color: #999;
-				margin-top: 10rpx;
+			&.abnormal .summary-value,
+			.highlight-abnormal {
+				color: #ff5a5f;
+			}
+			.highlight-advice {
+				color: #1296db;
+			}
+			.summary-value {
+				font-size: 40rpx;
+				font-weight: 700;
+				display: block;
+				margin-bottom: 6rpx;
+			}
+			.summary-label {
+				font-size: 26rpx;
+				color: #888;
 			}
 		}
-		
-		.info-item {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 20rpx 0;
-			border-bottom: 1px solid #f0f0f0;
-			
+	}
+
+	.filter-tabs {
+		display: flex;
+		margin-bottom: 24rpx;
+		.tab-item {
+			padding: 12rpx 36rpx;
+			font-size: 30rpx;
+			color: #666;
+			background: #f3f8fd;
+			border-radius: 36rpx;
+			margin-right: 24rpx;
+			transition: background 0.2s, color 0.2s;
+			&.active {
+				color: #fff;
+				background: linear-gradient(90deg, #1296db 0%, #6ec6ff 100%);
+				box-shadow: 0 2rpx 8rpx rgba(18, 150, 219, 0.08);
+			}
+		}
+	}
+
+	.result-list {
+		.result-item {
+			border-bottom: 1px solid #e3eaf2;
+			padding: 24rpx 0;
+			transition: background 0.2s;
 			&:last-child {
 				border-bottom: none;
 			}
-			
-			.info-label {
-				color: #666;
-				font-size: 28rpx;
-			}
-			
-			.info-value {
-				color: #333;
-				font-size: 28rpx;
-				font-weight: 600;
-				
-				&.main {
-					color: #1296db;
-				}
-			}
-		}
-	}
-
-	/* 
-		概要卡片样式
-		显示体检结果概要的卡片样式
-	*/
-	.summary-card {
-		.card-title {
-			font-size: 32rpx;
-			font-weight: 700;
-			color: #333;
-			margin-bottom: 30rpx;
-			text-align: center;
-		}
-		
-		.summary-content {
-			display: flex;
-			justify-content: space-around;
-			text-align: center;
-			
-			.summary-item {
-				flex: 1;
-				
-				.summary-value {
-					display: block;
-					font-size: 48rpx;
+			&.abnormal {
+				background: linear-gradient(90deg, #fff0f0 0%, #fff 100%);
+				.result-header .status-icon {
+					display: inline-block;
+					width: 36rpx;
+					height: 36rpx;
+					line-height: 36rpx;
+					text-align: center;
+					background: #ff5a5f;
+					color: #fff;
+					border-radius: 50%;
+					font-size: 26rpx;
+					margin-right: 12rpx;
 					font-weight: 700;
-					color: #1296db;
-					margin-bottom: 10rpx;
-					
-					&.highlight-abnormal {
-						color: #ff4757;
-					}
-					
-					&.highlight-advice {
-						color: #20bf6b;
-					}
-				}
-				
-				.summary-label {
-					font-size: 24rpx;
-					color: #666;
 				}
 			}
-		}
-	}
-
-	/* 
-		结果卡片样式
-		显示详细检查结果的卡片样式
-	*/
-	.result-card {
-		.card-title {
-			font-size: 32rpx;
-			font-weight: 700;
-			color: #333;
-			margin-bottom: 30rpx;
-			text-align: center;
-		}
-		
-		.result-list {
-			.result-item {
-				border: 1px solid #e6f3ff;
-				border-radius: 12rpx;
-				margin-bottom: 20rpx;
-				background: #fff;
-				transition: all 0.3s ease;
-				
-				&.expanded {
-					border-color: #1296db;
-					box-shadow: 0 2rpx 8rpx rgba(18, 150, 219, 0.1);
-				}
-				
-				.result-header {
+			&.expanded {
+				background: #f7fbff;
+			}
+			.result-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 0 4rpx;
+				.result-name {
+					font-size: 30rpx;
+					color: #222;
 					display: flex;
-					justify-content: space-between;
 					align-items: center;
-					padding: 30rpx;
-					
-					.result-name {
-						flex: 1;
-						font-size: 28rpx;
-						color: #333;
-						font-weight: 600;
-					}
-					
-					.result-value {
-						display: flex;
-						align-items: center;
-						
-						.result-unit {
-							font-size: 24rpx;
-							color: #666;
-							margin-right: 15rpx;
-						}
-						
-						.expand-icon {
-							font-size: 24rpx;
-							color: #1296db;
-							font-weight: 700;
-						}
-					}
+					flex-wrap: wrap;
 				}
-				
-				.result-detail {
-					padding: 0 30rpx 30rpx 30rpx;
-					border-top: 1px solid #f0f0f0;
-					
-					.detail-label {
-						font-size: 24rpx;
-						color: #666;
-						margin-bottom: 10rpx;
+				.result-value {
+					font-size: 30rpx;
+					color: #222;
+					display: flex;
+					align-items: center;
+					.abnormal-text {
+						color: #ff5a5f;
+						font-weight: 700;
 					}
-					
-					.detail-value {
+					.result-unit {
 						font-size: 26rpx;
-						color: #333;
-						line-height: 1.6;
+						color: #888;
+						margin-left: 8rpx;
 					}
-					
-					.result-desc {
-						margin-bottom: 20rpx;
-					}
-					
-					.conclusion-content {
-						.conclusion-text {
-							font-size: 26rpx;
-							color: #333;
-							line-height: 1.6;
-							background: #f8fbff;
-							padding: 20rpx;
-							border-radius: 8rpx;
-							margin-top: 10rpx;
-						}
-						
-						.conclusion-list {
-							.conclusion-item {
-								background: #f8fbff;
-								padding: 15rpx;
-								border-radius: 8rpx;
-								margin-bottom: 10rpx;
-								
-								.conclusion-category {
-									font-size: 24rpx;
-									color: #1296db;
-									font-weight: 600;
-									margin-right: 20rpx;
-								}
-								
-								.conclusion-name {
-									font-size: 26rpx;
-									color: #333;
-									font-weight: 600;
-								}
-								
-								.conclusion-desc {
-									font-size: 24rpx;
-									color: #666;
-									line-height: 1.6;
-									margin-top: 5rpx;
-								}
-							}
-						}
+					.expand-icon {
+						margin-left: 24rpx;
+						color: #bbb;
+						font-size: 32rpx;
+						transition: transform 0.2s;
 					}
 				}
+			}
+			.animated-expand {
+				margin-top: 18rpx;
+				padding: 18rpx;
+				background: #f3f8fd;
+				border-radius: 10rpx;
+				font-size: 28rpx;
+				box-shadow: 0 1rpx 4rpx rgba(18, 150, 219, 0.04);
+				animation: fadeInExpand 0.25s;
 			}
 		}
 	}
 
-	/* 
-		底部操作栏样式
-		固定在底部的操作按钮样式
-	*/
+	@keyframes fadeInExpand {
+		0% { opacity: 0; transform: scaleY(0.95); }
+		100% { opacity: 1; transform: scaleY(1); }
+	}
+
+	// 底部操作栏增强
 	.enhanced-bottom {
 		position: fixed;
 		left: 0;
@@ -908,10 +849,9 @@
 		bottom: 0;
 		background: #fff;
 		display: flex;
-		padding: 24rpx 30rpx 32rpx 30rpx;
+		padding: 24rpx 12rpx 32rpx 12rpx;
 		box-shadow: 0 -4rpx 24rpx rgba(18, 150, 219, 0.08);
 		z-index: 10;
-		
 		.action-btn {
 			flex: 1;
 			display: flex;
@@ -926,98 +866,88 @@
 			color: #1296db;
 			font-weight: 700;
 			box-shadow: 0 1rpx 4rpx rgba(18, 150, 219, 0.04);
-			transition: all 0.3s ease;
-			
+			transition: background 0.2s, color 0.2s;
+			.iconfont {
+				font-size: 36rpx;
+				margin-right: 10rpx;
+				font-family: texticons;
+			}
 			.btn-icon {
 				font-size: 36rpx;
 				margin-right: 10rpx;
 			}
-			
 			&.primary {
 				background: linear-gradient(90deg, #1296db 0%, #6ec6ff 100%);
 				color: #fff;
 			}
-			
 			&:active {
-				transform: scale(0.98);
+				background: #e0e7ff;
 			}
-			
 			&::after {
 				border: none;
 			}
 		}
 	}
 
-	/* 
-		美化信息列表样式
-		优化信息展示的布局和样式
-	*/
 	.beautify-info-list {
 		display: flex;
 		flex-direction: column;
 		gap: 0;
 		padding: 10rpx 0 0 0;
-		
 		.beautify-info-item {
 			padding: 18rpx 0 12rpx 0;
 			border-bottom: 1px solid #f0f3fa;
 			display: flex;
 			flex-direction: column;
 			justify-content: flex-start;
-			
 			.info-label {
 				font-size: 24rpx;
 				color: #999;
 				font-weight: 400;
 				margin-bottom: 4rpx;
 			}
-			
 			.info-value {
 				font-size: 30rpx;
 				color: #222;
 				font-weight: 600;
 				word-break: break-all;
-				
 				&.main {
-					color: #222;
+					color: #222; // 由 #1296db 改为 #222，显示为黑色
 				}
 			}
 		}
-		
 		.beautify-info-item:last-child {
 			border-bottom: none;
 		}
 	}
 
-	/* 
-		美化标题样式
-		优化标题的布局和视觉效果
-	*/
 	.beautify-title {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: flex-start;
 		margin-bottom: 20rpx;
-		
 		.title-center-group {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 		}
-		
 		.package-icon {
 			font-size: 52rpx;
 			margin-right: 12rpx;
 		}
-		
 		.package-name {
 			font-size: 44rpx;
 			font-weight: 700;
 			color: #1296db;
 			letter-spacing: 1rpx;
 		}
-		
+		.exam-date-center {
+			margin-top: 8rpx;
+			font-size: 26rpx;
+			color: #666;
+			text-align: center;
+		}
 		.report-date {
 			font-size: 26rpx;
 			color: #999;
@@ -1026,25 +956,6 @@
 			text-align: right;
 			align-self: flex-end;
 			width: 100%;
-		}
-	}
-
-	/* 
-		展开动画效果
-		为展开的内容添加动画效果
-	*/
-	.animated-expand {
-		animation: fadeInExpand 0.3s ease;
-	}
-
-	@keyframes fadeInExpand {
-		0% {
-			opacity: 0;
-			transform: translateY(-10rpx);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
 		}
 	}
 </style>
