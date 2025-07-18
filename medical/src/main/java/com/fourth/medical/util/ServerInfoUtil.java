@@ -19,7 +19,58 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 获取系统服务信息
+ * 服务器系统信息监控工具类
+ * 
+ * <p><strong>功能描述：</strong></p>
+ * <ul>
+ *   <li>提供全面的服务器系统信息获取功能</li>
+ *   <li>监控CPU、内存、JVM、磁盘等系统资源</li>
+ *   <li>支持实时系统性能指标统计</li>
+ *   <li>提供操作系统和进程信息获取</li>
+ * </ul>
+ * 
+ * <p><strong>主要特性：</strong></p>
+ * <ul>
+ *   <li>多维度监控：CPU、内存、JVM、磁盘、操作系统</li>
+ *   <li>实时数据：获取当前系统运行状态</li>
+ *   <li>格式化输出：自动转换文件大小单位</li>
+ *   <li>异常处理：优雅处理系统信息获取异常</li>
+ *   <li>跨平台支持：基于OSHI库支持多操作系统</li>
+ * </ul>
+ * 
+ * <p><strong>使用场景：</strong></p>
+ * <ul>
+ *   <li>系统监控面板</li>
+ *   <li>性能监控和告警</li>
+ *   <li>系统资源使用分析</li>
+ *   <li>运维管理和故障诊断</li>
+ *   <li>系统健康检查</li>
+ * </ul>
+ * 
+ * <p><strong>技术实现：</strong></p>
+ * <ul>
+ *   <li>基于OSHI（Operating System and Hardware Information）库</li>
+ *   <li>集成Hutool工具库进行数据处理</li>
+ *   <li>支持Windows、Linux、macOS等操作系统</li>
+ *   <li>提供统一的系统信息封装</li>
+ * </ul>
+ * 
+ * <p><strong>监控指标：</strong></p>
+ * <ul>
+ *   <li>CPU：核心数、使用率、空闲率</li>
+ *   <li>内存：总量、已用、可用、使用率</li>
+ *   <li>JVM：内存分配、版本信息、进程信息</li>
+ *   <li>磁盘：容量、使用情况、文件系统类型</li>
+ *   <li>操作系统：版本、架构、运行时间</li>
+ * </ul>
+ * 
+ * <p><strong>扩展点：</strong></p>
+ * <ul>
+ *   <li>可扩展网络监控功能</li>
+ *   <li>可添加历史数据记录</li>
+ *   <li>可支持自定义监控指标</li>
+ *   <li>可集成第三方监控系统</li>
+ * </ul>
  *
  * @author geekidea
  * @date 2023/12/16

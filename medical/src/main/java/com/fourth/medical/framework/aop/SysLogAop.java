@@ -60,7 +60,74 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 日志AOP
+ * 系统操作日志AOP切面
+ * 
+ * <p><strong>功能描述：</strong></p>
+ * <ul>
+ *   <li>自动拦截标记@Log注解的方法调用</li>
+ *   <li>记录完整的操作日志信息</li>
+ *   <li>支持异步日志保存和实时日志打印</li>
+ *   <li>提供IP地址、用户代理、请求参数等详细信息</li>
+ *   <li>集成链路追踪和性能监控</li>
+ * </ul>
+ * 
+ * <p><strong>主要特性：</strong></p>
+ * <ul>
+ *   <li>自动拦截：基于AOP自动拦截方法调用</li>
+ *   <li>完整记录：记录请求、响应、异常等完整信息</li>
+ *   <li>异步处理：支持异步保存日志，不影响性能</li>
+ *   <li>链路追踪：集成MDC链路ID追踪</li>
+ *   <li>IP定位：自动解析IP地址的地理位置</li>
+ *   <li>用户代理：解析浏览器和操作系统信息</li>
+ *   <li>参数记录：智能记录请求参数和响应结果</li>
+ *   <li>路径过滤：支持排除特定路径的日志记录</li>
+ * </ul>
+ * 
+ * <p><strong>使用场景：</strong></p>
+ * <ul>
+ *   <li>系统操作审计</li>
+ *   <li>用户行为分析</li>
+ *   <li>安全事件追踪</li>
+ *   <li>性能监控分析</li>
+ *   <li>问题排查调试</li>
+ *   <li>合规性要求</li>
+ * </ul>
+ * 
+ * <p><strong>技术实现：</strong></p>
+ * <ul>
+ *   <li>基于Spring AOP切面编程</li>
+ *   <li>使用@Around环绕通知</li>
+ *   <li>集成ThreadLocal线程变量</li>
+ *   <li>支持Redis缓存和数据库存储</li>
+ *   <li>异步处理机制</li>
+ *   <li>条件装配配置</li>
+ * </ul>
+ * 
+ * <p><strong>记录信息：</strong></p>
+ * <ul>
+ *   <li>请求URL、方法、参数</li>
+ *   <li>响应结果、执行时间</li>
+ *   <li>用户信息、IP地址、地理位置</li>
+ *   <li>浏览器、操作系统信息</li>
+ *   <li>异常信息和堆栈</li>
+ *   <li>链路追踪ID</li>
+ * </ul>
+ * 
+ * <p><strong>配置选项：</strong></p>
+ * <ul>
+ *   <li>log-aop.enable：是否启用日志AOP</li>
+ *   <li>excludePaths：排除的路径列表</li>
+ *   <li>responseLogType：响应日志类型</li>
+ *   <li>async：是否异步保存</li>
+ * </ul>
+ * 
+ * <p><strong>扩展点：</strong></p>
+ * <ul>
+ *   <li>可扩展更多日志字段</li>
+ *   <li>可添加日志级别控制</li>
+ *   <li>可支持日志加密存储</li>
+ *   <li>可集成第三方日志系统</li>
+ * </ul>
  *
  * @author geekidea
  * @date 2022/6/9

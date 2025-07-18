@@ -1,6 +1,58 @@
 package com.fourth.medical.util;
 
 /**
+ * IP地址工具类
+ * 
+ * <p><strong>功能描述：</strong></p>
+ * <ul>
+ *   <li>提供HTTP请求IP地址获取和验证功能</li>
+ *   <li>支持多种代理环境下的真实IP获取</li>
+ *   <li>提供本地主机IP地址获取和验证</li>
+ *   <li>支持IPv4地址格式验证</li>
+ * </ul>
+ * 
+ * <p><strong>主要特性：</strong></p>
+ * <ul>
+ *   <li>多代理支持：支持X-Forwarded-For、X-Real-IP等代理头</li>
+ *   <li>IP验证：提供IPv4地址格式验证</li>
+ *   <li>本地IP获取：获取本机所有有效IP地址</li>
+ *   <li>IPv6处理：自动处理IPv6本地地址转换</li>
+ *   <li>网络接口过滤：过滤无效的网络接口</li>
+ * </ul>
+ * 
+ * <p><strong>使用场景：</strong></p>
+ * <ul>
+ *   <li>用户访问日志记录</li>
+ *   <li>IP白名单验证</li>
+ *   <li>地理位置服务</li>
+ *   <li>安全审计和监控</li>
+ *   <li>负载均衡环境下的真实IP获取</li>
+ * </ul>
+ * 
+ * <p><strong>技术实现：</strong></p>
+ * <ul>
+ *   <li>基于HttpServletRequest获取请求IP</li>
+ *   <li>支持多种代理头信息解析</li>
+ *   <li>使用正则表达式验证IPv4格式</li>
+ *   <li>基于NetworkInterface获取本地IP</li>
+ * </ul>
+ * 
+ * <p><strong>安全考虑：</strong></p>
+ * <ul>
+ *   <li>防止IP伪造攻击</li>
+ *   <li>支持代理环境下的真实IP获取</li>
+ *   <li>过滤无效和虚拟网络接口</li>
+ *   <li>IPv6地址安全处理</li>
+ * </ul>
+ * 
+ * <p><strong>扩展点：</strong></p>
+ * <ul>
+ *   <li>可扩展支持更多代理头</li>
+ *   <li>可添加IP地理位置解析</li>
+ *   <li>可支持IPv6地址验证</li>
+ *   <li>可集成第三方IP服务</li>
+ * </ul>
+ *
  * @author geekidea
  * @date 2022/7/31
  **/
